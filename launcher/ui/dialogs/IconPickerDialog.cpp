@@ -14,10 +14,12 @@
  */
 
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
+#include <QTimer>
 
 #include "Application.h"
 
@@ -71,6 +73,11 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
     contentsWidget->setModel(proxyModel);
 
     // NOTE: ResetRole forces the button to be on the left, while the OK/Cancel ones are on the right. We win.
+    // the quickest way to a personal icon: pick any picture and it becomes the instance icon right away
+    auto buttonOwn = ui->buttonBox->addButton(tr("Your own picture..."), QDialogButtonBox::ResetRole);
+    buttonOwn->setObjectName("accentButton");
+    buttonOwn->setToolTip(tr("Use any picture from your computer (PNG, JPG, SVG, ...) as the instance icon"));
+    connect(buttonOwn, &QPushButton::clicked, this, &IconPickerDialog::chooseOwnPicture);
     auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
     buttonRemove = ui->buttonBox->addButton(tr("Remove Icon"), QDialogButtonBox::ResetRole);
 
@@ -120,6 +127,37 @@ void IconPickerDialog::addNewIcon()
     auto filter = IconUtils::getIconFilter();
     QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(), tr("Icons %1").arg(filter));
     APPLICATION->icons()->installIcons(fileNames);
+}
+
+void IconPickerDialog::chooseOwnPicture()
+{
+    const auto filter = IconUtils::getIconFilter();
+    const auto file = QFileDialog::getOpenFileName(this, tr("Choose a picture for the instance"), QString(), tr("Pictures %1").arg(filter));
+    if (file.isEmpty()) {
+        return;
+    }
+    const QFileInfo info(file);
+
+    // never replace an existing icon: give the copy a free name
+    auto key = info.completeBaseName();
+    for (int i = 2; APPLICATION->icons()->iconFileExists(key); i++) {
+        key = QString("%1-%2").arg(info.completeBaseName()).arg(i);
+    }
+    APPLICATION->icons()->installIcon(file, key + "." + info.suffix());
+    selectWhenAvailable(key, 30);
+}
+
+void IconPickerDialog::selectWhenAvailable(const QString& key, int attemptsLeft)
+{
+    // the icon list notices new files through a file system watcher, so the icon shows up a moment later
+    if (APPLICATION->icons()->iconFileExists(key)) {
+        selectedIconKey = key;
+        accept();
+        return;
+    }
+    if (attemptsLeft > 0) {
+        QTimer::singleShot(100, this, [this, key, attemptsLeft] { selectWhenAvailable(key, attemptsLeft - 1); });
+    }
 }
 
 void IconPickerDialog::removeSelectedIcon()

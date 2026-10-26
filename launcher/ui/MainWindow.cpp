@@ -45,6 +45,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include <QTimer>
 #include <QDir>
 #include <QFileInfo>
 #include <QUrl>
@@ -110,7 +111,9 @@
 #include "ui/instanceview/InstanceView.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
+#include "ui/pages/instance/ModFolderPage.h"
 #include "ui/widgets/LabeledToolButton.h"
+#include "ui/widgets/LaunchPanel.h"
 
 #include "minecraft/PackProfile.h"
 #include "minecraft/VersionFile.h"
@@ -289,6 +292,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         updateNewsLabel();
     }
 
+    // The launch panel on the left: AI agent, ready packs, new instance
+    {
+        m_launchPanel = new LaunchPanel(ui->centralWidget);
+        ui->horizontalLayout->addWidget(m_launchPanel);
+        connect(m_launchPanel, &LaunchPanel::agentRequested, this, [this] { addInstance(QString(), {}, "agent"); });
+        connect(m_launchPanel, &LaunchPanel::packsRequested, this, [this] { addInstance(QString(), {}, "modrinth"); });
+        connect(m_launchPanel, &LaunchPanel::newInstanceRequested, this, [this] { addInstance(QString(), {}, "quick"); });
+    }
+
     // Create the instance list widget
     {
         view = new InstanceView(ui->centralWidget);
@@ -455,6 +467,9 @@ void MainWindow::retranslateUi()
     }
 
     ui->retranslateUi(this);
+    if (m_launchPanel) {
+        m_launchPanel->retranslate();
+    }
 
     MinecraftAccountPtr defaultAccount = APPLICATION->accounts()->defaultAccount();
     if (defaultAccount) {
@@ -890,7 +905,7 @@ void MainWindow::on_actionCopyInstance_triggered()
     runModalTask(task.get());
 }
 
-void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& extra_info)
+void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& extra_info, const QString& pageId)
 {
     QString groupName;
     do {
@@ -911,15 +926,46 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
     }
 
     NewInstanceDialog newInstDlg(groupName, url, extra_info, this);
+    newInstDlg.selectPage(pageId);
     if (!newInstDlg.exec())
         return;
 
     APPLICATION->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
 
+    const bool openMods = newInstDlg.openModsAfterCreation();
     InstanceTask* creationTask = newInstDlg.extractTask();
     if (creationTask) {
+        // the instance list asks to select the new instance once it is created; remember which one it is
+        QString createdId;
+        auto connection = connect(APPLICATION->instances(), &InstanceList::instanceSelectRequest, this,
+                                  [&createdId](const QString& id) { createdId = id; });
         instanceFromInstanceTask(creationTask);
+        disconnect(connection);
+        if (openMods && !createdId.isEmpty()) {
+            openModBrowser(createdId);
+        }
     }
+}
+
+void MainWindow::openModBrowser(const QString& instanceId)
+{
+    auto* instance = APPLICATION->instances()->getInstanceById(instanceId);
+    if (!instance) {
+        return;
+    }
+    auto* window = APPLICATION->showInstanceWindow(instance, "mods");
+    if (!window) {
+        return;
+    }
+    // open "Download mods" (Modrinth and CurseForge) on the mods page once the window is up
+    QTimer::singleShot(0, window, [window] {
+        for (auto* page : window->findChildren<ModFolderPage*>()) {
+            if (page->id() == "mods") {
+                QMetaObject::invokeMethod(page, "downloadMods");
+                break;
+            }
+        }
+    });
 }
 
 void MainWindow::on_actionAddInstance_triggered()

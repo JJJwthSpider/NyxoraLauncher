@@ -715,6 +715,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Anthropic API key for the mod pack agent (optional, the agent also works without it)
         m_settings->registerSetting("AgentClaudeApiKey", QString());
+        m_settings->registerSetting("AgentUseModrinth", true);
+        m_settings->registerSetting("AgentUseCurseForge", true);
         m_settings->registerSetting("UseSystemLocale", false);
 
         // Console

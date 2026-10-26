@@ -36,6 +36,8 @@ class IconPickerDialog : public QDialog {
     virtual bool eventFilter(QObject*, QEvent*);
 
    private:
+    void selectWhenAvailable(const QString& key, int attemptsLeft);
+
     Ui::IconPickerDialog* ui;
     QPushButton* buttonRemove;
     QLineEdit* searchBar;
@@ -46,6 +48,7 @@ class IconPickerDialog : public QDialog {
     void activated(QModelIndex);
     void delayed_scroll(QModelIndex);
     void addNewIcon();
+    void chooseOwnPicture();
     void removeSelectedIcon();
     void openFolder();
     void filterIcons(const QString& text);

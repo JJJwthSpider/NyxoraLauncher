@@ -94,6 +94,11 @@ QuickPage::QuickPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
     m_loaderVersionBox->setMaxVisibleItems(15);
     layout->addWidget(m_loaderVersionBox);
 
+    // building a pack yourself: right after creation the mod browser opens, with Modrinth and CurseForge
+    m_openMods = new QCheckBox(this);
+    m_openMods->setChecked(true);
+    layout->addWidget(m_openMods);
+
     m_status = new QLabel(this);
     m_status->setWordWrap(true);
     m_status->setTextFormat(Qt::RichText);
@@ -132,6 +137,7 @@ void QuickPage::retranslate()
         m_loaderButtons.at(i)->setText(m_loaders.at(i).name);
     }
     m_loaderVersionLabel->setText(tr("3. Loader version (the recommended one is already selected)"));
+    m_openMods->setText(tr("Right after creating, open the mod browser (Modrinth and CurseForge) to add mods yourself"));
     m_tip->setText(
         tr("Want a ready pack with mods? Open the \"AI pack\" page and describe it in your own words, "
            "for example \"zombie pack neoforge 1.21.1\"."));
@@ -164,6 +170,12 @@ void QuickPage::updateLoaderDescription()
     m_loaderDescription->setText(text);
     m_loaderVersionLabel->setVisible(!key.isEmpty());
     m_loaderVersionBox->setVisible(!key.isEmpty());
+    m_openMods->setVisible(!key.isEmpty());
+}
+
+bool QuickPage::openModsAfterCreation() const
+{
+    return !currentLoader().key.isEmpty() && m_openMods->isChecked();
 }
 
 void QuickPage::openedImpl()

@@ -16,6 +16,8 @@
  */
 #include "AgentPage.h"
 
+#include <QCheckBox>
+#include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -80,7 +82,10 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
     requestRow->addWidget(m_stopButton);
     layout->addLayout(requestRow);
 
-    auto* examplesRow = new QHBoxLayout;
+    // two columns, so long examples never make the dialog wider than the screen
+    auto* examplesGrid = new QGridLayout;
+    examplesGrid->setHorizontalSpacing(6);
+    examplesGrid->setVerticalSpacing(6);
     for (const auto* example : s_examples) {
         auto* chip = new QPushButton(this);
         chip->setObjectName("quickChip");
@@ -90,11 +95,26 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
             m_request->setText(chip->text());
             startBuild();
         });
-        examplesRow->addWidget(chip);
+        chip->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+        examplesGrid->addWidget(chip, m_examples.size() / 2, m_examples.size() % 2);
         m_examples << chip;
     }
-    examplesRow->addStretch();
-    layout->addLayout(examplesRow);
+    layout->addLayout(examplesGrid);
+
+    auto* sourcesRow = new QHBoxLayout;
+    m_sourcesLabel = new QLabel(this);
+    m_sourcesLabel->setObjectName("hintLabel");
+    sourcesRow->addWidget(m_sourcesLabel);
+    m_useModrinth = new QCheckBox("Modrinth", this);
+    m_useModrinth->setChecked(APPLICATION->settings()->get("AgentUseModrinth").toBool());
+    sourcesRow->addWidget(m_useModrinth);
+    m_useCurseForge = new QCheckBox("CurseForge", this);
+    m_useCurseForge->setChecked(APPLICATION->settings()->get("AgentUseCurseForge").toBool());
+    sourcesRow->addWidget(m_useCurseForge);
+    sourcesRow->addStretch();
+    layout->addLayout(sourcesRow);
+    connect(m_useModrinth, &QCheckBox::toggled, this, [](bool on) { APPLICATION->settings()->set("AgentUseModrinth", on); });
+    connect(m_useCurseForge, &QCheckBox::toggled, this, [](bool on) { APPLICATION->settings()->set("AgentUseCurseForge", on); });
 
     m_progress = new QProgressBar(this);
     m_progress->setTextVisible(false);
@@ -109,12 +129,13 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
 
     auto* splitter = new QSplitter(Qt::Vertical, this);
     m_modTree = new QTreeWidget(splitter);
-    m_modTree->setColumnCount(2);
+    m_modTree->setColumnCount(3);
     m_modTree->setRootIsDecorated(true);
     m_modTree->setUniformRowHeights(true);
     m_modTree->setWordWrap(false);
     m_modTree->setAlternatingRowColors(true);
     m_modTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    m_modTree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     m_modTree->header()->setStretchLastSection(true);
     m_log = new QPlainTextEdit(splitter);
     m_log->setReadOnly(true);
@@ -168,7 +189,7 @@ void AgentPage::retranslate()
 {
     m_title->setText(tr("Describe the pack you want"));
     m_hint->setText(
-        tr("The agent understands requests like \"zombie pack neoforge 1.21.1\": it picks fitting mods on Modrinth, "
+        tr("The agent understands requests like \"zombie pack neoforge 1.21.1\": it picks fitting mods on Modrinth and CurseForge, "
            "adds performance and quality-of-life mods and every library the mods need, and checks that everything "
            "fits your Minecraft version and loader. You can untick mods before creating the instance."));
     m_request->setPlaceholderText(tr("For example: zombie pack neoforge 1.21.1"));
@@ -177,7 +198,8 @@ void AgentPage::retranslate()
     for (auto* chip : m_examples) {
         chip->setText(tr(chip->property("sourceText").toByteArray().constData()));
     }
-    m_modTree->setHeaderLabels({ tr("Mod"), tr("What it does") });
+    m_modTree->setHeaderLabels({ tr("Mod"), tr("Source"), tr("What it does") });
+    m_sourcesLabel->setText(tr("Take mods from:"));
     m_aiBox->setTitle(tr("Smarter understanding with Claude (optional)"));
     m_aiHint->setText(
         tr("Without a key the agent uses built-in rules. With an Anthropic API key Claude reads your request, "
@@ -202,6 +224,8 @@ void AgentPage::setBusy(bool busy)
     for (auto* chip : m_examples) {
         chip->setEnabled(!busy);
     }
+    m_useModrinth->setEnabled(!busy);
+    m_useCurseForge->setEnabled(!busy);
     if (busy) {
         m_progress->setMaximum(0);  // busy indicator until the first request is counted
         m_progress->setValue(0);
@@ -240,7 +264,7 @@ void AgentPage::startBuilder(const ModpackAgent::Plan& plan)
         themes << theme.title;
     }
     appendLog(themes.isEmpty() ? tr("Plan: performance and quality-of-life mods only.") : tr("Plan: %1.").arg(themes.join(", ")));
-    m_builder->build(plan);
+    m_builder->build(plan, m_useModrinth->isChecked(), m_useCurseForge->isChecked());
 }
 
 void AgentPage::stopBuild()
@@ -292,10 +316,11 @@ void AgentPage::fillModTree()
             group->setFlags(Qt::ItemIsEnabled);
             group->setFirstColumnSpanned(true);
         }
-        auto* item = new QTreeWidgetItem(group, { mod.title, mod.description });
+        const auto source = mod.platform == "curseforge" ? QStringLiteral("CurseForge") : QStringLiteral("Modrinth");
+        auto* item = new QTreeWidgetItem(group, { mod.title, source, mod.description });
         item->setData(0, s_modIndexRole, i);
         item->setToolTip(0, QString("%1 %2\n%3").arg(mod.title, mod.versionNumber, mod.fileName));
-        item->setToolTip(1, mod.description);
+        item->setToolTip(2, mod.description);
         if (mod.dependency) {
             // libraries are needed by other mods, switching them off would break the game
             item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);

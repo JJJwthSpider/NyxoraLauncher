@@ -31,6 +31,7 @@ class QPushButton;
 class QTreeWidget;
 class QTreeWidgetItem;
 class QGroupBox;
+class QCheckBox;
 
 /// "AI pack" page of the new instance dialog: the user describes a pack in their own words
 /// ("сборка с зомби neoforge 1.21.1") and the agent assembles an instance with fitting mods.
@@ -73,6 +74,9 @@ class AgentPage : public QWidget, public BasePage {
     QList<QPushButton*> m_examples;
     QPushButton* m_buildButton = nullptr;
     QPushButton* m_stopButton = nullptr;
+    QLabel* m_sourcesLabel = nullptr;
+    QCheckBox* m_useModrinth = nullptr;
+    QCheckBox* m_useCurseForge = nullptr;
     QProgressBar* m_progress = nullptr;
     QLabel* m_summary = nullptr;
     QTreeWidget* m_modTree = nullptr;

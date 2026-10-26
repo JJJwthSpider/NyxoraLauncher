@@ -417,8 +417,14 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
                 }
 
                 QJsonObject hashes = Json::requireObject(modInfo, "hashes");
-                file.hash = QByteArray::fromHex(Json::requireString(hashes, "sha512").toLatin1());
-                file.hashAlgorithm = QCryptographicHash::Sha512;
+                // files the mod pack agent takes from CurseForge only come with a sha1 hash
+                if (hashes.contains("sha512") || !hashes.contains("sha1")) {
+                    file.hash = QByteArray::fromHex(Json::requireString(hashes, "sha512").toLatin1());
+                    file.hashAlgorithm = QCryptographicHash::Sha512;
+                } else {
+                    file.hash = QByteArray::fromHex(Json::requireString(hashes, "sha1").toLatin1());
+                    file.hashAlgorithm = QCryptographicHash::Sha1;
+                }
 
                 // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode
                 // (as Modrinth seems to incorrectly handle spaces)

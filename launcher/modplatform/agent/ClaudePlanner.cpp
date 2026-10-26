@@ -31,14 +31,14 @@ namespace ModpackAgent {
 
 namespace {
 
-const char* s_systemPrompt = R"(You plan Minecraft modpacks that a launcher assembles automatically from Modrinth.
+const char* s_systemPrompt = R"(You plan Minecraft modpacks that a launcher assembles automatically from Modrinth and CurseForge.
 The user describes the pack they want, usually in Russian, for example "сборка с зомби neoforge 1.21.1".
 
 Decide:
 - minecraft_version: the version the user asked for. If none was given, use "1.21.1".
 - loader: the mod loader the user asked for (neoforge, forge, fabric or quilt). If none was given, use neoforge for 1.20.2 and newer, forge for older versions.
-- themes: 2 to 8 content themes that make up the pack. Each theme has a short title in the user's language, 1 to 3 English Modrinth search queries, and how many mods to take for it (1 to 5). Think about what a player expects from such a pack: a zombie pack also wants weapons, armor and survival mods.
-- mods: Modrinth project slugs of well known content mods that clearly fit the request and exist for that version and loader. Only list slugs you are sure about; leave the list empty otherwise.
+- themes: 2 to 8 content themes that make up the pack. Each theme has a short title in the user's language, 1 to 3 English search queries, and how many mods to take for it (1 to 5). Think about what a player expects from such a pack: a zombie pack also wants weapons, armor and survival mods.
+- mods: project slugs (as used in Modrinth or CurseForge URLs) of well known content mods that clearly fit the request and exist for that version and loader. Only list slugs you are sure about; leave the list empty otherwise.
 - name: a short catchy pack name in the user's language.
 - summary: one or two sentences in the user's language describing the pack.
 

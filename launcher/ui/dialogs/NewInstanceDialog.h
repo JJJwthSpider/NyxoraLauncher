@@ -49,6 +49,8 @@ class QDialogButtonBox;
 class ImportPage;
 class FlamePage;
 
+class QuickPage;
+
 class NewInstanceDialog : public QDialog, public BasePageProvider {
     Q_OBJECT
 
@@ -75,6 +77,11 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     QString instGroup() const;
     QString iconKey() const;
 
+    /// opens the dialog on a specific page ("quick", "agent", "modrinth", ...)
+    void selectPage(const QString& pageId);
+    /// the user wants to pick mods (Modrinth / CurseForge) right after the instance is created
+    bool openModsAfterCreation() const;
+
    public slots:
     void accept() override;
     void reject() override;
@@ -91,6 +98,7 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
 
     QString InstIconKey;
     ImportPage* importPage = nullptr;
+    QuickPage* quickPage = nullptr;
     std::unique_ptr<InstanceTask> creationTask;
 
     bool importIcon = false;

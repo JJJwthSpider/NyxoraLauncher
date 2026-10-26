@@ -65,6 +65,8 @@ class LabeledToolButton;
 namespace Ui {
 class MainWindow;
 }
+class LaunchPanel;
+
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -219,7 +221,8 @@ class MainWindow : public QMainWindow {
    private:
     void retranslateUi();
 
-    void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {});
+    void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {}, const QString& pageId = QString());
+    void openModBrowser(const QString& instanceId);
     void activateInstance(BaseInstance* instance);
     void setCatBackground(bool enabled);
     void updateInstanceToolIcon(QString new_icon);
@@ -234,6 +237,7 @@ class MainWindow : public QMainWindow {
     Ui::MainWindow* ui;
     // these are managed by Qt's memory management model!
     InstanceView* view = nullptr;
+    LaunchPanel* m_launchPanel = nullptr;
     InstanceProxyModel* proxymodel = nullptr;
     QToolButton* newsLabel = nullptr;
     QLabel* m_statusLeft = nullptr;

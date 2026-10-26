@@ -46,6 +46,9 @@ class QuickPage : public QWidget, public BasePage {
     void openedImpl() override;
     void retranslate() override;
 
+    /// "open the mod download dialog right after creating the instance" is ticked and a loader is chosen
+    bool openModsAfterCreation() const;
+
    private:
     struct LoaderInfo {
         QString key;  // "", "neoforge", "fabric", "forge", "quilt"
@@ -81,6 +84,7 @@ class QuickPage : public QWidget, public BasePage {
     QLabel* m_loaderDescription = nullptr;
     QLabel* m_loaderVersionLabel = nullptr;
     QComboBox* m_loaderVersionBox = nullptr;
+    QCheckBox* m_openMods = nullptr;
     QLabel* m_status = nullptr;
     QLabel* m_tip = nullptr;
 };

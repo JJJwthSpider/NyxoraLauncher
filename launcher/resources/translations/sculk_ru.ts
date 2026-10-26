@@ -32,10 +32,6 @@
         <translation>Опишите сборку, которую хотите</translation>
     </message>
     <message>
-        <source>The agent understands requests like &quot;zombie pack neoforge 1.21.1&quot;: it picks fitting mods on Modrinth, adds performance and quality-of-life mods and every library the mods need, and checks that everything fits your Minecraft version and loader. You can untick mods before creating the instance.</source>
-        <translation>Агент понимает запросы вроде «сборка с зомби neoforge 1.21.1»: подбирает подходящие моды на Modrinth, добавляет моды на оптимизацию и удобство и все нужные им библиотеки, а также проверяет, что всё подходит к вашей версии Minecraft и загрузчику. Перед созданием установки лишние моды можно снять галочкой.</translation>
-    </message>
-    <message>
         <source>For example: zombie pack neoforge 1.21.1</source>
         <translation>Например: сборка с зомби neoforge 1.21.1</translation>
     </message>
@@ -102,6 +98,109 @@
     <message>
         <source>AI pack</source>
         <translation>ИИ-сборка</translation>
+    </message>
+    <message>
+        <source>The agent understands requests like &quot;zombie pack neoforge 1.21.1&quot;: it picks fitting mods on Modrinth and CurseForge, adds performance and quality-of-life mods and every library the mods need, and checks that everything fits your Minecraft version and loader. You can untick mods before creating the instance.</source>
+        <translation>Агент понимает запросы вроде «сборка с зомби neoforge 1.21.1»: подбирает подходящие моды на Modrinth и CurseForge, добавляет моды на оптимизацию и удобство и все нужные им библиотеки, а также проверяет, что всё подходит к вашей версии Minecraft и загрузчику. Перед созданием установки лишние моды можно снять галочкой.</translation>
+    </message>
+    <message>
+        <source>Source</source>
+        <translation>Источник</translation>
+    </message>
+    <message>
+        <source>Take mods from:</source>
+        <translation>Брать моды с:</translation>
+    </message>
+</context>
+<context>
+    <name>IconPickerDialog</name>
+    <message>
+        <source>Search...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your own picture...</source>
+        <translation>Своя картинка...</translation>
+    </message>
+    <message>
+        <source>Use any picture from your computer (PNG, JPG, SVG, ...) as the instance icon</source>
+        <translation>Сделать иконкой установки любую картинку с компьютера (PNG, JPG, SVG, ...)</translation>
+    </message>
+    <message>
+        <source>Add Icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove Icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open Folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select Icons</source>
+        <extracomment>The title of the select icons open file dialog</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Icons %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose a picture for the instance</source>
+        <translation>Выберите картинку для установки</translation>
+    </message>
+    <message>
+        <source>Pictures %1</source>
+        <translation>Картинки %1</translation>
+    </message>
+</context>
+<context>
+    <name>LaunchPanel</name>
+    <message>
+        <source>AI agent</source>
+        <translation>ИИ-агент</translation>
+    </message>
+    <message>
+        <source>A pack from your description</source>
+        <translation>Сборка по вашему описанию</translation>
+    </message>
+    <message>
+        <source>Describe a pack in your own words and the Warden assembles it with mods from Modrinth and CurseForge</source>
+        <translation>Опишите сборку своими словами — Варден соберёт её из модов с Modrinth и CurseForge</translation>
+    </message>
+    <message>
+        <source>Ready packs</source>
+        <translation>Готовые сборки</translation>
+    </message>
+    <message>
+        <source>From Modrinth and CurseForge</source>
+        <translation>С Modrinth и CurseForge</translation>
+    </message>
+    <message>
+        <source>Install a ready-made mod pack from the internet</source>
+        <translation>Установить готовую сборку модов из интернета</translation>
+    </message>
+    <message>
+        <source>New instance</source>
+        <translation>Новая установка</translation>
+    </message>
+    <message>
+        <source>Version, loader and mods</source>
+        <translation>Версия, загрузчик и моды</translation>
+    </message>
+    <message>
+        <source>Create an instance yourself: choose the version and the loader, then add mods</source>
+        <translation>Создайте установку сами: выберите версию и загрузчик, затем добавьте моды</translation>
     </message>
 </context>
 <context>
@@ -260,10 +359,6 @@
 <context>
     <name>ModpackAgent::ModpackBuilder</name>
     <message>
-        <source>Minecraft %1, loader %2.</source>
-        <translation>Minecraft %1, загрузчик %2.</translation>
-    </message>
-    <message>
         <source>Network error: %1</source>
         <translation>Ошибка сети: %1</translation>
     </message>
@@ -296,18 +391,6 @@
         <translation>Пропущен %1: несовместим с %2.</translation>
     </message>
     <message>
-        <source>Skipped %1: the download is incomplete.</source>
-        <translation>Пропущен %1: неполные данные для загрузки.</translation>
-    </message>
-    <message>
-        <source>+ %1 (needed by other mods)</source>
-        <translation>+ %1 (нужен другим модам)</translation>
-    </message>
-    <message>
-        <source>+ %1</source>
-        <translation>+ %1</translation>
-    </message>
-    <message>
         <source>Searching mods for &quot;%1&quot;...</source>
         <translation>Ищу моды на тему «%1»...</translation>
     </message>
@@ -334,6 +417,65 @@
             <numerusform>Готово: выбрано %n мода.</numerusform>
             <numerusform>Готово: выбрано %n модов.</numerusform>
         </translation>
+    </message>
+    <message>
+        <source>CurseForge is not available in this build (no API key), only Modrinth is used.</source>
+        <translation>CurseForge недоступен в этой сборке лаунчера (нет ключа API), используется только Modrinth.</translation>
+    </message>
+    <message>
+        <source>Choose at least one source of mods: Modrinth or CurseForge.</source>
+        <translation>Выберите хотя бы один источник модов: Modrinth или CurseForge.</translation>
+    </message>
+    <message>
+        <source>Minecraft %1, loader %2, mods from %3.</source>
+        <translation>Minecraft %1, загрузчик %2, моды с %3.</translation>
+    </message>
+    <message>
+        <source>the download is incomplete</source>
+        <translation>неполные данные для загрузки</translation>
+    </message>
+    <message>
+        <source>its author allows downloads only through the CurseForge app</source>
+        <translation>автор разрешает скачивание только через приложение CurseForge</translation>
+    </message>
+    <message>
+        <source>Skipped %1: %2.</source>
+        <translation>Пропущен %1: %2.</translation>
+    </message>
+    <message>
+        <source>+ %1 (needed by other mods, %2)</source>
+        <translation>+ %1 (нужен другим модам, %2)</translation>
+    </message>
+    <message>
+        <source>+ %1 (%2)</source>
+        <translation>+ %1 (%2)</translation>
+    </message>
+</context>
+<context>
+    <name>NewInstanceDialog</name>
+    <message>
+        <source>Click to choose an icon or your own picture</source>
+        <translation>Нажмите, чтобы выбрать иконку или свою картинку</translation>
+    </message>
+    <message>
+        <source>No group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Help</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New Instance</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -436,6 +578,10 @@
     <message>
         <source>Quick start</source>
         <translation>Быстрое создание</translation>
+    </message>
+    <message>
+        <source>Right after creating, open the mod browser (Modrinth and CurseForge) to add mods yourself</source>
+        <translation>Сразу после создания открыть каталог модов (Modrinth и CurseForge), чтобы добавить моды самому</translation>
     </message>
 </context>
 <context>

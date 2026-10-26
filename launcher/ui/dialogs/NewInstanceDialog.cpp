@@ -81,6 +81,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     InstIconKey = "default";
     ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
+    ui->iconButton->setToolTip(tr("Click to choose an icon or your own picture"));
 
     QStringList groups = APPLICATION->instances()->getGroups();
     groups.prepend("");
@@ -175,21 +176,35 @@ QList<BasePage*> NewInstanceDialog::getPages()
 
     importPage = new ImportPage(this);
 
-    // the simple ways first: two-click creation and the AI pack agent, then the detailed pages
-    pages.append(new QuickPage(this));
+    quickPage = new QuickPage(this);
+
+    // the simple ways first: two-click creation, the AI pack agent and ready packs, then the detailed pages
+    pages.append(quickPage);
     pages.append(new AgentPage(this));
+    pages.append(new ModrinthPage(this));
+    if (APPLICATION->capabilities() & Application::SupportsFlame)
+        pages.append(new FlamePage(this));
     pages.append(new CustomPage(this));
     pages.append(importPage);
     pages.append(new AtlPage(this));
-    if (APPLICATION->capabilities() & Application::SupportsFlame)
-        pages.append(new FlamePage(this));
     pages.append(new FtbPage(this));
     pages.append(new LegacyFTB::Page(this));
     pages.append(new FTBImportAPP::ImportFTBPage(this));
-    pages.append(new ModrinthPage(this));
     pages.append(new TechnicPage(this));
 
     return pages;
+}
+
+void NewInstanceDialog::selectPage(const QString& pageId)
+{
+    if (!pageId.isEmpty()) {
+        m_container->selectPage(pageId);
+    }
+}
+
+bool NewInstanceDialog::openModsAfterCreation() const
+{
+    return quickPage && m_container->selectedPage() == quickPage && quickPage->openModsAfterCreation();
 }
 
 QString NewInstanceDialog::dialogTitle()
