@@ -506,6 +506,16 @@ set(API_SOURCES
     modplatform/flame/FlameAPI.cpp
     modplatform/modrinth/ModrinthAPI.h
     modplatform/modrinth/ModrinthAPI.cpp
+    modplatform/agent/SearchTranslator.cpp
+    modplatform/agent/SearchTranslator.h
+    modplatform/agent/ModpackPlan.cpp
+    modplatform/agent/ModpackPlan.h
+    modplatform/agent/ClaudePlanner.cpp
+    modplatform/agent/ClaudePlanner.h
+    modplatform/agent/ModpackBuilder.cpp
+    modplatform/agent/ModpackBuilder.h
+    modplatform/agent/AgentImportTask.cpp
+    modplatform/agent/AgentImportTask.h
     modplatform/helpers/HashUtils.h
     modplatform/helpers/HashUtils.cpp
     modplatform/helpers/OverrideUtils.h
@@ -961,6 +971,10 @@ SET(LAUNCHER_SOURCES
 
     # GUI - platform pages
     ui/pages/modplatform/CustomPage.cpp
+    ui/pages/modplatform/QuickPage.cpp
+    ui/pages/modplatform/QuickPage.h
+    ui/pages/modplatform/agent/AgentPage.cpp
+    ui/pages/modplatform/agent/AgentPage.h
     ui/pages/modplatform/CustomPage.h
 
     ui/pages/modplatform/ResourcePage.cpp
@@ -1298,6 +1312,7 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/flat_white/flat_white.qrc
     resources/sculk/sculk.qrc
     resources/sculk_theme/sculk_theme.qrc
+    resources/translations/translations.qrc
     resources/documents/documents.qrc
     resources/shaders/shaders.qrc
     "${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_LogoQRC}"

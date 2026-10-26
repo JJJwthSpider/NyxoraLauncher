@@ -260,6 +260,50 @@ QPushButton::menu-indicator {
     width: 12px;
     right: 4px;
 }
+/* one-click search / example chips */
+QPushButton#quickChip {
+    background-color: #0b1f25;
+    border: 1px solid #1b4651;
+    border-radius: 13px;
+    padding: 4px 12px;
+    min-height: 0px;
+    color: #7fe9ee;
+}
+QPushButton#quickChip:hover {
+    background-color: #143440;
+    border-color: #29dfeb;
+    color: #29dfeb;
+}
+QPushButton#quickChip:pressed {
+    background-color: #0e8f99;
+    color: #ffffff;
+}
+/* the main action of a page */
+QPushButton#accentButton {
+    background-color: #0e8f99;
+    border: 1px solid #29dfeb;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 7px 22px;
+}
+QPushButton#accentButton:hover {
+    background-color: #12a6b1;
+    color: #ffffff;
+}
+/* big loader choice buttons on the quick start page */
+QPushButton#loaderCard {
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: bold;
+}
+QPushButton#loaderCard:checked {
+    background-color: #0a5a63;
+    border: 2px solid #29dfeb;
+    color: #ffffff;
+}
+QLabel#hintLabel {
+    color: #7fa3a8;
+}
 QToolButton {
     background-color: #0f252c;
     border: 1px solid #1b4651;
@@ -505,6 +549,16 @@ QAbstractItemView::item:selected {
 }
 QAbstractItemView::item:selected:!active {
     background-color: #0a5a63;
+}
+/* tables and version lists: one continuous row per entry */
+QTreeView::item, QTableView::item {
+    border-radius: 0px;
+    padding: 4px 6px;
+    min-height: 20px;
+}
+QComboBox QAbstractItemView::item {
+    min-height: 24px;
+    padding: 2px 8px;
 }
 QTreeView::branch {
     background: transparent;

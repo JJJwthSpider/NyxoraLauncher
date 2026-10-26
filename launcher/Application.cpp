@@ -710,7 +710,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("JsonEditor", QString());
 
         // Language
-        m_settings->registerSetting("Language", QString());
+        // the launcher speaks Russian out of the box; the language can still be changed in the settings
+        m_settings->registerSetting("Language", QString("ru"));
+
+        // Anthropic API key for the mod pack agent (optional, the agent also works without it)
+        m_settings->registerSetting("AgentClaudeApiKey", QString());
         m_settings->registerSetting("UseSystemLocale", false);
 
         // Console

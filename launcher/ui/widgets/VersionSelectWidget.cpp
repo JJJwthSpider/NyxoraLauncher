@@ -26,7 +26,12 @@ VersionSelectWidget::VersionSelectWidget(QWidget* parent) : QWidget(parent)
     listView->setAlternatingRowColors(true);
     listView->setRootIsDecorated(false);
     listView->setItemsExpandable(false);
-    listView->setWordWrap(true);
+    // one version per line: never wrap a version over several lines, elide it instead
+    listView->setWordWrap(false);
+    listView->setUniformRowHeights(true);
+    listView->setTextElideMode(Qt::ElideRight);
+    listView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    listView->setAllColumnsShowFocus(true);
     listView->header()->setCascadingSectionResizes(true);
     listView->header()->setStretchLastSection(false);
     listView->setModel(m_proxyModel);

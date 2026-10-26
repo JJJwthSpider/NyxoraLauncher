@@ -58,6 +58,18 @@ namespace ResourceDownload {
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ResourcePage(dialog, instance)
 {
     connect(m_ui->resourceFilterButton, &QPushButton::clicked, this, &ModPage::filterMods);
+
+    addQuickSearches({
+        { tr("Optimization"), "optimization" },
+        { tr("Weapons"), "weapons" },
+        { tr("Mobs"), "mobs" },
+        { tr("Magic"), "magic" },
+        { tr("Technology"), "technology" },
+        { tr("Adventure"), "adventure" },
+        { tr("Map"), "minimap" },
+        { tr("Storage"), "storage" },
+        { tr("Decoration"), "decoration" },
+    });
 }
 
 void ModPage::setFilterWidget(std::unique_ptr<ModFilterWidget>& widget)

@@ -52,9 +52,11 @@
 #include "settings/SettingsObject.h"
 
 static constexpr QLatin1String g_defaultLangCode("en_US");
+// Russian ships inside the launcher, so it works without downloading anything
+static constexpr QLatin1String g_bundledLangCode("ru");
 
 namespace {
-enum class FileType : std::uint8_t { None, Qm, Po };
+enum class FileType : std::uint8_t { None, Bundled, Qm, Po };
 
 QString getSystemLocaleName()
 {
@@ -71,6 +73,14 @@ struct Language {
     Language() : updated(true) {}
 
     explicit Language(QString _key) : key(std::move(_key)), updated(key == g_defaultLangCode) { locale = QLocale(key); }
+
+    static Language bundled()
+    {
+        Language lang(g_bundledLangCode);
+        lang.localFileType = FileType::Bundled;
+        lang.setTranslationStats(1, 0, 0);
+        return lang;
+    }
 
     QString languageName() const
     {
@@ -158,11 +168,12 @@ struct TranslationsModel::Private {
     QDir m_dir;
 
     // initial state is just english
-    QList<Language> m_languages = { Language(g_defaultLangCode) };
+    QList<Language> m_languages = { Language(g_defaultLangCode), Language::bundled() };
 
     QString m_selectedLanguage = g_defaultLangCode;
     std::unique_ptr<QTranslator> m_qtTranslator;
     std::unique_ptr<QTranslator> m_appTranslator;
+    std::unique_ptr<QTranslator> m_extraTranslator;
 
     Net::Download* m_indexTask = nullptr;
     QString m_downloadingTranslation;
@@ -182,6 +193,10 @@ TranslationsModel::TranslationsModel(const QString& path, QObject* parent) : QAb
     d->m_selectedLanguage = APPLICATION->settings()->get("Language").toString();
     FS::ensureFolderPathExists(path);
     reloadLocalFiles();
+    // apply the saved language right away, so bundled and cached translations work without a network connection
+    if (!d->m_selectedLanguage.isEmpty()) {
+        selectLanguage(d->m_selectedLanguage);
+    }
 
     d->watcher = new QFileSystemWatcher(this);
     connect(d->watcher, &QFileSystemWatcher::directoryChanged, this, &TranslationsModel::translationDirChanged);
@@ -264,7 +279,7 @@ void readIndex(const QString& path, QMap<QString, Language>& languages)
 
 void TranslationsModel::reloadLocalFiles()
 {
-    QMap<QString, Language> languages = { { g_defaultLangCode, Language(g_defaultLangCode) } };
+    QMap<QString, Language> languages = { { g_defaultLangCode, Language(g_defaultLangCode) }, { g_bundledLangCode, Language::bundled() } };
 
     const auto indexPath = d->m_dir.absoluteFilePath("index_v2.json");
     if (!QFileInfo::exists(indexPath)) {
@@ -272,6 +287,10 @@ void TranslationsModel::reloadLocalFiles()
         return;
     }
     readIndex(indexPath, languages);
+    if (auto bundledIter = languages.find(g_bundledLangCode);
+        bundledIter != languages.end() && bundledIter->localFileType == FileType::None) {
+        bundledIter->localFileType = FileType::Bundled;
+    }
     auto entries = d->m_dir.entryInfoList({ "mmc_*.qm", "*.po" }, QDir::Files | QDir::NoDotAndDotDot);
     for (auto& entry : entries) {
         auto completeSuffix = entry.completeSuffix();
@@ -469,6 +488,10 @@ bool TranslationsModel::selectLanguage(QString key) const
         QCoreApplication::removeTranslator(d->m_qtTranslator.get());
         d->m_qtTranslator.reset();
     }
+    if (d->m_extraTranslator) {
+        QCoreApplication::removeTranslator(d->m_extraTranslator.get());
+        d->m_extraTranslator.reset();
+    }
 
     /*
      * FIXME: potential source of crashes:
@@ -488,7 +511,8 @@ bool TranslationsModel::selectLanguage(QString key) const
     bool successful = false;
     // FIXME: this is likely never present. FIX IT.
     d->m_qtTranslator = std::make_unique<QTranslator>();
-    if (d->m_qtTranslator->load("qt_" + langCode, QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
+    if (d->m_qtTranslator->load("qt_" + langCode, QLibraryInfo::path(QLibraryInfo::TranslationsPath)) ||
+        d->m_qtTranslator->load("qtbase_" + langCode, ":/translations")) {
         qDebug() << "Loading Qt Language File for" << langCode.toLocal8Bit().constData() << "...";
         if (!QCoreApplication::installTranslator(d->m_qtTranslator.get())) {
             qCritical() << "Loading Qt Language File failed.";
@@ -527,8 +551,29 @@ bool TranslationsModel::selectLanguage(QString key) const
         } else {
             d->m_appTranslator.reset();
         }
+    } else if (langPtr->localFileType == FileType::Bundled) {
+        d->m_appTranslator = std::make_unique<QTranslator>();
+        if (d->m_appTranslator->load("mmc_" + langCode, ":/translations")) {
+            qDebug() << "Loading bundled Application Language File for" << langCode.toLocal8Bit().constData() << "...";
+            if (!QCoreApplication::installTranslator(d->m_appTranslator.get())) {
+                qCritical() << "Installing bundled Application Language File failed.";
+                d->m_appTranslator.reset();
+            } else {
+                successful = true;
+            }
+        } else {
+            d->m_appTranslator.reset();
+        }
     } else {
         d->m_appTranslator.reset();
+    }
+
+    // strings added by the Sculk edition (quick create, mod pack agent, ...)
+    d->m_extraTranslator = std::make_unique<QTranslator>();
+    if (d->m_extraTranslator->load("sculk_" + langCode, ":/translations")) {
+        QCoreApplication::installTranslator(d->m_extraTranslator.get());
+    } else {
+        d->m_extraTranslator.reset();
     }
     d->m_selectedLanguage = langCode;
     return successful;

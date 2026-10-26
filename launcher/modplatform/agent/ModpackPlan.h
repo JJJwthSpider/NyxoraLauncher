@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include <QList>
+#include <QString>
+#include <QStringList>
+
+namespace ModpackAgent {
+
+/// A group of mods the agent looks for, e.g. "Zombies" with the searches "zombie", "zombie apocalypse".
+struct Theme {
+    QString title;        // shown to the user (already translated)
+    QStringList queries;  // English search terms for Modrinth
+    int count = 3;        // how many mods to take for this theme
+};
+
+/// A hand-picked mod. The first slug of the alternatives that exists for the version/loader is used.
+struct CuratedMod {
+    QStringList alternatives;  // Modrinth slugs
+    QString group;             // shown to the user (already translated)
+};
+
+/// Everything the agent needs to know to assemble a pack.
+struct Plan {
+    QString name;
+    QString summary;
+    QString minecraftVersion;
+    QString loader;  // "neoforge", "forge", "fabric" or "quilt"
+    QList<Theme> themes;
+    QList<CuratedMod> curated;
+    bool fromClaude = false;
+    bool versionGiven = false;
+    bool loaderGiven = false;
+};
+
+/// The Minecraft version used when the request does not name one.
+QString defaultMinecraftVersion();
+
+/// The loader used when the request does not name one.
+QString defaultLoader(const QString& minecraftVersion);
+
+/// Human readable name of a loader id ("neoforge" -> "NeoForge").
+QString loaderDisplayName(const QString& loader);
+
+/// Understands requests like "сборка с зомби neoforge 1.21.1" without any AI service.
+Plan parseLocally(const QString& request);
+
+/// Performance and quality-of-life mods that are added to every pack.
+QList<CuratedMod> essentialMods(const QString& loader, bool wantsShaders, bool wantsMap);
+
+/// Detects shader / map wishes in a request (used to pick the right curated mods).
+bool requestWantsShaders(const QString& request);
+bool requestWantsMap(const QString& request);
+
+}  // namespace ModpackAgent

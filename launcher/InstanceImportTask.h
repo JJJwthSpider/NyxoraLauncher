@@ -49,6 +49,7 @@ class InstanceImportTask : public InstanceTask {
                                 QMap<QString, QString>&& extra_info = {});
     virtual ~InstanceImportTask() = default;
     bool abort() override;
+    const QUrl& sourceUrl() const { return m_sourceUrl; }
 
    protected:
     //! Entry point for tasks.

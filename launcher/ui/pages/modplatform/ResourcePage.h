@@ -56,6 +56,8 @@ class ResourcePage : public QWidget, public BasePage {
 
     /** Get the current term in the search bar. */
     auto getSearchTerm() const -> QString;
+    /// a row of one-click searches ("Optimization", "Weapons", ...) above the results
+    void addQuickSearches(const QList<std::pair<QString, QString>>& searches);
     /** Programatically set the term in the search bar. */
     void setSearchTerm(const QString&);
 

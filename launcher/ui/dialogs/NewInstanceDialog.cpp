@@ -59,6 +59,8 @@
 
 #include "ui/pages/modplatform/CustomPage.h"
 #include "ui/pages/modplatform/ImportPage.h"
+#include "ui/pages/modplatform/QuickPage.h"
+#include "ui/pages/modplatform/agent/AgentPage.h"
 #include "ui/pages/modplatform/atlauncher/AtlPage.h"
 #include "ui/pages/modplatform/flame/FlamePage.h"
 #include "ui/pages/modplatform/ftb/FtbPage.h"
@@ -173,6 +175,9 @@ QList<BasePage*> NewInstanceDialog::getPages()
 
     importPage = new ImportPage(this);
 
+    // the simple ways first: two-click creation and the AI pack agent, then the detailed pages
+    pages.append(new QuickPage(this));
+    pages.append(new AgentPage(this));
     pages.append(new CustomPage(this));
     pages.append(importPage);
     pages.append(new AtlPage(this));

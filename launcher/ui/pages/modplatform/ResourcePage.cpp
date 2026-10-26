@@ -43,14 +43,18 @@
 
 #include <StringUtils.h>
 #include <QDesktopServices>
+#include <QHBoxLayout>
 #include <QKeyEvent>
+#include <QLabel>
 #include <QMessageBox>
+#include <QPushButton>
 #include <algorithm>
 #include <utility>
 
 #include "Markdown.h"
 
 #include "Application.h"
+#include "modplatform/agent/SearchTranslator.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/pages/modplatform/ResourceModel.h"
 #include "ui/widgets/ProjectItem.h"
@@ -111,7 +115,8 @@ void ResourcePage::openedImpl()
     }
 
     //: String in the search bar of the mod downloading dialog
-    m_ui->searchEdit->setPlaceholderText(tr("Search for %1...").arg(resourcesString()));
+    m_ui->searchEdit->setPlaceholderText(
+        tr("Search for %1 in English or Russian, e.g. \"zombie\" or \"minimap\"...").arg(resourcesString()));
     m_ui->resourceSelectionButton->setText(tr("Select %1 for download").arg(resourceString()));
 
     updateSelectionButton();
@@ -166,7 +171,30 @@ auto ResourcePage::eventFilter(QObject* watched, QEvent* event) -> bool
 
 QString ResourcePage::getSearchTerm() const
 {
-    return m_ui->searchEdit->text();
+    // the platforms only know English, so Russian words like "зомби" are translated before searching
+    return SearchTranslator::toEnglish(m_ui->searchEdit->text());
+}
+
+void ResourcePage::addQuickSearches(const QList<std::pair<QString, QString>>& searches)
+{
+    auto* row = new QHBoxLayout;
+    row->setSpacing(6);
+    auto* label = new QLabel(tr("Popular:"), this);
+    label->setObjectName("hintLabel");
+    row->addWidget(label);
+    for (const auto& [title, query] : searches) {
+        auto* chip = new QPushButton(title, this);
+        chip->setObjectName("quickChip");
+        chip->setCursor(Qt::PointingHandCursor);
+        chip->setToolTip(tr("Search for \"%1\"").arg(query));
+        connect(chip, &QPushButton::clicked, this, [this, query] {
+            m_ui->searchEdit->setText(query);
+            triggerSearch();
+        });
+        row->addWidget(chip);
+    }
+    row->addStretch();
+    m_ui->verticalLayout->insertLayout(1, row);
 }
 
 void ResourcePage::setSearchTerm(const QString& term)
