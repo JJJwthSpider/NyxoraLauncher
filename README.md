@@ -1,3 +1,35 @@
+# Prism Launcher — Sculk Edition
+
+Модификация Prism Launcher 11.1.1 в цветах **скалка (sculk)** из Minecraft.
+
+## Что изменено
+
+- **Новая тема «Sculk (Dark)»** (`launcher/ui/themes/SculkTheme.cpp`) — очень тёмный фон
+  (#050f12 / #0a1a1f) и светящийся бирюзовый акцент (#29dfeb), как у блоков скалка.
+  Современный вид: скруглённые кнопки и поля ввода, тонкие полосы прокрутки, вкладки с
+  подчёркиванием, подсветка при наведении и фокусе, градиентный прогресс-бар,
+  свои флажки/радиокнопки/стрелки (`launcher/resources/sculk_theme/`).
+  Цвета лога (ошибки, предупреждения) подобраны под тёмный фон.
+- **Набор иконок «Sculk»** (`launcher/resources/sculk/`) — плоские иконки с бирюзовым свечением.
+- Тема и иконки «Sculk» включаются **по умолчанию** при первом запуске
+  (`launcher/Application.cpp`); переключить можно в *Настройки → Внешний вид*.
+- **Иконка лаунчера**: радужные полосы вокруг куба заменены на оттенки скалка
+  (от тёмно-бирюзового до светящегося циана). Обновлены все SVG в `program_info/`,
+  `launcher/resources/multimc/scalable/launcher.svg`, а также `prismlauncher.ico`,
+  `prismlauncher.icns` и PNG; фон macOS-иконки сделан тёмным.
+
+## Сборка
+
+```sh
+git clone --recursive <этот репозиторий>
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+Подробнее о зависимостях: https://prismlauncher.org/wiki/development/build-instructions/
+
+---
+
 <p align="center">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="/program_info/org.prismlauncher.PrismLauncher.logo-darkmode.svg">

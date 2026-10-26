@@ -1,0 +1,11 @@
+[Icon Theme]
+Name=Sculk
+Comment=Glowing cyan icons in the colors of Minecraft sculk (dark mode)
+Inherits=multimc
+Directories=scalable
+
+[scalable]
+Size=48
+Type=Scalable
+MinSize=16
+MaxSize=256
