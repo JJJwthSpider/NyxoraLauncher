@@ -47,6 +47,14 @@ const Entry s_dictionary[] = {
     { "пират", "pirates" },
     { "рыцар", "knights" },
     { "викинг", "vikings" },
+    { "ведьм", "witch" },
+    { "призрак", "ghosts" },
+    { "демон", "demons" },
+    { "пчел", "bees" },
+    { "пчёл", "bees" },
+    { "лошад", "horses" },
+    { "рыб", "fishing" },
+    { "рыбалк", "fishing" },
     // weapons & combat
     { "оруж", "weapons" },
     { "пушк", "guns" },
@@ -86,7 +94,6 @@ const Entry s_dictionary[] = {
     { "энерг", "energy" },
     { "труб", "pipes" },
     { "завод", "factory" },
-    { "фабрик", "factory" },
     { "индустр", "industrial" },
     { "космос", "space" },
     { "космич", "space" },
@@ -122,6 +129,8 @@ const Entry s_dictionary[] = {
     { "океан", "ocean" },
     { "мор", "ocean" },
     { "лес", "forest" },
+    { "незер", "nether" },
+    { "ад", "nether" },
     { "гор", "mountains" },
     { "руд", "ores" },
     { "шахт", "mining" },
@@ -160,6 +169,15 @@ const Entry s_dictionary[] = {
     { "строит", "building" },
     { "постро", "building" },
     { "блок", "blocks" },
+    { "дом", "house" },
+    { "кроват", "bed" },
+    { "крафт", "crafting" },
+    { "верстак", "crafting" },
+    { "оборон", "defense" },
+    { "турел", "turrets" },
+    { "ловуш", "traps" },
+    { "лут", "loot" },
+    { "сокровищ", "treasure" },
     // transport
     { "транспорт", "vehicles" },
     { "машин", "vehicles" },
@@ -244,17 +262,22 @@ QStringList keywords(const QString& query)
 {
     static const QRegularExpression s_separators(QStringLiteral("[^\\w\\.\\-]+"), QRegularExpression::UseUnicodePropertiesOption);
     QStringList result;
+    QStringList unknown;
     const auto words = query.toLower().split(s_separators, Qt::SkipEmptyParts);
     for (const auto& word : words) {
         if (fillerWords().contains(word)) {
             continue;
         }
         const auto translated = hasCyrillic(word) ? translateWord(word) : word;
-        if (!result.contains(translated)) {
+        if (hasCyrillic(translated)) {
+            unknown << translated;
+        } else if (!result.contains(translated)) {
             result << translated;
         }
     }
-    return result;
+    // Russian words without a translation would only spoil an English search;
+    // keep them only when nothing else is left (it may be the name of a Russian mod)
+    return result.isEmpty() ? unknown : result;
 }
 
 QString toEnglish(const QString& query)
