@@ -472,6 +472,7 @@ bool ResourceFolderModel::dropMimeData(const QMimeData* data, Qt::DropAction act
     // files dropped from outside?
     if (data->hasUrls()) {
         auto urls = data->urls();
+        QStringList added;
         for (auto url : urls) {
             // only local files may be dropped...
             if (!url.isLocalFile()) {
@@ -479,7 +480,12 @@ bool ResourceFolderModel::dropMimeData(const QMimeData* data, Qt::DropAction act
             }
             // TODO: implement not only copy, but also move
             // FIXME: handle errors here
-            installResource(url.toLocalFile());
+            if (installResource(url.toLocalFile())) {
+                added << QFileInfo(url.toLocalFile()).fileName();
+            }
+        }
+        if (!added.isEmpty()) {
+            emit filesAddedByUser(added);
         }
         return true;
     }

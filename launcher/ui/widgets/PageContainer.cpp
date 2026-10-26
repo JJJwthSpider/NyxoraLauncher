@@ -36,6 +36,7 @@
  */
 
 #include "PageContainer.h"
+#include "ui/Animations.h"
 #include "BuildConfig.h"
 #include "PageContainer_p.h"
 
@@ -231,6 +232,7 @@ void PageContainer::showPage(int row)
     }
     if (m_currentPage) {
         m_pageStack->setCurrentIndex(m_currentPage->stackIndex);
+        Animations::fadeIn(m_pageStack->currentWidget(), 160);
         m_header->setText(m_currentPage->displayName());
         m_currentPage->opened();
     } else {

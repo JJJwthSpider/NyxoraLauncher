@@ -68,7 +68,9 @@ class ModFolderPage : public ExternalResourcesPage {
 
     void downloadMods();
     void downloadDialogFinished(int result);
-    void updateMods(bool includeDeps = false);
+    void updateMods(bool includeDeps = false, QList<Resource*> only = {}, bool silentIfNothingFound = false);
+    /// mods added by hand get their missing dependencies offered right away
+    void checkAddedFiles();
     void deleteModMetadata();
     void exportModMetadata();
     void changeModVersion();
@@ -76,6 +78,9 @@ class ModFolderPage : public ExternalResourcesPage {
    protected:
     ModFolderModel* m_model;
     QPointer<ResourceDownload::ModDownloadDialog> m_downloadDialog;
+
+   private:
+    QStringList m_pendingAddedFiles;
 };
 
 class CoreModFolderPage : public ModFolderPage {

@@ -4,44 +4,12 @@
 <context>
     <name>AgentPage</name>
     <message>
-        <source>Zombie apocalypse with guns NeoForge 1.21.1</source>
-        <translation>Зомби-апокалипсис с оружием NeoForge 1.21.1</translation>
-    </message>
-    <message>
-        <source>Magic and adventure Fabric 1.20.1</source>
-        <translation>Магия и приключения Fabric 1.20.1</translation>
-    </message>
-    <message>
-        <source>Technology and space Forge 1.20.1</source>
-        <translation>Технологии и космос Forge 1.20.1</translation>
-    </message>
-    <message>
-        <source>Just optimization for a weak PC 1.21.1</source>
-        <translation>Только оптимизация для слабого ПК 1.21.1</translation>
-    </message>
-    <message>
         <source>Claude understood the request: %1</source>
         <translation>Claude понял запрос: %1</translation>
     </message>
     <message>
         <source>Claude is not available (%1). Using the built-in rules instead.</source>
         <translation>Claude недоступен (%1). Использую встроенные правила.</translation>
-    </message>
-    <message>
-        <source>Describe the pack you want</source>
-        <translation>Опишите сборку, которую хотите</translation>
-    </message>
-    <message>
-        <source>For example: zombie pack neoforge 1.21.1</source>
-        <translation>Например: сборка с зомби neoforge 1.21.1</translation>
-    </message>
-    <message>
-        <source>Build pack</source>
-        <translation>Собрать сборку</translation>
-    </message>
-    <message>
-        <source>Stop</source>
-        <translation>Остановить</translation>
     </message>
     <message>
         <source>Mod</source>
@@ -64,26 +32,6 @@
         <translation>Ключ Anthropic API (sk-ant-...)</translation>
     </message>
     <message>
-        <source>Asking Claude to plan the pack...</source>
-        <translation>Claude составляет план сборки...</translation>
-    </message>
-    <message>
-        <source>Plan: performance and quality-of-life mods only.</source>
-        <translation>План: только моды на оптимизацию и удобство.</translation>
-    </message>
-    <message>
-        <source>Plan: %1.</source>
-        <translation>План: %1.</translation>
-    </message>
-    <message>
-        <source>Stopped.</source>
-        <translation>Остановлено.</translation>
-    </message>
-    <message>
-        <source>Could not build the pack.</source>
-        <translation>Не удалось собрать сборку.</translation>
-    </message>
-    <message>
         <source>Needed by other mods in the pack</source>
         <translation>Нужен другим модам сборки</translation>
     </message>
@@ -100,16 +48,203 @@
         <translation>ИИ-сборка</translation>
     </message>
     <message>
-        <source>The agent understands requests like &quot;zombie pack neoforge 1.21.1&quot;: it picks fitting mods on Modrinth and CurseForge, adds performance and quality-of-life mods and every library the mods need, and checks that everything fits your Minecraft version and loader. You can untick mods before creating the instance.</source>
-        <translation>Агент понимает запросы вроде «сборка с зомби neoforge 1.21.1»: подбирает подходящие моды на Modrinth и CurseForge, добавляет моды на оптимизацию и удобство и все нужные им библиотеки, а также проверяет, что всё подходит к вашей версии Minecraft и загрузчику. Перед созданием установки лишние моды можно снять галочкой.</translation>
-    </message>
-    <message>
         <source>Source</source>
         <translation>Источник</translation>
     </message>
     <message>
         <source>Take mods from:</source>
         <translation>Брать моды с:</translation>
+    </message>
+    <message>
+        <source>Zombie apocalypse: cities, zombies and weapons</source>
+        <translation>Зомби-апокалипсис: города, зомби и оружие</translation>
+    </message>
+    <message>
+        <source>Magic and adventure with dungeons</source>
+        <translation>Магия и приключения с подземельями</translation>
+    </message>
+    <message>
+        <source>Technology and space</source>
+        <translation>Технологии и космос</translation>
+    </message>
+    <message>
+        <source>Just optimization for a weak PC</source>
+        <translation>Только оптимизация для слабого ПК</translation>
+    </message>
+    <message>
+        <source>Add magic</source>
+        <translation>Добавь магию</translation>
+    </message>
+    <message>
+        <source>Add shaders</source>
+        <translation>Добавь шейдеры</translation>
+    </message>
+    <message>
+        <source>Start over</source>
+        <translation>Начать заново</translation>
+    </message>
+    <message>
+        <source>The Warden is working</source>
+        <translation>Варден работает</translation>
+    </message>
+    <message>
+        <source>Warden, the pack builder</source>
+        <translation>Варден-сборщик</translation>
+    </message>
+    <message>
+        <source>Tell me what the pack should be about, and the loader and version. I will find the mods, add optimization and everything they need.</source>
+        <translation>Расскажи, о чём сборка, и на каком загрузчике и версии. Я найду моды, добавлю оптимизацию и всё, что им нужно.</translation>
+    </message>
+    <message>
+        <source>Write to the Warden, e.g.: a zombie apocalypse pack with cities, zombies and weapons</source>
+        <translation>Напиши Вардену, например: сборка про зомби-апокалипсис, должны быть города, зомби и оружие</translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation>Отправить</translation>
+    </message>
+    <message>
+        <source>Show the work log</source>
+        <translation>Показать журнал работы</translation>
+    </message>
+    <message>
+        <source>Hi! I&apos;m the Warden and I build mod packs. &lt;b&gt;What should your pack be about?&lt;/b&gt; Tell me the theme and what must be in it, for example: &lt;i&gt;a zombie apocalypse with cities, zombies and weapons&lt;/i&gt;.</source>
+        <translation>Привет! Я Варден, собираю сборки модов. &lt;b&gt;Про что будет твоя сборка?&lt;/b&gt; Расскажи тему и что в ней должно быть, например: &lt;i&gt;зомби-апокалипсис, должны быть города, зомби и оружие&lt;/i&gt;.</translation>
+    </message>
+    <message>
+        <source>I&apos;m still assembling the pack, give me a moment.</source>
+        <translation>Я ещё собираю сборку, подожди немного.</translation>
+    </message>
+    <message>
+        <source>Tell me what to change: a theme to add (&quot;add magic&quot;), another loader or version (&quot;Fabric 1.20.1&quot;), or &quot;start over&quot;. Or press OK below to create the instance.</source>
+        <translation>Напиши, что поменять: добавить тему («добавь магию»), другой загрузчик или версию («Fabric 1.20.1») или «начать заново». Или нажми «ОК» внизу, чтобы создать установку.</translation>
+    </message>
+    <message>
+        <source>I didn&apos;t catch the theme. Tell me what should be in the pack: zombies, weapons, magic, technology, cities, adventure, horror, space...</source>
+        <translation>Не понял тему. Расскажи, что должно быть в сборке: зомби, оружие, магия, технологии, города, приключения, хоррор, космос...</translation>
+    </message>
+    <message>
+        <source>optimization only</source>
+        <translation>только оптимизация</translation>
+    </message>
+    <message>
+        <source>Good. And what should the pack be about?</source>
+        <translation>Хорошо. А про что будет сборка?</translation>
+    </message>
+    <message>
+        <source>Got it: &lt;b&gt;%1&lt;/b&gt;. Now the loader and the Minecraft version, for example &lt;i&gt;NeoForge 1.21.1&lt;/i&gt;.</source>
+        <translation>Понял: &lt;b&gt;%1&lt;/b&gt;. Теперь загрузчик и версия Minecraft, например &lt;i&gt;NeoForge 1.21.1&lt;/i&gt;.</translation>
+    </message>
+    <message>
+        <source>Minecraft %1. Which loader: NeoForge, Fabric, Forge or Quilt?</source>
+        <translation>Minecraft %1. Какой загрузчик: NeoForge, Fabric, Forge или Quilt?</translation>
+    </message>
+    <message>
+        <source>%1 it is. Which Minecraft version?</source>
+        <translation>Значит, %1. Какая версия Minecraft?</translation>
+    </message>
+    <message>
+        <source>Understood! Theme: &lt;b&gt;%1&lt;/b&gt;. Minecraft &lt;b&gt;%2&lt;/b&gt; with &lt;b&gt;%3&lt;/b&gt;. I&apos;m looking for mods on %4 and adding optimization and the libraries they need.</source>
+        <translation>Понял! Тема: &lt;b&gt;%1&lt;/b&gt;. Minecraft &lt;b&gt;%2&lt;/b&gt; на &lt;b&gt;%3&lt;/b&gt;. Ищу моды на %4, добавляю оптимизацию и нужные им библиотеки.</translation>
+    </message>
+    <message>
+        <source>Planning the pack...</source>
+        <translation>Составляю план сборки...</translation>
+    </message>
+    <message>
+        <source>Claude is reading your request...</source>
+        <translation>Claude читает твой запрос...</translation>
+    </message>
+    <message>
+        <source>Something went wrong: %1&lt;br&gt;Let&apos;s try another loader or version.</source>
+        <translation>Что-то пошло не так: %1&lt;br&gt;Давай попробуем другой загрузчик или версию.</translation>
+    </message>
+    <message>
+        <source>Done! &lt;b&gt;%1&lt;/b&gt;: %2. For your themes: %3, optimization and comfort: %4, libraries the mods need: %5. The list is on the right, untick what you don&apos;t want.&lt;br&gt;Press &lt;b&gt;OK&lt;/b&gt; below to create the instance, or write me what to change.</source>
+        <translation>Готово! &lt;b&gt;%1&lt;/b&gt;: %2. По твоим темам: %3, оптимизация и удобство: %4, нужные модам библиотеки: %5. Список справа, лишнее можно снять галочкой.&lt;br&gt;Нажми &lt;b&gt;«ОК»&lt;/b&gt; внизу, чтобы создать установку, или напиши, что поменять.</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n mod(s)</source>
+        <translation>
+            <numerusform>%n мод</numerusform>
+            <numerusform>%n мода</numerusform>
+            <numerusform>%n модов</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>ChangeNameDialog</name>
+    <message>
+        <source>Change nickname</source>
+        <translation>Смена ника</translation>
+    </message>
+    <message>
+        <source>Current nickname: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Текущий ник: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>3 to 16 characters: Latin letters, digits and _. Mojang allows changing the name once every 30 days.</source>
+        <translation>От 3 до 16 символов: латинские буквы, цифры и _. Mojang разрешает менять ник раз в 30 дней.</translation>
+    </message>
+    <message>
+        <source>New nickname</source>
+        <translation>Новый ник</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>The name must be 3 to 16 characters long.</source>
+        <translation>Ник должен быть длиной от 3 до 16 символов.</translation>
+    </message>
+    <message>
+        <source>This is already your nickname.</source>
+        <translation>Это и так твой ник.</translation>
+    </message>
+    <message>
+        <source>Checking whether the name is free...</source>
+        <translation>Проверяю, свободен ли ник...</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;%1&lt;/b&gt; is free.</source>
+        <translation>&lt;b&gt;%1&lt;/b&gt; свободен.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;%1&lt;/b&gt; is already taken.</source>
+        <translation>&lt;b&gt;%1&lt;/b&gt; уже занят.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;%1&lt;/b&gt; is not allowed.</source>
+        <translation>&lt;b&gt;%1&lt;/b&gt; использовать нельзя.</translation>
+    </message>
+    <message>
+        <source>The login has expired. Refresh the account in the account settings and try again.</source>
+        <translation>Вход устарел. Обнови учётную запись в настройках учётных записей и попробуй снова.</translation>
+    </message>
+    <message>
+        <source>Could not check the name: %1</source>
+        <translation>Не удалось проверить ник: %1</translation>
+    </message>
+    <message>
+        <source>Changing the nickname...</source>
+        <translation>Меняю ник...</translation>
+    </message>
+    <message>
+        <source>The name is not valid.</source>
+        <translation>Недопустимый ник.</translation>
+    </message>
+    <message>
+        <source>The name cannot be changed right now. Mojang allows one change every 30 days.</source>
+        <translation>Сейчас сменить ник нельзя. Mojang разрешает одну смену раз в 30 дней.</translation>
+    </message>
+    <message>
+        <source>Too many attempts. Wait a minute and try again.</source>
+        <translation>Слишком много попыток. Подожди минуту и попробуй снова.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;The nickname was not changed.&lt;/b&gt; %1</source>
+        <translation>&lt;b&gt;Ник не изменён.&lt;/b&gt; %1</translation>
     </message>
 </context>
 <context>
@@ -136,7 +271,7 @@
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Отмена</translation>
     </message>
     <message>
         <source>OK</source>
@@ -201,6 +336,268 @@
     <message>
         <source>Create an instance yourself: choose the version and the loader, then add mods</source>
         <translation>Создайте установку сами: выберите версию и загрузчик, затем добавьте моды</translation>
+    </message>
+    <message>
+        <source>Change your skin, cape or nickname</source>
+        <translation>Сменить скин, плащ или ник</translation>
+    </message>
+    <message>
+        <source>Sign in</source>
+        <translation>Войти</translation>
+    </message>
+</context>
+<context>
+    <name>MainWindow</name>
+    <message>
+        <source>Backspace</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No instance selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Total playtime: 0s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Create instance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Delete group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Rename group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ctrl+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Accounts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Loading news...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No news available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Warnings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Task aborted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The task has been aborted by the user.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add a Microsoft account...</source>
+        <translation>Добавить учётную запись Microsoft...</translation>
+    </message>
+    <message>
+        <source>Skins and capes...</source>
+        <translation>Скины и плащи...</translation>
+    </message>
+    <message>
+        <source>Change nickname...</source>
+        <translation>Сменить ник...</translation>
+    </message>
+    <message>
+        <source>Nickname changed</source>
+        <translation>Ник изменён</translation>
+    </message>
+    <message>
+        <source>Your new nickname will appear in the launcher after the account refreshes.</source>
+        <translation>Новый ник появится в лаунчере после обновления учётной записи.</translation>
+    </message>
+    <message>
+        <source>Accounts...</source>
+        <translation>Учётные записи...</translation>
+    </message>
+    <message>
+        <source>The modpack, mod, or resource %1 is blocked for third-parties! Please download it manually.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid import link: missing &apos;url&apos; parameter.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid import link: URL must be http(s).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install modpack</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do you want to download and import a modpack from:
+%1
+
+URL:
+%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modpack download</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No instance!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No instance available to add the resource to.
+Please create a new instance before attempting to install this resource again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Group name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter a new group name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete the group &apos;%1&apos;?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rename group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot rename group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot set empty name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Group already exists. :/</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to undo trashing instance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Some instances and shortcuts could not be restored.
+Please check your trashbin to manually restore them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Instance not editable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This instance is not editable. It may be broken, invalid, or too old. Check logs for details.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Metadata cache clear Failed!
+To clear the metadata cache manually, press Folders -&gt; View Launcher Root Folder, and after closing the launcher delete the folder named &quot;meta&quot;
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Successfully added %1 to PATH</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 was successfully added to your PATH. You can now start it by running `%2`.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to add %1 to PATH</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>An error occurred while trying to add %1 to PATH</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot Delete Running Instance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The selected instance is currently running and cannot be deleted. Please stop the instance before attempting to delete it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source> and its %n registered shortcut(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Confirm Deletion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You are about to delete &quot;%1&quot;%2.
+This may be permanent and will completely delete the instance.
+
+Are you sure?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rename Instance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your instance folder contains &apos;!&apos; and this is known to cause Java problems!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You have now two options: &lt;br/&gt; - change the instance folder in the settings &lt;br/&gt; - move this installation of %1 to a different folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This is a problem: &lt;br/&gt; - The launcher will likely be deleted without warning by the operating system &lt;br/&gt; - close the launcher now and extract it to a real location, not a temporary folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your instance folder contains &apos;Rar$&apos; - that means you haven&apos;t extracted the launcher archive!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your instance folder is in a temporary folder: &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Total playtime: %1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -467,7 +864,7 @@
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Отмена</translation>
     </message>
     <message>
         <source>Help</source>
@@ -479,6 +876,13 @@
     </message>
 </context>
 <context>
+    <name>ProfileButton</name>
+    <message>
+        <source>Skins and nickname</source>
+        <translation>Скины и ник</translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message>
         <source>Sculk (Dark)</source>
@@ -487,6 +891,10 @@
     <message>
         <source>Modern dark theme in the colors of Minecraft sculk</source>
         <translation>Современная тёмная тема в цветах скалка из Minecraft</translation>
+    </message>
+    <message>
+        <source>%1 (in use)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -718,7 +1126,7 @@ The author likely blocked third-party launchers.</source>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Отмена</translation>
     </message>
     <message>
         <source>The resource was not found</source>

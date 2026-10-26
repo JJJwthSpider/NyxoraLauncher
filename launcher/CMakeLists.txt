@@ -1065,6 +1065,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ProfileSelectDialog.h
     ui/dialogs/ProfileSetupDialog.cpp
     ui/dialogs/ProfileSetupDialog.h
+    ui/dialogs/ChangeNameDialog.cpp
+    ui/dialogs/ChangeNameDialog.h
     ui/dialogs/CopyInstanceDialog.cpp
     ui/dialogs/CopyInstanceDialog.h
     ui/dialogs/CreateShortcutDialog.cpp
@@ -1140,6 +1142,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/JavaWizardWidget.cpp
     ui/widgets/JavaWizardWidget.h
     ui/widgets/LabeledToolButton.cpp
+    ui/Animations.cpp
+    ui/Animations.h
     ui/widgets/LaunchPanel.cpp
     ui/widgets/LaunchPanel.h
     ui/widgets/WardenWidget.cpp

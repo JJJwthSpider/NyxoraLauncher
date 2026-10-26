@@ -223,6 +223,8 @@ class MainWindow : public QMainWindow {
 
     void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {}, const QString& pageId = QString());
     void openModBrowser(const QString& instanceId);
+    void updateLaunchPanelProfile();
+    void showProfileMenu();
     void activateInstance(BaseInstance* instance);
     void setCatBackground(bool enabled);
     void updateInstanceToolIcon(QString new_icon);

@@ -162,6 +162,23 @@ def logo_svg(text_color):
 """
 
 
+def agent_svg():
+    """The AI agent: the Warden head with a speech bubble, because the agent talks to you in a chat."""
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+ {DEFS}
+ <g shape-rendering="crispEdges">
+  {head(8, 60, 10)}
+ </g>
+ <path d="M168 14h70a12 12 0 0 1 12 12v40a12 12 0 0 1-12 12h-44l-22 18 4-18h-8a12 12 0 0 1-12-12v-40a12 12 0 0 1 12-12z"
+       fill="#0b1f25" stroke="#29dfeb" stroke-width="5"/>
+ <circle cx="181" cy="46" r="7" fill="#8ff6fb"/>
+ <circle cx="203" cy="46" r="7" fill="#29dfeb"/>
+ <circle cx="225" cy="46" r="7" fill="#1a8c96"/>
+</svg>
+"""
+
+
 EMPTY = """<?xml version="1.0" encoding="UTF-8"?>
 <svg width="256" height="256" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"/>
 """
@@ -180,6 +197,7 @@ def main():
         HERE / "PrismLauncher.icon/Assets/block.svg": EMPTY,
         HERE / "../launcher/resources/multimc/scalable/launcher.svg": icon_svg(),
         HERE / "../launcher/resources/multimc/scalable/instances/prismlauncher.svg": head_only_svg(),
+        HERE / "../launcher/resources/sculk_theme/agent.svg": agent_svg(),
     }
     for path, content in files.items():
         path.write_text(content, encoding="utf-8")

@@ -42,6 +42,7 @@
 #include "minecraft/mod/ResourceFolderModel.h"
 #include "ui/GuiUtil.h"
 
+#include <QFileInfo>
 #include <QHeaderView>
 #include <QKeyEvent>
 #include <QMenu>
@@ -215,8 +216,14 @@ void ExternalResourcesPage::addItem()
         m_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
     if (!list.isEmpty()) {
+        QStringList added;
         for (auto filename : list) {
-            m_model->installResource(filename);
+            if (m_model->installResource(filename)) {
+                added << QFileInfo(filename).fileName();
+            }
+        }
+        if (!added.isEmpty()) {
+            emit m_model->filesAddedByUser(added);
         }
     }
 }

@@ -17,6 +17,7 @@
 #include "WardenWidget.h"
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QRadialGradient>
 #include <QRandomGenerator>
 #include <algorithm>
@@ -106,6 +107,17 @@ void WardenWidget::setExcited(bool excited)
     m_excited = excited;
 }
 
+void WardenWidget::setBubbleVisible(bool visible)
+{
+    m_bubble = visible;
+    update();
+}
+
+void WardenWidget::setTalking(bool talking)
+{
+    m_talking = talking;
+}
+
 void WardenWidget::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
@@ -154,9 +166,11 @@ void WardenWidget::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
-    // fit the 20x17 head (plus room for the swaying horns) into the widget
-    const double cell = std::floor(std::min(width() / (s_cols + 2.0), height() / (s_rows + 3.0)) * 4.0) / 4.0;
-    const QPointF origin((width() - s_cols * cell) / 2.0, (height() - s_rows * cell) / 2.0 + cell * 0.5);
+    // fit the 20x17 head (plus room for the swaying horns and the speech bubble) into the widget
+    const double room = m_bubble ? 0.78 : 1.0;
+    const double cell = std::floor(std::min(width() * room / (s_cols + 2.0), height() * room / (s_rows + 3.0)) * 4.0) / 4.0;
+    const QPointF origin(m_bubble ? cell : (width() - s_cols * cell) / 2.0,
+                         m_bubble ? height() - (s_rows + 1.0) * cell : (height() - s_rows * cell) / 2.0 + cell * 0.5);
     const double bob = std::sin(m_time * 1.3) * cell * 0.25;
     painter.translate(origin.x(), origin.y() + bob);
 
@@ -261,5 +275,43 @@ void WardenWidget::paintEvent(QPaintEvent*)
         c.setAlphaF(std::clamp(std::sin(age * s_pi), 0.0, 1.0) * 0.8);
         const double size = cell * (0.55 - 0.25 * age);
         painter.fillRect(QRectF(p.pos.x() * cell, p.pos.y() * cell - bob, size, size), c);
+    }
+
+    if (m_bubble) {
+        paintBubble(painter);
+    }
+}
+
+void WardenWidget::paintBubble(QPainter& painter)
+{
+    painter.resetTransform();
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    const double w = width() * 0.42;
+    const double h = w * 0.5;
+    const QRectF box(width() - w - 2, 2, w, h);
+    QPainterPath path;
+    path.addRoundedRect(box, h * 0.3, h * 0.3);
+    QPolygonF tail;
+    tail << QPointF(box.left() + w * 0.3, box.bottom() - 1) << QPointF(box.left() + w * 0.12, box.bottom() + h * 0.4)
+         << QPointF(box.left() + w * 0.5, box.bottom() - 1);
+    path.addPolygon(tail);
+    path = path.simplified();
+    painter.setPen(QPen(QColor(0x29, 0xdf, 0xeb), std::max(1.5, w * 0.04)));
+    painter.setBrush(QColor(0x0b, 0x1f, 0x25));
+    painter.drawPath(path);
+
+    const QColor dots[] = { QColor(0x8f, 0xf6, 0xfb), QColor(0x29, 0xdf, 0xeb), QColor(0x1a, 0x8c, 0x96) };
+    const double r = h * 0.12;
+    for (int i = 0; i < 3; i++) {
+        double lift = 0;
+        QColor color = dots[i];
+        if (m_talking) {
+            // the dots jump one after another, like someone typing
+            lift = std::max(0.0, std::sin(m_time * 7.0 - i * 0.9)) * h * 0.18;
+            color = QColor(0x8f, 0xf6, 0xfb);
+        }
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(color);
+        painter.drawEllipse(QPointF(box.left() + w * (0.28 + i * 0.22), box.center().y() - lift), r, r);
     }
 }

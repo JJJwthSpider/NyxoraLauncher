@@ -18,6 +18,9 @@
 
 #include <QAbstractButton>
 #include <QIcon>
+#include <QPixmap>
+#include <QTimer>
+#include <QVariantAnimation>
 #include <QWidget>
 
 class WardenWidget;
@@ -49,11 +52,31 @@ class LaunchTile : public QAbstractButton {
 
    private:
     QRect pictureRect() const;
+    void animateHover(bool hovered);
 
     QString m_subtitle;
     QIcon m_picture;
     QWidget* m_pictureWidget = nullptr;
     bool m_hovered = false;
+    double m_hover = 0;  // 0..1, animated so the glow fades in and out smoothly
+    double m_gemPhase = 0;
+    QVariantAnimation m_hoverAnimation;
+    QTimer m_gemTimer;
+};
+
+/// The player's face and nickname at the bottom of the launch panel; opens skins and nickname settings.
+class ProfileButton : public QAbstractButton {
+    Q_OBJECT
+   public:
+    explicit ProfileButton(QWidget* parent = nullptr);
+    void setProfile(const QString& name, const QPixmap& face);
+    QSize sizeHint() const override { return { 184, 52 }; }
+
+   protected:
+    void paintEvent(QPaintEvent* event) override;
+
+   private:
+    QPixmap m_face;
 };
 
 /// The column on the left of the main window: the mod pack agent (animated Warden),
@@ -64,9 +87,13 @@ class LaunchPanel : public QWidget {
     explicit LaunchPanel(QWidget* parent = nullptr);
 
     void retranslate();
+    /// shows the face and nickname of the active account (empty name: no account yet)
+    void setProfile(const QString& name, const QPixmap& face);
+    ProfileButton* profileButton() const { return m_profile; }
 
    signals:
     void agentRequested();
+    void profileRequested();
     void packsRequested();
     void newInstanceRequested();
 
@@ -78,4 +105,7 @@ class LaunchPanel : public QWidget {
     LaunchTile* m_packsTile = nullptr;
     LaunchTile* m_newTile = nullptr;
     WardenWidget* m_warden = nullptr;
+    ProfileButton* m_profile = nullptr;
+    QString m_profileName;
+    QPixmap m_profileFace;
 };

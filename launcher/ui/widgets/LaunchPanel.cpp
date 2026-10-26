@@ -19,6 +19,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QVBoxLayout>
+#include <cmath>
 
 #include "WardenWidget.h"
 
@@ -51,6 +52,29 @@ LaunchTile::LaunchTile(QWidget* parent) : QAbstractButton(parent)
     setCursor(Qt::PointingHandCursor);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     setAttribute(Qt::WA_Hover);
+
+    m_hoverAnimation.setDuration(180);
+    m_hoverAnimation.setEasingCurve(QEasingCurve::OutCubic);
+    connect(&m_hoverAnimation, &QVariantAnimation::valueChanged, this, [this](const QVariant& value) {
+        m_hover = value.toDouble();
+        update();
+    });
+
+    // the catalyst gem on top pulses slowly
+    m_gemTimer.setInterval(60);
+    connect(&m_gemTimer, &QTimer::timeout, this, [this] {
+        m_gemPhase += 0.06;
+        update(QRect(width() / 2 - 12, 0, 24, 14));
+    });
+    m_gemTimer.start();
+}
+
+void LaunchTile::animateHover(bool hovered)
+{
+    m_hoverAnimation.stop();
+    m_hoverAnimation.setStartValue(m_hover);
+    m_hoverAnimation.setEndValue(hovered ? 1.0 : 0.0);
+    m_hoverAnimation.start();
 }
 
 void LaunchTile::setSubtitle(const QString& subtitle)
@@ -92,7 +116,7 @@ void LaunchTile::enterEvent(QEnterEvent* event)
     QAbstractButton::enterEvent(event);
     m_hovered = true;
     emit hoverChanged(true);
-    update();
+    animateHover(true);
 }
 
 void LaunchTile::leaveEvent(QEvent* event)
@@ -100,7 +124,7 @@ void LaunchTile::leaveEvent(QEvent* event)
     QAbstractButton::leaveEvent(event);
     m_hovered = false;
     emit hoverChanged(false);
-    update();
+    animateHover(false);
 }
 
 void LaunchTile::paintEvent(QPaintEvent*)
@@ -110,15 +134,21 @@ void LaunchTile::paintEvent(QPaintEvent*)
 
     const auto& pal = palette();
     const QColor accent = pal.color(QPalette::Highlight).lighter(isDown() ? 100 : 135);
-    const QColor border = m_hovered || hasFocus() ? accent : pal.color(QPalette::Light);
+    const QColor idleBorder = hasFocus() ? accent : pal.color(QPalette::Light);
+    const QColor border = QColor::fromRgbF(idleBorder.redF() + (accent.redF() - idleBorder.redF()) * m_hover,
+                                           idleBorder.greenF() + (accent.greenF() - idleBorder.greenF()) * m_hover,
+                                           idleBorder.blueF() + (accent.blueF() - idleBorder.blueF()) * m_hover);
     const QRectF r = QRectF(rect()).adjusted(3.5, 3.5, -3.5, -3.5);
     const auto path = framePath(r);
 
-    // outer glow while hovered
-    if (m_hovered) {
+    // outer glow while hovered, fading in and out
+    if (m_hover > 0.01) {
         QColor glow = accent;
-        glow.setAlphaF(0.25);
-        painter.setPen(QPen(glow, 6));
+        glow.setAlphaF(0.12 * m_hover);
+        painter.setPen(QPen(glow, 10));
+        painter.drawPath(path);
+        glow.setAlphaF(0.25 * m_hover);
+        painter.setPen(QPen(glow, 5));
         painter.drawPath(path);
     }
 
@@ -166,6 +196,11 @@ void LaunchTile::paintEvent(QPaintEvent*)
     QPolygonF gem;
     const QPointF top(r.center().x(), r.top());
     gem << QPointF(top.x(), top.y() - 4) << QPointF(top.x() + 5, top.y()) << QPointF(top.x(), top.y() + 4) << QPointF(top.x() - 5, top.y());
+    QColor gemGlow = accent;
+    gemGlow.setAlphaF(0.25 + 0.25 * std::sin(m_gemPhase));
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(gemGlow);
+    painter.drawEllipse(top, 9, 6);
     painter.setPen(QPen(pal.color(QPalette::Base), 1));
     painter.setBrush(accent);
     painter.drawPolygon(gem);
@@ -192,6 +227,60 @@ void LaunchTile::paintEvent(QPaintEvent*)
     painter.drawText(caption.adjusted(0, 24, 0, 0), Qt::AlignHCenter | Qt::AlignTop | Qt::TextWordWrap, m_subtitle);
 }
 
+ProfileButton::ProfileButton(QWidget* parent) : QAbstractButton(parent)
+{
+    setCursor(Qt::PointingHandCursor);
+    setAttribute(Qt::WA_Hover);
+    setFixedHeight(52);
+}
+
+void ProfileButton::setProfile(const QString& name, const QPixmap& face)
+{
+    setText(name);
+    m_face = face;
+    update();
+}
+
+void ProfileButton::paintEvent(QPaintEvent*)
+{
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    const auto& pal = palette();
+    const bool hovered = underMouse();
+    const QRectF r = QRectF(rect()).adjusted(1.5, 1.5, -1.5, -1.5);
+    painter.setPen(QPen(hovered ? pal.color(QPalette::Highlight).lighter(135) : pal.color(QPalette::Light), 1.5));
+    painter.setBrush(isDown() ? pal.color(QPalette::Highlight).darker(220) : pal.color(QPalette::Button));
+    painter.drawRoundedRect(r, 10, 10);
+
+    // the face is pixel art: scale without smoothing
+    const QRect faceRect(10, (height() - 32) / 2, 32, 32);
+    if (!m_face.isNull()) {
+        painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+        painter.drawPixmap(faceRect, m_face);
+    } else {
+        painter.fillRect(faceRect, pal.color(QPalette::Base));
+    }
+
+    const QRect textRect(faceRect.right() + 10, 6, width() - faceRect.right() - 30, height() - 12);
+    auto nameFont = font();
+    nameFont.setBold(true);
+    painter.setFont(nameFont);
+    painter.setPen(hovered ? pal.color(QPalette::Highlight).lighter(135) : pal.color(QPalette::WindowText));
+    painter.drawText(textRect.adjusted(0, 0, 0, -textRect.height() / 2), Qt::AlignLeft | Qt::AlignBottom,
+                     fontMetrics().elidedText(text(), Qt::ElideRight, textRect.width()));
+    auto subFont = font();
+    subFont.setPointSizeF(subFont.pointSizeF() * 0.85);
+    painter.setFont(subFont);
+    painter.setPen(pal.color(QPalette::PlaceholderText));
+    painter.drawText(textRect.adjusted(0, textRect.height() / 2 + 1, 0, 0), Qt::AlignLeft | Qt::AlignTop, tr("Skins and nickname"));
+
+    // a small arrow: there is a menu behind the button
+    painter.setPen(QPen(pal.color(QPalette::Highlight).lighter(135), 1.8));
+    const QPointF c(width() - 14, height() / 2.0);
+    painter.drawLine(c + QPointF(-4, -2), c + QPointF(0, 2));
+    painter.drawLine(c + QPointF(0, 2), c + QPointF(4, -2));
+}
+
 LaunchPanel::LaunchPanel(QWidget* parent) : QWidget(parent)
 {
     setObjectName("launchPanel");
@@ -204,7 +293,9 @@ LaunchPanel::LaunchPanel(QWidget* parent) : QWidget(parent)
     m_agentTile = new LaunchTile(this);
     m_warden = new WardenWidget;
     m_agentTile->setPictureWidget(m_warden);
+    m_warden->setBubbleVisible(true);
     connect(m_agentTile, &LaunchTile::hoverChanged, m_warden, &WardenWidget::setExcited);
+    connect(m_agentTile, &LaunchTile::hoverChanged, m_warden, &WardenWidget::setTalking);
     connect(m_agentTile, &QAbstractButton::clicked, this, &LaunchPanel::agentRequested);
     layout->addWidget(m_agentTile, 1);
 
@@ -217,6 +308,10 @@ LaunchPanel::LaunchPanel(QWidget* parent) : QWidget(parent)
     m_newTile->setPicture(QIcon(":/sculk_theme/tile-plus.svg"));
     connect(m_newTile, &QAbstractButton::clicked, this, &LaunchPanel::newInstanceRequested);
     layout->addWidget(m_newTile, 1);
+
+    m_profile = new ProfileButton(this);
+    connect(m_profile, &QAbstractButton::clicked, this, &LaunchPanel::profileRequested);
+    layout->addWidget(m_profile);
 
     retranslate();
 }
@@ -232,6 +327,15 @@ void LaunchPanel::retranslate()
     m_newTile->setText(tr("New instance"));
     m_newTile->setSubtitle(tr("Version, loader and mods"));
     m_newTile->setToolTip(tr("Create an instance yourself: choose the version and the loader, then add mods"));
+    m_profile->setToolTip(tr("Change your skin, cape or nickname"));
+    setProfile(m_profileName, m_profileFace);
+}
+
+void LaunchPanel::setProfile(const QString& name, const QPixmap& face)
+{
+    m_profileName = name;
+    m_profileFace = face;
+    m_profile->setProfile(name.isEmpty() ? tr("Sign in") : name, face);
 }
 
 void LaunchPanel::paintEvent(QPaintEvent*)

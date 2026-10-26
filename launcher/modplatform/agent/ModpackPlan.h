@@ -60,6 +60,16 @@ QString loaderDisplayName(const QString& loader);
 /// Understands requests like "сборка с зомби neoforge 1.21.1" without any AI service.
 Plan parseLocally(const QString& request);
 
+/// The plan for a topic described in a chat, with the loader and version the user chose separately.
+/// Empty loader / version fall back to what the topic says or to the defaults.
+Plan planFor(const QString& topic, const QString& loader, const QString& minecraftVersion);
+
+/// Fills name and summary from the themes, version and loader.
+void describePlan(Plan& plan);
+
+/// The request is about performance only ("оптимизация для слабого ПК").
+bool wantsOnlyPerformance(const QString& request);
+
 /// Performance and quality-of-life mods that are added to every pack.
 QList<CuratedMod> essentialMods(const QString& loader, bool wantsShaders, bool wantsMap);
 

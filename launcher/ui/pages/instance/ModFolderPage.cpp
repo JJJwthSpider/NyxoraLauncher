@@ -70,6 +70,10 @@
 ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
+    // mods added by hand: once the folder is re-read, offer the dependencies they are missing
+    connect(m_model, &ResourceFolderModel::filesAddedByUser, this, [this](const QStringList& names) { m_pendingAddedFiles << names; });
+    connect(m_model, &ResourceFolderModel::updateFinished, this, &ModFolderPage::checkAddedFiles, Qt::QueuedConnection);
+
     ui->actionDownloadItem->setText(tr("Download Mods"));
     ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
     ui->actionDownloadItem->setEnabled(true);
@@ -78,13 +82,13 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, ModFolderModel* model, QWidget*
     connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::downloadMods);
 
     ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
-    connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
+    connect(ui->actionUpdateItem, &QAction::triggered, this, [this] { updateMods(); });
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
 
     auto* updateMenu = new QMenu(this);
 
     auto* update = updateMenu->addAction(tr("Check for Updates"));
-    connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
+    connect(update, &QAction::triggered, this, [this] { updateMods(); });
 
     updateMenu->addAction(ui->actionVerifyItemDependencies);
     connect(ui->actionVerifyItemDependencies, &QAction::triggered, this, [this] { updateMods(true); });
@@ -218,14 +222,34 @@ void ModFolderPage::downloadDialogFinished(int result)
     }
 }
 
-void ModFolderPage::updateMods(bool includeDeps)
+void ModFolderPage::checkAddedFiles()
+{
+    if (m_pendingAddedFiles.isEmpty()) {
+        return;
+    }
+    QList<Resource*> added;
+    for (auto* resource : m_model->allResources()) {
+        if (m_pendingAddedFiles.contains(resource->fileinfo().fileName())) {
+            added << resource;
+        }
+    }
+    m_pendingAddedFiles.clear();
+    if (!added.isEmpty() && !APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {
+        updateMods(true, added, true);
+    }
+}
+
+void ModFolderPage::updateMods(bool includeDeps, QList<Resource*> only, bool silentIfNothingFound)
 {
     if (m_instance->typeName() != "Minecraft") {
         return;  // this is a null instance or a legacy instance
     }
 
     auto* profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
-    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+    if (!profile->getModLoaders().has_value() && (silentIfNothingFound || handleNoModLoader())) {
+        return;
+    }
+    if (silentIfNothingFound && (APPLICATION->settings()->get("ModMetadataDisabled").toBool() || m_instance->isRunning())) {
         return;
     }
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
@@ -249,7 +273,10 @@ void ModFolderPage::updateMods(bool includeDeps)
 
     auto modsList = m_model->selectedResources(selection);
     bool useAll = modsList.empty();
-    if (useAll) {
+    if (!only.isEmpty()) {
+        modsList = only;
+        useAll = false;
+    } else if (useAll) {
         modsList = m_model->allResources();
     }
 
@@ -261,6 +288,9 @@ void ModFolderPage::updateMods(bool includeDeps)
         return;
     }
     if (updateDialog.noUpdates()) {
+        if (silentIfNothingFound) {
+            return;  // the added mods have everything they need
+        }
         QString message{ tr("'%1' is up-to-date! :)").arg(modsList.front()->name()) };
         if (modsList.size() > 1) {
             if (useAll) {

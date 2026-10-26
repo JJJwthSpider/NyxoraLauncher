@@ -67,7 +67,7 @@ const QList<ThemeRule>& themeRules()
           { "dungeons", "adventure" },
           4 },
         { QT_TRANSLATE_NOOP("ModpackAgent", "Structures"),
-          { "structures", "buildings", "villages", "city", "castles" },
+          { "structures", "buildings", "villages", "city", "cities", "town", "towns", "castles" },
           { "structures", "villages" },
           3 },
         { QT_TRANSLATE_NOOP("ModpackAgent", "World generation"),
@@ -196,7 +196,7 @@ Plan parseLocally(const QString& request)
     }
 
     const auto words = SearchTranslator::keywords(request);
-    if (words.contains("neoforge") || lower.contains("neo forge") || lower.contains("нео")) {
+    if (words.contains("neoforge") || lower.contains("neo forge") || lower.contains("нео фордж")) {
         plan.loader = "neoforge";
     } else if (words.contains("forge")) {
         plan.loader = "forge";
@@ -210,7 +210,6 @@ Plan parseLocally(const QString& request)
         plan.loader = defaultLoader(plan.minecraftVersion);
     }
 
-    QStringList titles;
     for (const auto& rule : themeRules()) {
         bool hit = false;
         for (const auto& trigger : rule.triggers) {
@@ -221,7 +220,6 @@ Plan parseLocally(const QString& request)
         }
         if (hit) {
             plan.themes << Theme{ tr(rule.title), rule.queries, rule.count };
-            titles << tr(rule.title).toLower();
         }
     }
 
@@ -236,11 +234,19 @@ Plan parseLocally(const QString& request)
             continue;
         }
         plan.themes << Theme{ word, { word }, 2 };
-        titles << word;
     }
 
     plan.curated = essentialMods(plan.loader, requestWantsShaders(request), requestWantsMap(request));
+    describePlan(plan);
+    return plan;
+}
 
+void describePlan(Plan& plan)
+{
+    QStringList titles;
+    for (const auto& theme : plan.themes) {
+        titles << theme.title.toLower();
+    }
     if (titles.isEmpty()) {
         plan.name = tr("Optimized %1 %2").arg(loaderDisplayName(plan.loader), plan.minecraftVersion);
         plan.summary = tr("A light pack with performance and quality-of-life mods.");
@@ -250,7 +256,28 @@ Plan parseLocally(const QString& request)
         plan.name = tr("%1 pack %2").arg(first, plan.minecraftVersion);
         plan.summary = tr("Mods for: %1. Plus performance and quality-of-life mods.").arg(titles.join(", "));
     }
+}
+
+Plan planFor(const QString& topic, const QString& loader, const QString& minecraftVersion)
+{
+    auto plan = parseLocally(topic);
+    if (!minecraftVersion.isEmpty()) {
+        plan.minecraftVersion = minecraftVersion;
+        plan.versionGiven = true;
+    }
+    if (!loader.isEmpty()) {
+        plan.loader = loader;
+        plan.loaderGiven = true;
+    }
+    plan.curated = essentialMods(plan.loader, requestWantsShaders(topic), requestWantsMap(topic));
+    describePlan(plan);
     return plan;
+}
+
+bool wantsOnlyPerformance(const QString& request)
+{
+    const auto words = SearchTranslator::keywords(request);
+    return words.contains("optimization") || words.contains("performance") || words.contains("fps") || words.contains("lag");
 }
 
 }  // namespace ModpackAgent

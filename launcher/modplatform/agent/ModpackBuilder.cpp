@@ -498,7 +498,13 @@ const AgentMod* ModpackBuilder::findSameMod(const Candidate& candidate) const
 
 bool ModpackBuilder::addMod(const Candidate& candidate, const FileChoice& file, const QString& group, bool dependency)
 {
-    if (findSameMod(candidate)) {
+    if (const auto* same = findSameMod(candidate)) {
+        // the same mod from the other platform: remember its id, so mods that need it see it as present
+        for (auto& mod : m_mods) {
+            if (&mod == same && mod.projectId != candidate.id && !mod.aliases.contains(candidate.id)) {
+                mod.aliases << candidate.id;
+            }
+        }
         return false;
     }
     if (!file.valid) {

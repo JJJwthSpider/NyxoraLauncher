@@ -98,6 +98,7 @@
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/CreateShortcutDialog.h"
+#include "ui/dialogs/ChangeNameDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
@@ -105,6 +106,7 @@
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/NewsDialog.h"
+#include "ui/dialogs/skins/SkinManageDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
@@ -299,6 +301,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(m_launchPanel, &LaunchPanel::agentRequested, this, [this] { addInstance(QString(), {}, "agent"); });
         connect(m_launchPanel, &LaunchPanel::packsRequested, this, [this] { addInstance(QString(), {}, "modrinth"); });
         connect(m_launchPanel, &LaunchPanel::newInstanceRequested, this, [this] { addInstance(QString(), {}, "quick"); });
+        connect(m_launchPanel, &LaunchPanel::profileRequested, this, &MainWindow::showProfileMenu);
+        connect(APPLICATION->accounts(), &AccountList::defaultAccountChanged, this, &MainWindow::updateLaunchPanelProfile);
+        connect(APPLICATION->accounts(), &AccountList::listChanged, this, &MainWindow::updateLaunchPanelProfile);
+        updateLaunchPanelProfile();
     }
 
     // Create the instance list widget
@@ -945,6 +951,51 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
             openModBrowser(createdId);
         }
     }
+}
+
+void MainWindow::updateLaunchPanelProfile()
+{
+    const auto account = APPLICATION->accounts()->defaultAccount();
+    if (!account) {
+        m_launchPanel->setProfile(QString(), QPixmap());
+        return;
+    }
+    m_launchPanel->setProfile(account->profileName(), account->getFace(32, 32));
+}
+
+void MainWindow::showProfileMenu()
+{
+    const auto account = APPLICATION->accounts()->defaultAccount();
+    QMenu menu(this);
+    if (!account) {
+        menu.addAction(QIcon::fromTheme("accounts"), tr("Add a Microsoft account..."), this,
+                       [this] { APPLICATION->ShowGlobalSettings(this, "accounts"); });
+    } else {
+        const bool microsoft = account->accountType() == AccountType::MSA;
+        auto* skins = menu.addAction(QIcon::fromTheme("skins"), tr("Skins and capes..."), this, [this, account] {
+            SkinManageDialog dialog(this, account);
+            dialog.exec();
+            updateLaunchPanelProfile();
+        });
+        auto* rename = menu.addAction(QIcon::fromTheme("rename"), tr("Change nickname..."), this, [this, account] {
+            ChangeNameDialog dialog(account, this);
+            if (dialog.exec() == QDialog::Accepted) {
+                CustomMessageBox::selectable(this, tr("Nickname changed"),
+                                             tr("Your new nickname will appear in the launcher after the account refreshes."),
+                                             QMessageBox::Information)
+                    ->show();
+            }
+        });
+        if (!microsoft) {
+            // skins and names belong to Microsoft accounts with Minecraft
+            skins->setEnabled(false);
+            rename->setEnabled(false);
+        }
+        menu.addSeparator();
+    }
+    menu.addAction(QIcon::fromTheme("accounts"), tr("Accounts..."), this, [this] { APPLICATION->ShowGlobalSettings(this, "accounts"); });
+    auto* button = m_launchPanel->profileButton();
+    menu.exec(button->mapToGlobal(QPoint(0, button->height())));
 }
 
 void MainWindow::openModBrowser(const QString& instanceId)

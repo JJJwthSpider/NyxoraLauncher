@@ -188,6 +188,8 @@ class ResourceFolderModel : public QAbstractListModel {
    signals:
     void updateFinished();
     void parseFinished();
+    /// files the user added by hand (drag and drop or the file picker)
+    void filesAddedByUser(QStringList fileNames);
 
    protected:
     [[nodiscard]] virtual Task* createPreUpdateTask() { return nullptr; }

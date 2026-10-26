@@ -12,6 +12,7 @@
         <file>arrow-up-disabled.svg</file>
         <file>arrow-left-disabled.svg</file>
         <file>arrow-right-disabled.svg</file>
+        <file>agent.svg</file>
         <file>tile-plus.svg</file>
         <file>tile-wrenches.svg</file>
     </qresource>
