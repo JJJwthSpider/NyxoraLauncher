@@ -474,6 +474,180 @@
     </message>
 </context>
 <context>
+    <name>Lobby::TunnelModInstaller</name>
+    <message>
+        <source>The instance has no mod loader, so the internet lobby mod can&apos;t be installed.</source>
+        <translation>В установке нет загрузчика модов, поэтому мод для лобби через интернет поставить нельзя.</translation>
+    </message>
+    <message>
+        <source>Looking for e4mc for %1 %2...</source>
+        <translation>Ищу e4mc для %1 %2...</translation>
+    </message>
+    <message>
+        <source>Modrinth could not be reached: %1</source>
+        <translation>Не удалось связаться с Modrinth: %1</translation>
+    </message>
+    <message>
+        <source>e4mc has no version for %1 %2 yet.</source>
+        <translation>У e4mc пока нет версии для %1 %2.</translation>
+    </message>
+    <message>
+        <source>A library e4mc needs has no version for %1 %2.</source>
+        <translation>У библиотеки, нужной e4mc, нет версии для %1 %2.</translation>
+    </message>
+    <message>
+        <source>Downloading %1...</source>
+        <translation>Скачиваю %1...</translation>
+    </message>
+    <message>
+        <source>Could not download %1: %2</source>
+        <translation>Не удалось скачать %1: %2</translation>
+    </message>
+    <message>
+        <source>%1 is damaged (wrong checksum). Try again.</source>
+        <translation>%1 повреждён (не совпала контрольная сумма). Попробуй ещё раз.</translation>
+    </message>
+    <message>
+        <source>Could not save %1 to the mods folder.</source>
+        <translation>Не удалось сохранить %1 в папку модов.</translation>
+    </message>
+    <message>
+        <source>e4mc is installed.</source>
+        <translation>e4mc установлен.</translation>
+    </message>
+</context>
+<context>
+    <name>LobbyDialog</name>
+    <message>
+        <source>Lobby: play with friends</source>
+        <translation>Лобби: игра с друзьями</translation>
+    </message>
+    <message>
+        <source>Create a lobby</source>
+        <translation>Создать лобби</translation>
+    </message>
+    <message>
+        <source>Join a friend</source>
+        <translation>Присоединиться к другу</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+    <message>
+        <source>Your world, your friends</source>
+        <translation>Твой мир, твои друзья</translation>
+    </message>
+    <message>
+        <source>Choose the instance you want to play. The launcher prepares it, starts the game and shows the address for your friends as soon as you open your world.</source>
+        <translation>Выбери установку, в которой хочешь играть. Лаунчер подготовит её, запустит игру и покажет адрес для друзей, как только ты откроешь мир.</translation>
+    </message>
+    <message>
+        <source>Create lobby</source>
+        <translation>Создать лобби</translation>
+    </message>
+    <message>
+        <source>Address for your friends:</source>
+        <translation>Адрес для друзей:</translation>
+    </message>
+    <message>
+        <source>Copy address</source>
+        <translation>Копировать адрес</translation>
+    </message>
+    <message>
+        <source>Copy invitation</source>
+        <translation>Копировать приглашение</translation>
+    </message>
+    <message>
+        <source>Friends need the same mods. Send them your pack:</source>
+        <translation>Друзьям нужны те же моды. Отправь им свою сборку:</translation>
+    </message>
+    <message>
+        <source>Save the pack for friends (.mrpack)...</source>
+        <translation>Сохранить сборку для друзей (.mrpack)...</translation>
+    </message>
+    <message>
+        <source>Copied!</source>
+        <translation>Скопировано!</translation>
+    </message>
+    <message>
+        <source>Create an instance first, then come back here.</source>
+        <translation>Сначала создай установку, а потом возвращайся сюда.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Minecraft %1 without mods:&lt;/b&gt; friends can join only from the same network (the same Wi-Fi). To play over the internet choose an instance with Fabric, Quilt, Forge or NeoForge.</source>
+        <translation>&lt;b&gt;Minecraft %1 без модов:&lt;/b&gt; друзья смогут зайти только из той же сети (тот же Wi-Fi). Чтобы играть через интернет, выбери установку с Fabric, Quilt, Forge или NeoForge.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Minecraft %1 with %2:&lt;/b&gt; ready for playing over the internet (e4mc is installed).</source>
+        <translation>&lt;b&gt;Minecraft %1 на %2:&lt;/b&gt; готово к игре через интернет (e4mc установлен).</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Minecraft %1 with %2:&lt;/b&gt; the launcher will add the small e4mc mod. It gives your world an internet address, no port forwarding and no account needed. Only you need it, not your friends.</source>
+        <translation>&lt;b&gt;Minecraft %1 на %2:&lt;/b&gt; лаунчер добавит маленький мод e4mc. Он даёт твоему миру адрес в интернете — без проброса портов и без регистрации. Он нужен только тебе, друзьям — нет.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;The internet lobby could not be prepared:&lt;/b&gt; %1&lt;br&gt;You can still play with friends in the same network: press &quot;Create lobby&quot; again.</source>
+        <translation>&lt;b&gt;Не получилось подготовить лобби через интернет:&lt;/b&gt; %1&lt;br&gt;С друзьями в той же сети играть всё равно можно: нажми «Создать лобби» ещё раз.</translation>
+    </message>
+    <message>
+        <source>The game is closed. The lobby ended.</source>
+        <translation>Игра закрыта. Лобби завершено.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;The game is starting.&lt;/b&gt; Then:&lt;ol&gt;&lt;li&gt;open your world (or create a new one);&lt;/li&gt;&lt;li&gt;press &lt;b&gt;Esc&lt;/b&gt; and choose &lt;b&gt;Open to LAN&lt;/b&gt;;&lt;/li&gt;&lt;li&gt;press &lt;b&gt;Start LAN World&lt;/b&gt;.&lt;/li&gt;&lt;/ol&gt;The address for your friends appears here by itself.</source>
+        <translation>&lt;b&gt;Игра запускается.&lt;/b&gt; Дальше:&lt;ol&gt;&lt;li&gt;открой свой мир (или создай новый);&lt;/li&gt;&lt;li&gt;нажми &lt;b&gt;Esc&lt;/b&gt; и выбери &lt;b&gt;«Открыть для сети»&lt;/b&gt;;&lt;/li&gt;&lt;li&gt;нажми &lt;b&gt;«Открыть мир для сети»&lt;/b&gt;.&lt;/li&gt;&lt;/ol&gt;Адрес для друзей появится здесь сам.</translation>
+    </message>
+    <message>
+        <source>This address works for friends in the same network (Wi-Fi).</source>
+        <translation>Этот адрес работает для друзей в той же сети (Wi-Fi).</translation>
+    </message>
+    <message>
+        <source>Works over the internet.</source>
+        <translation>Работает через интернет.</translation>
+    </message>
+    <message>
+        <source>Works over the internet. In the same network friends can also use %1.</source>
+        <translation>Работает через интернет. В той же сети друзья могут зайти и по адресу %1.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;The lobby is open!&lt;/b&gt; Send the address to your friends. They join with &lt;i&gt;Lobby → Join a friend&lt;/i&gt; or in Minecraft with &lt;i&gt;Multiplayer → Direct Connection&lt;/i&gt;.</source>
+        <translation>&lt;b&gt;Лобби открыто!&lt;/b&gt; Отправь адрес друзьям. Они заходят через &lt;i&gt;Лобби → Присоединиться к другу&lt;/i&gt; или в самом Minecraft: &lt;i&gt;Сетевая игра → Прямое подключение&lt;/i&gt;.</translation>
+    </message>
+    <message>
+        <source>Join me in Minecraft %1!
+Address: %2
+In SculkShoot Client: Lobby → Join a friend, paste the address. In Minecraft: Multiplayer → Direct Connection.</source>
+        <translation>Заходи ко мне в Minecraft %1!
+Адрес: %2
+В SculkShoot Client: Лобби → Присоединиться к другу, вставь адрес. В Minecraft: Сетевая игра → Прямое подключение.</translation>
+    </message>
+    <message>
+        <source>Join a friend&apos;s world</source>
+        <translation>Зайти в мир друга</translation>
+    </message>
+    <message>
+        <source>Paste the address your friend sent you and choose the instance with the same pack. The game starts and connects right away.</source>
+        <translation>Вставь адрес, который прислал друг, и выбери установку с той же сборкой. Игра запустится и сразу подключится.</translation>
+    </message>
+    <message>
+        <source>For example: brave-creeper.e4mc.link or 192.168.1.5:51234</source>
+        <translation>Например: brave-creeper.e4mc.link или 192.168.1.5:51234</translation>
+    </message>
+    <message>
+        <source>Connect</source>
+        <translation>Подключиться</translation>
+    </message>
+    <message>
+        <source>No such pack yet? Import the .mrpack file your friend sent:</source>
+        <translation>Нет такой сборки? Импортируй файл .mrpack, который прислал друг:</translation>
+    </message>
+    <message>
+        <source>Import a pack from a friend...</source>
+        <translation>Импортировать сборку от друга...</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
         <source>Backspace</source>
@@ -759,6 +933,30 @@ Check the spelling or clear the search.</source>
     <message>
         <source>%1 of %2</source>
         <translation>%1 из %2</translation>
+    </message>
+    <message>
+        <source>Play with friends</source>
+        <translation>Играть с друзьями</translation>
+    </message>
+    <message>
+        <source>Create a lobby with this instance or join a friend</source>
+        <translation>Создать лобби с этой установкой или зайти к другу</translation>
+    </message>
+    <message>
+        <source>Lobby</source>
+        <translation>Лобби</translation>
+    </message>
+    <message>
+        <source>Play with friends: create a lobby or join one</source>
+        <translation>Игра с друзьями: создать лобби или присоединиться</translation>
+    </message>
+    <message>
+        <source>The pack from your friend</source>
+        <translation>Сборка от друга</translation>
+    </message>
+    <message>
+        <source>Packs (*.mrpack *.zip)</source>
+        <translation>Сборки (*.mrpack *.zip)</translation>
     </message>
 </context>
 <context>

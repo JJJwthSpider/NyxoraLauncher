@@ -1181,6 +1181,10 @@ SET(LAUNCHER_SOURCES
     ui/widgets/WideBar.h
     ui/widgets/WideBar.cpp
     ui/widgets/InstanceIconBox.h
+    ui/dialogs/LobbyDialog.h
+    ui/dialogs/LobbyDialog.cpp
+    modplatform/lobby/TunnelModInstaller.h
+    modplatform/lobby/TunnelModInstaller.cpp
     ui/widgets/InstanceIconBox.cpp
     ui/widgets/AppearanceWidget.h
     ui/widgets/AppearanceWidget.cpp

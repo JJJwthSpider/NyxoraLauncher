@@ -103,6 +103,7 @@
 #include "ui/dialogs/CreateShortcutDialog.h"
 #include "ui/dialogs/ChangeNameDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/LobbyDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
@@ -200,6 +201,17 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
             deleteButton->setObjectName("dangerAction");
         }
         ui->newsToolBar->hide();
+
+        // playing with friends: a lobby for the selected instance, and in the main tool bar for any instance
+        auto* friendsAction = new QAction(QIcon::fromTheme("accounts"), tr("Play with friends"), this);
+        friendsAction->setToolTip(tr("Create a lobby with this instance or join a friend"));
+        connect(friendsAction, &QAction::triggered, this, [this] { openLobby(m_selectedInstance); });
+        ui->instanceToolBar->insertActionBefore(ui->actionKillInstance, friendsAction);
+
+        auto* lobbyAction = new QAction(QIcon::fromTheme("accounts"), tr("Lobby"), this);
+        lobbyAction->setToolTip(tr("Play with friends: create a lobby or join one"));
+        connect(lobbyAction, &QAction::triggered, this, [this] { openLobby(m_selectedInstance); });
+        ui->mainToolBar->insertAction(ui->actionFoldersButton, lobbyAction);
 
         ui->instanceToolBar->addContextMenuAction(ui->newsToolBar->toggleViewAction());
         ui->instanceToolBar->addContextMenuAction(ui->instanceToolBar->toggleViewAction());
@@ -1034,6 +1046,24 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
             openModBrowser(createdId);
         }
     }
+}
+
+void MainWindow::openLobby(BaseInstance* instance)
+{
+    auto* dialog = new LobbyDialog(instance, this);
+    connect(dialog, &LobbyDialog::exportRequested, this, [this](BaseInstance* toExport) {
+        if (auto* minecraft = dynamic_cast<MinecraftInstance*>(toExport)) {
+            ExportPackDialog exportDialog(minecraft, this);
+            exportDialog.exec();
+        }
+    });
+    connect(dialog, &LobbyDialog::importRequested, this, [this] {
+        const auto file = QFileDialog::getOpenFileName(this, tr("The pack from your friend"), QString(), tr("Packs (*.mrpack *.zip)"));
+        if (!file.isEmpty()) {
+            processURLs({ QUrl::fromLocalFile(file) });
+        }
+    });
+    dialog->show();
 }
 
 void MainWindow::updateInstanceCount()

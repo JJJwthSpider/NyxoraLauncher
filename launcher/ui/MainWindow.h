@@ -245,6 +245,7 @@ class MainWindow : public QMainWindow {
     class QComboBox* m_instanceSort = nullptr;
     QLabel* m_instanceCount = nullptr;
     void updateInstanceCount();
+    void openLobby(BaseInstance* instance);
     InstanceProxyModel* proxymodel = nullptr;
     QToolButton* newsLabel = nullptr;
     QLabel* m_statusLeft = nullptr;
