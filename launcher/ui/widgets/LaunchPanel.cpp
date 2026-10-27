@@ -404,7 +404,10 @@ void LaunchPanel::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     if (SculkTheme::isActive()) {
-        painter.drawTiledPixmap(rect(), SculkTheme::texture(palette().color(QPalette::Window), palette().color(QPalette::Highlight)));
+        // tinted glass over the sculk of the main window, like the tool bars
+        QColor glass = palette().color(QPalette::Window);
+        glass.setAlphaF(0.55);
+        painter.fillRect(rect(), glass);
     } else {
         painter.fillRect(rect(), palette().color(QPalette::Window));
     }

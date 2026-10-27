@@ -88,6 +88,7 @@ class InstanceView : public QAbstractItemView {
     /// the icon at the top of every instance card: clicking it changes the icon
     static QRect iconRect(const QRect& itemRect);
     QModelIndex hoveredIconIndex() const { return m_hoveredIcon; }
+    QModelIndex hoveredItemIndex() const { return m_hoveredItem; }
     /// text shown when the list is empty, e.g. when the search finds nothing; empty means the welcome text
     void setEmptyText(const QString& text)
     {
@@ -162,6 +163,8 @@ class InstanceView : public QAbstractItemView {
     QPersistentModelIndex m_hoveredPlay;
     QPersistentModelIndex m_pressedIcon;
     QPersistentModelIndex m_hoveredIcon;
+    QPersistentModelIndex m_hoveredItem;
+    QPixmap m_vignette;  // darkened edges of the sculk floor, rendered once per size
 
     VisualGroup* category(const QModelIndex& index) const;
     VisualGroup* category(const QString& cat) const;

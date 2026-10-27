@@ -259,12 +259,30 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     // on the textured sculk floor every instance gets its own card, so the name stays readable
     if (instanceCard && SculkTheme::isActive()) {
-        QColor card = opt.palette.color(QPalette::Base);
-        card.setAlphaF(0.82);
+        const auto* view = qobject_cast<const InstanceView*>(opt.widget);
+        const bool hovered = view->hoveredItemIndex() == index;
+        const QRectF cardRect = QRectF(opt.rect).adjusted(2.5, 2.5, -2.5, -3.5);
         painter->setRenderHint(QPainter::Antialiasing, true);
-        painter->setPen(QPen(opt.palette.color(QPalette::Light), 1));
+        // a soft shadow lifts the card off the floor
+        painter->setPen(Qt::NoPen);
+        for (int i = 3; i >= 1; i--) {
+            painter->setBrush(QColor(0, 0, 0, 22));
+            painter->drawRoundedRect(cardRect.translated(0, i), 10, 10);
+        }
+        QColor card = opt.palette.color(QPalette::Base);
+        card.setAlphaF(hovered ? 0.92 : 0.84);
+        const QColor accent = opt.palette.color(QPalette::Highlight);
+        if (hovered) {
+            // a cyan glow around the hovered card
+            QColor glow = accent;
+            glow.setAlphaF(0.30);
+            painter->setPen(QPen(glow, 4));
+            painter->setBrush(Qt::NoBrush);
+            painter->drawRoundedRect(cardRect, 10, 10);
+        }
+        painter->setPen(QPen(hovered ? accent.lighter(130) : opt.palette.color(QPalette::Light), hovered ? 1.5 : 1));
         painter->setBrush(card);
-        painter->drawRoundedRect(QRectF(opt.rect).adjusted(1.5, 1.5, -1.5, -1.5), 8, 8);
+        painter->drawRoundedRect(cardRect, 10, 10);
     }
 
     // draw background

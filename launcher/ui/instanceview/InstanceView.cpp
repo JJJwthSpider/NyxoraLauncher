@@ -46,7 +46,9 @@
 #include <QPainter>
 #include <QPersistentModelIndex>
 #include <QScrollBar>
+#include <QRadialGradient>
 #include <QtMath>
+#include <cmath>
 
 #include "VisualGroup.h"
 #include "ui/themes/CatPainter.h"
@@ -317,6 +319,7 @@ void InstanceView::setHoveredPlay(const QModelIndex& index)
 void InstanceView::leaveEvent(QEvent* event)
 {
     m_hoveredIcon = QModelIndex();
+    m_hoveredItem = QModelIndex();
     setHoveredPlay({});
     QAbstractItemView::leaveEvent(event);
 }
@@ -401,8 +404,10 @@ void InstanceView::mouseMoveEvent(QMouseEvent* event)
 
     if (event->buttons() == Qt::NoButton) {
         const QModelIndex icon = iconIndexAt(visualPos);
-        if (QModelIndex(m_hoveredIcon) != icon) {
+        const QModelIndex item = indexAt(visualPos);
+        if (QModelIndex(m_hoveredIcon) != icon || QModelIndex(m_hoveredItem) != item) {
             m_hoveredIcon = icon;
+            m_hoveredItem = item;
             viewport()->update();
         }
         setHoveredPlay(playIndexAt(visualPos));
@@ -572,10 +577,32 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
     // the instances lie on a sculk floor
     if (SculkTheme::isActive()) {
         const auto& pal = viewport()->palette();
-        const QPoint textureOffset(0, verticalOffset() % 128);
+        const QPoint textureOffset(0, verticalOffset() % 192);
         painter.drawTiledPixmap(viewport()->rect(), SculkTheme::texture(pal.color(QPalette::Base), pal.color(QPalette::Highlight)),
                                 textureOffset);
         m_ambience->paint(&painter, viewport()->rect(), textureOffset, pal.color(QPalette::Highlight));
+
+        // the floor gets darker towards the edges, like a cave lit from the middle
+        const qreal dpr = viewport()->devicePixelRatioF();
+        const QSize size = viewport()->size();
+        if (m_vignette.size() != size * dpr) {
+            m_vignette = QPixmap(size * dpr);
+            m_vignette.setDevicePixelRatio(dpr);
+            m_vignette.fill(Qt::transparent);
+            QPainter vignettePainter(&m_vignette);
+            const QPointF center(size.width() / 2.0, size.height() * 0.42);
+            QRadialGradient gradient(center, std::hypot(size.width(), size.height()) * 0.62);
+            const bool light = pal.color(QPalette::Base).lightnessF() > 0.6;
+            QColor edge = light ? QColor(0, 60, 70) : QColor(0, 0, 0);
+            edge.setAlphaF(light ? 0.10 : 0.45);
+            QColor middle = edge;
+            middle.setAlphaF(0);
+            gradient.setColorAt(0, middle);
+            gradient.setColorAt(0.55, middle);
+            gradient.setColorAt(1, edge);
+            vignettePainter.fillRect(QRect(QPoint(), size), gradient);
+        }
+        painter.drawPixmap(0, 0, m_vignette);
     }
 
     if (m_cat) {
