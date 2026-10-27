@@ -5563,12 +5563,12 @@ Please make sure that the maximum memory value is lower.</source>
     <message>
         <location filename="src/launcher/ui/instanceview/InstanceView.cpp" line="461"/>
         <source>Welcome!</source>
-        <translation>Добро пожаловать!</translation>
+        <translation>Привет!</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/instanceview/InstanceView.cpp" line="461"/>
         <source>Click &quot;Add Instance&quot; to get started.</source>
-        <translation>Для начала нажмите кнопку «Добавить экземпляр».</translation>
+        <translation>Чтобы начать играть, нажми кнопку «Добавить установку».</translation>
     </message>
 </context>
 <context>
@@ -8669,7 +8669,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="287"/>
         <source>Add Instanc&amp;e...</source>
-        <translation>Добавить экзе&amp;мпляр…</translation>
+        <translation>Добавить уст&amp;ановку…</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="182"/>
