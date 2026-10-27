@@ -15,5 +15,13 @@
         <file>agent.svg</file>
         <file>tile-plus.svg</file>
         <file>tile-wrenches.svg</file>
+        <file>dark-arrow-down-disabled.svg</file>
+        <file>dark-arrow-down.svg</file>
+        <file>dark-arrow-left-disabled.svg</file>
+        <file>dark-arrow-left.svg</file>
+        <file>dark-arrow-right-disabled.svg</file>
+        <file>dark-arrow-right.svg</file>
+        <file>dark-arrow-up-disabled.svg</file>
+        <file>dark-arrow-up.svg</file>
     </qresource>
 </RCC>

@@ -132,16 +132,8 @@
         <translation>Хорошо. А про что будет сборка?</translation>
     </message>
     <message>
-        <source>Got it: &lt;b&gt;%1&lt;/b&gt;. Now the loader and the Minecraft version, for example &lt;i&gt;NeoForge 1.21.1&lt;/i&gt;.</source>
-        <translation>Понял: &lt;b&gt;%1&lt;/b&gt;. Теперь загрузчик и версия Minecraft, например &lt;i&gt;NeoForge 1.21.1&lt;/i&gt;.</translation>
-    </message>
-    <message>
         <source>Minecraft %1. Which loader: NeoForge, Fabric, Forge or Quilt?</source>
         <translation>Minecraft %1. Какой загрузчик: NeoForge, Fabric, Forge или Quilt?</translation>
-    </message>
-    <message>
-        <source>%1 it is. Which Minecraft version?</source>
-        <translation>Значит, %1. Какая версия Minecraft?</translation>
     </message>
     <message>
         <source>Understood! Theme: &lt;b&gt;%1&lt;/b&gt;. Minecraft &lt;b&gt;%2&lt;/b&gt; with &lt;b&gt;%3&lt;/b&gt;. I&apos;m looking for mods on %4 and adding optimization and the libraries they need.</source>
@@ -170,6 +162,61 @@
             <numerusform>%n мода</numerusform>
             <numerusform>%n модов</numerusform>
         </translation>
+    </message>
+    <message>
+        <source>Got it: &lt;b&gt;%1&lt;/b&gt;. Now write the loader and the Minecraft version. Any version that has the loader works, for example &lt;i&gt;NeoForge 1.21.1&lt;/i&gt;, &lt;i&gt;Forge 1.12.2&lt;/i&gt; or &lt;i&gt;Fabric 1.20.1&lt;/i&gt;.</source>
+        <translation>Понял: &lt;b&gt;%1&lt;/b&gt;. Теперь напиши загрузчик и версию Minecraft. Подойдёт любая версия, для которой есть этот загрузчик, например &lt;i&gt;NeoForge 1.21.1&lt;/i&gt;, &lt;i&gt;Forge 1.12.2&lt;/i&gt; или &lt;i&gt;Fabric 1.20.1&lt;/i&gt;.</translation>
+    </message>
+    <message>
+        <source>%1 it is. Which Minecraft version? Write any version, for example 1.20.1 or 1.12.2.</source>
+        <translation>Значит, %1. Какая версия Minecraft? Напиши любую, например 1.20.1 или 1.12.2.</translation>
+    </message>
+</context>
+<context>
+    <name>AutoInstallJava</name>
+    <message>
+        <source>The automatic Java mechanism detected a 32-bit installation of Java.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Using Java %1 for this Minecraft version: %2</source>
+        <translation>Для этой версии Minecraft используется Java %1: %2</translation>
+    </message>
+    <message>
+        <source>No compatible Java version was found. Using the default one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your system (%1-%2) is not compatible with automatic Java installation. Using the default Java path.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your meta information is out of date or doesn&apos;t have the information necessary to determine what installation of Java should be used. Using the default Java path.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Compatible Java found at: %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No compatible Java version was found (the binary file does not exist). Using the default one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not determine Java download type!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install Java</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No versions of Java were found for your operating system: %1-%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No compatible version of Java was found. Using the default one.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -601,6 +648,134 @@ Are you sure?</source>
     </message>
 </context>
 <context>
+    <name>ModFolderPage</name>
+    <message>
+        <source>Download Mods</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download mods from online mod platforms</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Try to check or update all selected mods (all mods if none are selected)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Check for Updates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Change a mod&apos;s version.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View the homepages of all selected mods.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Export mod&apos;s metadata to text.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Confirm Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>If you remove mods while the game is running it may crash your game.
+Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Confirm Disable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The mods you are trying to delete are required by %1 mods.
+Do you want to disable them?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Aborted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download stopped by user.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Warnings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mod updates are unavailable when metadata is disabled!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Confirm Update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Updating mods while the game is running may cause mod duplication and game crashes.
+The old files may not be deleted as they are in use.
+Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Download dependencies</source>
+        <translation>Скачивание зависимостей</translation>
+    </message>
+    <message>
+        <source>The mod updater was aborted!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&apos;%1&apos; is up-to-date! :)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All mods are up-to-date! :)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All selected mods are up-to-date! :)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Update checker</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Confirm Removal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You are about to remove the metadata for %1 mods.
+Are you sure?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Missing Mod Loader</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You need to install a compatible mod loader before installing mods. Would you like to do so?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No mod loader was installed. Please try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ModpackAgent</name>
     <message>
         <source>Zombies</source>
@@ -847,6 +1022,18 @@ Are you sure?</source>
         <source>+ %1 (%2)</source>
         <translation>+ %1 (%2)</translation>
     </message>
+    <message>
+        <source>Checking that Minecraft %1 exists...</source>
+        <translation>Проверяю, что Minecraft %1 существует...</translation>
+    </message>
+    <message>
+        <source>Minecraft %1 does not exist. Check the version number.</source>
+        <translation>Minecraft %1 не существует. Проверь номер версии.</translation>
+    </message>
+    <message>
+        <source>Could not load the list of Minecraft versions: %1</source>
+        <translation>Не удалось загрузить список версий Minecraft: %1</translation>
+    </message>
 </context>
 <context>
     <name>NewInstanceDialog</name>
@@ -889,12 +1076,20 @@ Are you sure?</source>
         <translation>Скалк (тёмная)</translation>
     </message>
     <message>
-        <source>Modern dark theme in the colors of Minecraft sculk</source>
-        <translation>Современная тёмная тема в цветах скалка из Minecraft</translation>
-    </message>
-    <message>
         <source>%1 (in use)</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sculk (Light)</source>
+        <translation>Скалк (светлая)</translation>
+    </message>
+    <message>
+        <source>Sculk</source>
+        <translation>Скалк</translation>
+    </message>
+    <message>
+        <source>Modern theme in the colors of Minecraft sculk</source>
+        <translation>Современная тема в цветах скалка из Minecraft</translation>
     </message>
 </context>
 <context>
@@ -1130,6 +1325,130 @@ The author likely blocked third-party launchers.</source>
     </message>
     <message>
         <source>The resource was not found</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ResourceUpdateDialog</name>
+    <message>
+        <source>Confirm resources to update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You&apos;re about to update the following resources:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Only resources with a check will be updated!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mod name: %1&lt;br&gt;File name: %2&lt;br&gt;Reason: %3&lt;br&gt;&lt;br&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Metadata generation failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not generate metadata for the following resources:&lt;br&gt;Do you wish to proceed without those resources?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Checking for updates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Warnings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Checking for updates...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mod name: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reason: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Possible solution: Getting the latest version manually:&lt;br&gt;%1&lt;br&gt;</source>
+        <extracomment>%1 is the link to download it manually</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to check for updates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not check or get the following resources for updates:&lt;br&gt;Do you wish to proceed without those resources?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Checking for dependencies...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not installed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Looking for metadata</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The resource &apos;%1&apos; does not have a metadata yet. We need to generate it in order to track relevant information on how to update this mod. To do this, please select a mod provider which we can use to check for updates for this mod.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Generating metadata...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Couldn&apos;t find a valid version on the selected mod provider(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mod was disabled as it may be already installed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Provider: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Old version: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New version: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New Version Type: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Required by: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Required by:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Changelog of the latest version</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -22,6 +22,10 @@
 /// deep blue-black backgrounds with glowing cyan accents.
 class SculkTheme : public FusionTheme {
    public:
+    /// the same sculk hues at three brightness levels; Default is the lighter, everyday look
+    enum class Variant { Default, Dark, Light };
+
+    explicit SculkTheme(Variant variant = Variant::Default);
     virtual ~SculkTheme() {}
 
     QString id() override;
@@ -33,4 +37,13 @@ class SculkTheme : public FusionTheme {
     double fadeAmount() override;
     QColor fadeColor() override;
     LogColors logColorScheme() override;
+
+   private:
+    struct Colors {
+        QString text, disabled, window, border, surface, bar, hover, glow, accent, onAccent, panel, disabledIcon, deep, base, muted,
+            itemHover, accentHover, chipText;
+    };
+    const Colors& colors() const;
+
+    Variant m_variant;
 };

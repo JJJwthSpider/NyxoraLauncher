@@ -1,0 +1,11 @@
+[Icon Theme]
+Name=Sculk (Light)
+Comment=Teal sculk icons for light themes
+Inherits=multimc
+Directories=scalable
+
+[scalable]
+Size=48
+Type=Scalable
+MinSize=16
+MaxSize=256

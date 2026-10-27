@@ -138,7 +138,9 @@ void ThemeManager::initializeWidgets()
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>(m_defaultStyle, m_defaultPalette, true));
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
-    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SculkTheme>());
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SculkTheme>(SculkTheme::Variant::Default));
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SculkTheme>(SculkTheme::Variant::Light));
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SculkTheme>(SculkTheme::Variant::Dark));
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
 
     themeDebugLog() << "<> Initializing System Widget Themes";
@@ -264,6 +266,14 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
         setTitlebarColorOfAllWindowsOnMac(qApp->palette().window().color());
 
         m_logColors = theme->logColorScheme();
+
+        // SculkShoot Client: the cyan sculk icons are hard to see on the light variant, so the icon set follows the theme
+        const QString icons = QIcon::themeName();
+        const QString pairedIcons = name == "sculk_light" ? "sculk_light" : "sculk";
+        if ((icons == "sculk" || icons == "sculk_light") && icons != pairedIcons && name.startsWith("sculk")) {
+            setIconTheme(pairedIcons);
+            APPLICATION->settings()->set("IconTheme", pairedIcons);
+        }
     } else {
         themeWarningLog() << "Tried to set invalid theme:" << name;
     }

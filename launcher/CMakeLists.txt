@@ -1319,6 +1319,7 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/flat/flat.qrc
     resources/flat_white/flat_white.qrc
     resources/sculk/sculk.qrc
+    resources/sculk_light/sculk_light.qrc
     resources/sculk_theme/sculk_theme.qrc
     resources/translations/translations.qrc
     resources/documents/documents.qrc
