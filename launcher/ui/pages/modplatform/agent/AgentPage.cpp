@@ -95,7 +95,7 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
     // header: the Warden himself, who he is, where he takes mods from
     auto* header = new QHBoxLayout;
     m_warden = new WardenWidget(this);
-    m_warden->setFixedSize(100, 76);
+    m_warden->setFixedSize(100, 70);
     m_warden->setBubbleVisible(true);
     header->addWidget(m_warden);
     auto* titles = new QVBoxLayout;
