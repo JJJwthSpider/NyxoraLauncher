@@ -25,55 +25,85 @@
 
 namespace {
 
-// The same head as the launcher icon (program_info/warden_icon.py).
-// . transparent  K outline  D dark skin  M skin  L light skin  E horn  G horn glow
-// S eye socket   J mouth    T teeth      C glowing sculk spot
+// The detailed head of the AI agent, also drawn by program_info/warden_icon.py (agent.svg).
+// . transparent  K outline      D dark skin   M skin         L light skin  H highlight  N brow shadow
+// S eye socket   X socket rim   J jaw         Q mouth        O soul glow in the throat
+// T tooth        U tooth shade  C soul spot   B bright soul  V sculk vein
+// E horn         F horn rim     G horn glow   W bright horn glow
 const char* s_head[] = {
-    "EE................EE",  //
-    "EGE..............EGE",  //
-    "EGGE............EGGE",  //
-    ".EGGE..........EGGE.",  //
-    "..EGEE........EEGE..",  //
-    "...EEKKKKKKKKKKEE...",  //
-    "...KDDDMMMMMMDDDK...",  //
-    "...KDMMLLLLLLMMDK...",  //
-    "...KDSSSMLLMSSSDK...",  //
-    "...KDSSSMMMMSSSDK...",  //
-    "...KDCMMMMMMMMCDK...",  //
-    "...KDMJJJJJJJJMDK...",  //
-    "...KDJTTJTTJTTJDK...",  //
-    "...KDJJJJJJJJJJDK...",  //
-    "...KDDMMMMMMMMDDK...",  //
-    "....KDDDDDDDDDDK....",  //
-    ".....KKKKKKKKKK.....",  //
+    "..FWF....................FWF..",  //
+    "..FEWEF................FEWEF..",  //
+    "..FEGEF...G........G...FEGEF..",  //
+    "...FEGEF.FE........EF.FEGEF...",  //
+    "..FEEGEEFE.F......F.EFEEGEEF..",  //
+    "...FEEGEEF..........FEEGEEF...",  //
+    "....FEEEEEF........FEEEEEF....",  //
+    ".....FEEEEEKKKKKKKKEEEEEF.....",  //
+    ".....KDDMMMMMMMMMMMMMMDDK.....",  //
+    ".....KDDLHHHHHHHHHHVHLDDK.....",  //
+    ".....KDDLLVLLLLLLLVLLLDDK.....",  //
+    ".....KDDMMMVVMMMMVMMMMDDK.....",  //
+    ".....KDDNNNNNNNNNNNNNNDDK.....",  //
+    ".....KDDMSXXXSLLSXXXSMDDK.....",  //
+    ".....KDDMSSSSSLLSSSSSMDDK.....",  //
+    ".....KDDMSSSSSLLSSSSSMDDK.....",  //
+    ".....KDDMMMMMMLLMMMMMMDDK.....",  //
+    ".....KDDBCMMMMMMMMMMBCDDK.....",  //
+    ".....KDDCCJJJJJJJJJJCCDDK.....",  //
+    ".....KDDMMJTUTUTUTUJMMDDK.....",  //
+    ".....KDDMMJQQQOOQQQJMMDDK.....",  //
+    ".....KDDMMJQQQOOQQQJMMDDK.....",  //
+    ".....KDDMMJUTUTUTUTJMMDDK.....",  //
+    ".....KDDDDJJJJJJJJJJDDDDK.....",  //
+    ".....KKDDDDDDDDDDDDDDDDKK.....",  //
+    "......KKKKKKKKKKKKKKKKKK......",  //
 };
 constexpr double s_pi = 3.14159265358979323846;
-constexpr int s_cols = 20;
-constexpr int s_rows = 17;
-// rows 0..4 (and the horn cells of row 5) belong to the horns, which sway around their base
-constexpr int s_hornRows = 6;
-const QPointF s_leftHornBase(4.5, 5.0);
-const QPointF s_rightHornBase(15.5, 5.0);
+constexpr int s_cols = 30;
+constexpr int s_rows = 26;
+// rows 0..7 hold the horns, which sway around their base
+constexpr int s_hornRows = 8;
+const QPointF s_leftHornBase(8.5, 8.0);
+const QPointF s_rightHornBase(21.5, 8.0);
 
 QColor colorOf(char c)
 {
     switch (c) {
         case 'K':
-            return QColor(0x04, 0x15, 0x1a);
+            return QColor(0x03, 0x12, 0x1a);
         case 'D':
-            return QColor(0x0e, 0x3a, 0x44);
+            return QColor(0x0c, 0x36, 0x40);
         case 'M':
-            return QColor(0x15, 0x54, 0x62);
+            return QColor(0x14, 0x51, 0x60);
         case 'L':
-            return QColor(0x1f, 0x6f, 0x7c);
+            return QColor(0x1d, 0x6a, 0x78);
+        case 'H':
+            return QColor(0x2a, 0x85, 0x93);
+        case 'N':
+            return QColor(0x0a, 0x2d, 0x35);
+        case 'S':
+            return QColor(0x01, 0x08, 0x0a);
+        case 'X':
+            return QColor(0x0f, 0x3f, 0x4a);
+        case 'J':
+            return QColor(0x06, 0x1e, 0x24);
+        case 'Q':
+            return QColor(0x03, 0x14, 0x1a);
+        case 'O':
+            return QColor(0x0f, 0x6f, 0x78);
+        case 'T':
+            return QColor(0xd9, 0xec, 0xe6);
+        case 'U':
+            return QColor(0x9f, 0xb8, 0xb1);
+        case 'V':
+            return QColor(0x1f, 0xb3, 0xbd);
         case 'E':
             return QColor(0x1a, 0x8c, 0x96);
-        case 'S':
-            return QColor(0x02, 0x0a, 0x0c);
-        case 'J':
-            return QColor(0x08, 0x2a, 0x31);
-        case 'T':
-            return QColor(0xcf, 0xe3, 0xdc);
+        case 'F':
+            return QColor(0x0d, 0x55, 0x5c);
+        case 'B':
+        case 'W':
+            return QColor(0xb8, 0xfb, 0xff);
         default:
             return QColor(0x29, 0xdf, 0xeb);
     }
@@ -82,7 +112,7 @@ QColor colorOf(char c)
 bool isHornCell(int x, int y)
 {
     const char c = s_head[y][x];
-    return y < s_hornRows && (c == 'E' || c == 'G');
+    return y < s_hornRows && (c == 'E' || c == 'F' || c == 'G' || c == 'W');
 }
 
 QColor mix(const QColor& a, const QColor& b, double t)
@@ -155,7 +185,7 @@ void WardenWidget::tick()
     }
     const double spawnChance = m_excited ? 0.35 : 0.12;
     if (random->generateDouble() < spawnChance && m_particles.size() < 24) {
-        m_particles << Particle{ QPointF(2.0 + random->generateDouble() * 16.0, s_rows - 1.0 + random->generateDouble()),
+        m_particles << Particle{ QPointF(6.0 + random->generateDouble() * 18.0, s_rows - 1.0 + random->generateDouble()),
                                  1.5 + random->generateDouble() * 2.0, now, 2.5 + random->generateDouble() * 2.0 };
     }
     update();
@@ -166,11 +196,12 @@ void WardenWidget::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
-    // fit the 20x17 head (plus room for the swaying horns and the speech bubble) into the widget
-    const double room = m_bubble ? 0.78 : 1.0;
-    const double cell = std::floor(std::min(width() * room / (s_cols + 2.0), height() * room / (s_rows + 3.0)) * 4.0) / 4.0;
-    const QPointF origin(m_bubble ? cell : (width() - s_cols * cell) / 2.0,
-                         m_bubble ? height() - (s_rows + 1.0) * cell : (height() - s_rows * cell) / 2.0 + cell * 0.5);
+    // fit the 30x26 head (plus room for the swaying horns and the speech bubble) into the widget
+    // with the bubble the head keeps to the left three quarters and sits at the bottom, the bubble takes the top right corner
+    const double headWidth = m_bubble ? width() * 0.74 : width();
+    const double cell = std::floor(std::min(headWidth / (s_cols + 2.0), height() / (s_rows + 2.0)) * 4.0) / 4.0;
+    const QPointF origin((headWidth - s_cols * cell) / 2.0,
+                         m_bubble ? height() - (s_rows + 0.75) * cell : (height() - s_rows * cell) / 2.0 + cell * 0.5);
     const double bob = std::sin(m_time * 1.3) * cell * 0.25;
     painter.translate(origin.x(), origin.y() + bob);
 
@@ -221,8 +252,11 @@ void WardenWidget::paintEvent(QPaintEvent*)
             if (c == '.' || isHornCell(x, y)) {
                 continue;
             }
-            if (c == 'C') {
-                drawCell(x, y, mix(glowDim, glowBright, 0.3 + 0.7 * beat));
+            if (c == 'C' || c == 'O') {
+                // the souls in the cheeks and the throat light up with every heartbeat
+                drawCell(x, y, mix(c == 'O' ? colorOf('O') : glowDim, glowBright, 0.25 + 0.75 * beat));
+            } else if (c == 'V') {
+                drawCell(x, y, mix(colorOf('M'), glowDim, 0.45 + 0.4 * beat));
             } else {
                 drawCell(x, y, colorOf(c));
             }
@@ -244,12 +278,12 @@ void WardenWidget::paintEvent(QPaintEvent*)
                     continue;
                 }
                 const char c = s_head[y][x];
-                drawCell(x, y, c == 'G' ? mix(glowDim, glowBright, glow) : colorOf(c));
+                drawCell(x, y, c == 'G' ? mix(glowDim, glowBright, glow) : c == 'W' ? mix(glowBright, QColor(Qt::white), glow) : colorOf(c));
             }
         }
         for (int y = 0; y < s_hornRows; y++) {
             for (int x = side == 0 ? 0 : s_cols / 2; x < (side == 0 ? s_cols / 2 : s_cols); x++) {
-                if (s_head[y][x] == 'G') {
+                if (s_head[y][x] == 'W') {
                     glowCell(x, y, 0.25 + 0.35 * glow + (m_excited ? 0.2 : 0.0));
                 }
             }
@@ -261,8 +295,8 @@ void WardenWidget::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing, true);
     for (int y = 0; y < s_rows; y++) {
         for (int x = 0; x < s_cols; x++) {
-            if (s_head[y][x] == 'C') {
-                glowCell(x, y, 0.2 + 0.6 * beat);
+            if (s_head[y][x] == 'B' || s_head[y][x] == 'O') {
+                glowCell(x, y, (s_head[y][x] == 'O' ? 0.1 : 0.2) + 0.6 * beat);
             }
         }
     }
@@ -286,7 +320,7 @@ void WardenWidget::paintBubble(QPainter& painter)
 {
     painter.resetTransform();
     painter.setRenderHint(QPainter::Antialiasing, true);
-    const double w = width() * 0.42;
+    const double w = std::min(width() * 0.36, height() * 0.75);
     const double h = w * 0.5;
     const QRectF box(width() - w - 2, 2, w, h);
     QPainterPath path;

@@ -10,41 +10,47 @@ Then run genicons.sh (or the PNG/ICO/ICNS steps in it) to refresh the raster ico
 
 import pathlib
 
-# . transparent   K outline       D dark skin    M skin         L light skin
-# E ear (horn)    G ear glow      S eye socket   J mouth        T teeth
-# C glowing sculk spot on the cheek
+# The detailed 30x26 head of the AI agent (the same grid as launcher/ui/widgets/WardenWidget.cpp)
+# . transparent  K outline      D dark skin   M skin         L light skin  H highlight  N brow shadow
+# S eye socket   X socket rim   J jaw         Q mouth        O soul glow in the throat
+# T tooth        U tooth shade  C soul spot   B bright soul  V sculk vein
+# E horn         F horn rim     G horn glow   W bright horn glow
 WARDEN = [
-    "EE................EE",
-    "EGE..............EGE",
-    "EGGE............EGGE",
-    ".EGGE..........EGGE.",
-    "..EGEE........EEGE..",
-    "...EEKKKKKKKKKKEE...",
-    "...KDDDMMMMMMDDDK...",
-    "...KDMMLLLLLLMMDK...",
-    "...KDSSSMLLMSSSDK...",
-    "...KDSSSMMMMSSSDK...",
-    "...KDCMMMMMMMMCDK...",
-    "...KDMJJJJJJJJMDK...",
-    "...KDJTTJTTJTTJDK...",
-    "...KDJJJJJJJJJJDK...",
-    "...KDDMMMMMMMMDDK...",
-    "....KDDDDDDDDDDK....",
-    ".....KKKKKKKKKK.....",
+    "..FWF....................FWF..",
+    "..FEWEF................FEWEF..",
+    "..FEGEF...G........G...FEGEF..",
+    "...FEGEF.FE........EF.FEGEF...",
+    "..FEEGEEFE.F......F.EFEEGEEF..",
+    "...FEEGEEF..........FEEGEEF...",
+    "....FEEEEEF........FEEEEEF....",
+    ".....FEEEEEKKKKKKKKEEEEEF.....",
+    ".....KDDMMMMMMMMMMMMMMDDK.....",
+    ".....KDDLHHHHHHHHHHVHLDDK.....",
+    ".....KDDLLVLLLLLLLVLLLDDK.....",
+    ".....KDDMMMVVMMMMVMMMMDDK.....",
+    ".....KDDNNNNNNNNNNNNNNDDK.....",
+    ".....KDDMSXXXSLLSXXXSMDDK.....",
+    ".....KDDMSSSSSLLSSSSSMDDK.....",
+    ".....KDDMSSSSSLLSSSSSMDDK.....",
+    ".....KDDMMMMMMLLMMMMMMDDK.....",
+    ".....KDDBCMMMMMMMMMMBCDDK.....",
+    ".....KDDCCJJJJJJJJJJCCDDK.....",
+    ".....KDDMMJTUTUTUTUJMMDDK.....",
+    ".....KDDMMJQQQOOQQQJMMDDK.....",
+    ".....KDDMMJQQQOOQQQJMMDDK.....",
+    ".....KDDMMJUTUTUTUTJMMDDK.....",
+    ".....KDDDDJJJJJJJJJJDDDDK.....",
+    ".....KKDDDDDDDDDDDDDDDDKK.....",
+    "......KKKKKKKKKKKKKKKKKK......",
 ]
 
 COLORS = {
-    "K": "#04151a",
-    "D": "#0e3a44",
-    "M": "#155462",
-    "L": "#1f6f7c",
-    "E": "#1a8c96",
-    "G": "#29dfeb",
-    "S": "#020a0c",
-    "J": "#082a31",
-    "T": "#cfe3dc",
-    "C": "#29dfeb",
+    "K": "#03121a", "D": "#0c3640", "M": "#145160", "L": "#1d6a78", "H": "#2a8593", "N": "#0a2d35",
+    "S": "#01080a", "X": "#0f3f4a", "J": "#061e24", "Q": "#03141a", "O": "#0f6f78", "T": "#d9ece6",
+    "U": "#9fb8b1", "C": "#29dfeb", "B": "#c4fdff", "V": "#1fb3bd", "E": "#1a8c96", "F": "#0d555c",
+    "G": "#29dfeb", "W": "#b0fbff",
 }
+COLS, ROWS = len(WARDEN[0]), len(WARDEN)
 
 HERE = pathlib.Path(__file__).resolve().parent
 
@@ -73,10 +79,12 @@ def glow_spots(x0, y0, size):
     spots = []
     for y, row in enumerate(WARDEN):
         for x, c in enumerate(row):
-            if c == "G":
-                spots.append((x0 + (x + 0.5) * size, y0 + (y + 0.5) * size, size * 2.0, "earGlow"))
-            elif c == "C":
-                spots.append((x0 + (x + 0.5) * size, y0 + (y + 0.5) * size, size * 1.8, "soulGlow"))
+            if c == "W":
+                spots.append((x0 + (x + 0.5) * size, y0 + (y + 0.5) * size, size * 2.4, "earGlow"))
+            elif c == "B":
+                spots.append((x0 + (x + 0.5) * size, y0 + (y + 0.5) * size, size * 2.2, "soulGlow"))
+            elif c == "O":
+                spots.append((x0 + (x + 0.5) * size, y0 + (y + 0.5) * size, size * 1.1, "soulGlow"))  # a faint glow deep in the throat
     return "\n  ".join(f'<circle cx="{cx:g}" cy="{cy:g}" r="{r:g}" fill="url(#{g})"/>' for cx, cy, r, g in spots)
 
 
@@ -105,7 +113,7 @@ DEFS = """<defs>
 
 
 def head(x0, y0, size):
-    return f"""<circle cx="{x0 + 10 * size:g}" cy="{y0 + 9 * size:g}" r="{10 * size:g}" fill="url(#halo)"/>
+    return f"""<circle cx="{x0 + COLS / 2 * size:g}" cy="{y0 + ROWS * 0.55 * size:g}" r="{COLS / 2 * size:g}" fill="url(#halo)"/>
   {pixels(x0, y0, size)}
   {glow_spots(x0, y0, size)}"""
 
@@ -206,7 +214,7 @@ def head_only_svg(size=256):
 <svg width="{size}" height="{size}" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
  {DEFS}
  <g shape-rendering="crispEdges">
-  {head(28, 40, 10)}
+  {head(13, 30, 7.7)}
  </g>
 </svg>
 """
@@ -231,13 +239,13 @@ def agent_svg():
 <svg width="256" height="256" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
  {DEFS}
  <g shape-rendering="crispEdges">
-  {head(8, 60, 10)}
+  {head(2, 74, 6.0)}
  </g>
- <path d="M168 14h70a12 12 0 0 1 12 12v40a12 12 0 0 1-12 12h-44l-22 18 4-18h-8a12 12 0 0 1-12-12v-40a12 12 0 0 1 12-12z"
-       fill="#0b1f25" stroke="#29dfeb" stroke-width="5"/>
- <circle cx="181" cy="46" r="7" fill="#8ff6fb"/>
- <circle cx="203" cy="46" r="7" fill="#29dfeb"/>
- <circle cx="225" cy="46" r="7" fill="#1a8c96"/>
+ <path d="M180 8h62a10 10 0 0 1 10 10v34a10 10 0 0 1-10 10h-36l-18 14 3-14h-11a10 10 0 0 1-10-10v-34a10 10 0 0 1 10-10z"
+       fill="#0b1f25" stroke="#29dfeb" stroke-width="4"/>
+ <circle cx="193" cy="35" r="6" fill="#8ff6fb"/>
+ <circle cx="211" cy="35" r="6" fill="#29dfeb"/>
+ <circle cx="229" cy="35" r="6" fill="#1a8c96"/>
 </svg>
 """
 

@@ -54,6 +54,7 @@ class LaunchTile : public QAbstractButton {
 
    private:
     QRect pictureRect() const;
+    QRect widgetRect() const;
     void animateHover(bool hovered);
 
     QString m_subtitle;

@@ -96,7 +96,7 @@ void LaunchTile::setPictureWidget(QWidget* widget)
 {
     m_pictureWidget = widget;
     widget->setParent(this);
-    widget->setGeometry(pictureRect());
+    widget->setGeometry(widgetRect());
     widget->show();
 }
 
@@ -106,11 +106,18 @@ QRect LaunchTile::pictureRect() const
     return { (width() - side) / 2, 14, side, side };
 }
 
+QRect LaunchTile::widgetRect() const
+{
+    // an animated picture (the Warden with its speech bubble) gets the whole width between the corner brackets
+    const auto picture = pictureRect();
+    return { 16, picture.top(), width() - 32, picture.height() };
+}
+
 void LaunchTile::resizeEvent(QResizeEvent* event)
 {
     QAbstractButton::resizeEvent(event);
     if (m_pictureWidget) {
-        m_pictureWidget->setGeometry(pictureRect());
+        m_pictureWidget->setGeometry(widgetRect());
     }
 }
 
