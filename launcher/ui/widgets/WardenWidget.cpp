@@ -91,13 +91,6 @@ QColor colorOf(char c)
     }
 }
 
-// bioluminescent sculk spots on the skin, like the glowing layer of the Warden in the game
-const QPoint s_glowSpots[] = {
-    { 12, 3 }, { 13, 4 }, { 22, 3 }, { 23, 4 },  // forehead
-    { 17, 5 }, { 18, 5 },                        // between the brows
-    { 11, 11 }, { 11, 12 }, { 24, 11 }, { 24, 12 }, // cheeks
-    { 12, 16 }, { 23, 16 }, { 17, 17 }, { 18, 17 }, // chin
-};
 const QPointF s_mouthCenter(17.5, 11.5);
 
 bool isHornCell(int x, int)
@@ -284,20 +277,6 @@ void WardenWidget::paintEvent(QPaintEvent*)
         painter.setPen(Qt::NoPen);
         painter.setBrush(gradient);
         painter.drawEllipse(center, cell * 4.0, cell * 2.6);
-    }
-
-    // the sculk spots light up in a wave that runs from the mouth outwards, one wave per heartbeat
-    painter.setRenderHint(QPainter::Antialiasing, false);
-    for (const auto& spot : s_glowSpots) {
-        const double distance = std::hypot(spot.x() - s_mouthCenter.x(), spot.y() - s_mouthCenter.y());
-        const double wave = heartbeat(m_beatPhase - distance * 0.025);
-        const double strength = std::clamp(0.35 + 0.65 * wave + (m_excited ? 0.15 : 0.0), 0.0, 1.0);
-        drawCell(spot.x(), spot.y(), mix(QColor(0x0e, 0x6f, 0x78), QColor(0x7f, 0xf6, 0xfb), strength));
-    }
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    for (const auto& spot : s_glowSpots) {
-        const double distance = std::hypot(spot.x() - s_mouthCenter.x(), spot.y() - s_mouthCenter.y());
-        glowCell(spot.x(), spot.y(), 0.12 + 0.45 * heartbeat(m_beatPhase - distance * 0.025));
     }
 
     // the antlers sway around where they grow out of the head, in opposite directions; the light tips shimmer

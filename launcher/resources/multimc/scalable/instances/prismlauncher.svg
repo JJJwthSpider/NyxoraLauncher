@@ -207,7 +207,7 @@
   <rect x="156" y="185" width="7" height="7" fill="#1b1a20"/>
   <rect x="163" y="185" width="14" height="7" fill="#090911"/>
   <rect x="177" y="185" width="7" height="7" fill="#1b1a20"/>
-  <rect x="86" y="87" width="7" height="7" fill="#6ff0f7"/><rect x="93" y="94" width="7" height="7" fill="#6ff0f7"/><rect x="156" y="87" width="7" height="7" fill="#6ff0f7"/><rect x="163" y="94" width="7" height="7" fill="#6ff0f7"/><rect x="121" y="101" width="7" height="7" fill="#6ff0f7"/><rect x="128" y="101" width="7" height="7" fill="#6ff0f7"/><rect x="79" y="143" width="7" height="7" fill="#6ff0f7"/><rect x="79" y="150" width="7" height="7" fill="#6ff0f7"/><rect x="170" y="143" width="7" height="7" fill="#6ff0f7"/><rect x="170" y="150" width="7" height="7" fill="#6ff0f7"/><rect x="86" y="178" width="7" height="7" fill="#6ff0f7"/><rect x="163" y="178" width="7" height="7" fill="#6ff0f7"/><rect x="121" y="185" width="7" height="7" fill="#6ff0f7"/><rect x="128" y="185" width="7" height="7" fill="#6ff0f7"/><rect x="23" y="66" width="7" height="7" fill="#2fb8c2"/><rect x="16" y="73" width="7" height="7" fill="#2fb8c2"/><rect x="226" y="73" width="7" height="7" fill="#2fb8c2"/><rect x="9" y="80" width="7" height="7" fill="#2fb8c2"/><rect x="240" y="80" width="7" height="7" fill="#2fb8c2"/><rect x="2" y="87" width="7" height="7" fill="#2fb8c2"/><rect x="233" y="87" width="7" height="7" fill="#2fb8c2"/><rect x="16" y="94" width="7" height="7" fill="#2fb8c2"/><rect x="247" y="94" width="7" height="7" fill="#2fb8c2"/><rect x="9" y="101" width="7" height="7" fill="#2fb8c2"/><rect x="30" y="101" width="7" height="7" fill="#2fb8c2"/><rect x="219" y="101" width="7" height="7" fill="#2fb8c2"/><rect x="240" y="101" width="7" height="7" fill="#2fb8c2"/><rect x="23" y="108" width="7" height="7" fill="#2fb8c2"/><rect x="233" y="108" width="7" height="7" fill="#2fb8c2"/><ellipse cx="128" cy="150" rx="28" ry="18.2" fill="url(#soulGlow)"/><circle cx="12.5" cy="69.5" r="10.5" fill="url(#earGlow)"/>
+  <rect x="23" y="66" width="7" height="7" fill="#2fb8c2"/><rect x="16" y="73" width="7" height="7" fill="#2fb8c2"/><rect x="226" y="73" width="7" height="7" fill="#2fb8c2"/><rect x="9" y="80" width="7" height="7" fill="#2fb8c2"/><rect x="240" y="80" width="7" height="7" fill="#2fb8c2"/><rect x="2" y="87" width="7" height="7" fill="#2fb8c2"/><rect x="233" y="87" width="7" height="7" fill="#2fb8c2"/><rect x="16" y="94" width="7" height="7" fill="#2fb8c2"/><rect x="247" y="94" width="7" height="7" fill="#2fb8c2"/><rect x="9" y="101" width="7" height="7" fill="#2fb8c2"/><rect x="30" y="101" width="7" height="7" fill="#2fb8c2"/><rect x="219" y="101" width="7" height="7" fill="#2fb8c2"/><rect x="240" y="101" width="7" height="7" fill="#2fb8c2"/><rect x="23" y="108" width="7" height="7" fill="#2fb8c2"/><rect x="233" y="108" width="7" height="7" fill="#2fb8c2"/><ellipse cx="128" cy="150" rx="28" ry="18.2" fill="url(#soulGlow)"/><circle cx="12.5" cy="69.5" r="10.5" fill="url(#earGlow)"/>
   <circle cx="243.5" cy="69.5" r="10.5" fill="url(#earGlow)"/>
   <circle cx="12.5" cy="90.5" r="10.5" fill="url(#earGlow)"/>
   <circle cx="243.5" cy="90.5" r="10.5" fill="url(#earGlow)"/>
@@ -221,19 +221,5 @@
   <circle cx="47.5" cy="125.5" r="10.5" fill="url(#earGlow)"/>
   <circle cx="208.5" cy="125.5" r="10.5" fill="url(#earGlow)"/>
   <circle cx="229.5" cy="125.5" r="10.5" fill="url(#earGlow)"/>
-  <circle cx="89.5" cy="90.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="96.5" cy="97.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="159.5" cy="90.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="166.5" cy="97.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="124.5" cy="104.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="131.5" cy="104.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="82.5" cy="146.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="82.5" cy="153.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="173.5" cy="146.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="173.5" cy="153.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="89.5" cy="181.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="166.5" cy="181.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="124.5" cy="188.5" r="12.6" fill="url(#soulGlow)"/>
-  <circle cx="131.5" cy="188.5" r="12.6" fill="url(#soulGlow)"/>
  </g>
 </svg>

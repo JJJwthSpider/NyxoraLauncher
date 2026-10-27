@@ -37,9 +37,7 @@ WARDEN = [
 
 COLORS = {"A": "#a2b1b8", "B": "#3d5c6a", "C": "#344852", "D": "#263137", "E": "#172123", "F": "#1a2328", "G": "#16151a", "H": "#1b1a20", "I": "#090911", "J": "#0e0d13", "K": "#2e3f46", "L": "#000000", "M": "#06050b"}
 COLS, ROWS = len(WARDEN[0]), len(WARDEN)
-# glowing sculk spots on the skin and the soul in the throat (also in WardenWidget.cpp, animated there)
-GLOW_SPOTS = [(12, 3), (13, 4), (22, 3), (23, 4), (17, 5), (18, 5), (11, 11), (11, 12), (24, 11), (24, 12),
-              (12, 16), (23, 16), (17, 17), (18, 17)]
+# the soul glowing in the throat (also in WardenWidget.cpp, animated there)
 MOUTH_CENTER = (17.5, 11.5)
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -65,16 +63,13 @@ def pixels(x0, y0, size):
 
 
 def glow_spots(x0, y0, size):
-    """The glowing parts of the Warden: sculk spots on the skin, light along the antlers, the soul in the throat."""
+    """The glowing parts of the Warden: light along the antlers, their tips and the soul in the throat."""
     spots = []
     for y, row in enumerate(WARDEN):
         for x, c in enumerate(row):
             if c == "A":
                 spots.append((x0 + (x + 0.5) * size, y0 + (y + 0.5) * size, size * 1.5, "earGlow"))  # the antler tips
-    for x, y in GLOW_SPOTS:
-        spots.append((x0 + (x + 0.5) * size, y0 + (y + 0.5) * size, size * 1.8, "soulGlow"))
-    cells = "".join(f'<rect x="{x0 + x * size:g}" y="{y0 + y * size:g}" width="{size:g}" height="{size:g}" fill="#6ff0f7"/>'
-                    for x, y in GLOW_SPOTS)
+    cells = ""
     # the antlers carry a stripe of light from the head out to the tips
     for y, row in enumerate(WARDEN):
         for x, c in enumerate(row):
