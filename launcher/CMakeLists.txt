@@ -1183,6 +1183,14 @@ SET(LAUNCHER_SOURCES
     ui/widgets/InstanceIconBox.h
     ui/dialogs/LobbyDialog.h
     ui/dialogs/LobbyDialog.cpp
+    ui/dialogs/ServerWindow.h
+    ui/dialogs/ServerWindow.cpp
+    modplatform/server/InviteCode.h
+    modplatform/server/InviteCode.cpp
+    modplatform/server/BoreTunnel.h
+    modplatform/server/BoreTunnel.cpp
+    modplatform/server/ServerManager.h
+    modplatform/server/ServerManager.cpp
     modplatform/lobby/TunnelModInstaller.h
     modplatform/lobby/TunnelModInstaller.cpp
     ui/widgets/InstanceIconBox.cpp

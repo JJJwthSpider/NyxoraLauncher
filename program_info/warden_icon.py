@@ -93,6 +93,10 @@ DEFS = """<defs>
    <stop offset="0" stop-color="#8ff6fb" stop-opacity="0.9"/>
    <stop offset="1" stop-color="#29dfeb" stop-opacity="0"/>
   </radialGradient>
+  <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
+   <stop offset="0" stop-color="#3ff0f8" stop-opacity="0.75"/>
+   <stop offset="1" stop-color="#3ff0f8" stop-opacity="0"/>
+  </linearGradient>
   <radialGradient id="soulGlow" cx="0.5" cy="0.5" r="0.5">
    <stop offset="0" stop-color="#29dfeb" stop-opacity="0.55"/>
    <stop offset="1" stop-color="#29dfeb" stop-opacity="0"/>
@@ -107,7 +111,7 @@ def head(x0, y0, size):
 
 
 def emblem(cx, cy, scale):
-    """The SculkShoot emblem: a sniper reticle made of sculk. Two Warden horns grow out of the ring,
+    """The former emblem (kept for reference): a sniper reticle made of sculk. Two Warden horns grow out of the ring,
     the centre is the glowing soul of a sculk sensor. Drawn for a 256 unit square and scaled."""
     k = scale
     def P(x, y):
@@ -132,6 +136,45 @@ def emblem(cx, cy, scale):
   <path d="M{P(0, -15)} L{P(13, 0)} L{P(0, 15)} L{P(-13, 0)} Z" fill="#b8fbff"/>"""
 
 
+def sonic_boom(cx, cy, scale):
+    """The SculkShoot emblem: a sculk shrieker fires the Warden's sonic boom. Bone jaws frame a glowing soul mouth at
+    the bottom, a beam with widening cyan rings shoots up from it. Drawn for a 256 unit square and scaled."""
+    k = scale
+
+    def P(x, y):
+        return f"{cx + x * k:g} {cy + y * k:g}"
+
+    def ring(y, rx, ry, width, opacity):
+        return (f'<ellipse cx="{cx:g}" cy="{cy + y * k:g}" rx="{rx * k:g}" ry="{ry * k:g}" fill="none" stroke="#3ff0f8" '
+                f'stroke-width="{width * k:g}" stroke-opacity="{opacity}"/>'
+                f'<ellipse cx="{cx:g}" cy="{cy + y * k:g}" rx="{rx * k:g}" ry="{ry * k:g}" fill="none" stroke="#e6feff" '
+                f'stroke-width="{width * 0.35 * k:g}" stroke-opacity="{opacity}"/>')
+
+    jaw = lambda side: (
+        # a bone jaw: a curved horn rising from the base and bending over the mouth
+        f'<path d="M{P(side * 30, 78)} C{P(side * 70, 74)} {P(side * 92, 50)} {P(side * 86, 18)} '
+        f'L{P(side * 70, 30)} C{P(side * 70, 52)} {P(side * 52, 62)} {P(side * 26, 62)} Z" '
+        f'fill="#efe6d2" stroke="#9c8f74" stroke-width="{3 * k:g}" stroke-linejoin="round"/>'
+        f'<path d="M{P(side * 86, 18)} L{P(side * 98, 4)} L{P(side * 76, 22)} Z" fill="#efe6d2" stroke="#9c8f74" stroke-width="{2 * k:g}"/>')
+    particles = "".join(
+        f'<rect x="{cx + x * k:g}" y="{cy + y * k:g}" width="{s * k:g}" height="{s * k:g}" fill="#8ff6fb" fill-opacity="{o}"/>'
+        for x, y, s, o in ((-62, -40, 7, 0.9), (54, -70, 6, 0.8), (-44, -92, 5, 0.6), (70, -12, 5, 0.7), (-80, 6, 4, 0.5), (36, -104, 4, 0.5)))
+    return f"""<circle cx="{cx:g}" cy="{cy + 10 * k:g}" r="{108 * k:g}" fill="url(#halo)"/>
+  <path d="M{P(-22, 52)} L{P(-34, -112)} L{P(34, -112)} L{P(22, 52)} Z" fill="url(#beam)"/>
+  {ring(14, 30, 9, 7, 1)}
+  {ring(-30, 46, 13, 7, 0.9)}
+  {ring(-78, 64, 18, 6, 0.7)}
+  <rect x="{cx - 64 * k:g}" y="{cy + 62 * k:g}" width="{128 * k:g}" height="{40 * k:g}" rx="{6 * k:g}" fill="#0d3b45" stroke="#0e8f99" stroke-width="{3 * k:g}"/>
+  <rect x="{cx - 50 * k:g}" y="{cy + 74 * k:g}" width="{10 * k:g}" height="{10 * k:g}" fill="#29dfeb"/>
+  <rect x="{cx + 34 * k:g}" y="{cy + 84 * k:g}" width="{10 * k:g}" height="{8 * k:g}" fill="#29dfeb" fill-opacity="0.8"/>
+  <rect x="{cx - 8 * k:g}" y="{cy + 88 * k:g}" width="{8 * k:g}" height="{8 * k:g}" fill="#1a8c96"/>
+  <ellipse cx="{cx:g}" cy="{cy + 62 * k:g}" rx="{40 * k:g}" ry="{13 * k:g}" fill="#03161b" stroke="#29dfeb" stroke-width="{3 * k:g}"/>
+  <ellipse cx="{cx:g}" cy="{cy + 62 * k:g}" rx="{26 * k:g}" ry="{7 * k:g}" fill="url(#soulGlow)"/>
+  {jaw(-1)}
+  {jaw(1)}
+  {particles}"""
+
+
 def icon_svg(rounded=True):
     """Square app icon: the head on a dark sculk tile."""
     tile = '<rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)" stroke="#29dfeb" stroke-opacity="0.55" stroke-width="4"/>' if rounded else ""
@@ -140,7 +183,7 @@ def icon_svg(rounded=True):
  <title>SculkShoot Client</title>
  {DEFS}
  {tile}
- {emblem(128, 140, 0.92)}
+ {sonic_boom(128, 122, 0.95)}
 </svg>
 """
 
@@ -152,7 +195,7 @@ def bigsur_svg():
  <title>SculkShoot Client</title>
  {DEFS}
  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)" stroke="#29dfeb" stroke-opacity="0.5" stroke-width="8"/>
- {emblem(512, 552, 2.95)}
+ {sonic_boom(512, 495, 3.05)}
 </svg>
 """
 
@@ -175,7 +218,7 @@ def logo_svg(text_color):
  <title>SculkShoot Client</title>
  {DEFS}
  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)" stroke="#29dfeb" stroke-opacity="0.55" stroke-width="4"/>
- {emblem(128, 140, 0.92)}
+ {sonic_boom(128, 122, 0.95)}
  <text x="290" y="150" font-family="sans-serif" font-size="104" font-weight="bold" fill="{text_color}">SculkShoot</text>
  <text x="294" y="210" font-family="sans-serif" font-size="48" fill="#29dfeb">Client</text>
 </svg>

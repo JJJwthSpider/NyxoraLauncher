@@ -56,6 +56,7 @@ InstanceInfo describe(MinecraftInstance* instance)
         if (!profile->getComponentVersion(l.uid).isEmpty()) {
             info.loader = l.loader;
             info.loaderName = l.name;
+            info.loaderVersion = profile->getComponentVersion(l.uid);
             break;
         }
     }

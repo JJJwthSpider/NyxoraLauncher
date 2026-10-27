@@ -39,6 +39,7 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/launch/MinecraftTarget.h"
 #include "modplatform/lobby/TunnelModInstaller.h"
+#include "modplatform/server/InviteCode.h"
 
 namespace {
 // the address e4mc gives out, e.g. "brave-creeper.eu.e4mc.link"
@@ -176,6 +177,18 @@ QWidget* LobbyDialog::buildHostTab(BaseInstance* preselected)
     exportRow->addWidget(exportHint, 1);
     exportRow->addWidget(exportButton);
     layout->addLayout(exportRow);
+
+    auto* serverRow = new QHBoxLayout;
+    serverRow->addWidget(paragraph(tr("Want a real server with settings like PvP, game mode and a white list, and an invite code for friends?"),
+                                   page),
+                         1);
+    auto* serverButton = new QPushButton(tr("My server..."), page);
+    serverRow->addWidget(serverButton);
+    layout->addLayout(serverRow);
+    connect(serverButton, &QPushButton::clicked, this, [this] {
+        emit serverRequested();
+        close();
+    });
     layout->addStretch(1);
 
     connect(m_hostInstance, &QComboBox::currentIndexChanged, this, &LobbyDialog::updateHostInfo);
@@ -284,6 +297,9 @@ void LobbyDialog::startGame()
     if (!instance->isRunning()) {
         APPLICATION->launch(instance);
     }
+    // the launch can still be cancelled (account, demo question...), so the lobby can always be started again
+    m_createButton->setEnabled(true);
+    m_hostInstance->setEnabled(true);
     attachLog(instance->getLaunchTask());
     setStatus(tr("<b>The game is starting.</b> Then:<ol><li>open your world (or create a new one);</li>"
                  "<li>press <b>Esc</b> and choose <b>Open to LAN</b>;</li><li>press <b>Start LAN World</b>.</li></ol>"
@@ -360,14 +376,21 @@ QWidget* LobbyDialog::buildJoinTab(BaseInstance* preselected)
     layout->setSpacing(10);
 
     layout->addWidget(heading(tr("Join a friend's world"), page));
-    layout->addWidget(paragraph(tr("Paste the address your friend sent you and choose the instance with the same pack. The game starts and "
-                                   "connects right away."),
+    layout->addWidget(paragraph(tr("Enter the invite code or the address your friend sent you and choose the instance with the same pack. "
+                                   "The game starts and connects right away."),
                                 page));
 
     m_joinAddress = new QLineEdit(page);
-    m_joinAddress->setPlaceholderText(tr("For example: brave-creeper.e4mc.link or 192.168.1.5:51234"));
+    m_joinAddress->setPlaceholderText(tr("Invite code like SC-8N4Q-2ZKD-1X, or an address like brave-creeper.e4mc.link"));
     m_joinAddress->setClearButtonEnabled(true);
     layout->addWidget(m_joinAddress);
+    m_joinInfo = paragraph(QString(), page);
+    layout->addWidget(m_joinInfo);
+    connect(m_joinAddress, &QLineEdit::textChanged, this, [this] {
+        QString explanation;
+        targetAddress(&explanation);
+        m_joinInfo->setText(explanation);
+    });
 
     auto* row = new QHBoxLayout;
     m_joinInstance = new QComboBox(page);
@@ -387,7 +410,10 @@ QWidget* LobbyDialog::buildJoinTab(BaseInstance* preselected)
 
     // an address on the clipboard is pasted for the user
     const QString clip = QApplication::clipboard()->text().trimmed();
-    if (s_tunnelAddress.match(clip).hasMatch() || QRegularExpression(R"(^\d{1,3}(\.\d{1,3}){3}:\d{2,5}$)").match(clip).hasMatch()) {
+    QString codeHost;
+    quint16 codePort = 0;
+    if (s_tunnelAddress.match(clip).hasMatch() || QRegularExpression(R"(^\d{1,3}(\.\d{1,3}){3}:\d{2,5}$)").match(clip).hasMatch() ||
+        InviteCode::decode(clip, codeHost, codePort)) {
         m_joinAddress->setText(clip);
     }
 
@@ -398,13 +424,39 @@ QWidget* LobbyDialog::buildJoinTab(BaseInstance* preselected)
     return page;
 }
 
+QString LobbyDialog::targetAddress(QString* explanation) const
+{
+    const QString text = m_joinAddress->text().trimmed();
+    QString host;
+    quint16 port = 0;
+    // an invite code, maybe inside a pasted invitation
+    static const QRegularExpression code(R"(SC-[0-9A-Za-z]{1,4}(?:-[0-9A-Za-z]{1,4})+)", QRegularExpression::CaseInsensitiveOption);
+    const auto codeMatch = code.match(text);
+    if (InviteCode::decode(codeMatch.hasMatch() ? codeMatch.captured(0) : text, host, port)) {
+        if (explanation) {
+            *explanation = tr("Invite code accepted. Server: <b>%1</b>, port: <b>%2</b>").arg(host).arg(port);
+        }
+        return QString("%1:%2").arg(host).arg(port);
+    }
+    if (text.startsWith("SC-", Qt::CaseInsensitive)) {
+        if (explanation) {
+            *explanation = tr("This invite code is not complete or has a typo.");
+        }
+        return {};
+    }
+    // the whole invitation may have been pasted: take the address out of it
+    if (const auto match = s_tunnelAddress.match(text); match.hasMatch()) {
+        return match.captured(1);
+    }
+    if (explanation) {
+        explanation->clear();
+    }
+    return text;
+}
+
 void LobbyDialog::join()
 {
-    QString address = m_joinAddress->text().trimmed();
-    // the whole invitation may have been pasted: take the address out of it
-    if (const auto match = s_tunnelAddress.match(address); match.hasMatch()) {
-        address = match.captured(1);
-    }
+    const QString address = targetAddress();
     auto* instance = instanceOf(m_joinInstance);
     if (address.isEmpty() || !instance) {
         m_joinAddress->setFocus();

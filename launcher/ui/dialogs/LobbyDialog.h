@@ -43,6 +43,8 @@ class LobbyDialog : public QDialog {
     void exportRequested(BaseInstance* instance);
     /// the guest wants to import the pack a friend sent
     void importRequested();
+    /// the host wants a real server with settings
+    void serverRequested();
 
    private:
     QWidget* buildHostTab(BaseInstance* preselected);
@@ -58,6 +60,8 @@ class LobbyDialog : public QDialog {
     void setStatus(const QString& text);
     QString invitation() const;
     void join();
+    /// the address to connect to: an invite code is decoded, an invitation text is reduced to its address
+    QString targetAddress(QString* explanation = nullptr) const;
 
     // host tab
     QComboBox* m_hostInstance = nullptr;
@@ -78,5 +82,6 @@ class LobbyDialog : public QDialog {
 
     // join tab
     QLineEdit* m_joinAddress = nullptr;
+    QLabel* m_joinInfo = nullptr;
     QComboBox* m_joinInstance = nullptr;
 };

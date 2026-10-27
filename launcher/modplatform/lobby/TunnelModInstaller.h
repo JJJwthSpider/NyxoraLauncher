@@ -30,6 +30,7 @@ struct InstanceInfo {
     QString minecraftVersion;
     QString loader;  // "fabric", "quilt", "forge", "neoforge" or empty for vanilla
     QString loaderName;  // "Fabric", ... for the user
+    QString loaderVersion;
 };
 InstanceInfo describe(MinecraftInstance* instance);
 

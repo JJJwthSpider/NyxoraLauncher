@@ -14,21 +14,28 @@
    <stop offset="0" stop-color="#8ff6fb" stop-opacity="0.9"/>
    <stop offset="1" stop-color="#29dfeb" stop-opacity="0"/>
   </radialGradient>
+  <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
+   <stop offset="0" stop-color="#3ff0f8" stop-opacity="0.75"/>
+   <stop offset="1" stop-color="#3ff0f8" stop-opacity="0"/>
+  </linearGradient>
   <radialGradient id="soulGlow" cx="0.5" cy="0.5" r="0.5">
    <stop offset="0" stop-color="#29dfeb" stop-opacity="0.55"/>
    <stop offset="1" stop-color="#29dfeb" stop-opacity="0"/>
   </radialGradient>
  </defs>
  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)" stroke="#29dfeb" stroke-opacity="0.55" stroke-width="4"/>
- <circle cx="128" cy="140" r="92" fill="url(#halo)"/>
-  <path d="M85.68 82.96 C74.64 55.36 48.88 44.32 32.32 31.44 C39.68 53.52 50.72 68.24 63.6 86.64 Z" fill="#1a8c96" stroke="#29dfeb" stroke-width="2.76"/><circle cx="37.84" cy="38.8" r="9.2" fill="url(#earGlow)"/>
-  <path d="M170.32 82.96 C181.36 55.36 207.12 44.32 223.68 31.44 C216.32 53.52 205.28 68.24 192.4 86.64 Z" fill="#1a8c96" stroke="#29dfeb" stroke-width="2.76"/><circle cx="218.16" cy="38.8" r="9.2" fill="url(#earGlow)"/>
-  <circle cx="128" cy="140" r="71.76" fill="#071418" stroke="#0e8f99" stroke-width="3.68"/>
-  <circle cx="128" cy="140" r="71.76" fill="none" stroke="#29dfeb" stroke-width="9.2"
-          stroke-dasharray="75.44 37.26" stroke-dashoffset="-18.4"/>
-  <path d="M128 51.68 L128 79.28" stroke="#29dfeb" stroke-width="10.12" stroke-linecap="round"/><path d="M128 200.72 L128 228.32" stroke="#29dfeb" stroke-width="10.12" stroke-linecap="round"/><path d="M39.68 140 L67.28 140" stroke="#29dfeb" stroke-width="10.12" stroke-linecap="round"/><path d="M188.72 140 L216.32 140" stroke="#29dfeb" stroke-width="10.12" stroke-linecap="round"/>
-  <circle cx="128" cy="140" r="40.48" fill="none" stroke="#0e8f99" stroke-width="2.76" stroke-dasharray="5.52 5.52"/>
-  <circle cx="128" cy="140" r="36.8" fill="url(#soulGlow)"/>
-  <path d="M128 112.4 L151.92 140 L128 167.6 L104.08 140 Z" fill="#0b5560" stroke="#29dfeb" stroke-width="3.68"/>
-  <path d="M128 126.2 L139.96 140 L128 153.8 L116.04 140 Z" fill="#b8fbff"/>
+ <circle cx="128" cy="131.5" r="102.6" fill="url(#halo)"/>
+  <path d="M107.1 171.4 L95.7 15.6 L160.3 15.6 L148.9 171.4 Z" fill="url(#beam)"/>
+  <ellipse cx="128" cy="135.3" rx="28.5" ry="8.55" fill="none" stroke="#3ff0f8" stroke-width="6.65" stroke-opacity="1"/><ellipse cx="128" cy="135.3" rx="28.5" ry="8.55" fill="none" stroke="#e6feff" stroke-width="2.3275" stroke-opacity="1"/>
+  <ellipse cx="128" cy="93.5" rx="43.7" ry="12.35" fill="none" stroke="#3ff0f8" stroke-width="6.65" stroke-opacity="0.9"/><ellipse cx="128" cy="93.5" rx="43.7" ry="12.35" fill="none" stroke="#e6feff" stroke-width="2.3275" stroke-opacity="0.9"/>
+  <ellipse cx="128" cy="47.9" rx="60.8" ry="17.1" fill="none" stroke="#3ff0f8" stroke-width="5.7" stroke-opacity="0.7"/><ellipse cx="128" cy="47.9" rx="60.8" ry="17.1" fill="none" stroke="#e6feff" stroke-width="1.995" stroke-opacity="0.7"/>
+  <rect x="67.2" y="180.9" width="121.6" height="38" rx="5.7" fill="#0d3b45" stroke="#0e8f99" stroke-width="2.85"/>
+  <rect x="80.5" y="192.3" width="9.5" height="9.5" fill="#29dfeb"/>
+  <rect x="160.3" y="201.8" width="9.5" height="7.6" fill="#29dfeb" fill-opacity="0.8"/>
+  <rect x="120.4" y="205.6" width="7.6" height="7.6" fill="#1a8c96"/>
+  <ellipse cx="128" cy="180.9" rx="38" ry="12.35" fill="#03161b" stroke="#29dfeb" stroke-width="2.85"/>
+  <ellipse cx="128" cy="180.9" rx="24.7" ry="6.65" fill="url(#soulGlow)"/>
+  <path d="M99.5 196.1 C61.5 192.3 40.6 169.5 46.3 139.1 L61.5 150.5 C61.5 171.4 78.6 180.9 103.3 180.9 Z" fill="#efe6d2" stroke="#9c8f74" stroke-width="2.85" stroke-linejoin="round"/><path d="M46.3 139.1 L34.9 125.8 L55.8 142.9 Z" fill="#efe6d2" stroke="#9c8f74" stroke-width="1.9"/>
+  <path d="M156.5 196.1 C194.5 192.3 215.4 169.5 209.7 139.1 L194.5 150.5 C194.5 171.4 177.4 180.9 152.7 180.9 Z" fill="#efe6d2" stroke="#9c8f74" stroke-width="2.85" stroke-linejoin="round"/><path d="M209.7 139.1 L221.1 125.8 L200.2 142.9 Z" fill="#efe6d2" stroke="#9c8f74" stroke-width="1.9"/>
+  <rect x="69.1" y="84" width="6.65" height="6.65" fill="#8ff6fb" fill-opacity="0.9"/><rect x="179.3" y="55.5" width="5.7" height="5.7" fill="#8ff6fb" fill-opacity="0.8"/><rect x="86.2" y="34.6" width="4.75" height="4.75" fill="#8ff6fb" fill-opacity="0.6"/><rect x="194.5" y="110.6" width="4.75" height="4.75" fill="#8ff6fb" fill-opacity="0.7"/><rect x="52" y="127.7" width="3.8" height="3.8" fill="#8ff6fb" fill-opacity="0.5"/><rect x="162.2" y="23.2" width="3.8" height="3.8" fill="#8ff6fb" fill-opacity="0.5"/>
 </svg>

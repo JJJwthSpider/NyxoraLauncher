@@ -13,6 +13,10 @@
    <stop offset="0" stop-color="#8ff6fb" stop-opacity="0.9"/>
    <stop offset="1" stop-color="#29dfeb" stop-opacity="0"/>
   </radialGradient>
+  <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
+   <stop offset="0" stop-color="#3ff0f8" stop-opacity="0.75"/>
+   <stop offset="1" stop-color="#3ff0f8" stop-opacity="0"/>
+  </linearGradient>
   <radialGradient id="soulGlow" cx="0.5" cy="0.5" r="0.5">
    <stop offset="0" stop-color="#29dfeb" stop-opacity="0.55"/>
    <stop offset="1" stop-color="#29dfeb" stop-opacity="0"/>

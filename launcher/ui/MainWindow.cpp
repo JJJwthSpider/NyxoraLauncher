@@ -104,6 +104,7 @@
 #include "ui/dialogs/ChangeNameDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/LobbyDialog.h"
+#include "ui/dialogs/ServerWindow.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
@@ -212,6 +213,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         lobbyAction->setToolTip(tr("Play with friends: create a lobby or join one"));
         connect(lobbyAction, &QAction::triggered, this, [this] { openLobby(m_selectedInstance); });
         ui->mainToolBar->insertAction(ui->actionFoldersButton, lobbyAction);
+
+        // a real server with settings and an invite code
+        auto* serverAction = new QAction(QIcon::fromTheme("proxy"), tr("My server"), this);
+        serverAction->setToolTip(tr("Start a server for your friends: PvP, game mode, white list and an invite code"));
+        connect(serverAction, &QAction::triggered, this, [this] { openServer(m_selectedInstance); });
+        ui->mainToolBar->insertAction(ui->actionFoldersButton, serverAction);
+        auto* instanceServerAction = new QAction(QIcon::fromTheme("proxy"), tr("Make a server"), this);
+        instanceServerAction->setToolTip(tr("Start a server for your friends from this instance"));
+        connect(instanceServerAction, &QAction::triggered, this, [this] { openServer(m_selectedInstance); });
+        ui->instanceToolBar->insertActionBefore(ui->actionKillInstance, instanceServerAction);
 
         ui->instanceToolBar->addContextMenuAction(ui->newsToolBar->toggleViewAction());
         ui->instanceToolBar->addContextMenuAction(ui->instanceToolBar->toggleViewAction());
@@ -1057,6 +1068,7 @@ void MainWindow::openLobby(BaseInstance* instance)
             exportDialog.exec();
         }
     });
+    connect(dialog, &LobbyDialog::serverRequested, this, [this, instance] { openServer(instance); });
     connect(dialog, &LobbyDialog::importRequested, this, [this] {
         const auto file = QFileDialog::getOpenFileName(this, tr("The pack from your friend"), QString(), tr("Packs (*.mrpack *.zip)"));
         if (!file.isEmpty()) {
@@ -1064,6 +1076,17 @@ void MainWindow::openLobby(BaseInstance* instance)
         }
     });
     dialog->show();
+}
+
+void MainWindow::openServer(BaseInstance* instance)
+{
+    // one server at a time, so there is only one window for it
+    if (!m_serverWindow) {
+        m_serverWindow = new ServerWindow(instance, this);
+    }
+    m_serverWindow->show();
+    m_serverWindow->raise();
+    m_serverWindow->activateWindow();
 }
 
 void MainWindow::updateInstanceCount()

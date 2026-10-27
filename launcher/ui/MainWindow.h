@@ -43,6 +43,7 @@
 #include <memory>
 
 #include <QMainWindow>
+#include <QPointer>
 #include <QProcess>
 #include <QTimer>
 
@@ -246,6 +247,8 @@ class MainWindow : public QMainWindow {
     QLabel* m_instanceCount = nullptr;
     void updateInstanceCount();
     void openLobby(BaseInstance* instance);
+    void openServer(BaseInstance* instance);
+    QPointer<class ServerWindow> m_serverWindow;
     InstanceProxyModel* proxymodel = nullptr;
     QToolButton* newsLabel = nullptr;
     QLabel* m_statusLeft = nullptr;

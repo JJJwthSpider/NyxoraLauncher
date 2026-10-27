@@ -251,6 +251,21 @@
     </message>
 </context>
 <context>
+    <name>BoreTunnel</name>
+    <message>
+        <source>The tunnel server %1 can&apos;t be reached: %2</source>
+        <translation>Сервер туннеля %1 недоступен: %2</translation>
+    </message>
+    <message>
+        <source>The tunnel was closed by %1.</source>
+        <translation>Туннель закрыт сервером %1.</translation>
+    </message>
+    <message>
+        <source>The tunnel server %1 needs a secret.</source>
+        <translation>Серверу туннеля %1 нужен секретный ключ.</translation>
+    </message>
+</context>
+<context>
     <name>ChangeNameDialog</name>
     <message>
         <source>Change nickname</source>
@@ -627,14 +642,6 @@ In SculkShoot Client: Lobby → Join a friend, paste the address. In Minecraft: 
         <translation>Зайти в мир друга</translation>
     </message>
     <message>
-        <source>Paste the address your friend sent you and choose the instance with the same pack. The game starts and connects right away.</source>
-        <translation>Вставь адрес, который прислал друг, и выбери установку с той же сборкой. Игра запустится и сразу подключится.</translation>
-    </message>
-    <message>
-        <source>For example: brave-creeper.e4mc.link or 192.168.1.5:51234</source>
-        <translation>Например: brave-creeper.e4mc.link или 192.168.1.5:51234</translation>
-    </message>
-    <message>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
@@ -645,6 +652,30 @@ In SculkShoot Client: Lobby → Join a friend, paste the address. In Minecraft: 
     <message>
         <source>Import a pack from a friend...</source>
         <translation>Импортировать сборку от друга...</translation>
+    </message>
+    <message>
+        <source>Want a real server with settings like PvP, game mode and a white list, and an invite code for friends?</source>
+        <translation>Нужен настоящий сервер с настройками (PvP, режим игры, белый список) и кодом приглашения для друзей?</translation>
+    </message>
+    <message>
+        <source>My server...</source>
+        <translation>Мой сервер...</translation>
+    </message>
+    <message>
+        <source>Enter the invite code or the address your friend sent you and choose the instance with the same pack. The game starts and connects right away.</source>
+        <translation>Введи код приглашения или адрес, который прислал друг, и выбери установку с той же сборкой. Игра запустится и сразу подключится.</translation>
+    </message>
+    <message>
+        <source>Invite code like SC-8N4Q-2ZKD-1X, or an address like brave-creeper.e4mc.link</source>
+        <translation>Код приглашения вида SC-8N4Q-2ZKD-1X или адрес вида brave-creeper.e4mc.link</translation>
+    </message>
+    <message>
+        <source>Invite code accepted. Server: &lt;b&gt;%1&lt;/b&gt;, port: &lt;b&gt;%2&lt;/b&gt;</source>
+        <translation>Код приглашения принят. Сервер: &lt;b&gt;%1&lt;/b&gt;, порт: &lt;b&gt;%2&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>This invite code is not complete or has a typo.</source>
+        <translation>Код приглашения неполный или в нём опечатка.</translation>
     </message>
 </context>
 <context>
@@ -957,6 +988,22 @@ Check the spelling or clear the search.</source>
     <message>
         <source>Packs (*.mrpack *.zip)</source>
         <translation>Сборки (*.mrpack *.zip)</translation>
+    </message>
+    <message>
+        <source>My server</source>
+        <translation>Мой сервер</translation>
+    </message>
+    <message>
+        <source>Start a server for your friends: PvP, game mode, white list and an invite code</source>
+        <translation>Запустить сервер для друзей: PvP, режим игры, белый список и код приглашения</translation>
+    </message>
+    <message>
+        <source>Make a server</source>
+        <translation>Сделать сервер</translation>
+    </message>
+    <message>
+        <source>Start a server for your friends from this instance</source>
+        <translation>Запустить сервер для друзей из этой установки</translation>
     </message>
 </context>
 <context>
@@ -1523,7 +1570,7 @@ Are you sure?</source>
     </message>
     <message>
         <source>Adventure</source>
-        <translation>Приключения</translation>
+        <translation>Приключение</translation>
     </message>
     <message>
         <source>Map</source>
@@ -1762,6 +1809,356 @@ The author likely blocked third-party launchers.</source>
     <message>
         <source>Changelog of the latest version</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ServerManager</name>
+    <message>
+        <source>The server is open for your friends over the internet. Send them the invite code.</source>
+        <translation>Сервер открыт для друзей через интернет. Отправь им код приглашения.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;No internet access for the server:&lt;/b&gt; %1&lt;br&gt;Friends in the same network can still join with the code.</source>
+        <translation>&lt;b&gt;Сервер недоступен из интернета:&lt;/b&gt; %1&lt;br&gt;Друзья в той же сети всё равно могут зайти по коду.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;The server could not be started:&lt;/b&gt; %1</source>
+        <translation>&lt;b&gt;Не удалось запустить сервер:&lt;/b&gt; %1</translation>
+    </message>
+    <message>
+        <source>The instance does not exist anymore.</source>
+        <translation>Этой установки больше нет.</translation>
+    </message>
+    <message>
+        <source>The Minecraft version of the instance is unknown. Start the instance once and try again.</source>
+        <translation>Версия Minecraft установки неизвестна. Запусти установку один раз и попробуй снова.</translation>
+    </message>
+    <message>
+        <source>Quilt servers are not supported yet. Make the server from a Fabric, Forge, NeoForge or vanilla instance.</source>
+        <translation>Серверы на Quilt пока не поддерживаются. Сделай сервер из установки на Fabric, Forge, NeoForge или без модов.</translation>
+    </message>
+    <message>
+        <source>Looking for Java %1...</source>
+        <translation>Ищу Java %1...</translation>
+    </message>
+    <message>
+        <source>Java %1 is needed for Minecraft %2. Play the instance once: the launcher downloads the right Java, then start the server again.</source>
+        <translation>Для Minecraft %2 нужна Java %1. Запусти установку один раз — лаунчер скачает нужную Java, — и снова запусти сервер.</translation>
+    </message>
+    <message>
+        <source>Could not download %1: %2</source>
+        <translation>Не удалось скачать %1: %2</translation>
+    </message>
+    <message>
+        <source>Downloading %1...</source>
+        <translation>Скачиваю %1...</translation>
+    </message>
+    <message>
+        <source>%1 is damaged (wrong checksum). Try again.</source>
+        <translation>%1 повреждён (не совпала контрольная сумма). Попробуй ещё раз.</translation>
+    </message>
+    <message>
+        <source>Could not save %1.</source>
+        <translation>Не удалось сохранить %1.</translation>
+    </message>
+    <message>
+        <source>Getting the Minecraft %1 server...</source>
+        <translation>Получаю сервер Minecraft %1...</translation>
+    </message>
+    <message>
+        <source>Mojang has no server for Minecraft %1.</source>
+        <translation>У Mojang нет сервера для Minecraft %1.</translation>
+    </message>
+    <message>
+        <source>Getting the Fabric server for Minecraft %1...</source>
+        <translation>Получаю сервер Fabric для Minecraft %1...</translation>
+    </message>
+    <message>
+        <source>No Fabric installer was found.</source>
+        <translation>Установщик Fabric не найден.</translation>
+    </message>
+    <message>
+        <source>The %1 installer did not finish (code %2). See the console for details.</source>
+        <translation>Установщик %1 не завершился (код %2). Подробности в консоли.</translation>
+    </message>
+    <message>
+        <source>Installing the %1 %2 server, this takes a minute...</source>
+        <translation>Устанавливаю сервер %1 %2, это займёт около минуты...</translation>
+    </message>
+    <message>
+        <source>Copying the mods of the instance...</source>
+        <translation>Копирую моды установки...</translation>
+    </message>
+    <message>
+        <source>[SculkShoot] Mods on the server: %1. Client-only, left out: %2.</source>
+        <translation>[SculkShoot] Моды на сервере: %1. Только для клиента, не перенесены: %2.</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>нет</translation>
+    </message>
+    <message>
+        <source>SculkShoot server</source>
+        <translation>Сервер SculkShoot</translation>
+    </message>
+    <message>
+        <source>The server files are missing.</source>
+        <translation>Не хватает файлов сервера.</translation>
+    </message>
+    <message>
+        <source>Starting the server...</source>
+        <translation>Запускаю сервер...</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;The server stopped&lt;/b&gt; (code %1). The console below shows why.</source>
+        <translation>&lt;b&gt;Сервер остановился&lt;/b&gt; (код %1). Причина — в консоли ниже.</translation>
+    </message>
+    <message>
+        <source>The server is stopped. The world is saved.</source>
+        <translation>Сервер остановлен. Мир сохранён.</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;The port %1 is taken.&lt;/b&gt; Close the other server and try again.</source>
+        <translation>&lt;b&gt;Порт %1 занят.&lt;/b&gt; Закрой другой сервер и попробуй снова.</translation>
+    </message>
+    <message>
+        <source>The server is running. Opening it to the internet...</source>
+        <translation>Сервер запущен. Открываю его для интернета...</translation>
+    </message>
+    <message>
+        <source>The server is running. Friends in the same network join with the invite code.</source>
+        <translation>Сервер запущен. Друзья в той же сети заходят по коду приглашения.</translation>
+    </message>
+    <message>
+        <source>Stopping the server and saving the world...</source>
+        <translation>Останавливаю сервер и сохраняю мир...</translation>
+    </message>
+</context>
+<context>
+    <name>ServerWindow</name>
+    <message>
+        <source>My server</source>
+        <translation>Мой сервер</translation>
+    </message>
+    <message>
+        <source>Nobody yet</source>
+        <translation>Пока никого</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Server settings&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Настройки сервера&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Instance:</source>
+        <translation>Установка:</translation>
+    </message>
+    <message>
+        <source>Survival</source>
+        <translation>Выживание</translation>
+    </message>
+    <message>
+        <source>Creative</source>
+        <translation>Творческий</translation>
+    </message>
+    <message>
+        <source>Adventure</source>
+        <translation>Приключение</translation>
+    </message>
+    <message>
+        <source>Game mode:</source>
+        <translation>Режим игры:</translation>
+    </message>
+    <message>
+        <source>Peaceful</source>
+        <translation>Мирная</translation>
+    </message>
+    <message>
+        <source>Easy</source>
+        <translation>Лёгкая</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Нормальная</translation>
+    </message>
+    <message>
+        <source>Hard</source>
+        <translation>Сложная</translation>
+    </message>
+    <message>
+        <source>Difficulty:</source>
+        <translation>Сложность:</translation>
+    </message>
+    <message>
+        <source>Command blocks</source>
+        <translation>Командные блоки</translation>
+    </message>
+    <message>
+        <source>Max players:</source>
+        <translation>Макс. игроков:</translation>
+    </message>
+    <message>
+        <source> chunks</source>
+        <translation> чанков</translation>
+    </message>
+    <message>
+        <source>View distance:</source>
+        <translation>Дальность прорисовки:</translation>
+    </message>
+    <message>
+        <source> MB</source>
+        <translation> МБ</translation>
+    </message>
+    <message>
+        <source>Server memory:</source>
+        <translation>Память сервера:</translation>
+    </message>
+    <message>
+        <source>SculkShoot server</source>
+        <translation>Сервер SculkShoot</translation>
+    </message>
+    <message>
+        <source>Description:</source>
+        <translation>Описание:</translation>
+    </message>
+    <message>
+        <source>random</source>
+        <translation>случайный</translation>
+    </message>
+    <message>
+        <source>World seed:</source>
+        <translation>Сид мира:</translation>
+    </message>
+    <message>
+        <source>Only my friends (white list)</source>
+        <translation>Только мои друзья (белый список)</translation>
+    </message>
+    <message>
+        <source>Nicknames separated by commas</source>
+        <translation>Ники через запятую</translation>
+    </message>
+    <message>
+        <source>Friends:</source>
+        <translation>Друзья:</translation>
+    </message>
+    <message>
+        <source>I accept the &lt;a href=&quot;https://aka.ms/MinecraftEULA&quot;&gt;Minecraft EULA&lt;/a&gt;</source>
+        <translation>Я принимаю &lt;a href=&quot;https://aka.ms/MinecraftEULA&quot;&gt;EULA Minecraft&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>Changes apply on the next start of the server. Players need a licensed Minecraft, like in the launcher.</source>
+        <translation>Изменения применяются при следующем запуске сервера. Игрокам нужна лицензионная Minecraft, как и в лаунчере.</translation>
+    </message>
+    <message>
+        <source>Server folder</source>
+        <translation>Папка сервера</translation>
+    </message>
+    <message>
+        <source>Invite code for your friends:</source>
+        <translation>Код приглашения для друзей:</translation>
+    </message>
+    <message>
+        <source>Copy code</source>
+        <translation>Копировать код</translation>
+    </message>
+    <message>
+        <source>Copy invitation</source>
+        <translation>Копировать приглашение</translation>
+    </message>
+    <message>
+        <source>Players online:</source>
+        <translation>Игроки онлайн:</translation>
+    </message>
+    <message>
+        <source>Console:</source>
+        <translation>Консоль:</translation>
+    </message>
+    <message>
+        <source>Server command, e.g. op Steve, time set day, gamerule keepInventory true</source>
+        <translation>Команда сервера, например: op Steve, time set day, gamerule keepInventory true</translation>
+    </message>
+    <message>
+        <source>Copied!</source>
+        <translation>Скопировано!</translation>
+    </message>
+    <message>
+        <source>Create an instance first, then come back here.</source>
+        <translation>Сначала создай установку, а потом возвращайся сюда.</translation>
+    </message>
+    <message>
+        <source>Minecraft %1 without mods: the vanilla server.</source>
+        <translation>Minecraft %1 без модов: обычный сервер.</translation>
+    </message>
+    <message>
+        <source>Minecraft %1 with %2 %3: the server gets the same loader and the mods of the instance (client-only mods like Sodium are left out).</source>
+        <translation>Minecraft %1 на %2 %3: на сервер ставится тот же загрузчик и моды установки (моды только для клиента, вроде Sodium, не переносятся).</translation>
+    </message>
+    <message>
+        <source>Minecraft EULA</source>
+        <translation>EULA Minecraft</translation>
+    </message>
+    <message>
+        <source>A Minecraft server can only be started after accepting the Minecraft EULA.</source>
+        <translation>Сервер Minecraft можно запустить только после принятия EULA Minecraft.</translation>
+    </message>
+    <message>
+        <source>Start the server</source>
+        <translation>Запустить сервер</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>Stop the server</source>
+        <translation>Остановить сервер</translation>
+    </message>
+    <message>
+        <source>Stopping...</source>
+        <translation>Останавливаю...</translation>
+    </message>
+    <message>
+        <source>Set up the server on the left and press &lt;b&gt;Start the server&lt;/b&gt;. You get an invite code: send it to your friends, they enter it in &lt;i&gt;Lobby → Join a friend&lt;/i&gt; and connect.</source>
+        <translation>Настрой сервер слева и нажми &lt;b&gt;«Запустить сервер»&lt;/b&gt;. Ты получишь код приглашения: отправь его друзьям, они введут его в &lt;i&gt;Лобби → Присоединиться к другу&lt;/i&gt; и подключатся.</translation>
+    </message>
+    <message>
+        <source>Over the internet: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Через интернет: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>In the same network: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>В той же сети: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Join my Minecraft server!
+Invite code: %1
+In SculkShoot Client: Lobby → Join a friend, enter the code. Or in Minecraft: Multiplayer → Direct Connection → %2</source>
+        <translation>Заходи на мой сервер Minecraft!
+Код приглашения: %1
+В SculkShoot Client: Лобби → Присоединиться к другу, введи код. Или в Minecraft: Сетевая игра → Прямое подключение → %2</translation>
+    </message>
+    <message>
+        <source>PvP between players</source>
+        <translation>PvP между игроками</translation>
+    </message>
+    <message>
+        <source>Hardcore: one life</source>
+        <translation>Хардкор: одна жизнь</translation>
+    </message>
+    <message>
+        <source>Allow flying</source>
+        <translation>Разрешить полёт</translation>
+    </message>
+    <message>
+        <source>Some mods need it, otherwise the server kicks players for flying</source>
+        <translation>Нужно некоторым модам, иначе сервер выкидывает игроков за полёт</translation>
+    </message>
+    <message>
+        <source>Open to the internet</source>
+        <translation>Открыть для интернета</translation>
+    </message>
+    <message>
+        <source>Through the free bore.pub tunnel: no port forwarding and no account needed</source>
+        <translation>Через бесплатный туннель bore.pub: без проброса портов и без регистрации</translation>
     </message>
 </context>
 </TS>

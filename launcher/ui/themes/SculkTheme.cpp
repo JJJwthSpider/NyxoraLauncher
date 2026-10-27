@@ -456,6 +456,10 @@ QToolBar QToolButton {
     padding: 6px 10px;
     margin: 1px;
 }
+/* the main tool bar holds many labelled buttons: tighter, so they fit into smaller windows too */
+QToolBar#mainToolBar QToolButton {
+    padding: 6px 4px;
+}
 QToolBar QToolButton:hover {
     background-color: @hover@;
     border-color: @border@;
