@@ -16,6 +16,8 @@
  */
 #include "SculkTheme.h"
 
+#include <QDir>
+#include <QFileInfo>
 #include <QHash>
 #include <QObject>
 #include <QPainter>
@@ -57,6 +59,32 @@ void SculkTheme::setActive(bool active)
     s_active = active;
 }
 
+namespace {
+constexpr int s_grid = 32;
+
+// veins: short random walks that wrap around the edges of the tile; calls paint(x, y, isSoul) for every pixel
+template <typename Paint>
+void forEachVeinPixel(Paint paint)
+{
+    for (int v = 0; v < 14; v++) {
+        int x = int(cellHash(v, 0, 3) % s_grid);
+        int y = int(cellHash(v, 0, 4) % s_grid);
+        const int length = 4 + int(cellHash(v, 0, 5) % 5);
+        for (int step = 0; step < length; step++) {
+            paint(x, y, step == length - 1);
+            const quint32 dir = cellHash(v, step, 6) % 4;
+            x = (x + (dir == 0 ? 1 : dir == 1 ? s_grid - 1 : 0)) % s_grid;
+            y = (y + (dir == 2 ? 1 : dir == 3 ? s_grid - 1 : 0)) % s_grid;
+        }
+    }
+}
+
+QPixmap enlarge(const QImage& image, int pixelSize)
+{
+    return QPixmap::fromImage(image.scaled(s_grid * pixelSize, s_grid * pixelSize, Qt::IgnoreAspectRatio, Qt::FastTransformation));
+}
+}  // namespace
+
 QPixmap SculkTheme::texture(const QColor& background, const QColor& glow, int pixelSize)
 {
     static QHash<QString, QPixmap> cache;
@@ -66,16 +94,15 @@ QPixmap SculkTheme::texture(const QColor& background, const QColor& glow, int pi
     }
 
     // like the sculk block: blotches of slightly darker and lighter skin, crossed by veins that end in glowing dots
-    constexpr int grid = 32;
     const bool lightBackground = background.lightnessF() > 0.6;
     const QColor shadow = lightBackground ? background.darker(108) : background.darker(118);
     const QColor shine = lightBackground ? background.darker(103) : background.lighter(112);
     const QColor vein = mix(background, glow, lightBackground ? 0.22 : 0.30);
     const QColor soul = mix(background, glow, lightBackground ? 0.45 : 0.62);
 
-    QImage image(grid, grid, QImage::Format_RGB32);
-    for (int y = 0; y < grid; y++) {
-        for (int x = 0; x < grid; x++) {
+    QImage image(s_grid, s_grid, QImage::Format_RGB32);
+    for (int y = 0; y < s_grid; y++) {
+        for (int x = 0; x < s_grid; x++) {
             // blotches: the noise of 2x2 blocks with a bit of per-pixel noise on top, wrapped so the tile is seamless
             const quint32 blotch = cellHash(x / 2, y / 2, 1) % 100;
             const quint32 grain = cellHash(x, y, 2) % 100;
@@ -91,22 +118,37 @@ QPixmap SculkTheme::texture(const QColor& background, const QColor& glow, int pi
             image.setPixel(x, y, c.rgb());
         }
     }
-    // veins: short random walks that wrap around the edges of the tile
-    for (int v = 0; v < 14; v++) {
-        int x = int(cellHash(v, 0, 3) % grid);
-        int y = int(cellHash(v, 0, 4) % grid);
-        const int length = 4 + int(cellHash(v, 0, 5) % 5);
-        for (int step = 0; step < length; step++) {
-            image.setPixel(x, y, (step == length - 1 ? soul : vein).rgb());
-            const quint32 dir = cellHash(v, step, 6) % 4;
-            x = (x + (dir == 0 ? 1 : dir == 1 ? grid - 1 : 0)) % grid;
-            y = (y + (dir == 2 ? 1 : dir == 3 ? grid - 1 : 0)) % grid;
-        }
-    }
+    forEachVeinPixel([&](int x, int y, bool isSoul) { image.setPixel(x, y, (isSoul ? soul : vein).rgb()); });
 
-    const QPixmap pixmap = QPixmap::fromImage(image.scaled(grid * pixelSize, grid * pixelSize, Qt::IgnoreAspectRatio, Qt::FastTransformation));
+    const QPixmap pixmap = enlarge(image, pixelSize);
     cache.insert(key, pixmap);
     return pixmap;
+}
+
+QPixmap SculkTheme::veinTexture(const QColor& glow, int pixelSize)
+{
+    static QHash<QString, QPixmap> cache;
+    const QString key = glow.name() + QString::number(pixelSize);
+    if (auto it = cache.constFind(key); it != cache.constEnd()) {
+        return *it;
+    }
+    QImage image(s_grid, s_grid, QImage::Format_ARGB32);
+    image.fill(Qt::transparent);
+    const QColor soul = glow.lighter(130);
+    forEachVeinPixel([&](int x, int y, bool isSoul) { image.setPixel(x, y, (isSoul ? soul : glow).rgba()); });
+    const QPixmap pixmap = enlarge(image, pixelSize);
+    cache.insert(key, pixmap);
+    return pixmap;
+}
+
+QString SculkTheme::textureFile(const QColor& background, const QColor& glow)
+{
+    // style sheets can only load images from files, so the generated texture is written to the temp folder once
+    const QString path = QDir::temp().filePath(QString("sculkshoot-texture-%1-%2.png").arg(background.name().mid(1), glow.name().mid(1)));
+    if (!QFileInfo::exists(path)) {
+        texture(background, glow).save(path, "PNG");
+    }
+    return QDir::fromNativeSeparators(path);
 }
 
 const SculkTheme::Colors& SculkTheme::colors() const
@@ -242,6 +284,9 @@ QWidget:disabled {
 QMainWindow, QDialog, QWizard {
     background-color: @window@;
 }
+QMainWindow {
+    background-image: url("@windowTexture@");
+}
 QMainWindow::separator {
     background: @border@;
     width: 1px;
@@ -260,6 +305,7 @@ QToolTip {
 /* ---------- menus ---------- */
 QMenuBar {
     background-color: @bar@;
+    background-image: url("@barTexture@");
     border-bottom: 1px solid @border@;
     padding: 2px 4px;
 }
@@ -306,6 +352,7 @@ QMenu::icon {
 /* ---------- tool bars ---------- */
 QToolBar {
     background-color: @bar@;
+    background-image: url("@barTexture@");
     border: none;
     spacing: 4px;
     padding: 4px;
@@ -318,6 +365,7 @@ QToolBar#newsToolBar {
 }
 QToolBar#instanceToolBar {
     background-color: @panel@;
+    background-image: url("@panelTexture@");
     border-left: 1px solid @border@;
     padding: 8px 6px;
 }
@@ -802,6 +850,7 @@ QSlider::handle:vertical {
 /* ---------- misc ---------- */
 QStatusBar {
     background-color: @bar@;
+    background-image: url("@barTexture@");
     border-top: 1px solid @border@;
     color: @muted@;
 }
@@ -849,6 +898,9 @@ QDialogButtonBox QPushButton {
         { "@onAccent@", c.onAccent }, { "@panel@", c.panel },               { "@disabledIcon@", c.disabledIcon },
         { "@deep@", c.deep },         { "@base@", c.base },                 { "@muted@", c.muted },
         { "@itemHover@", c.itemHover }, { "@accentHover@", c.accentHover }, { "@chipText@", c.chipText },
+        { "@windowTexture@", textureFile(QColor(c.window), QColor(c.glow)) },
+        { "@barTexture@", textureFile(QColor(c.bar), QColor(c.glow)) },
+        { "@panelTexture@", textureFile(QColor(c.panel), QColor(c.glow)) },
         { "@arrows@", m_variant == Variant::Light ? QStringLiteral(":/sculk_theme/dark-") : QStringLiteral(":/sculk_theme/") },
     };
     for (const auto& [token, value] : values) {

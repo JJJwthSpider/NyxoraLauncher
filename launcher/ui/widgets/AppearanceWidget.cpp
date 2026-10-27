@@ -38,6 +38,7 @@
 #include "ui_AppearanceWidget.h"
 
 #include <DesktopServices.h>
+#include <QCheckBox>
 #include <QGraphicsOpacityEffect>
 #include "BuildConfig.h"
 #include "ui/themes/ITheme.h"
@@ -52,6 +53,12 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
     m_ui->setupUi(this);
 
     m_ui->catPreview->setGraphicsEffect(new QGraphicsOpacityEffect(this));
+
+    // SculkShoot Client: the living background of the sculk themes can be switched off on weak computers
+    auto* animation = new QCheckBox(tr("Animated sculk background (glowing veins and particles)"), m_ui->themingBox);
+    animation->setChecked(APPLICATION->settings()->get("SculkBackgroundAnimation").toBool());
+    m_ui->verticalLayout_2->addWidget(animation);
+    connect(animation, &QCheckBox::toggled, this, [](bool on) { APPLICATION->settings()->set("SculkBackgroundAnimation", on); });
 
     m_defaultFormat = QTextCharFormat(m_ui->consolePreview->currentCharFormat());
 

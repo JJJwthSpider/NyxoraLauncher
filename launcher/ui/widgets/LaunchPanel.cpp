@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include "WardenWidget.h"
+#include "ui/themes/SculkAmbience.h"
 #include "ui/themes/SculkTheme.h"
 
 namespace {
@@ -50,6 +51,7 @@ QPainterPath framePath(const QRectF& r)
 
 LaunchTile::LaunchTile(QWidget* parent) : QAbstractButton(parent)
 {
+    m_ambience = new SculkAmbience(this, 5);
     setCursor(Qt::PointingHandCursor);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     setAttribute(Qt::WA_Hover);
@@ -130,7 +132,66 @@ void LaunchTile::leaveEvent(QEvent* event)
 
 void LaunchTile::paintEvent(QPaintEvent*)
 {
+    // the frame, the texture, the picture and the caption only change with the hover state, the palette or the size;
+    // they are rendered into two layers once, so the animations (Warden, gem, pulsing veins) only blit pixmaps
+    const auto& pal = palette();
+    const qreal dpr = devicePixelRatioF();
+    const QString key = QString("%1x%2@%3|%4|%5%6%7%8|%9|")
+                            .arg(width())
+                            .arg(height())
+                            .arg(dpr)
+                            .arg(qRound(m_hover * 40))
+                            .arg(isDown())
+                            .arg(hasFocus())
+                            .arg(m_hovered)
+                            .arg(SculkTheme::isActive())
+                            .arg(font().key()) +
+                        pal.color(QPalette::Highlight).name() + pal.color(QPalette::Button).name() + pal.color(QPalette::Base).name() +
+                        pal.color(QPalette::Light).name() + pal.color(QPalette::WindowText).name() + text() + m_subtitle +
+                        QString::number(m_picture.cacheKey());
+    if (key != m_layerKey) {
+        m_layerKey = key;
+        for (int i = 0; i < 2; i++) {
+            QPixmap layer((QSizeF(size()) * dpr).toSize());
+            layer.setDevicePixelRatio(dpr);
+            layer.fill(Qt::transparent);
+            QPainter layerPainter(&layer);
+            paintLayer(layerPainter, i);
+            m_layers[i] = layer;
+        }
+    }
+
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.drawPixmap(0, 0, m_layers[0]);
+
+    const QColor accent = pal.color(QPalette::Highlight).lighter(isDown() ? 100 : 135);
+    const QRectF r = QRectF(rect()).adjusted(3.5, 3.5, -3.5, -3.5);
+    // the veins of the sculk body pulse and particles rise, between the body and the decoration
+    if (SculkTheme::isActive()) {
+        painter.save();
+        painter.setClipRect(r.adjusted(s_chamfer, 2, -s_chamfer, -2));
+        m_ambience->paint(&painter, r.toRect(), QPoint(), pal.color(QPalette::Highlight), 3);
+        painter.restore();
+    }
+    painter.drawPixmap(0, 0, m_layers[1]);
+
+    // the catalyst gem in the middle of the top edge
+    QPolygonF gem;
+    const QPointF top(r.center().x(), r.top());
+    gem << QPointF(top.x(), top.y() - 4) << QPointF(top.x() + 5, top.y()) << QPointF(top.x(), top.y() + 4) << QPointF(top.x() - 5, top.y());
+    QColor gemGlow = accent;
+    gemGlow.setAlphaF(0.25 + 0.25 * std::sin(m_gemPhase));
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(gemGlow);
+    painter.drawEllipse(top, 9, 6);
+    painter.setPen(QPen(pal.color(QPalette::Base), 1));
+    painter.setBrush(accent);
+    painter.drawPolygon(gem);
+}
+
+void LaunchTile::paintLayer(QPainter& painter, int layer)
+{
     painter.setRenderHint(QPainter::Antialiasing, true);
 
     const auto& pal = palette();
@@ -142,33 +203,36 @@ void LaunchTile::paintEvent(QPaintEvent*)
     const QRectF r = QRectF(rect()).adjusted(3.5, 3.5, -3.5, -3.5);
     const auto path = framePath(r);
 
-    // outer glow while hovered, fading in and out
-    if (m_hover > 0.01) {
-        QColor glow = accent;
-        glow.setAlphaF(0.12 * m_hover);
-        painter.setPen(QPen(glow, 10));
-        painter.drawPath(path);
-        glow.setAlphaF(0.25 * m_hover);
-        painter.setPen(QPen(glow, 5));
-        painter.drawPath(path);
-    }
+    if (layer == 0) {
+        // outer glow while hovered, fading in and out
+        if (m_hover > 0.01) {
+            QColor glow = accent;
+            glow.setAlphaF(0.12 * m_hover);
+            painter.setPen(QPen(glow, 10));
+            painter.drawPath(path);
+            glow.setAlphaF(0.25 * m_hover);
+            painter.setPen(QPen(glow, 5));
+            painter.drawPath(path);
+        }
 
-    // body
-    QLinearGradient body(r.topLeft(), r.bottomLeft());
-    body.setColorAt(0, isDown() ? pal.color(QPalette::Highlight).darker(220) : pal.color(QPalette::Button));
-    body.setColorAt(1, pal.color(QPalette::Base));
-    painter.setPen(QPen(border, 1.5));
-    painter.setBrush(body);
-    painter.drawPath(path);
-    // the body is a block of sculk
-    if (SculkTheme::isActive()) {
-        painter.save();
-        painter.setClipPath(path);
-        painter.setOpacity(0.55);
-        painter.drawTiledPixmap(r, SculkTheme::texture(pal.color(QPalette::Button), pal.color(QPalette::Highlight), 3));
-        painter.restore();
-        painter.setBrush(Qt::NoBrush);
+        // body
+        QLinearGradient body(r.topLeft(), r.bottomLeft());
+        body.setColorAt(0, isDown() ? pal.color(QPalette::Highlight).darker(220) : pal.color(QPalette::Button));
+        body.setColorAt(1, pal.color(QPalette::Base));
+        painter.setPen(QPen(border, 1.5));
+        painter.setBrush(body);
         painter.drawPath(path);
+        // the body is a block of sculk
+        if (SculkTheme::isActive()) {
+            painter.save();
+            painter.setClipPath(path);
+            painter.setOpacity(0.55);
+            painter.drawTiledPixmap(r, SculkTheme::texture(pal.color(QPalette::Button), pal.color(QPalette::Highlight), 3));
+            painter.restore();
+            painter.setBrush(Qt::NoBrush);
+            painter.drawPath(path);
+        }
+        return;
     }
 
     // glowing brackets on the four chamfered corners
@@ -202,19 +266,6 @@ void LaunchTile::paintEvent(QPaintEvent*)
     veins(r.topRight() + QPointF(-6, c + 6), -1, 1);
     veins(r.bottomLeft() + QPointF(6, -c - 6), 1, -1);
     veins(r.bottomRight() + QPointF(-6, -c - 6), -1, -1);
-
-    // the catalyst gem in the middle of the top edge
-    QPolygonF gem;
-    const QPointF top(r.center().x(), r.top());
-    gem << QPointF(top.x(), top.y() - 4) << QPointF(top.x() + 5, top.y()) << QPointF(top.x(), top.y() + 4) << QPointF(top.x() - 5, top.y());
-    QColor gemGlow = accent;
-    gemGlow.setAlphaF(0.25 + 0.25 * std::sin(m_gemPhase));
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(gemGlow);
-    painter.drawEllipse(top, 9, 6);
-    painter.setPen(QPen(pal.color(QPalette::Base), 1));
-    painter.setBrush(accent);
-    painter.drawPolygon(gem);
 
     // picture
     if (!m_pictureWidget && !m_picture.isNull()) {

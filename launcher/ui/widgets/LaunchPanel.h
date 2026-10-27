@@ -23,7 +23,9 @@
 #include <QVariantAnimation>
 #include <QWidget>
 
+class QPainter;
 class WardenWidget;
+class SculkAmbience;
 
 /// A big button in the sculk frame that all launch tiles share:
 /// chamfered corners, glowing corner brackets, little sculk veins and a catalyst gem on top.
@@ -62,6 +64,12 @@ class LaunchTile : public QAbstractButton {
     double m_gemPhase = 0;
     QVariantAnimation m_hoverAnimation;
     QTimer m_gemTimer;
+    SculkAmbience* m_ambience = nullptr;
+
+    /// 0: glow, body and texture; 1: brackets, veins, picture and caption
+    void paintLayer(QPainter& painter, int layer);
+    QString m_layerKey;
+    QPixmap m_layers[2];
 };
 
 /// The player's face and nickname at the bottom of the launch panel; opens skins and nickname settings.

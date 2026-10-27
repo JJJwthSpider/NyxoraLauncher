@@ -881,6 +881,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/DarkTheme.cpp
     ui/themes/DarkTheme.h
     ui/themes/SculkTheme.cpp
+    ui/themes/SculkAmbience.h
+    ui/themes/SculkAmbience.cpp
     ui/themes/SculkTheme.h
     ui/themes/ITheme.cpp
     ui/themes/ITheme.h

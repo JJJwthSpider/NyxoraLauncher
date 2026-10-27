@@ -50,6 +50,7 @@
 
 #include "VisualGroup.h"
 #include "ui/themes/CatPainter.h"
+#include "ui/themes/SculkAmbience.h"
 #include "ui/themes/SculkTheme.h"
 #include "ui/themes/ThemeManager.h"
 
@@ -74,6 +75,7 @@ InstanceView::InstanceView(QWidget* parent) : QAbstractItemView(parent)
     setAcceptDrops(true);
     setAutoScroll(true);
     setMouseTracking(true);  // hover effect of the Play buttons
+    m_ambience = new SculkAmbience(viewport(), 40);
     setPaintCat(APPLICATION->settings()->get("TheCat").toBool());
     connect(verticalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
@@ -529,8 +531,10 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
     // the instances lie on a sculk floor
     if (SculkTheme::isActive()) {
         const auto& pal = viewport()->palette();
+        const QPoint textureOffset(0, verticalOffset() % 128);
         painter.drawTiledPixmap(viewport()->rect(), SculkTheme::texture(pal.color(QPalette::Base), pal.color(QPalette::Highlight)),
-                                QPoint(0, verticalOffset() % 128));
+                                textureOffset);
+        m_ambience->paint(&painter, viewport()->rect(), textureOffset, pal.color(QPalette::Highlight));
     }
 
     if (m_cat) {

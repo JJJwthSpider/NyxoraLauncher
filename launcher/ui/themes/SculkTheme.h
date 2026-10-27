@@ -45,6 +45,10 @@ class SculkTheme : public FusionTheme {
     static void setActive(bool active);
     /// a seamless pixel texture of a sculk block in the given colors: a 32x32 grid of patches with glowing veins
     static QPixmap texture(const QColor& background, const QColor& glow, int pixelSize = 4);
+    /// only the veins of the texture, on a transparent background: drawn on top to make them pulse
+    static QPixmap veinTexture(const QColor& glow, int pixelSize = 4);
+    /// the texture saved as a PNG file, for style sheets
+    static QString textureFile(const QColor& background, const QColor& glow);
 
    private:
     struct Colors {

@@ -97,7 +97,7 @@ WardenWidget::WardenWidget(QWidget* parent) : QWidget(parent)
 {
     setAttribute(Qt::WA_TransparentForMouseEvents);
     setMinimumSize(64, 64);
-    m_timer.setInterval(33);  // ~30 frames per second is plenty for a calm animation
+    m_timer.setInterval(40);  // 25 frames per second is plenty for a calm animation
     connect(&m_timer, &QTimer::timeout, this, &WardenWidget::tick);
     m_clock.start();
 }
