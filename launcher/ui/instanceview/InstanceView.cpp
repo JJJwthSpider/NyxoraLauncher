@@ -547,7 +547,7 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
 
     if (model()->rowCount() == 0) {
         painter.save();
-        QString emptyString = tr("Welcome!") + "\n" + tr("Click \"Add Instance\" to get started.");
+        QString emptyString = !m_emptyText.isEmpty() ? m_emptyText : tr("Welcome!") + "\n" + tr("Click \"Add Instance\" to get started.");
 
         // calculate the rect for the overlay
         painter.setRenderHint(QPainter::Antialiasing, true);

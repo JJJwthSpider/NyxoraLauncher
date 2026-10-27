@@ -240,6 +240,11 @@ class MainWindow : public QMainWindow {
     // these are managed by Qt's memory management model!
     InstanceView* view = nullptr;
     LaunchPanel* m_launchPanel = nullptr;
+    // search and sorting above the instance list
+    class QLineEdit* m_instanceSearch = nullptr;
+    class QComboBox* m_instanceSort = nullptr;
+    QLabel* m_instanceCount = nullptr;
+    void updateInstanceCount();
     InstanceProxyModel* proxymodel = nullptr;
     QToolButton* newsLabel = nullptr;
     QLabel* m_statusLeft = nullptr;

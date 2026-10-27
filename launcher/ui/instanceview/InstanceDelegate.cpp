@@ -42,10 +42,18 @@
 #include <QtMath>
 
 #include <QIcon>
+#include <QDateTime>
+#include <QFile>
+#include <QFileInfo>
+#include <QHash>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QTextEdit>
 #include "BaseInstance.h"
 #include "InstanceList.h"
 #include "InstanceView.h"
+#include "FileSystem.h"
 #include "ui/themes/SculkTheme.h"
 
 // Origin: Qt
@@ -175,6 +183,50 @@ static QSize viewItemTextSize(const QStyleOptionViewItem* option)
     viewItemTextLayout(textLayout, bounds.width(), height, widthUsed);
     const QSize size(qCeil(widthUsed), qCeil(height));
     return QSize(size.width() + 2 * textMargin, size.height());
+}
+
+// "1.21.1 · NeoForge" under the name of the instance. Read from mmc-pack.json and cached until the file changes:
+// loading the pack profile from a paint event would start tasks while painting.
+static QString instanceSubtitle(BaseInstance* instance)
+{
+    struct Entry {
+        QDateTime modified;
+        QString subtitle;
+    };
+    static QHash<QString, Entry> cache;
+
+    const QFileInfo file(FS::PathCombine(instance->instanceRoot(), "mmc-pack.json"));
+    const QDateTime modified = file.lastModified();
+    if (auto it = cache.constFind(instance->id()); it != cache.constEnd() && it->modified == modified) {
+        return it->subtitle;
+    }
+
+    QHash<QString, QString> versions;
+    QFile pack(file.filePath());
+    if (pack.open(QIODevice::ReadOnly)) {
+        const auto components = QJsonDocument::fromJson(pack.readAll()).object().value("components").toArray();
+        for (const auto& value : components) {
+            const auto component = value.toObject();
+            const QString version = component.value("version").toString(component.value("cachedVersion").toString());
+            versions.insert(component.value("uid").toString(), version);
+        }
+    }
+
+    QString subtitle = versions.value("net.minecraft");
+    static const std::pair<const char*, const char*> loaders[] = {
+        { "net.neoforged", "NeoForge" },
+        { "net.minecraftforge", "Forge" },
+        { "net.fabricmc.fabric-loader", "Fabric" },
+        { "org.quiltmc.quilt-loader", "Quilt" },
+    };
+    for (const auto& [uid, name] : loaders) {
+        if (!subtitle.isEmpty() && versions.contains(uid)) {
+            subtitle += QString::fromUtf8(" \u00B7 ") + name;
+            break;
+        }
+    }
+    cache.insert(instance->id(), { modified, subtitle });
+    return subtitle;
 }
 
 void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
@@ -320,6 +372,19 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     // FIXME: this really has no business of being here. Make generic.
     auto instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole).value<void*>();
+
+    // the Minecraft version and the loader, in a smaller and dimmer font
+    if (instance) {
+        if (const QString subtitle = instanceSubtitle(instance); !subtitle.isEmpty()) {
+            QFont small = opt.font;
+            small.setPointSizeF(opt.font.pointSizeF() * 0.85);
+            painter->setFont(small);
+            painter->setPen(opt.palette.color(cg, opt.state & QStyle::State_Selected ? QPalette::HighlightedText : QPalette::PlaceholderText));
+            const QRect subtitleRect(textRect.left(), int(position.y() + height) + 1, textRect.width(), QFontMetrics(small).height());
+            painter->drawText(subtitleRect, Qt::AlignHCenter | Qt::AlignTop,
+                              QFontMetrics(small).elidedText(subtitle, Qt::ElideRight, subtitleRect.width()));
+        }
+    }
     if (instance) {
         drawBadges(painter, opt, instance, mode, state);
     }
@@ -366,11 +431,11 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QMode
 
     QStyle* style = opt.widget ? opt.widget->style() : QApplication::style();
     const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, &option, opt.widget) + 1;
-    int height = 48 + textMargin * 2 + 5 + 30;  // TODO: turn constants into variables; 30 is the Play button
+    int height = 48 + textMargin * 2 + 5 + 30 + 16;  // TODO: turn constants into variables; 30 Play button, 16 version line
     QSize szz = viewItemTextSize(&opt);
     height += szz.height();
     // FIXME: maybe the icon items could scale and keep proportions?
-    QSize sz(100, height);
+    QSize sz(136, height);  // wide enough for "1.21.1 · NeoForge"
     return sz;
 }
 

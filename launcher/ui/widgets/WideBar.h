@@ -19,6 +19,8 @@ class WideBar : public QToolBar {
     ~WideBar() override = default;
 
     void addAction(QAction* action);
+    /// the button that shows the action, e.g. to give it an object name for the style sheet
+    QWidget* buttonForAction(QAction* action);
     void addSeparator();
 
     void insertSpacer(QAction* action);

@@ -369,6 +369,43 @@ QToolBar#instanceToolBar {
     border-left: 1px solid @border@;
     padding: 8px 6px;
 }
+/* the main action of the instance panel stands out, deleting warns in red */
+QToolBar#instanceToolBar QToolButton#primaryAction {
+    background-color: @accent@;
+    color: @onAccent@;
+    font-weight: bold;
+    border: 1px solid @glow@;
+    border-radius: 8px;
+    padding: 9px 8px;
+    margin: 2px 0 6px 0;
+}
+QToolBar#instanceToolBar QToolButton#primaryAction:hover {
+    background-color: @accentHover@;
+}
+QToolBar#instanceToolBar QToolButton#primaryAction:disabled {
+    background-color: @surface@;
+    color: @disabled@;
+    border-color: @border@;
+}
+QToolBar#instanceToolBar QToolButton#dangerAction:hover {
+    background-color: #b3261e;
+    border-color: #e5534b;
+    color: #ffffff;
+}
+/* search and sorting above the instance list */
+QWidget#instanceSearchBar {
+    background-color: @bar@;
+    background-image: url("@barTexture@");
+    border-bottom: 1px solid @border@;
+}
+QLineEdit#instanceSearch {
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+QLabel#instanceCount {
+    color: @muted@;
+    padding: 0 4px;
+}
 QToolBar::separator {
     background: @border@;
     width: 1px;

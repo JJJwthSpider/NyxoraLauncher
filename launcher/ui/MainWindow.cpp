@@ -56,12 +56,14 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
+#include <QComboBox>
 #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QInputDialog>
 #include <QKeyEvent>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMainWindow>
 #include <QMenu>
 #include <QMenuBar>
@@ -71,6 +73,7 @@
 #include <QStatusBar>
 #include <QToolBar>
 #include <QToolButton>
+#include <QVBoxLayout>
 #include <QWidget>
 #include <QWidgetAction>
 #include <memory>
@@ -189,6 +192,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         instanceToolbarSetting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
         ui->instanceToolBar->setVisibilityState(QByteArray::fromBase64(instanceToolbarSetting->get().toString().toUtf8()));
+
+        if (auto* launchButton = ui->instanceToolBar->buttonForAction(ui->actionLaunchInstance)) {
+            launchButton->setObjectName("primaryAction");
+        }
+        if (auto* deleteButton = ui->instanceToolBar->buttonForAction(ui->actionDeleteInstance)) {
+            deleteButton->setObjectName("dangerAction");
+        }
+        ui->newsToolBar->hide();
 
         ui->instanceToolBar->addContextMenuAction(ui->newsToolBar->toggleViewAction());
         ui->instanceToolBar->addContextMenuAction(ui->instanceToolBar->toggleViewAction());
@@ -349,7 +360,69 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         view->setSourceOfGroupCollapseStatus(
             [](const QString& groupName) -> bool { return APPLICATION->instances()->isGroupCollapsed(groupName); });
         connect(view, &InstanceView::groupStateChanged, APPLICATION->instances(), &InstanceList::on_GroupStateChanged);
-        ui->horizontalLayout->addWidget(view);
+
+        // SculkShoot Client: search and sorting right above the list, so a pack is found in a second
+        auto* listArea = new QWidget(ui->centralWidget);
+        auto* listLayout = new QVBoxLayout(listArea);
+        listLayout->setContentsMargins(0, 0, 0, 0);
+        listLayout->setSpacing(0);
+        auto* searchBar = new QWidget(listArea);
+        searchBar->setObjectName("instanceSearchBar");
+        auto* barLayout = new QHBoxLayout(searchBar);
+        barLayout->setContentsMargins(10, 8, 10, 8);
+        barLayout->setSpacing(8);
+
+        m_instanceSearch = new QLineEdit(searchBar);
+        m_instanceSearch->setObjectName("instanceSearch");
+        m_instanceSearch->setPlaceholderText(tr("Find an instance...  (Ctrl+F)"));
+        m_instanceSearch->setClearButtonEnabled(true);
+        barLayout->addWidget(m_instanceSearch, 1);
+
+        m_instanceSort = new QComboBox(searchBar);
+        m_instanceSort->addItem(tr("By name"), "Name");
+        m_instanceSort->addItem(tr("Recently played first"), "LastLaunch");
+        m_instanceSort->setToolTip(tr("Order of the instances"));
+        m_instanceSort->setCurrentIndex(APPLICATION->settings()->get("InstSortMode").toString() == "LastLaunch" ? 1 : 0);
+        barLayout->addWidget(m_instanceSort);
+
+        m_instanceCount = new QLabel(searchBar);
+        m_instanceCount->setObjectName("instanceCount");
+        barLayout->addWidget(m_instanceCount);
+
+        listLayout->addWidget(searchBar);
+        listLayout->addWidget(view, 1);
+        ui->horizontalLayout->addWidget(listArea, 1);
+
+        proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        connect(m_instanceSearch, &QLineEdit::textChanged, this, [this](const QString& text) {
+            proxymodel->setFilterFixedString(text.trimmed());
+            view->setEmptyText(text.trimmed().isEmpty() ? QString()
+                                                        : tr("Nothing found for \"%1\".\nCheck the spelling or clear the search.").arg(text.trimmed()));
+            updateInstanceCount();
+        });
+        // Enter in the search selects the first match, so Enter once more launches it
+        connect(m_instanceSearch, &QLineEdit::returnPressed, this, [this] {
+            if (proxymodel->rowCount() > 0) {
+                view->setFocus();
+                view->setCurrentIndex(proxymodel->index(0, 0));
+            }
+        });
+        auto* clearSearch = new QShortcut(QKeySequence(Qt::Key_Escape), m_instanceSearch, nullptr, nullptr, Qt::WidgetShortcut);
+        connect(clearSearch, &QShortcut::activated, m_instanceSearch, &QLineEdit::clear);
+        auto* findShortcut = new QShortcut(QKeySequence::Find, this);
+        connect(findShortcut, &QShortcut::activated, this, [this] {
+            m_instanceSearch->setFocus();
+            m_instanceSearch->selectAll();
+        });
+        connect(m_instanceSort, &QComboBox::currentIndexChanged, this, [this] {
+            APPLICATION->settings()->set("InstSortMode", m_instanceSort->currentData().toString());
+            proxymodel->invalidate();
+        });
+        connect(proxymodel, &QAbstractItemModel::rowsInserted, this, &MainWindow::updateInstanceCount);
+        connect(proxymodel, &QAbstractItemModel::rowsRemoved, this, &MainWindow::updateInstanceCount);
+        connect(proxymodel, &QAbstractItemModel::modelReset, this, &MainWindow::updateInstanceCount);
+        connect(proxymodel, &QAbstractItemModel::layoutChanged, this, &MainWindow::updateInstanceCount);
+        updateInstanceCount();
     }
     // The cat background
     {
@@ -959,6 +1032,16 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
             openModBrowser(createdId);
         }
     }
+}
+
+void MainWindow::updateInstanceCount()
+{
+    if (!m_instanceCount) {
+        return;
+    }
+    const int shown = proxymodel->rowCount();
+    const int total = APPLICATION->instances()->count();
+    m_instanceCount->setText(shown == total ? tr("%n instance(s)", "", total) : tr("%1 of %2").arg(shown).arg(total));
 }
 
 void MainWindow::updateLaunchPanelProfile()

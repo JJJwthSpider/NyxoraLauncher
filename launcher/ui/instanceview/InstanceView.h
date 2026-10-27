@@ -85,6 +85,12 @@ class InstanceView : public QAbstractItemView {
     /// the "Play" button drawn at the bottom of every instance card
     static QRect playButtonRect(const QRect& itemRect);
     QModelIndex hoveredPlayIndex() const { return m_hoveredPlay; }
+    /// text shown when the list is empty, e.g. when the search finds nothing; empty means the welcome text
+    void setEmptyText(const QString& text)
+    {
+        m_emptyText = text;
+        viewport()->update();
+    }
 
    public slots:
     virtual void updateGeometries() override;
@@ -133,12 +139,13 @@ class InstanceView : public QAbstractItemView {
     int m_bottomMargin = 5;
     int m_categoryMargin = 5;
     int m_spacing = 5;
-    int m_itemWidth = 100;
+    int m_itemWidth = 144;
     int m_currentItemsPerRow = -1;
     int m_currentCursorColumn = -1;
     mutable QCache<int, QRect> m_geometryCache;
     CatPainter* m_cat = nullptr;
     SculkAmbience* m_ambience = nullptr;
+    QString m_emptyText;
 
     // point where the currently active mouse action started in geometry coordinates
     QPoint m_pressedPosition;

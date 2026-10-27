@@ -341,7 +341,7 @@
     <message>
         <location filename="src/launcher/ui/dialogs/AboutDialog.ui" line="116"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A custom launcher that makes managing Minecraft easier by allowing you to have multiple instances of Minecraft at once.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Пользовательский лаунчер, который облегчает работу с Minecraft, позволяя оперировать несколькими экземплярами игры одновременно.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Пользовательский лаунчер, который облегчает работу с Minecraft, позволяя оперировать несколькими установками игры одновременно.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/AboutDialog.ui" line="173"/>
@@ -1528,7 +1528,7 @@ Some versions of Minecraft may not launch.
     <message>
         <location filename="src/launcher/ui/dialogs/BlockedModsDialog.ui" line="45"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Your configured global mods folder and default downloads folder are automatically checked for the downloaded mods and they will be copied to the instance if found.&lt;/p&gt;&lt;p&gt;Optionally, you may drag and drop the downloaded mods onto this dialog or add a folder to watch if you did not download the mods to a default location.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Click &apos;Open Missing&apos; to open all the download links in the browser. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выполняется автоматическая проверка настроенной глобальной папки с модами и папки с загрузками на наличие скачанных модов и в случае обнаружения эти моды копируются в экземпляр.&lt;/p&gt;&lt;p&gt;Также можно перетащить скачанные моды в это диалоговое окно или добавить папку, чтобы проследить, что моды не были скачаны в папку по умолчанию.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Нажмите кнопку «Открыть отсутствующие», чтобы открыть все ссылки для скачивания в браузере. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Выполняется автоматическая проверка настроенной глобальной папки с модами и папки с загрузками на наличие скачанных модов и в случае обнаружения эти моды копируются в установку.&lt;/p&gt;&lt;p&gt;Также можно перетащить скачанные моды в это диалоговое окно или добавить папку, чтобы проследить, что моды не были скачаны в папку по умолчанию.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Нажмите кнопку «Открыть отсутствующие», чтобы открыть все ссылки для скачивания в браузере. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/BlockedModsDialog.ui" line="59"/>
@@ -1702,12 +1702,12 @@ Some versions of Minecraft may not launch.
     <message>
         <location filename="src/launcher/minecraft/ComponentUpdateTask.cpp" line="504"/>
         <source>Instance has conflicting dependencies.</source>
-        <translation>Экземпляр имеет конфликтующие зависимости.</translation>
+        <translation>Установка имеет конфликтующие зависимости.</translation>
     </message>
     <message>
         <location filename="src/launcher/minecraft/ComponentUpdateTask.cpp" line="510"/>
         <source>Instance has unresolved dependencies while loading/checking for launch.</source>
-        <translation>Экземпляр имеет неразрешённые зависимости при загрузке/проверке запуска.</translation>
+        <translation>Установка имеет неразрешённые зависимости при загрузке/проверке запуска.</translation>
     </message>
     <message>
         <location filename="src/launcher/minecraft/ComponentUpdateTask.cpp" line="810"/>
@@ -1781,7 +1781,7 @@ Some versions of Minecraft may not launch.
     <message>
         <location filename="src/launcher/ui/dialogs/CopyInstanceDialog.ui" line="17"/>
         <source>Copy Instance</source>
-        <translation>Копирование экземпляра игры</translation>
+        <translation>Копирование установки игры</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/CopyInstanceDialog.ui" line="74"/>
@@ -1806,7 +1806,7 @@ Some versions of Minecraft may not launch.
     <message>
         <location filename="src/launcher/ui/dialogs/CopyInstanceDialog.ui" line="118"/>
         <source>Instance Copy Options</source>
-        <translation>Параметры копирования экземпляра</translation>
+        <translation>Параметры копирования установки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/CopyInstanceDialog.ui" line="134"/>
@@ -1861,7 +1861,7 @@ Some versions of Minecraft may not launch.
     <message>
         <location filename="src/launcher/ui/dialogs/CopyInstanceDialog.ui" line="288"/>
         <source>If &quot;copy saves&quot; is selected world save data will be copied instead of linked and thus not shared between instances.</source>
-        <translation>Если выбрано «копировать сохранения», данные сохранения мира будут скопированы, а не связаны, и, следовательно, не будут совместно использоваться экземплярами.</translation>
+        <translation>Если выбрано «копировать сохранения», данные сохранения мира будут скопированы, а не связаны, и, следовательно, не будут совместно использоваться установками.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/CopyInstanceDialog.ui" line="291"/>
@@ -2008,7 +2008,7 @@ Some versions of Minecraft may not launch.
     <message>
         <location filename="src/launcher/ui/dialogs/CreateShortcutDialog.ui" line="17"/>
         <source>Create Instance Shortcut</source>
-        <translation>Создать ярлык экземпляра</translation>
+        <translation>Создать ярлык установки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/CreateShortcutDialog.ui" line="44"/>
@@ -2064,7 +2064,7 @@ Some versions of Minecraft may not launch.
     <message>
         <location filename="src/launcher/ui/dialogs/CreateShortcutDialog.ui" line="200"/>
         <source>Note: If a shortcut is moved after creation, it won&apos;t be deleted when deleting the instance.</source>
-        <translation>Примечание: Если ярлык перемещён после создания, он не будет удалён при удалении экземпляра.</translation>
+        <translation>Примечание: Если ярлык перемещён после создания, он не будет удалён при удалении установки.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/CreateShortcutDialog.ui" line="207"/>
@@ -2109,7 +2109,7 @@ Some versions of Minecraft may not launch.
     <message>
         <location filename="src/launcher/ui/dialogs/CreateShortcutDialog.cpp" line="195"/>
         <source>instance</source>
-        <translation>экземпляра</translation>
+        <translation>установки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/CreateShortcutDialog.cpp" line="199"/>
@@ -2167,7 +2167,7 @@ Some versions of Minecraft may not launch.
     <message>
         <location filename="src/launcher/ui/widgets/CustomCommands.ui" line="157"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pre-load command runs before the instance&apos;s metadata is loaded, pre-launch command runs before the instance launches and post-exit command runs after it exits.&lt;/p&gt;&lt;p&gt;All will be run in the launcher&apos;s working folder with extra environment variables:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;$INST_NAME - Name of the instance&lt;/li&gt;&lt;li&gt;$INST_ID - ID of the instance (its folder name)&lt;/li&gt;&lt;li&gt;$INST_DIR - absolute path of the instance&lt;/li&gt;&lt;li&gt;$INST_MC_DIR - absolute path of Minecraft&lt;/li&gt;&lt;li&gt;$INST_JAVA - Java binary used for launch&lt;/li&gt;&lt;li&gt;$INST_JAVA_ARGS - command-line parameters used for launch (warning: will not work correctly if arguments contain spaces)&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Wrapper command allows launching using an extra wrapper program (like &apos;optirun&apos; on Linux)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Предзагрузочная команда выполняется до загрузки метаданных экземпляра, предстартовая — перед запуском экземпляра, а завершающая команда — после закрытия.&lt;/p&gt;&lt;p&gt;Они будут выполняться в папке лаунчера с дополнительными переменными среды:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;$INST_NAME - имя экземпляра&lt;/li&gt;&lt;li&gt;$INST_ID - ID экземпляра (имя его папки)&lt;/li&gt;&lt;li&gt;$INST_DIR - полный путь до экземпляра&lt;/li&gt;&lt;li&gt;$INST_MC_DIR - полный путь до Minecraft&lt;/li&gt;&lt;li&gt;$INST_JAVA - Java файл, используемый при запуске&lt;/li&gt;&lt;li&gt;$INST_JAVA_ARGS - аргументы командной строки, используемые при запуске (внимание: они не будут работать при наличии пробелов у аргументов)&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Команда обёртки позволяет запускать Java, используя дополнительную программу-обёртку (например, «optirun» на Linux)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Предзагрузочная команда выполняется до загрузки метаданных установки, предстартовая — перед запуском установки, а завершающая команда — после закрытия.&lt;/p&gt;&lt;p&gt;Они будут выполняться в папке лаунчера с дополнительными переменными среды:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;$INST_NAME - имя установки&lt;/li&gt;&lt;li&gt;$INST_ID - ID установки (имя его папки)&lt;/li&gt;&lt;li&gt;$INST_DIR - полный путь до установки&lt;/li&gt;&lt;li&gt;$INST_MC_DIR - полный путь до Minecraft&lt;/li&gt;&lt;li&gt;$INST_JAVA - Java файл, используемый при запуске&lt;/li&gt;&lt;li&gt;$INST_JAVA_ARGS - аргументы командной строки, используемые при запуске (внимание: они не будут работать при наличии пробелов у аргументов)&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Команда обёртки позволяет запускать Java, используя дополнительную программу-обёртку (например, «optirun» на Linux)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/widgets/CustomCommands.ui" line="54"/>
@@ -2177,7 +2177,7 @@ Some versions of Minecraft may not launch.
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pre-launch command runs before the instance launches and post-exit command runs after it exits.&lt;/p&gt;&lt;p&gt;Both will be run in the launcher&apos;s working folder with extra environment variables:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;$INST_NAME - Name of the instance&lt;/li&gt;&lt;li&gt;$INST_ID - ID of the instance (its folder name)&lt;/li&gt;&lt;li&gt;$INST_DIR - absolute path of the instance&lt;/li&gt;&lt;li&gt;$INST_MC_DIR - absolute path of Minecraft&lt;/li&gt;&lt;li&gt;$INST_JAVA - Java binary used for launch&lt;/li&gt;&lt;li&gt;$INST_JAVA_ARGS - command-line parameters used for launch (warning: will not work correctly if arguments contain spaces)&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Wrapper command allows launching using an extra wrapper program (like &apos;optirun&apos; on Linux)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <oldsource>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pre-launch command runs before the instance launches and post-exit command runs after it exits.&lt;/p&gt;&lt;p&gt;Both will be run in the launcher&apos;s working folder with extra environment variables:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;$INST_NAME - Name of the instance&lt;/li&gt;&lt;li&gt;$INST_ID - ID of the instance (its folder name)&lt;/li&gt;&lt;li&gt;$INST_DIR - absolute path of the instance&lt;/li&gt;&lt;li&gt;$INST_MC_DIR - absolute path of Minecraft&lt;/li&gt;&lt;li&gt;$INST_JAVA - Java binary used for launch&lt;/li&gt;&lt;li&gt;$INST_JAVA_ARGS - command-line parameters used for launch&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Wrapper command allows launching using an extra wrapper program (like &apos;optirun&apos; on Linux)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</oldsource>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Предстартовая команда выполняется перед запуском экземпляра, а завершающая команда — после закрытия.&lt;/p&gt;&lt;p&gt;Они будут выполняться в папке лаунчера с дополнительными переменными среды:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;$INST_NAME - имя экземпляра&lt;/li&gt;&lt;li&gt;$INST_ID - ID экземпляра (имя его папки)&lt;/li&gt;&lt;li&gt;$INST_DIR - полный путь до экземпляра&lt;/li&gt;&lt;li&gt;$INST_MC_DIR - полный путь до Minecraft&lt;/li&gt;&lt;li&gt;$INST_JAVA - Java файл, используемый при запуске&lt;/li&gt;&lt;li&gt;$INST_JAVA_ARGS - аргументы командной строки, используемые при запуске (внимание: они не будут работать при наличии пробелов у аргументов)&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Команда обёртки позволяет запускать Java, используя дополнительную программу-обёртку (например, «optirun» на Linux)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Предстартовая команда выполняется перед запуском установки, а завершающая команда — после закрытия.&lt;/p&gt;&lt;p&gt;Они будут выполняться в папке лаунчера с дополнительными переменными среды:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;$INST_NAME - имя установки&lt;/li&gt;&lt;li&gt;$INST_ID - ID установки (имя его папки)&lt;/li&gt;&lt;li&gt;$INST_DIR - полный путь до установки&lt;/li&gt;&lt;li&gt;$INST_MC_DIR - полный путь до Minecraft&lt;/li&gt;&lt;li&gt;$INST_JAVA - Java файл, используемый при запуске&lt;/li&gt;&lt;li&gt;$INST_JAVA_ARGS - аргументы командной строки, используемые при запуске (внимание: они не будут работать при наличии пробелов у аргументов)&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Команда обёртки позволяет запускать Java, используя дополнительную программу-обёртку (например, «optirun» на Linux)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -2659,7 +2659,7 @@ Maximum allocated: %1 MiB
 Free: %2 MiB (out of %3 MiB total)
 
 Launch anyway? This may cause slowdowns in the game and your system.</source>
-        <translation>Вероятно, свободной оперативной памяти недостаточно для запуска этого экземпляра с заданными настройками памяти.
+        <translation>Вероятно, свободной оперативной памяти недостаточно для запуска этой установки с заданными настройками памяти.
 
 Максимальное выделенное количество: %1 МиБ
 Свободно: %2 МиБ (из %3 МиБ)
@@ -2669,7 +2669,7 @@ Launch anyway? This may cause slowdowns in the game and your system.</source>
     <message>
         <location filename="src/launcher/minecraft/launch/EnsureAvailableMemory.cpp" line="101"/>
         <source>Not enough RAM available to launch this instance</source>
-        <translation>Недостаточно ОЗУ для запуска этого экземпляра</translation>
+        <translation>Недостаточно ОЗУ для запуска этой установки</translation>
     </message>
 </context>
 <context>
@@ -2719,7 +2719,7 @@ Launch anyway? This may cause slowdowns in the game and your system.</source>
         <source>
 This instance cannot be launched because some libraries are missing or have not been downloaded yet. Please try again in online mode with a working Internet connection</source>
         <translation>
-Запуск данного экземпляра невозможен, поскольку некоторые библиотеки отсутствуют или еще не скачаны. Пожалуйста, повторите попытку в онлайн-режиме при работающем подключении к Интернету</translation>
+Запуск данной установки невозможен, поскольку некоторые библиотеки отсутствуют или еще не скачаны. Пожалуйста, повторите попытку в онлайн-режиме при работающем подключении к Интернету</translation>
     </message>
 </context>
 <context>
@@ -2789,7 +2789,7 @@ This instance cannot be launched because some libraries are missing or have not 
     <message>
         <location filename="src/launcher/ui/dialogs/ExportInstanceDialog.ui" line="14"/>
         <source>Export Instance</source>
-        <translation>Экспорт экземпляра</translation>
+        <translation>Экспорт установки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/ExportInstanceDialog.cpp" line="137"/>
@@ -2823,7 +2823,7 @@ This instance cannot be launched because some libraries are missing or have not 
     <message>
         <location filename="src/launcher/ui/dialogs/ExportInstanceDialog.cpp" line="149"/>
         <source>Unable to export instance</source>
-        <translation>Не удалось экспортировать экземпляр</translation>
+        <translation>Не удалось экспортировать установку</translation>
     </message>
     <message>
         <source>Abort</source>
@@ -3129,7 +3129,7 @@ This instance cannot be launched because some libraries are missing or have not 
     <message>
         <location filename="src/launcher/ui/dialogs/ExportToModListDialog.ui" line="212"/>
         <source>This depends on the mods&apos; metadata. To ensure it is available, run an update on the instance. Installing the updates isn&apos;t necessary.</source>
-        <translation>Это зависит от метаданных модов. Чтобы убедиться в их наличии, запустите обновление экземпляра. Установка обновлений необязательна.</translation>
+        <translation>Это зависит от метаданных модов. Чтобы убедиться в их наличии, запустите обновление установки. Установка обновлений необязательна.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/ExportToModListDialog.ui" line="226"/>
@@ -3479,7 +3479,7 @@ Are you sure you want to do this?</source>
     <message>
         <location filename="src/launcher/ui/pages/global/ExternalToolsPage.ui" line="245"/>
         <source>Custom tools launchable on worlds from the instance Worlds menu. Command supports the ${WORLD_PATH} placeholder.</source>
-        <translation>Пользовательские инструменты, доступные для миров из меню &quot;Миры&quot; экземпляра. Команда поддерживает заполнитель ${WORLD_PATH}.</translation>
+        <translation>Пользовательские инструменты, доступные для миров из меню &quot;Миры&quot; установки. Команда поддерживает заполнитель ${WORLD_PATH}.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/ExternalToolsPage.ui" line="257"/>
@@ -3764,12 +3764,12 @@ Please try again.</source>
     <message>
         <location filename="src/launcher/modplatform/ftb/FTBPackInstallTask.cpp" line="212"/>
         <source>The following files are not available for download in third party launchers.&lt;br/&gt;You will need to manually download them and add them to the instance.</source>
-        <translation>Следующие файлы недоступны для скачивания в сторонних лаунчерах.&lt;br/&gt;Вам нужно будет вручную скачать их и добавить в экземпляр.</translation>
+        <translation>Следующие файлы недоступны для скачивания в сторонних лаунчерах.&lt;br/&gt;Вам нужно будет вручную скачать их и добавить в установку.</translation>
     </message>
     <message>
         <location filename="src/launcher/modplatform/ftb/FTBPackInstallTask.cpp" line="234"/>
         <source>Creating the instance...</source>
-        <translation>Создание экземпляра...</translation>
+        <translation>Создание установки...</translation>
     </message>
     <message>
         <location filename="src/launcher/modplatform/ftb/FTBPackInstallTask.cpp" line="297"/>
@@ -3821,7 +3821,7 @@ Please try again.</source>
     <message>
         <location filename="src/launcher/ui/pages/modplatform/import_ftb/ImportFTBPage.ui" line="22"/>
         <source>Note: Many recent FTB modpacks are also available from CurseForge! Also, if your FTB instances are not in the default location, select it using the button next to search.</source>
-        <translation>Примечание: Многие последние сборки FTB также доступны на CurseForge! Кроме того, если ваши экземпляры FTB находятся не в стандартной папке, выберите её с помощью кнопки рядом с поиском.</translation>
+        <translation>Примечание: Многие последние сборки FTB также доступны на CurseForge! Кроме того, если ваши установки FTB находятся не в стандартной папке, выберите её с помощью кнопки рядом с поиском.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/modplatform/import_ftb/ImportFTBPage.ui" line="37"/>
@@ -3836,7 +3836,7 @@ Please try again.</source>
         <location filename="src/launcher/ui/pages/modplatform/import_ftb/ImportFTBPage.ui" line="47"/>
         <location filename="src/launcher/ui/pages/modplatform/import_ftb/ImportFTBPage.cpp" line="63"/>
         <source>Select FTBApp instances directory</source>
-        <translation>Выбрать каталог экземпляров FTBApp</translation>
+        <translation>Выбрать каталог установок FTBApp</translation>
     </message>
     <message>
         <source>Note: If your FTB instances are not in the default location, select it using the button next to search.</source>
@@ -4068,7 +4068,7 @@ NOTE: Make sure you made a backup of your important instance data before updatin
     <message>
         <location filename="src/launcher/modplatform/flame/FlameInstanceCreationTask.cpp" line="633"/>
         <source>The modpack is trying to download a file outside of the instance folder (%1). This is a security risk and isn&apos;t allowed.</source>
-        <translation>Сборка модов пытается скачать файл за пределами папки экземпляра (%1). Это небезопасно и запрещено.</translation>
+        <translation>Сборка модов пытается скачать файл за пределами папки установки (%1). Это небезопасно и запрещено.</translation>
     </message>
     <message>
         <location filename="src/launcher/modplatform/flame/FlameInstanceCreationTask.cpp" line="802"/>
@@ -4100,7 +4100,7 @@ NOTE: Make sure you made a backup of your important instance data before updatin
         <location filename="src/launcher/modplatform/flame/FlameInstanceCreationTask.cpp" line="596"/>
         <source>The following files are not available for download in third party launchers.&lt;br/&gt;You will need to manually download them and add them to the instance.</source>
         <oldsource>The following mods were blocked on third party launchers.&lt;br/&gt;You will need to manually download them and add them to the modpack</oldsource>
-        <translation>Эти файлы недоступны для сторонних лаунчеров.&lt;br/&gt;Потребуется скачать и добавить их в экземпляр вручную.</translation>
+        <translation>Эти файлы недоступны для сторонних лаунчеров.&lt;br/&gt;Потребуется скачать и добавить их в установку вручную.</translation>
     </message>
     <message>
         <location filename="src/launcher/modplatform/flame/FlameInstanceCreationTask.cpp" line="618"/>
@@ -4149,7 +4149,7 @@ NOTE: Make sure you made a backup of your important instance data before updatin
     <message>
         <location filename="src/launcher/ui/pages/instance/ManagedPackPage.cpp" line="344"/>
         <source>&lt;h1&gt;Hey there!&lt;/h1&gt;&lt;h4&gt;It seems like your Pack ID is null. This is because of a bug in older versions of the launcher.&lt;br/&gt;Unfortunately, we can&apos;t do the proper API requests without this information.&lt;br/&gt;&lt;br/&gt;So, in order for this feature to work, you will need to re-download the modpack from the built-in downloader.&lt;br/&gt;&lt;br/&gt;Don&apos;t worry though, it will ask you to update this instance instead, so you&apos;ll not lose this instance!&lt;/h4&gt;</source>
-        <translation>&lt;h1&gt;Привет!&lt;/h1&gt;&lt;h4&gt;Похоже, что у данного набора отсутствует идентификатор. Это связано с ошибкой в старых версиях лаунчера.&lt;br/&gt;К сожалению, без этой информации выполнять правильные запросы к API невозможно.&lt;br/&gt;&lt;br/&gt;Для работы этой функции необходимо повторно скачать сборку из встроенного загрузчика.&lt;br/&gt;&lt;br/&gt;Только не волнуйтесь! Вместо загрузки будет предложено обновить данный экземпляр, и он не будет потерян!&lt;/h4&gt;</translation>
+        <translation>&lt;h1&gt;Привет!&lt;/h1&gt;&lt;h4&gt;Похоже, что у данного набора отсутствует идентификатор. Это связано с ошибкой в старых версиях лаунчера.&lt;br/&gt;К сожалению, без этой информации выполнять правильные запросы к API невозможно.&lt;br/&gt;&lt;br/&gt;Для работы этой функции необходимо повторно скачать сборку из встроенного загрузчика.&lt;br/&gt;&lt;br/&gt;Только не волнуйтесь! Вместо загрузки будет предложено обновить данный установку, и он не будет потерян!&lt;/h4&gt;</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/instance/ManagedPackPage.cpp" line="386"/>
@@ -4701,7 +4701,7 @@ NOTE: Make sure you made a backup of your important instance data before updatin
         <location filename="src/launcher/ui/pages/modplatform/ImportPage.ui" line="63"/>
         <source>- Prism Launcher, PolyMC or MultiMC exported instances (ZIP)</source>
         <oldsource>- PolyMC / MultiMC exported instances (ZIP)</oldsource>
-        <translation>- Экспортированные экземпляры SculkShoot Client, PolyMC или MultiMC (ZIP)</translation>
+        <translation>- Экспортированные установки SculkShoot Client, PolyMC или MultiMC (ZIP)</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/modplatform/ImportPage.ui" line="73"/>
@@ -4771,17 +4771,17 @@ NOTE: Make sure you made a backup of your important instance data before updatin
     <message>
         <location filename="src/launcher/ui/dialogs/ImportResourceDialog.ui" line="14"/>
         <source>Choose instance to import to</source>
-        <translation>Выберите экземпляр, в который импортировать</translation>
+        <translation>Выберите установку, в которую импортировать</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/ImportResourceDialog.ui" line="20"/>
         <source>Choose the instance you would like to import this resource pack to.</source>
-        <translation>Выберите экземпляр, в который необходимо импортировать этот набор ресурсов.</translation>
+        <translation>Выберите установку, в которую необходимо импортировать этот набор ресурсов.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/ImportResourceDialog.cpp" line="46"/>
         <source>Choose the instance you would like to import this %1 to.</source>
-        <translation>Выберите экземпляр, в который необходимо импортировать этот %1.</translation>
+        <translation>Выберите установку, в которую необходимо импортировать этот %1.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/ImportResourceDialog.cpp" line="47"/>
@@ -4913,7 +4913,7 @@ NOTE: Make sure you made a backup of your important instance data before updatin
         <source>%1 is known to conflict with %2, which is enabled on this instance. Having both enabled at the same time will likely break the instance.
 
 What would you like to do with %2?</source>
-        <translation>Известно, что %1 конфликтует с %2, который включен в этом экземпляре. Одновременное включение обоих, скорее всего, приведет к сбою в работе экземпляра.
+        <translation>Известно, что %1 конфликтует с %2, который включен в этой установке. Одновременное включение обоих, скорее всего, приведет к сбою в работе установки.
 
 Что бы вы хотели сделать с %2?</translation>
     </message>
@@ -4970,17 +4970,17 @@ What would you like to do with %2?</source>
     <message>
         <location filename="src/launcher/InstanceCopyTask.cpp" line="40"/>
         <source>Copying instance %1</source>
-        <translation>Копирование экземпляра %1</translation>
+        <translation>Копирование установки %1</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceCopyTask.cpp" line="127"/>
         <source>Instance folder copy failed.</source>
-        <translation>Не удалось скопировать папку экземпляра.</translation>
+        <translation>Не удалось скопировать папку установки.</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceCopyTask.cpp" line="176"/>
         <source>Instance folder copy has been aborted.</source>
-        <translation>Копирование папки экземпляра было отменено.</translation>
+        <translation>Копирование папки установки было отменено.</translation>
     </message>
 </context>
 <context>
@@ -4992,12 +4992,12 @@ What would you like to do with %2?</source>
     <message>
         <source>Error while creating new instance:
 %1</source>
-        <translation>Ошибка при создании нового экземпляра:
+        <translation>Ошибка при создании новой установки:
 %1</translation>
     </message>
     <message>
         <source>Error while creating new instance.</source>
-        <translation>Ошибка при создании нового экземпляра.</translation>
+        <translation>Ошибка при создании новой установки.</translation>
     </message>
     <message>
         <source>Removing old conflicting files...</source>
@@ -5037,7 +5037,7 @@ What would you like to do with %2?</source>
     <message>
         <location filename="src/launcher/InstanceImportTask.cpp" line="131"/>
         <source>Attempting to determine instance type</source>
-        <translation>Попытка определения типа экземпляра</translation>
+        <translation>Попытка определения типа установки</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceImportTask.cpp" line="181"/>
@@ -5175,7 +5175,7 @@ Proceed with caution!</source>
     <message>
         <location filename="src/launcher/InstanceList.cpp" line="178"/>
         <source>%1 Instance</source>
-        <translation>Экземпляр %1</translation>
+        <translation>Установка %1</translation>
     </message>
 </context>
 <context>
@@ -5197,7 +5197,7 @@ Proceed with caution!</source>
     <message>
         <location filename="src/launcher/InstancePageProvider.h" line="51"/>
         <source>Edit Instance (%1)</source>
-        <translation>Редактировать экземпляр (%1)</translation>
+        <translation>Изменить установку (%1)</translation>
     </message>
     <message>
         <source>Loader mods</source>
@@ -5532,7 +5532,7 @@ Please make sure that the maximum memory value is lower.</source>
     <message>
         <location filename="src/launcher/InstanceList.cpp" line="999"/>
         <source>Failed to commit instance, even after multiple retries. It is being blocked by something.</source>
-        <translation>Не удалось создать экземпляр даже после нескольких попыток. Создание экземпляра чем-то блокируется.</translation>
+        <translation>Не удалось создать установку даже после нескольких попыток. Создание установки чем-то блокируется.</translation>
     </message>
 </context>
 <context>
@@ -5596,7 +5596,7 @@ Please make sure that the maximum memory value is lower.</source>
     <message>
         <location filename="src/launcher/ui/InstanceWindow.cpp" line="99"/>
         <source>Restart the running instance</source>
-        <translation>Перезапустить запущенный экземпляр</translation>
+        <translation>Перезапустить запущенную установку</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/InstanceWindow.cpp" line="106"/>
@@ -5628,7 +5628,7 @@ Please make sure that the maximum memory value is lower.</source>
     <message>
         <location filename="src/launcher/ui/InstanceWindow.cpp" line="107"/>
         <source>Kill the running instance</source>
-        <translation>Остановить работающий экземпляр</translation>
+        <translation>Остановить работающую установку</translation>
     </message>
     <message>
         <source>Launch</source>
@@ -5637,7 +5637,7 @@ Please make sure that the maximum memory value is lower.</source>
     <message>
         <location filename="src/launcher/ui/InstanceWindow.cpp" line="91"/>
         <source>Launch the instance</source>
-        <translation>Запустить экземпляр</translation>
+        <translation>Запустить установку</translation>
     </message>
 </context>
 <context>
@@ -6135,7 +6135,7 @@ You can change the Java version in the settings later.
     <message>
         <location filename="src/launcher/ui/widgets/JavaSettingsWidget.ui" line="130"/>
         <source>If enabled, the launcher will not check if an instance is compatible with the selected Java version.</source>
-        <translation>При включенном параметре лаунчер не будет проверять совместимость экземпляра с выбранной версией Java.</translation>
+        <translation>При включенном параметре лаунчер не будет проверять совместимость установки с выбранной версией Java.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/widgets/JavaSettingsWidget.ui" line="44"/>
@@ -6313,7 +6313,7 @@ Please make sure that the maximum memory value is lower.</source>
         <location filename="src/launcher/ui/setupwizard/JavaWizardPage.cpp" line="85"/>
         <source>Please select how much memory to allocate to instances and if Prism Launcher should manage Java automatically or manually.</source>
         <oldsource>Please select how much memory to allocate to instances and if Prism Launcher should manage java automatically or manually.</oldsource>
-        <translation>Выберите объём выделяемой памяти для экземпляров, а также автоматический или ручной способ управления Java в SculkShoot Client.</translation>
+        <translation>Выберите объём выделяемой памяти для установок, а также автоматический или ручной способ управления Java в SculkShoot Client.</translation>
     </message>
     <message>
         <source>You do not have a working Java set up yet or it went missing.
@@ -6521,7 +6521,7 @@ You can change the Java version in the settings later.
     <message>
         <location filename="src/launcher/LaunchController.cpp" line="68"/>
         <source>No instance specified!</source>
-        <translation>Не указан экземпляр!</translation>
+        <translation>Не указана установка!</translation>
     </message>
     <message>
         <location filename="src/launcher/LaunchController.cpp" line="73"/>
@@ -6677,7 +6677,7 @@ Do you want to play the demo?</source>
         <location filename="src/launcher/LaunchController.cpp" line="375"/>
         <location filename="src/launcher/LaunchController.cpp" line="376"/>
         <source>Couldn&apos;t load the instance profile.</source>
-        <translation>Не удалось загрузить профиль экземпляра.</translation>
+        <translation>Не удалось загрузить профиль установки.</translation>
     </message>
     <message>
         <location filename="src/launcher/LaunchController.cpp" line="382"/>
@@ -6840,7 +6840,7 @@ Do you want to play the demo?</source>
     <message>
         <location filename="src/launcher/LaunchController.cpp" line="498"/>
         <source>This can cause the instance to get corrupted and should only be used if Minecraft is frozen for some reason</source>
-        <translation>Это может привести к нарушению работоспособности экземпляра. Используйте только в случае зависания Minecraft по какой-либо причине</translation>
+        <translation>Это может привести к нарушению работоспособности установки. Используйте только в случае зависания Minecraft по какой-либо причине</translation>
     </message>
 </context>
 <context>
@@ -6924,7 +6924,7 @@ You may have to fix your mods because the game is still logging to files and lik
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="278"/>
         <source>I&amp;nstances:</source>
-        <translation>&amp;Экземпляры:</translation>
+        <translation>&amp;Установки:</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="298"/>
@@ -6939,12 +6939,12 @@ You may have to fix your mods because the game is still logging to files and lik
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="62"/>
         <source>Instance Sorting</source>
-        <translation>Сортировка экземпляра</translation>
+        <translation>Сортировка установки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="115"/>
         <source>Instance Renaming</source>
-        <translation>Переименование экземпляра</translation>
+        <translation>Переименование установки</translation>
     </message>
     <message>
         <source>Ask what to do with the folder</source>
@@ -7346,7 +7346,7 @@ You may have to fix your mods because the game is still logging to files and lik
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="338"/>
         <source>Instance &amp;Icons:</source>
-        <translation>&amp;Значки экземпляра:</translation>
+        <translation>&amp;Значки установки:</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="368"/>
@@ -7356,7 +7356,7 @@ You may have to fix your mods because the game is still logging to files and lik
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="391"/>
         <source>Additional Instance Folders</source>
-        <translation>Дополнительные папки экземпляров</translation>
+        <translation>Дополнительные папки установок</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="402"/>
@@ -7406,12 +7406,12 @@ You may have to fix your mods because the game is still logging to files and lik
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="500"/>
         <source>When creating a new modpack instance, suggest updating an existing instance instead.</source>
-        <translation>При создании нового экземпляра сборки модов предлагать обновить уже существующий.</translation>
+        <translation>При создании новой установки сборки модов предлагать обновить уже существующую.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="503"/>
         <source>Suggest to update an existing instance during modpack installation</source>
-        <translation>Предлагать обновление существующего экземпляра в ходе установки сборки</translation>
+        <translation>Предлагать обновление существующей установки в ходе установки сборки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="512"/>
@@ -7443,17 +7443,17 @@ You may have to fix your mods because the game is still logging to files and lik
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="562"/>
         <source>Instance Creation</source>
-        <translation>Создание экземпляра</translation>
+        <translation>Создание установки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="568"/>
         <source>Downloads required game files while creating the instance. Disable this to skip the initial download and fetch files when the instance is launched instead.</source>
-        <translation>При создании экземпляра игры загружаются необходимые игровые файлы. Отключите эту опцию, чтобы пропустить первоначальную загрузку и получить файлы при запуске экземпляра.</translation>
+        <translation>При создании установки игры загружаются необходимые игровые файлы. Отключите эту опцию, чтобы пропустить первоначальную загрузку и получить файлы при запуске установки.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="571"/>
         <source>Download game files during instance creation</source>
-        <translation>Загрузка игровых файлов во время создания экземпляра игры</translation>
+        <translation>Загрузка игровых файлов во время создания установки игры</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="581"/>
@@ -7503,12 +7503,12 @@ You may have to fix your mods because the game is still logging to files and lik
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.cpp" line="129"/>
         <source>Instance Folder</source>
-        <translation>Папка экземпляра</translation>
+        <translation>Папка установки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.cpp" line="100"/>
         <source>You&apos;re trying to specify an instance folder which&apos;s path contains at least one &apos;!&apos;. Java is known to cause problems if that is the case, your instances (probably) won&apos;t start!</source>
-        <translation>Попытка указать папку экземпляра, путь к которому содержит по крайней мере один символ «!». Это может вызвать проблемы с Java, и ваши экземпляры (возможно) не будут запускаться!</translation>
+        <translation>Попытка указать папку установки, путь к которому содержит по крайней мере один символ «!». Это может вызвать проблемы с Java, и ваши установки (возможно) не будут запускаться!</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.cpp" line="105"/>
@@ -7525,7 +7525,7 @@ Granting %1 access to it via Flatseal is recommended.</source>
 This is known to cause problems. After a restart the launcher might break, because it will no longer have access to that directory.
 
 Granting %1 access to it via Flatseal is recommended.</oldsource>
-        <translation>Попытка указать папку экземпляра, которая была временно предоставлена через Flatpak.
+        <translation>Попытка указать папку установки, которая была временно предоставлена через Flatpak.
 Это может вызвать проблемы. После перезапуска лаунчер может перестать работать, так как эта папка будет недоступна.
 
 Рекомендуется предоставить доступ %1 к ней через Flatseal.</translation>
@@ -7538,7 +7538,7 @@ Granting %1 access to it via Flatseal is recommended.</oldsource>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.cpp" line="139"/>
         <source>Additional Instance Folder</source>
-        <translation>Дополнительная папка экземпляров</translation>
+        <translation>Дополнительная папка установок</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.cpp" line="145"/>
@@ -7549,7 +7549,7 @@ Granting %1 access to it via Flatseal is recommended.</oldsource>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.cpp" line="145"/>
         <source>This is already your primary instance directory.</source>
-        <translation>Это уже ваш основной каталог экземпляров.</translation>
+        <translation>Это уже ваш основной каталог установок.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.cpp" line="150"/>
@@ -7690,12 +7690,12 @@ Granting %1 access to it via Flatseal is recommended.</oldsource>
     <message>
         <location filename="src/launcher/minecraft/update/LegacyFMLLibrariesTask.cpp" line="89"/>
         <source>Copying FML libraries into the instance...</source>
-        <translation>Копирование библиотек FML в каталог экземпляра…</translation>
+        <translation>Копирование библиотек FML в каталог установки…</translation>
     </message>
     <message>
         <location filename="src/launcher/minecraft/update/LegacyFMLLibrariesTask.cpp" line="98"/>
         <source>Failed creating FML library folder inside the instance.</source>
-        <translation>Не удалось создать каталог библиотек FML в каталоге экземпляра.</translation>
+        <translation>Не удалось создать каталог библиотек FML в каталоге установки.</translation>
     </message>
     <message>
         <location filename="src/launcher/minecraft/update/LegacyFMLLibrariesTask.cpp" line="102"/>
@@ -7964,7 +7964,7 @@ Should it be removed now?</source>
     <message>
         <location filename="src/launcher/minecraft/update/LibrariesTask.cpp" line="23"/>
         <source>Libraries for instance %1</source>
-        <translation>Библиотеки для экземпляра %1</translation>
+        <translation>Библиотеки для установки %1</translation>
     </message>
     <message>
         <location filename="src/launcher/minecraft/update/LibrariesTask.cpp" line="31"/>
@@ -8462,7 +8462,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="345"/>
         <source>Launch the selected instance.</source>
-        <translation>Запустить выбранный экземпляр.</translation>
+        <translation>Запустить выбранную установку.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="35"/>
@@ -8476,7 +8476,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="290"/>
         <source>Add a new instance.</source>
-        <translation>Добавить новую сборку.</translation>
+        <translation>Добавить новую установку.</translation>
     </message>
     <message>
         <source>&amp;View Instance Folder</source>
@@ -8508,7 +8508,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="700"/>
         <source>Open one of the folders shared between instances.</source>
-        <translation>Откройте одну из папок, совместно используемых экземплярами.</translation>
+        <translation>Откройте одну из папок, совместно используемых установками.</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -8610,7 +8610,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="356"/>
         <source>Kill the running instance.</source>
-        <translation>Остановить запущенный экземпляр.</translation>
+        <translation>Остановить запущенную установку.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="400"/>
@@ -8649,7 +8649,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="91"/>
         <source>Instance Toolbar</source>
-        <translation>Панель экземпляра</translation>
+        <translation>Панель установки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="389"/>
@@ -8685,7 +8685,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="279"/>
         <source>&amp;Undo Last Instance Deletion</source>
-        <translation>От&amp;менить удаление предыдущего экземпляра</translation>
+        <translation>От&amp;менить удаление предыдущей установки</translation>
     </message>
     <message>
         <source>View &amp;Instance Folder</source>
@@ -8746,16 +8746,16 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="491"/>
         <source>Creates a shortcut on a selected folder to launch the selected instance.</source>
-        <translation>Создает ярлык в выбранной папке для запуска выбранного экземпляра.</translation>
+        <translation>Создает ярлык в выбранной папке для запуска выбранной установки.</translation>
     </message>
     <message>
         <source>&amp;Instances</source>
-        <translation>&amp;Экземпляры</translation>
+        <translation>&amp;Установки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="538"/>
         <source>Open the instances folder in a file browser.</source>
-        <translation>Открыть папку экземпляров в файловом менеджере.</translation>
+        <translation>Открыть папку установок в файловом менеджере.</translation>
     </message>
     <message>
         <source>Launcher &amp;Root</source>
@@ -8777,12 +8777,12 @@ Reason:
     </message>
     <message>
         <source>Instance Icons</source>
-        <translation>Значки экземпляров</translation>
+        <translation>Значки установок</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="582"/>
         <source>Open the instance icons folder in a file browser.</source>
-        <translation>Открыть папку значков экземпляров в файловом менеджере.</translation>
+        <translation>Открыть папку значков установок в файловом менеджере.</translation>
     </message>
     <message>
         <source>Logs</source>
@@ -8920,7 +8920,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="535"/>
         <source>I&amp;nstances</source>
-        <translation>&amp;Экземпляры</translation>
+        <translation>&amp;Установки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="546"/>
@@ -8940,7 +8940,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="579"/>
         <source>Instance &amp;Icons</source>
-        <translation>&amp;Значки экземпляров</translation>
+        <translation>&amp;Значки установок</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="590"/>
@@ -8979,7 +8979,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="456"/>
         <source>Export the selected instance to supported formats.</source>
-        <translation>Экспортировать выбранный экземпляр в поддерживаемые форматы.</translation>
+        <translation>Экспортировать выбранную установку в поддерживаемые форматы.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="464"/>
@@ -9071,7 +9071,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="392"/>
         <source>Change the selected instance&apos;s icon.</source>
-        <translation>Изменить значок выбранного экземпляра.</translation>
+        <translation>Изменить значок выбранной установки.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="367"/>
@@ -9081,7 +9081,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="370"/>
         <source>Rename the selected instance.</source>
-        <translation>Переименовать выбранный экземпляр.</translation>
+        <translation>Переименовать выбранную установку.</translation>
     </message>
     <message>
         <source>Launch &amp;Offline</source>
@@ -9192,7 +9192,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="403"/>
         <source>Change the instance settings, mods and versions.</source>
-        <translation>Изменить параметры, моды и версии экземпляра.</translation>
+        <translation>Изменить параметры, моды и версии установки.</translation>
     </message>
     <message>
         <source>Edit Notes</source>
@@ -9218,7 +9218,7 @@ Reason:
         <location filename="src/launcher/ui/MainWindow.ui" line="428"/>
         <source>Delete the selected instance.</source>
         <oldsource>View the worlds of this instance.</oldsource>
-        <translation>Удалить выбранный экземпляр.</translation>
+        <translation>Удалить выбранную установку.</translation>
     </message>
     <message>
         <source>Manage Screenshots</source>
@@ -9235,7 +9235,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="381"/>
         <source>Change the selected instance&apos;s group.</source>
-        <translation>Изменить группу выбранного экземпляра.</translation>
+        <translation>Изменить группу выбранной установки.</translation>
     </message>
     <message>
         <source>Minecraft Folder</source>
@@ -9261,7 +9261,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="417"/>
         <source>Open the selected instance&apos;s root folder in a file browser.</source>
-        <translation>Открыть корневую папку выбранного экземпляра в файловом менеджере.</translation>
+        <translation>Открыть корневую папку выбранной установки в файловом менеджере.</translation>
     </message>
     <message>
         <source>Export Instance</source>
@@ -9283,7 +9283,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="442"/>
         <source>Copy the selected instance.</source>
-        <translation>Копировать выбранный экземпляр.</translation>
+        <translation>Копировать выбранную установку.</translation>
     </message>
     <message>
         <source>%1 - Version %2</source>
@@ -9300,7 +9300,7 @@ Reason:
         <location filename="src/launcher/ui/MainWindow.cpp" line="450"/>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1716"/>
         <source>No instance selected</source>
-        <translation>Экземпляр не выбран</translation>
+        <translation>Установка не выбрана</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="376"/>
@@ -9315,7 +9315,7 @@ Reason:
         <location filename="src/launcher/ui/MainWindow.cpp" line="557"/>
         <source>&amp;Create instance</source>
         <oldsource>Create instance</oldsource>
-        <translation>&amp;Создать экземпляр</translation>
+        <translation>&amp;Создать установку</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="571"/>
@@ -9436,13 +9436,13 @@ Please add your Microsoft or Mojang account.</oldsource>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1395"/>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1610"/>
         <source>Instance not editable</source>
-        <translation>Экземпляр не редактируется</translation>
+        <translation>Установку нельзя изменить</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1396"/>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1611"/>
         <source>This instance is not editable. It may be broken, invalid, or too old. Check logs for details.</source>
-        <translation>Этот экземпляр недоступен для редактирования. Возможно, он повреждён, недопустим или слишком устарел. Подробную информацию смотрите в журналах.</translation>
+        <translation>Эту установку нельзя изменить. Возможно, она повреждена, недопустима или слишком устарела. Подробную информацию смотрите в журналах.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1449"/>
@@ -9496,25 +9496,25 @@ Deleting it could break the other instance(s),
 
 Do you wish to proceed?</source>
         <translation type="vanished">
-            <numerusform>Экземпляр может ссылаться на файлы из этого экземпляра:
+            <numerusform>Установка может ссылаться на файлы из этой установки:
 
 %1
 
-Удаление этого файла может привести к неправильной работе другого экземпляра, 
+Удаление этого файла может привести к неправильной работе другой установки, 
 
 Продолжить?</numerusform>
-            <numerusform>Экземпляры могут ссылаться на файлы из этого экземпляра:
+            <numerusform>Установки могут ссылаться на файлы из этой установки:
 
 %1
 
-Удаление этого файла может привести к неправильной работе нескольких экземпляров, 
+Удаление этого файла может привести к неправильной работе нескольких установок, 
 
 Продолжить?</numerusform>
-            <numerusform>Экземпляры могут ссылаться на файлы из этого экземпляра:
+            <numerusform>Установки могут ссылаться на файлы из этой установки:
 
 %1
 
-Удаление этого файла может привести к неправильной работе нескольких экземпляров, 
+Удаление этого файла может привести к неправильной работе нескольких установок, 
 
 Продолжить?</numerusform>
         </translation>
@@ -9578,7 +9578,7 @@ Are you sure?</source>
         <location filename="src/launcher/ui/MainWindow.cpp" line="451"/>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1722"/>
         <source>No Instance Selected</source>
-        <translation>Экземпляр не выбран</translation>
+        <translation>Установка не выбрана</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="575"/>
@@ -9625,14 +9625,14 @@ URL:
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1142"/>
         <source>No instance!</source>
-        <translation>Экземпляр отсутствует!</translation>
+        <translation>Установка отсутствует!</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1143"/>
         <source>No instance available to add the resource to.
 Please create a new instance before attempting to install this resource again.</source>
-        <translation>Нет доступного экземпляра для добавления ресурса.
-Создайте новый экземпляр перед попыткой установить этот ресурс снова.</translation>
+        <translation>Нет доступной установки для добавления ресурса.
+Создайте новую установку перед попыткой установить этот ресурс снова.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1267"/>
@@ -9668,7 +9668,7 @@ Please create a new instance before attempting to install this resource again.</
         <location filename="src/launcher/ui/MainWindow.cpp" line="1298"/>
         <source>Some instances and shortcuts could not be restored.
 Please check your trashbin to manually restore them.</source>
-        <translation>Некоторые ярлыки и экземпляры не могут быть восстановлены.
+        <translation>Некоторые ярлыки и установки не могут быть восстановлены.
 Проверьте корзину, чтобы восстановить их вручную.</translation>
     </message>
     <message>
@@ -9683,12 +9683,12 @@ To clear the metadata cache manually, press Folders -&gt; View Launcher Root Fol
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1497"/>
         <source>Cannot Delete Running Instance</source>
-        <translation>Невозможно удалить работающий экземпляр</translation>
+        <translation>Невозможно удалить работающую установку</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1498"/>
         <source>The selected instance is currently running and cannot be deleted. Please stop the instance before attempting to delete it.</source>
-        <translation>Выбранный экземпляр в данный момент работает и не может быть удален. Остановите работу экземпляра перед попыткой его удаления.</translation>
+        <translation>Выбранная установка в данный момент работает и не может быть удалена. Остановите работу установки перед попыткой её удаления.</translation>
     </message>
     <message numerus="yes">
         <location filename="src/launcher/ui/MainWindow.cpp" line="1509"/>
@@ -9706,7 +9706,7 @@ This may be permanent and will completely delete the instance.
 
 Are you sure?</source>
         <translation>Вы собираетесь удалить &quot;%1&quot;%2.
-Данное действие может оказаться необратимым и приведёт к полному удалению экземпляра.
+Данное действие может оказаться необратимым и приведёт к полному удалению установки.
 
 Вы уверены?</translation>
     </message>
@@ -9753,17 +9753,17 @@ Are you sure?</source>
     </message>
     <message>
         <source>Rename Instance</source>
-        <translation>Переименовать экземпляр</translation>
+        <translation>Переименовать установку</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1734"/>
         <source>Your instance folder contains &apos;!&apos; and this is known to cause Java problems!</source>
-        <translation>Папка экземпляра содержит в пути знак «!», что часто приводит к проблемам в Java!</translation>
+        <translation>Папка установки содержит в пути знак «!», что часто приводит к проблемам в Java!</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1735"/>
         <source>You have now two options: &lt;br/&gt; - change the instance folder in the settings &lt;br/&gt; - move this installation of %1 to a different folder</source>
-        <translation>Имеется два варианта: &lt;br/&gt; — изменить папку экземпляра в параметрах &lt;br/&gt; — переместить эту установку %1 в другую папку</translation>
+        <translation>Имеется два варианта: &lt;br/&gt; — изменить папку установки в параметрах &lt;br/&gt; — переместить эту установку %1 в другую папку</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1743"/>
@@ -9773,12 +9773,12 @@ Are you sure?</source>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1749"/>
         <source>Your instance folder contains &apos;Rar$&apos; - that means you haven&apos;t extracted the launcher archive!</source>
-        <translation>Имя папки этого экземпляра содержит подстроку «Rar$» - это означает, что архив с лаунчером не был распакован!</translation>
+        <translation>Имя папки этой установки содержит подстроку «Rar$» - это означает, что архив с лаунчером не был распакован!</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1755"/>
         <source>Your instance folder is in a temporary folder: &apos;%1&apos;!</source>
-        <translation>Папка экземпляра находится во временной папке: «%1»!</translation>
+        <translation>Папка установки находится во временной папке: «%1»!</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1768"/>
@@ -9949,7 +9949,7 @@ Make sure you also trust the URL.
 </source>
         <translation>Это локальная сборка модов.
 Обновить её можно либо с помощью файла в формате %1, либо по URL-адресу.
-Не используйте формат, отличный от указанного, так как это может нарушить работу экземпляра.
+Не используйте формат, отличный от указанного, так как это может нарушить работу установки.
 Также убедитесь, что вы доверяете указанному URL-адресу
 </translation>
     </message>
@@ -9976,7 +9976,7 @@ Make sure you also trust the URL.
     <message>
         <location filename="src/launcher/ui/pages/instance/ManagedPackPage.cpp" line="286"/>
         <source>The instance updated to pack version %1 successfully.</source>
-        <translation>Экземпляр успешно обновлён до версии пакета %1.</translation>
+        <translation>Установка успешно обновлена до версии пакета %1.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/instance/ManagedPackPage.cpp" line="291"/>
@@ -9986,7 +9986,7 @@ Make sure you also trust the URL.
     <message>
         <location filename="src/launcher/ui/pages/instance/ManagedPackPage.cpp" line="292"/>
         <source>The instance failed to update to pack version %1. Please check launcher logs for more information.</source>
-        <translation>Не удалось обновить экземпляр до версии пакета %1. Проверьте журналы запуска для получения дополнительной информации.</translation>
+        <translation>Не удалось обновить установку до версии пакета %1. Проверьте журналы запуска для получения дополнительной информации.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/instance/ManagedPackPage.cpp" line="461"/>
@@ -9996,8 +9996,8 @@ As such, it is strongly recommended to create a backup copy of the instance.
 
 Are you sure?</source>
         <translation>Вы собираетесь обновить сборку модов до новой версии.
-В файлы экземпляра могут быть внесены необратимые изменения.
-Поэтому настоятельно рекомендуется создать резервную копию экземпляра.
+В файлы установки могут быть внесены необратимые изменения.
+Поэтому настоятельно рекомендуется создать резервную копию установки.
 
 Вы уверены?</translation>
     </message>
@@ -10014,8 +10014,8 @@ As such, it is strongly recommended to create a backup copy of the instance.
 
 Are you sure?</source>
         <translation>Вы собираетесь обновить сборку модов до версии &quot;%1&quot;.
-В файлы экземпляра могут быть внесены необратимые изменения.
-Поэтому настоятельно рекомендуется создать резервную копию экземпляра.
+В файлы установки могут быть внесены необратимые изменения.
+Поэтому настоятельно рекомендуется создать резервную копию установки.
 
 Вы уверены?</translation>
     </message>
@@ -10513,17 +10513,17 @@ Are you sure?</source>
     <message>
         <location filename="src/launcher/ui/widgets/MinecraftSettingsWidget.ui" line="337"/>
         <source>Show time spent &amp;playing instances</source>
-        <translation>Показывать вре&amp;мя игры в экземплярах</translation>
+        <translation>Показывать вре&amp;мя игры в установках</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/widgets/MinecraftSettingsWidget.ui" line="344"/>
         <source>&amp;Record time spent playing instances</source>
-        <translation>Ре&amp;гистрировать время, проведённое в экземплярах</translation>
+        <translation>Ре&amp;гистрировать время, проведённое в установках</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/widgets/MinecraftSettingsWidget.ui" line="358"/>
         <source>Show the &amp;total time played across instances</source>
-        <translation>Показать общее врем&amp;я, проведённое в экземплярах</translation>
+        <translation>Показать общее врем&amp;я, проведённое в установках</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/widgets/MinecraftSettingsWidget.ui" line="365"/>
@@ -10676,7 +10676,7 @@ It is most likely you will need to change the path - please refer to the mod&apo
     <message>
         <location filename="src/launcher/ui/widgets/MinecraftSettingsWidget.ui" line="351"/>
         <source>&amp;Count time playing this instance into total time played</source>
-        <translation>&amp;Учитывать время игры в этот экземпляр в общем времени</translation>
+        <translation>&amp;Учитывать время игры в эту установку в общем времени</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/widgets/MinecraftSettingsWidget.ui" line="375"/>
@@ -10867,12 +10867,12 @@ It is most likely you will need to change the path - please refer to the mod&apo
     <message>
         <location filename="src/launcher/ui/widgets/MinecraftSettingsWidget.cpp" line="70"/>
         <source>Show time &amp;playing this instance</source>
-        <translation>Показать &amp;время, проведённое в этом экземпляре</translation>
+        <translation>Показать &amp;время, проведённое в этой установке</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/widgets/MinecraftSettingsWidget.cpp" line="71"/>
         <source>&amp;Record time playing this instance</source>
-        <translation>Запи&amp;сать время, проведённое в этом экземпляре</translation>
+        <translation>Запи&amp;сать время, проведённое в этой установке</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/widgets/MinecraftSettingsWidget.cpp" line="76"/>
@@ -12863,7 +12863,7 @@ NOTE: Make sure you made a backup of your important instance data before updatin
         <location filename="src/launcher/ui/dialogs/NewInstanceDialog.ui" line="17"/>
         <location filename="src/launcher/ui/dialogs/NewInstanceDialog.cpp" line="222"/>
         <source>New Instance</source>
-        <translation>Новый экземпляр</translation>
+        <translation>Новая установка</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/NewInstanceDialog.ui" line="32"/>
@@ -12908,7 +12908,7 @@ NOTE: Make sure you made a backup of your important instance data before updatin
     <message>
         <location filename="src/launcher/ui/dialogs/NewInstanceDialog.cpp" line="183"/>
         <source>The instance directory &quot;%1&quot; is no longer accessible. Please choose another location.</source>
-        <translation>Каталог экземпляров &quot;%1&quot; больше недоступен. Пожалуйста, выберите другое расположение.</translation>
+        <translation>Каталог установок &quot;%1&quot; больше недоступен. Пожалуйста, выберите другое расположение.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/dialogs/NewInstanceDialog.cpp" line="245"/>
@@ -13001,7 +13001,7 @@ NOTE: Make sure you made a backup of your important instance data before updatin
     <message>
         <location filename="src/launcher/NullInstance.h" line="52"/>
         <source>Unknown instance type</source>
-        <translation>Неизвестный тип экземпляра</translation>
+        <translation>Неизвестный тип установки</translation>
     </message>
 </context>
 <context>
@@ -13411,7 +13411,7 @@ Are you sure?</source>
     <message>
         <location filename="src/launcher/modplatform/atlauncher/ATLPackInstallTask.cpp" line="846"/>
         <source>The following files are not available for download in third party launchers.&lt;br/&gt;You will need to manually download them and add them to the instance.</source>
-        <translation>Следующие файлы недоступны для загрузки в сторонних лаунчерах. &lt;br/&gt;Вам нужно будет загрузить их вручную и добавить в экземпляр.</translation>
+        <translation>Следующие файлы недоступны для загрузки в сторонних лаунчерах. &lt;br/&gt;Вам нужно будет загрузить их вручную и добавить в установку.</translation>
     </message>
     <message>
         <location filename="src/launcher/modplatform/atlauncher/ATLPackInstallTask.cpp" line="912"/>
@@ -14122,7 +14122,7 @@ To overwrite this lock and proceed with this update anyway, select &quot;Ignore&
     <message>
         <location filename="src/launcher/ui/dialogs/ProfileSelectDialog.ui" line="39"/>
         <source>Use as default for this instance only?</source>
-        <translation>Использовать по умолчанию только в этом экземпляре?</translation>
+        <translation>Использовать по умолчанию только в этой установке?</translation>
     </message>
     <message>
         <source>Name</source>
@@ -14860,7 +14860,7 @@ This message will be displayed until you remove this from the JVM arguments.</so
     <message>
         <location filename="src/launcher/InstanceTask.cpp" line="17"/>
         <source>Change instance name</source>
-        <translation>Переименовать экземпляр</translation>
+        <translation>Переименовать установку</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceTask.cpp" line="18"/>
@@ -14868,7 +14868,7 @@ This message will be displayed until you remove this from the JVM arguments.</so
 
 Old name: %1
 New name: %2</source>
-        <translation>Похоже, что имя экземпляра включает номер старой версии. Обновить его?
+        <translation>Похоже, что имя установки включает номер старой версии. Обновить его?
 
 Старое имя: %1
 Новое имя: %2</translation>
@@ -14883,19 +14883,19 @@ New name: %2</source>
         <source>One or more of your instances are from this same modpack%1. Do you want to create a separate instance, or update the existing one?
 
 NOTE: Make sure you made a backup of your important instance data before updating, as worlds can be corrupted and some configuration may be lost (due to pack overrides).</source>
-        <translation>Один или несколько экземпляров имеют одну и ту же сборку модов%1. Создать отдельный экземпляр или обновить существующий?
+        <translation>Один или несколько установок имеют одну и ту же сборку модов%1. Создать отдельную установку или обновить существующий?
 
-ПРИМЕЧАНИЕ: Убедитесь в сохранении резервной копии важного экземпляра перед обновлением, так как миры имеют свойство повреждаться и можно потерять настройки некоторых параметров (из-за перезаписей сборок).</translation>
+ПРИМЕЧАНИЕ: Убедитесь в сохранении резервной копии важной установки перед обновлением, так как миры имеют свойство повреждаться и можно потерять настройки некоторых параметров (из-за перезаписей сборок).</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceTask.cpp" line="45"/>
         <source>Update existing instance</source>
-        <translation>Обновить существующий экземпляр</translation>
+        <translation>Обновить существующую установку</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceTask.cpp" line="46"/>
         <source>Create new instance</source>
-        <translation>Создать новый экземпляр</translation>
+        <translation>Создать новую установку</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceTask.cpp" line="104"/>
@@ -15211,26 +15211,26 @@ Would you like to remove those existing saves as part of this update?</source>
         <location filename="src/launcher/InstanceDirUpdate.cpp" line="64"/>
         <location filename="src/launcher/InstanceDirUpdate.cpp" line="104"/>
         <source>Cannot rename instance</source>
-        <translation>Невозможно переименовать экземпляр</translation>
+        <translation>Невозможно переименовать установку</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceDirUpdate.cpp" line="65"/>
         <source>New instance root (%1) already exists. &lt;br /&gt;Only the metadata will be renamed.</source>
-        <translation>Новый корневой каталог экземпляра (%1) уже существует. &lt;br /&gt;Будут переименованы только метаданные.</translation>
+        <translation>Новый корневой каталог установки (%1) уже существует. &lt;br /&gt;Будут переименованы только метаданные.</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceDirUpdate.cpp" line="70"/>
         <source>Cannot rename instance folder</source>
-        <translation>Не удалось переименовать папку экземпляров</translation>
+        <translation>Не удалось переименовать папку установок</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceDirUpdate.cpp" line="71"/>
         <source>The instance folder cannot be renamed while the instance is running.
 
 Only the instance name will be changed. The folder will keep its current name.</source>
-        <translation>Нельзя переименовать папку экземпляров, пока запущен экземпляр.
+        <translation>Нельзя переименовать папку установок, пока запущена установка.
 
-Будет изменено только название экземпляра. Папка сохранит прежнее название.</translation>
+Будет изменено только название установки. Папка сохранит прежнее название.</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceDirUpdate.cpp" line="78"/>
@@ -15240,7 +15240,7 @@ Only the instance name will be changed. The folder will keep its current name.</
     <message>
         <location filename="src/launcher/InstanceDirUpdate.cpp" line="80"/>
         <source>Rename instance folder</source>
-        <translation>Переименовать папку экземпляра</translation>
+        <translation>Переименовать папку установки</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceDirUpdate.cpp" line="81"/>
@@ -15248,7 +15248,7 @@ Only the instance name will be changed. The folder will keep its current name.</
 
 Old name: %1
 New name: %2</source>
-        <translation>Переименовать также папку экземпляра?
+        <translation>Переименовать также папку установки?
 
 Старое имя: %1
 Новое имя: %2</translation>
@@ -15261,12 +15261,12 @@ New name: %2</source>
     <message>
         <location filename="src/launcher/InstanceDirUpdate.cpp" line="105"/>
         <source>An error occurred when performing the following renaming operation: &lt;br/&gt; - Old instance root: %1&lt;br/&gt; - New instance root: %2&lt;br/&gt;Only the metadata is renamed.</source>
-        <translation>Произошла ошибка при выполнении следующей операции переименования:&lt;br/&gt; - Старый корневой каталог экземпляра: %1&lt;br/&gt; - Новый корневой каталог экземпляра: %2&lt;br/&gt;Будут переименованы только метаданные.</translation>
+        <translation>Произошла ошибка при выполнении следующей операции переименования:&lt;br/&gt; - Старый корневой каталог установки: %1&lt;br/&gt; - Новый корневой каталог установки: %2&lt;br/&gt;Будут переименованы только метаданные.</translation>
     </message>
     <message>
         <location filename="src/launcher/InstanceDirUpdate.cpp" line="119"/>
         <source>There are linked instances</source>
-        <translation>Имеются связанные экземпляры</translation>
+        <translation>Имеются связанные установки</translation>
     </message>
     <message numerus="yes">
         <location filename="src/launcher/InstanceDirUpdate.cpp" line="120"/>
@@ -15278,25 +15278,25 @@ New name: %2</source>
 
 Do you wish to proceed?</source>
         <translation>
-            <numerusform>Следующий экземпляр может ссылаться на файлы в этом экземпляре:
+            <numerusform>Следующий установку может ссылаться на файлы в этой установке:
 
 &lt;br/&gt; %1
 
-&lt;br/&gt; %2 его может повредить другой экземпляр.
+&lt;br/&gt; %2 её может повредить другая установка.
 
 &lt;br/&gt; Продолжить?</numerusform>
-            <numerusform>Следующие экземпляры могут ссылаться на файлы в этом экземпляре:
+            <numerusform>Следующие установки могут ссылаться на файлы в этой установке:
 
 &lt;br/&gt; %1
 
-&lt;br/&gt; %2 их может повредить другие экземпляры.
+&lt;br/&gt; %2 их может повредить другие установки.
 
 &lt;br/&gt; Продолжить?</numerusform>
-            <numerusform>Следующие экземпляры могут ссылаться на файлы в этом экземпляре:
+            <numerusform>Следующие установки могут ссылаться на файлы в этой установке:
 
 &lt;br/&gt; %1
 
-&lt;br/&gt; %2 их может повредить другие экземпляры.
+&lt;br/&gt; %2 их может повредить другие установки.
 
 &lt;br/&gt; Продолжить?</numerusform>
         </translation>
@@ -15407,7 +15407,7 @@ Do you wish to proceed?</source>
     <message>
         <location filename="src/launcher/minecraft/ShortcutUtils.cpp" line="202"/>
         <source>Failed to create instances folder in applications folder!</source>
-        <translation>Не удалось создать папку экземпляров в папке приложений!</translation>
+        <translation>Не удалось создать папку установок в папке приложений!</translation>
     </message>
     <message>
         <location filename="src/launcher/minecraft/ShortcutUtils.cpp" line="211"/>
@@ -15572,7 +15572,7 @@ Error message: %3</source>
     <message>
         <location filename="src/launcher/minecraft/mod/Resource.cpp" line="165"/>
         <source>Not marked as compatible with the instance&apos;s game version.</source>
-        <translation>Не помечен как совместимый с версией игры данного экземпляра.</translation>
+        <translation>Не помечен как совместимый с версией игры данной установки.</translation>
     </message>
 </context>
 <context>
@@ -17611,7 +17611,7 @@ Are you sure?</source>
         <source>Instance update failed because: %1
 
 </source>
-        <translation>Не удалось обновить экземпляр по причине: %1
+        <translation>Не удалось обновить установку по причине: %1
 
 </translation>
     </message>
@@ -17656,7 +17656,7 @@ Are you sure?</source>
     <message>
         <location filename="src/launcher/modplatform/technic/SingleZipPackInstallTask.cpp" line="125"/>
         <source>Instance import has been aborted.</source>
-        <translation>Импортирование экземпляра было прервано.</translation>
+        <translation>Импортирование установки было прервано.</translation>
     </message>
 </context>
 <context>
@@ -17722,7 +17722,7 @@ Are you sure?</source>
     <message>
         <location filename="src/launcher/modplatform/technic/SolderPackInstallTask.cpp" line="205"/>
         <source>Instance import has been aborted.</source>
-        <translation>Импортирование экземпляра было прервано.</translation>
+        <translation>Импортирование установки было прервано.</translation>
     </message>
 </context>
 <context>
@@ -18287,7 +18287,7 @@ Are you sure?</source>
     <message>
         <location filename="src/launcher/minecraft/VanillaInstanceCreationTask.cpp" line="16"/>
         <source>Creating instance from version %1</source>
-        <translation>Создание экземпляра на основе версии %1</translation>
+        <translation>Создание установки на основе версии %1</translation>
     </message>
 </context>
 <context>
@@ -18386,7 +18386,7 @@ The selected installation of Java is 32-bit and doesn&apos;t support more than 2
 The instance may not start due to this.</source>
         <translation>Максимальный объём выделенной памяти превышает поддерживаемое значение.
 Выбранная установка Java является 32-разрядной и не поддерживает более 2048 МиБ оперативной памяти.
-По этой причине экземпляр может не запуститься.</translation>
+По этой причине установка может не запуститься.</translation>
     </message>
     <message>
         <source>Java major version is incompatible. Things might break.</source>
@@ -18403,8 +18403,8 @@ The instance may not start due to this.</source>
         <location filename="src/launcher/minecraft/launch/VerifyJavaInstall.cpp" line="79"/>
         <source>This instance is not compatible with Java version %1.
 Please switch to one of the following Java versions for this instance:</source>
-        <translation>Этот экземпляр несовместим с Java %1.
-Переключитесь на одну из следующих версий Java для запуска этого экземпляра:</translation>
+        <translation>Эта установка несовместима с Java %1.
+Переключитесь на одну из следующих версий Java для запуска этой установки:</translation>
     </message>
     <message>
         <location filename="src/launcher/minecraft/launch/VerifyJavaInstall.cpp" line="84"/>
@@ -18414,7 +18414,7 @@ Please switch to one of the following Java versions for this instance:</source>
     <message>
         <location filename="src/launcher/minecraft/launch/VerifyJavaInstall.cpp" line="86"/>
         <source>Go to instance Java settings to change your Java version or disable the Java compatibility check if you know what you&apos;re doing.</source>
-        <translation>Перейдите в раздел настройки параметров Java для экземпляра, чтобы изменить версию Java или отключить проверку совместимости, если вы уверены в своих действиях.</translation>
+        <translation>Перейдите в раздел настройки параметров Java для установки, чтобы изменить версию Java или отключить проверку совместимости, если вы уверены в своих действиях.</translation>
     </message>
 </context>
 <context>
@@ -18621,7 +18621,7 @@ Please switch to one of the following Java versions for this instance:</source>
     <message>
         <location filename="src/launcher/ui/pages/instance/VersionPage.ui" line="147"/>
         <source>Remove selected component from the instance.</source>
-        <translation>Удалить выбранный компонент из экземпляра.</translation>
+        <translation>Удалить выбранный компонент из установки.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/instance/VersionPage.ui" line="155"/>
@@ -18666,7 +18666,7 @@ Please switch to one of the following Java versions for this instance:</source>
     <message>
         <location filename="src/launcher/ui/pages/instance/VersionPage.ui" line="224"/>
         <source>Download the files needed to launch the instance now.</source>
-        <translation>Скачать файлы, необходимые для запуска экземпляра, прямо сейчас.</translation>
+        <translation>Скачать файлы, необходимые для запуска установки, прямо сейчас.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/instance/VersionPage.ui" line="229"/>
@@ -18676,7 +18676,7 @@ Please switch to one of the following Java versions for this instance:</source>
     <message>
         <location filename="src/launcher/ui/pages/instance/VersionPage.ui" line="232"/>
         <source>Open the instance&apos;s .minecraft folder.</source>
-        <translation>Открыть папку «.minecraft» экземпляра.</translation>
+        <translation>Открыть папку «.minecraft» установки.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/instance/VersionPage.ui" line="237"/>
@@ -18686,7 +18686,7 @@ Please switch to one of the following Java versions for this instance:</source>
     <message>
         <location filename="src/launcher/ui/pages/instance/VersionPage.ui" line="240"/>
         <source>Open the instance&apos;s local libraries folder.</source>
-        <translation>Открыть папку локальных библиотек экземпляра.</translation>
+        <translation>Открыть папку локальных библиотек установки.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/instance/VersionPage.ui" line="245"/>
@@ -18732,7 +18732,7 @@ Please switch to one of the following Java versions for this instance:</source>
     </message>
     <message>
         <source>Couldn&apos;t load the instance profile.</source>
-        <translation>Не удалось загрузить профиль экземпляра.</translation>
+        <translation>Не удалось загрузить профиль установки.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/instance/VersionPage.cpp" line="260"/>
@@ -18838,7 +18838,7 @@ Are you sure?</source>
 Please add a Microsoft account.</source>
         <oldsource>Cannot download Minecraft or update instances unless you have at least one account added.
 Please add your Microsoft or Mojang account.</oldsource>
-        <translation>Невозможно скачать Minecraft или обновить экземпляры, пока не будет добавлена хотя бы одна учётная запись.
+        <translation>Невозможно скачать Minecraft или обновить установки, пока не будет добавлена хотя бы одна учётная запись.
 Добавьте учётную запись Microsoft.</translation>
     </message>
     <message>
@@ -18914,7 +18914,7 @@ Please add your Mojang or Minecraft account.</source>
     <message>
         <location filename="src/launcher/ui/pages/instance/VersionPage.cpp" line="484"/>
         <source>Error updating instance</source>
-        <translation>Ошибка обновления экземпляра</translation>
+        <translation>Ошибка обновления установки</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/instance/VersionPage.h" line="60"/>

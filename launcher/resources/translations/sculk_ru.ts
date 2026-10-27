@@ -688,6 +688,40 @@ Are you sure?</source>
         <source>Total playtime: %1</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Find an instance...  (Ctrl+F)</source>
+        <translation>Найти установку...  (Ctrl+F)</translation>
+    </message>
+    <message>
+        <source>By name</source>
+        <translation>По имени</translation>
+    </message>
+    <message>
+        <source>Recently played first</source>
+        <translation>Сначала недавние</translation>
+    </message>
+    <message>
+        <source>Order of the instances</source>
+        <translation>Порядок установок</translation>
+    </message>
+    <message>
+        <source>Nothing found for &quot;%1&quot;.
+Check the spelling or clear the search.</source>
+        <translation>По запросу «%1» ничего не найдено.
+Проверь написание или очисти поиск.</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n instance(s)</source>
+        <translation>
+            <numerusform>%n установка</numerusform>
+            <numerusform>%n установки</numerusform>
+            <numerusform>%n установок</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>%1 of %2</source>
+        <translation>%1 из %2</translation>
+    </message>
 </context>
 <context>
     <name>ModFolderPage</name>
