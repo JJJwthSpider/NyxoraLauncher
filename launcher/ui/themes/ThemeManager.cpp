@@ -21,6 +21,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QDirIterator>
+#include <QFontDatabase>
 #include <QIcon>
 #include <QImageReader>
 #include <QStyle>
@@ -255,6 +256,29 @@ void ThemeManager::setIconTheme(const QString& name)
     QIcon::setThemeName(name);
 }
 
+void ThemeManager::applyThemeFont(const QString& themeId)
+{
+    if (!m_systemFontSaved) {
+        m_systemFont = QApplication::font();
+        m_systemFontSaved = true;
+    }
+    // SculkShoot Client: the sculk themes use Tiny5, a pixel font that looks like the one in Minecraft (SIL OFL)
+    static const QString pixelFamily = [] {
+        const int id = QFontDatabase::addApplicationFont(":/sculk_theme/fonts/Tiny5-Regular.ttf");
+        const auto families = QFontDatabase::applicationFontFamilies(id);
+        return families.isEmpty() ? QString() : families.first();
+    }();
+    SculkTheme::setActive(themeId.startsWith("sculk"));
+    if (themeId.startsWith("sculk") && !pixelFamily.isEmpty()) {
+        QFont font(pixelFamily);
+        font.setPointSize(12);  // 16 px at 96 DPI: every pixel of the font is two screen pixels
+        font.setStyleStrategy(QFont::PreferAntialias);
+        QApplication::setFont(font);
+    } else {
+        QApplication::setFont(m_systemFont);
+    }
+}
+
 void ThemeManager::setApplicationTheme(const QString& name, bool initial)
 {
     auto systemPalette = qApp->palette();
@@ -262,6 +286,7 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
     if (themeIter != m_themes.end()) {
         auto& theme = themeIter->second;
         themeDebugLog() << "applying theme" << theme->name();
+        applyThemeFont(name);
         theme->apply(initial);
         setTitlebarColorOfAllWindowsOnMac(qApp->palette().window().color());
 

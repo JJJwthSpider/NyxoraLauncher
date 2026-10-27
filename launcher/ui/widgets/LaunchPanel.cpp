@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include "WardenWidget.h"
+#include "ui/themes/SculkTheme.h"
 
 namespace {
 
@@ -159,6 +160,16 @@ void LaunchTile::paintEvent(QPaintEvent*)
     painter.setPen(QPen(border, 1.5));
     painter.setBrush(body);
     painter.drawPath(path);
+    // the body is a block of sculk
+    if (SculkTheme::isActive()) {
+        painter.save();
+        painter.setClipPath(path);
+        painter.setOpacity(0.55);
+        painter.drawTiledPixmap(r, SculkTheme::texture(pal.color(QPalette::Button), pal.color(QPalette::Highlight), 3));
+        painter.restore();
+        painter.setBrush(Qt::NoBrush);
+        painter.drawPath(path);
+    }
 
     // glowing brackets on the four chamfered corners
     painter.setPen(QPen(accent, 2.2, Qt::SolidLine, Qt::SquareCap));
@@ -341,7 +352,11 @@ void LaunchPanel::setProfile(const QString& name, const QPixmap& face)
 void LaunchPanel::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    painter.fillRect(rect(), palette().color(QPalette::Window));
+    if (SculkTheme::isActive()) {
+        painter.drawTiledPixmap(rect(), SculkTheme::texture(palette().color(QPalette::Window), palette().color(QPalette::Highlight)));
+    } else {
+        painter.fillRect(rect(), palette().color(QPalette::Window));
+    }
     painter.setPen(palette().color(QPalette::Light));
     painter.drawLine(rect().topRight(), rect().bottomRight());
 }

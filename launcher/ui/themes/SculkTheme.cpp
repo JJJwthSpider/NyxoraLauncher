@@ -16,7 +16,9 @@
  */
 #include "SculkTheme.h"
 
+#include <QHash>
 #include <QObject>
+#include <QPainter>
 
 // The style sheet below uses @tokens@ that are filled from the color table of the variant:
 //   window / panel / surface / hover   backgrounds from the window down to hovered controls
@@ -26,6 +28,86 @@
 //   text / muted / disabled            primary, secondary and disabled text
 
 SculkTheme::SculkTheme(Variant variant) : m_variant(variant) {}
+
+namespace {
+bool s_active = false;
+
+// a small integer hash, so the texture is random looking but the same on every start
+quint32 cellHash(int x, int y, int salt)
+{
+    quint32 h = quint32(x) * 374761393u + quint32(y) * 668265263u + quint32(salt) * 2246822519u;
+    h = (h ^ (h >> 13)) * 1274126177u;
+    return h ^ (h >> 16);
+}
+
+QColor mix(const QColor& a, const QColor& b, double t)
+{
+    return QColor::fromRgbF(a.redF() + (b.redF() - a.redF()) * t, a.greenF() + (b.greenF() - a.greenF()) * t,
+                            a.blueF() + (b.blueF() - a.blueF()) * t);
+}
+}  // namespace
+
+bool SculkTheme::isActive()
+{
+    return s_active;
+}
+
+void SculkTheme::setActive(bool active)
+{
+    s_active = active;
+}
+
+QPixmap SculkTheme::texture(const QColor& background, const QColor& glow, int pixelSize)
+{
+    static QHash<QString, QPixmap> cache;
+    const QString key = background.name() + glow.name() + QString::number(pixelSize);
+    if (auto it = cache.constFind(key); it != cache.constEnd()) {
+        return *it;
+    }
+
+    // like the sculk block: blotches of slightly darker and lighter skin, crossed by veins that end in glowing dots
+    constexpr int grid = 32;
+    const bool lightBackground = background.lightnessF() > 0.6;
+    const QColor shadow = lightBackground ? background.darker(108) : background.darker(118);
+    const QColor shine = lightBackground ? background.darker(103) : background.lighter(112);
+    const QColor vein = mix(background, glow, lightBackground ? 0.22 : 0.30);
+    const QColor soul = mix(background, glow, lightBackground ? 0.45 : 0.62);
+
+    QImage image(grid, grid, QImage::Format_RGB32);
+    for (int y = 0; y < grid; y++) {
+        for (int x = 0; x < grid; x++) {
+            // blotches: the noise of 2x2 blocks with a bit of per-pixel noise on top, wrapped so the tile is seamless
+            const quint32 blotch = cellHash(x / 2, y / 2, 1) % 100;
+            const quint32 grain = cellHash(x, y, 2) % 100;
+            QColor c = background;
+            if (blotch < 30) {
+                c = shadow;
+            } else if (blotch > 78) {
+                c = shine;
+            }
+            if (grain < 10) {
+                c = c.darker(lightBackground ? 104 : 110);
+            }
+            image.setPixel(x, y, c.rgb());
+        }
+    }
+    // veins: short random walks that wrap around the edges of the tile
+    for (int v = 0; v < 14; v++) {
+        int x = int(cellHash(v, 0, 3) % grid);
+        int y = int(cellHash(v, 0, 4) % grid);
+        const int length = 4 + int(cellHash(v, 0, 5) % 5);
+        for (int step = 0; step < length; step++) {
+            image.setPixel(x, y, (step == length - 1 ? soul : vein).rgb());
+            const quint32 dir = cellHash(v, step, 6) % 4;
+            x = (x + (dir == 0 ? 1 : dir == 1 ? grid - 1 : 0)) % grid;
+            y = (y + (dir == 2 ? 1 : dir == 3 ? grid - 1 : 0)) % grid;
+        }
+    }
+
+    const QPixmap pixmap = QPixmap::fromImage(image.scaled(grid * pixelSize, grid * pixelSize, Qt::IgnoreAspectRatio, Qt::FastTransformation));
+    cache.insert(key, pixmap);
+    return pixmap;
+}
 
 const SculkTheme::Colors& SculkTheme::colors() const
 {

@@ -379,6 +379,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     }
     // start instance when double-clicked
     connect(view, &InstanceView::activated, this, &MainWindow::instanceActivated);
+    // the Play button on every instance card
+    connect(view, &InstanceView::playRequested, this, [this](QModelIndex index) {
+        const QString id = index.data(InstanceList::InstanceIDRole).toString();
+        BaseInstance* inst = APPLICATION->instances()->getInstanceById(id);
+        if (inst && !inst->isRunning()) {
+            activateInstance(inst);
+        }
+    });
 
     // track the selection -- update the instance toolbar
     connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::instanceChanged);

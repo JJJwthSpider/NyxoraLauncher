@@ -80,6 +80,10 @@ class InstanceView : public QAbstractItemView {
     int spacing() const { return m_spacing; };
     void setPaintCat(bool visible);
 
+    /// the "Play" button drawn at the bottom of every instance card
+    static QRect playButtonRect(const QRect& itemRect);
+    QModelIndex hoveredPlayIndex() const { return m_hoveredPlay; }
+
    public slots:
     virtual void updateGeometries() override;
 
@@ -94,6 +98,7 @@ class InstanceView : public QAbstractItemView {
    signals:
     void droppedURLs(QList<QUrl> urls);
     void groupStateChanged(QString group, bool collapsed);
+    void playRequested(QModelIndex index);
 
    protected:
     bool isIndexHidden(const QModelIndex& index) const override;
@@ -101,6 +106,7 @@ class InstanceView : public QAbstractItemView {
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent* event) override;
+    void leaveEvent(QEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
 
@@ -138,6 +144,8 @@ class InstanceView : public QAbstractItemView {
     VisualGroup* m_pressedCategory;
     QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
     QPoint m_lastDragPosition;
+    QPersistentModelIndex m_pressedPlay;
+    QPersistentModelIndex m_hoveredPlay;
 
     VisualGroup* category(const QModelIndex& index) const;
     VisualGroup* category(const QString& cat) const;
@@ -158,4 +166,6 @@ class InstanceView : public QAbstractItemView {
     std::pair<VisualGroup*, VisualGroup::HitResults> rowDropPos(const QPoint& pos);
 
     QPoint offset() const;
+    QModelIndex playIndexAt(const QPoint& visualPos) const;
+    void setHoveredPlay(const QModelIndex& index);
 };

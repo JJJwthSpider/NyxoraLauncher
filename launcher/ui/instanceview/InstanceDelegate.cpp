@@ -46,6 +46,7 @@
 #include "BaseInstance.h"
 #include "InstanceList.h"
 #include "InstanceView.h"
+#include "ui/themes/SculkTheme.h"
 
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& height, qreal& widthUsed)
@@ -201,6 +202,16 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     textHighlightRect.adjust(0, iconSize + 5, 0, 0);
 
+    // on the textured sculk floor every instance gets its own card, so the name stays readable
+    if (SculkTheme::isActive()) {
+        QColor card = opt.palette.color(QPalette::Base);
+        card.setAlphaF(0.82);
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        painter->setPen(QPen(opt.palette.color(QPalette::Light), 1));
+        painter->setBrush(card);
+        painter->drawRoundedRect(QRectF(opt.rect).adjusted(1.5, 1.5, -1.5, -1.5), 8, 8);
+    }
+
     // draw background
     {
         // FIXME: unused
@@ -316,6 +327,31 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     drawProgressOverlay(painter, opt, index.data(InstanceViewRoles::ProgressValueRole).toInt(),
                         index.data(InstanceViewRoles::ProgressMaximumRole).toInt());
 
+    // the Play button at the bottom of the card
+    {
+        const auto* view = qobject_cast<const InstanceView*>(opt.widget);
+        const bool hovered = view && view->hoveredPlayIndex() == index;
+        const bool running = instance && instance->isRunning();
+        const QRect button = InstanceView::playButtonRect(opt.rect);
+        QColor fill = opt.palette.color(QPalette::Highlight);
+        if (running) {
+            fill = opt.palette.color(QPalette::Button);
+        } else if (hovered) {
+            fill = fill.lighter(125);
+        }
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        painter->setPen(QPen(running ? opt.palette.color(QPalette::Mid) : fill.lighter(140), 1));
+        painter->setBrush(fill);
+        painter->drawRoundedRect(QRectF(button).adjusted(0.5, 0.5, -0.5, -0.5), 6, 6);
+
+        QFont font = opt.font;
+        font.setBold(true);
+        painter->setFont(font);
+        painter->setPen(running ? opt.palette.color(QPalette::Text) : opt.palette.color(QPalette::HighlightedText));
+        const QString label = running ? tr("Running") : QString::fromUtf8("\u25B6 ") + tr("Play");
+        painter->drawText(button, Qt::AlignCenter, painter->fontMetrics().elidedText(label, Qt::ElideRight, button.width() - 6));
+    }
+
     painter->restore();
 }
 
@@ -330,7 +366,7 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QMode
 
     QStyle* style = opt.widget ? opt.widget->style() : QApplication::style();
     const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, &option, opt.widget) + 1;
-    int height = 48 + textMargin * 2 + 5;  // TODO: turn constants into variables
+    int height = 48 + textMargin * 2 + 5 + 30;  // TODO: turn constants into variables; 30 is the Play button
     QSize szz = viewItemTextSize(&opt);
     height += szz.height();
     // FIXME: maybe the icon items could scale and keep proportions?

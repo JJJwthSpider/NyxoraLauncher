@@ -50,6 +50,7 @@
 
 #include "VisualGroup.h"
 #include "ui/themes/CatPainter.h"
+#include "ui/themes/SculkTheme.h"
 #include "ui/themes/ThemeManager.h"
 
 #include <Application.h>
@@ -72,6 +73,7 @@ InstanceView::InstanceView(QWidget* parent) : QAbstractItemView(parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setAcceptDrops(true);
     setAutoScroll(true);
+    setMouseTracking(true);  // hover effect of the Play buttons
     setPaintCat(APPLICATION->settings()->get("TheCat").toBool());
     connect(verticalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
@@ -271,6 +273,36 @@ int InstanceView::itemWidth() const
     return m_itemWidth;
 }
 
+QRect InstanceView::playButtonRect(const QRect& itemRect)
+{
+    return QRect(itemRect.left() + 8, itemRect.bottom() - 25, itemRect.width() - 16, 22);
+}
+
+QModelIndex InstanceView::playIndexAt(const QPoint& visualPos) const
+{
+    const QModelIndex index = indexAt(visualPos);
+    if (index.isValid() && (index.flags() & Qt::ItemIsEnabled) && playButtonRect(visualRect(index)).contains(visualPos)) {
+        return index;
+    }
+    return {};
+}
+
+void InstanceView::setHoveredPlay(const QModelIndex& index)
+{
+    if (QModelIndex(m_hoveredPlay) == index) {
+        return;
+    }
+    m_hoveredPlay = index;
+    viewport()->setCursor(index.isValid() ? Qt::PointingHandCursor : Qt::ArrowCursor);
+    viewport()->update();
+}
+
+void InstanceView::leaveEvent(QEvent* event)
+{
+    setHoveredPlay({});
+    QAbstractItemView::leaveEvent(event);
+}
+
 void InstanceView::mousePressEvent(QMouseEvent* event)
 {
     executeDelayedItemsLayout();
@@ -279,6 +311,18 @@ void InstanceView::mousePressEvent(QMouseEvent* event)
     QPoint geometryPos = event->pos() + offset();
 
     QPersistentModelIndex index = indexAt(visualPos);
+
+    // the Play button selects the instance and launches it on release, it never starts a drag
+    m_pressedPlay = QModelIndex();
+    if (event->button() == Qt::LeftButton) {
+        if (const auto play = playIndexAt(visualPos); play.isValid()) {
+            m_pressedPlay = play;
+            m_pressedIndex = QModelIndex();
+            selectionModel()->setCurrentIndex(play, QItemSelectionModel::ClearAndSelect);
+            event->accept();
+            return;
+        }
+    }
 
     m_pressedIndex = index;
     m_pressedAlreadySelected = selectionModel()->isSelected(m_pressedIndex);
@@ -329,6 +373,13 @@ void InstanceView::mouseMoveEvent(QMouseEvent* event)
         return;
     }
 
+    if (event->buttons() == Qt::NoButton) {
+        setHoveredPlay(playIndexAt(visualPos));
+    }
+    if (m_pressedPlay.isValid()) {
+        return;
+    }
+
     if (state() == DraggingState) {
         topLeft = m_pressedPosition - offset();
         if ((topLeft - event->pos()).manhattanLength() > QApplication::startDragDistance()) {
@@ -371,6 +422,16 @@ void InstanceView::mouseReleaseEvent(QMouseEvent* event)
     QPoint visualPos = event->pos();
     QPoint geometryPos = event->pos() + offset();
     QPersistentModelIndex index = indexAt(visualPos);
+
+    if (m_pressedPlay.isValid()) {
+        const QModelIndex play = m_pressedPlay;
+        m_pressedPlay = QModelIndex();
+        if (event->button() == Qt::LeftButton && playIndexAt(visualPos) == play) {
+            emit playRequested(play);
+        }
+        event->accept();
+        return;
+    }
 
     VisualGroup::HitResults hitResult;
 
@@ -422,6 +483,12 @@ void InstanceView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     executeDelayedItemsLayout();
 
+    // a quick second click on Play must not launch the instance twice
+    if (playIndexAt(event->pos()).isValid()) {
+        event->accept();
+        return;
+    }
+
     QModelIndex index = indexAt(event->pos());
     if (!index.isValid() || !(index.flags() & Qt::ItemIsEnabled) || (m_pressedIndex != index)) {
         QMouseEvent me(QEvent::MouseButtonPress, event->position(), event->scenePosition(), event->globalPosition(), event->button(),
@@ -459,6 +526,13 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
 
     QPainter painter(this->viewport());
 
+    // the instances lie on a sculk floor
+    if (SculkTheme::isActive()) {
+        const auto& pal = viewport()->palette();
+        painter.drawTiledPixmap(viewport()->rect(), SculkTheme::texture(pal.color(QPalette::Base), pal.color(QPalette::Highlight)),
+                                QPoint(0, verticalOffset() % 128));
+    }
+
     if (m_cat) {
         m_cat->paint(&painter, this->viewport()->rect());
     }
@@ -473,7 +547,8 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
 
         // calculate the rect for the overlay
         painter.setRenderHint(QPainter::Antialiasing, true);
-        QFont font("sans", 20);
+        QFont font = QApplication::font();  // follows the theme, the sculk themes use a Minecraft-like pixel font
+        font.setPointSize(20);
         font.setBold(true);
 
         QRect bounds = viewport()->geometry();

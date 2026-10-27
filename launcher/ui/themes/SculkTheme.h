@@ -16,6 +16,8 @@
  */
 #pragma once
 
+#include <QPixmap>
+
 #include "FusionTheme.h"
 
 /// @brief Modern, very dark theme in the colors of Minecraft's sculk blocks:
@@ -37,6 +39,12 @@ class SculkTheme : public FusionTheme {
     double fadeAmount() override;
     QColor fadeColor() override;
     LogColors logColorScheme() override;
+
+    /// true while one of the sculk themes is the application theme (set by the ThemeManager)
+    static bool isActive();
+    static void setActive(bool active);
+    /// a seamless pixel texture of a sculk block in the given colors: a 32x32 grid of patches with glowing veins
+    static QPixmap texture(const QColor& background, const QColor& glow, int pixelSize = 4);
 
    private:
     struct Colors {

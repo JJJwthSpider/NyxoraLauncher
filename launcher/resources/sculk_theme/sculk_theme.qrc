@@ -2,6 +2,7 @@
 <RCC version="1.0">
     <qresource prefix="/sculk_theme">
         <file>check.svg</file>
+        <file>fonts/Tiny5-Regular.ttf</file>
         <file>partial.svg</file>
         <file>radio.svg</file>
         <file>arrow-down.svg</file>

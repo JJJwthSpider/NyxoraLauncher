@@ -394,6 +394,17 @@
     </message>
 </context>
 <context>
+    <name>ListViewDelegate</name>
+    <message>
+        <source>Running</source>
+        <translation>Запущена</translation>
+    </message>
+    <message>
+        <source>Play</source>
+        <translation>Играть</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
         <source>Backspace</source>

@@ -68,6 +68,8 @@ class ThemeManager {
     QDir m_catPacksFolder{"catpacks"};
     std::map<QString, std::unique_ptr<CatPack>> m_catPacks;
     QPalette m_defaultPalette;
+    QFont m_systemFont;
+    bool m_systemFontSaved = false;
     QString m_defaultStyle;
     LogColors m_logColors;
 
@@ -78,6 +80,7 @@ class ThemeManager {
     QString addIconTheme(IconTheme theme);
     QString addCatPack(std::unique_ptr<CatPack> catPack);
     void initializeIcons();
+    void applyThemeFont(const QString& themeId);
     void initializeWidgets();
 
     // On non-Mac systems, this is a no-op.
