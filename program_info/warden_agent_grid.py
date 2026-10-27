@@ -26,28 +26,22 @@ for y in range(T, B + 1):
 put(L - 1, T - 1, "."); put(R + 1, T - 1, "."); put(L - 1, B, "."); put(R + 1, B, ".")
 rect(L, B - 1, L, B - 1, "K"); rect(R, B - 1, R, B - 1, "K")  # rounded chin corners
 
-# brow ridge and the deep eye sockets (the Warden is blind)
-rect(L + 2, T + 4, R - 2, T + 4, "N")
-for x0 in (L + 3, R - 7):
-    rect(x0, T + 5, x0 + 4, T + 7, "S")
-    rect(x0 + 1, T + 5, x0 + 3, T + 5, "X")    # rim of the socket catches some light
-# nose bridge
-rect(L + 8, T + 5, L + 9, T + 8, "L")
-
-# glowing souls on the cheeks
-for x0 in (L + 2, R - 3):
-    rect(x0, T + 9, x0 + 1, T + 10, "C")
-    put(x0, T + 9, "B")
-
-# the mouth: jaws, two rows of teeth with shade, a glowing throat
-mx0, mx1, my0, my1 = L + 4, R - 4, T + 10, T + 15
-rect(mx0, my0, mx1, my1, "J")
-rect(mx0 + 1, my0 + 2, mx1 - 1, my1 - 2, "Q")
-rect(mx0 + 4, my0 + 2, mx1 - 4, my1 - 2, "O")  # soul glow deep in the throat
-for x in range(mx0 + 1, mx1, 2):
-    put(x, my0 + 1, "T"); put(x + 1, my0 + 1, "U" if x + 1 < mx1 else "J")
-for x in range(mx0 + 2, mx1, 2):
-    put(x, my1 - 1, "T"); put(x - 1, my1 - 1, "U")
+# the face, like the Warden in the game: no eyes, a lighter face plate with a fold under it,
+# glowing bioluminescent patches on the sides and a wide dark mouth with jagged teeth and fangs
+rect(L + 3, T + 4, R - 3, T + 8, "L")
+rect(L + 5, T + 5, R - 5, T + 7, "H")
+rect(L + 3, T + 9, R - 3, T + 9, "N")
+for x0 in (L + 1, R - 2):
+    rect(x0, T + 6, x0 + 1, T + 8, "C")
+    put(x0 + (1 if x0 < W // 2 else 0), T + 7, "B")
+rect(L + 3, T + 10, R - 3, T + 15, "J")
+rect(L + 4, T + 12, R - 4, T + 13, "Q")
+for i, x in enumerate(range(L + 4, R - 3)):
+    put(x, T + 11, "T" if i % 2 == 0 else "U")  # upper teeth
+    put(x, T + 14, "U" if i % 2 == 0 else "T")  # lower teeth, offset
+for x in range(L + 4, R - 3, 3):
+    put(x, T + 12, "T")  # fangs reaching down
+rect(L + 8, T + 12, L + 9, T + 13, "O")  # a soul glowing deep in the throat
 
 # sculk veins creeping over the forehead
 for x, y in ((L + 4, T + 2), (L + 5, T + 3), (L + 6, T + 3), (R - 5, T + 2), (R - 6, T + 3), (R - 4, T + 1)):

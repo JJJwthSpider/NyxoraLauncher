@@ -43,18 +43,18 @@ const char* s_head[] = {
     ".....KDDLHHHHHHHHHHVHLDDK.....",  //
     ".....KDDLLVLLLLLLLVLLLDDK.....",  //
     ".....KDDMMMVVMMMMVMMMMDDK.....",  //
-    ".....KDDNNNNNNNNNNNNNNDDK.....",  //
-    ".....KDDMSXXXSLLSXXXSMDDK.....",  //
-    ".....KDDMSSSSSLLSSSSSMDDK.....",  //
-    ".....KDDMSSSSSLLSSSSSMDDK.....",  //
-    ".....KDDMMMMMMLLMMMMMMDDK.....",  //
-    ".....KDDBCMMMMMMMMMMBCDDK.....",  //
-    ".....KDDCCJJJJJJJJJJCCDDK.....",  //
-    ".....KDDMMJTUTUTUTUJMMDDK.....",  //
-    ".....KDDMMJQQQOOQQQJMMDDK.....",  //
-    ".....KDDMMJQQQOOQQQJMMDDK.....",  //
-    ".....KDDMMJUTUTUTUTJMMDDK.....",  //
-    ".....KDDDDJJJJJJJJJJDDDDK.....",  //
+    ".....KDDMLLLLLLLLLLLLMDDK.....",  //
+    ".....KDDMLLHHHHHHHHLLMDDK.....",  //
+    ".....KDCCLLHHHHHHHHLLCCDK.....",  //
+    ".....KDCBLLHHHHHHHHLLBCDK.....",  //
+    ".....KDCCLLLLLLLLLLLLCCDK.....",  //
+    ".....KDDMNNNNNNNNNNNNMDDK.....",  //
+    ".....KDDMJJJJJJJJJJJJMDDK.....",  //
+    ".....KDDMJTUTUTUTUTUJMDDK.....",  //
+    ".....KDDMJTQQTOOTQQTJMDDK.....",  //
+    ".....KDDMJQQQQOOQQQQJMDDK.....",  //
+    ".....KDDMJUTUTUTUTUTJMDDK.....",  //
+    ".....KDDDJJJJJJJJJJJJDDDK.....",  //
     ".....KKDDDDDDDDDDDDDDDDKK.....",  //
     "......KKKKKKKKKKKKKKKKKK......",  //
 };
