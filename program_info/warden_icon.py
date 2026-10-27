@@ -39,6 +39,9 @@ COLORS = {"A": "#a2b1b8", "B": "#3d5c6a", "C": "#344852", "D": "#263137", "E": "
 COLS, ROWS = len(WARDEN[0]), len(WARDEN)
 # the soul glowing in the throat (also in WardenWidget.cpp, animated there)
 MOUTH_CENTER = (17.5, 11.5)
+# glowing dots along the left antler (mirrored on the right) and sparkles around the head
+ANTLER_DOTS = [(2, 1), (1, 4), (4, 5), (3, 6), (7, 5), (8, 7)]
+SPARKLES = [(3.5, 10.0), (32.5, 10.0), (6.5, 14.0), (29.5, 14.0), (5.0, 1.5), (31.0, 1.5)]
 
 HERE = pathlib.Path(__file__).resolve().parent
 
@@ -75,6 +78,14 @@ def glow_spots(x0, y0, size):
         for x, c in enumerate(row):
             if c in "BC" and (x < 10 or x > 25) and (x + y) % 3 == 0:
                 cells += f'<rect x="{x0 + x * size:g}" y="{y0 + y * size:g}" width="{size:g}" height="{size:g}" fill="#2fb8c2"/>'
+    for dx, dy in ANTLER_DOTS:
+        for x in (dx, COLS - 1 - dx):
+            cells += f'<rect x="{x0 + x * size:g}" y="{y0 + dy * size:g}" width="{size:g}" height="{size:g}" fill="#c4fdff"/>'
+            spots.append((x0 + (x + 0.5) * size, y0 + (dy + 0.5) * size, size * 1.8, "earGlow"))
+    for i, (sx, sy) in enumerate(SPARKLES):
+        cx, cy, arm = x0 + (sx + 0.5) * size, y0 + (sy + 0.5) * size, size * (1.4 if i % 2 == 0 else 1.0)
+        cells += (f'<path d="M{cx - arm:g} {cy:g}H{cx + arm:g}M{cx:g} {cy - arm:g}V{cy + arm:g}" stroke="#c8fcff" '
+                  f'stroke-width="{size * 0.35:g}" stroke-linecap="round"/>')
     mx, my = MOUTH_CENTER
     throat = (f'<ellipse cx="{x0 + (mx + 0.5) * size:g}" cy="{y0 + (my + 0.5) * size:g}" rx="{4 * size:g}" ry="{2.6 * size:g}" '
               f'fill="url(#soulGlow)"/>')

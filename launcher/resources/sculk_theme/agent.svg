@@ -207,7 +207,7 @@
   <rect x="156" y="235" width="7" height="7" fill="#1b1a20"/>
   <rect x="163" y="235" width="14" height="7" fill="#090911"/>
   <rect x="177" y="235" width="7" height="7" fill="#1b1a20"/>
-  <rect x="23" y="116" width="7" height="7" fill="#2fb8c2"/><rect x="16" y="123" width="7" height="7" fill="#2fb8c2"/><rect x="226" y="123" width="7" height="7" fill="#2fb8c2"/><rect x="9" y="130" width="7" height="7" fill="#2fb8c2"/><rect x="240" y="130" width="7" height="7" fill="#2fb8c2"/><rect x="2" y="137" width="7" height="7" fill="#2fb8c2"/><rect x="233" y="137" width="7" height="7" fill="#2fb8c2"/><rect x="16" y="144" width="7" height="7" fill="#2fb8c2"/><rect x="247" y="144" width="7" height="7" fill="#2fb8c2"/><rect x="9" y="151" width="7" height="7" fill="#2fb8c2"/><rect x="30" y="151" width="7" height="7" fill="#2fb8c2"/><rect x="219" y="151" width="7" height="7" fill="#2fb8c2"/><rect x="240" y="151" width="7" height="7" fill="#2fb8c2"/><rect x="23" y="158" width="7" height="7" fill="#2fb8c2"/><rect x="233" y="158" width="7" height="7" fill="#2fb8c2"/><ellipse cx="128" cy="200" rx="28" ry="18.2" fill="url(#soulGlow)"/><circle cx="12.5" cy="119.5" r="10.5" fill="url(#earGlow)"/>
+  <rect x="23" y="116" width="7" height="7" fill="#2fb8c2"/><rect x="16" y="123" width="7" height="7" fill="#2fb8c2"/><rect x="226" y="123" width="7" height="7" fill="#2fb8c2"/><rect x="9" y="130" width="7" height="7" fill="#2fb8c2"/><rect x="240" y="130" width="7" height="7" fill="#2fb8c2"/><rect x="2" y="137" width="7" height="7" fill="#2fb8c2"/><rect x="233" y="137" width="7" height="7" fill="#2fb8c2"/><rect x="16" y="144" width="7" height="7" fill="#2fb8c2"/><rect x="247" y="144" width="7" height="7" fill="#2fb8c2"/><rect x="9" y="151" width="7" height="7" fill="#2fb8c2"/><rect x="30" y="151" width="7" height="7" fill="#2fb8c2"/><rect x="219" y="151" width="7" height="7" fill="#2fb8c2"/><rect x="240" y="151" width="7" height="7" fill="#2fb8c2"/><rect x="23" y="158" width="7" height="7" fill="#2fb8c2"/><rect x="233" y="158" width="7" height="7" fill="#2fb8c2"/><rect x="16" y="123" width="7" height="7" fill="#c4fdff"/><rect x="233" y="123" width="7" height="7" fill="#c4fdff"/><rect x="9" y="144" width="7" height="7" fill="#c4fdff"/><rect x="240" y="144" width="7" height="7" fill="#c4fdff"/><rect x="30" y="151" width="7" height="7" fill="#c4fdff"/><rect x="219" y="151" width="7" height="7" fill="#c4fdff"/><rect x="23" y="158" width="7" height="7" fill="#c4fdff"/><rect x="226" y="158" width="7" height="7" fill="#c4fdff"/><rect x="51" y="151" width="7" height="7" fill="#c4fdff"/><rect x="198" y="151" width="7" height="7" fill="#c4fdff"/><rect x="58" y="165" width="7" height="7" fill="#c4fdff"/><rect x="191" y="165" width="7" height="7" fill="#c4fdff"/><path d="M20.2 189.5H39.8M30 179.7V199.3" stroke="#c8fcff" stroke-width="2.45" stroke-linecap="round"/><path d="M226 189.5H240M233 182.5V196.5" stroke="#c8fcff" stroke-width="2.45" stroke-linecap="round"/><path d="M41.2 217.5H60.8M51 207.7V227.3" stroke="#c8fcff" stroke-width="2.45" stroke-linecap="round"/><path d="M205 217.5H219M212 210.5V224.5" stroke="#c8fcff" stroke-width="2.45" stroke-linecap="round"/><path d="M30.7 130H50.3M40.5 120.2V139.8" stroke="#c8fcff" stroke-width="2.45" stroke-linecap="round"/><path d="M215.5 130H229.5M222.5 123V137" stroke="#c8fcff" stroke-width="2.45" stroke-linecap="round"/><ellipse cx="128" cy="200" rx="28" ry="18.2" fill="url(#soulGlow)"/><circle cx="12.5" cy="119.5" r="10.5" fill="url(#earGlow)"/>
   <circle cx="243.5" cy="119.5" r="10.5" fill="url(#earGlow)"/>
   <circle cx="12.5" cy="140.5" r="10.5" fill="url(#earGlow)"/>
   <circle cx="243.5" cy="140.5" r="10.5" fill="url(#earGlow)"/>
@@ -221,6 +221,18 @@
   <circle cx="47.5" cy="175.5" r="10.5" fill="url(#earGlow)"/>
   <circle cx="208.5" cy="175.5" r="10.5" fill="url(#earGlow)"/>
   <circle cx="229.5" cy="175.5" r="10.5" fill="url(#earGlow)"/>
+  <circle cx="19.5" cy="126.5" r="12.6" fill="url(#earGlow)"/>
+  <circle cx="236.5" cy="126.5" r="12.6" fill="url(#earGlow)"/>
+  <circle cx="12.5" cy="147.5" r="12.6" fill="url(#earGlow)"/>
+  <circle cx="243.5" cy="147.5" r="12.6" fill="url(#earGlow)"/>
+  <circle cx="33.5" cy="154.5" r="12.6" fill="url(#earGlow)"/>
+  <circle cx="222.5" cy="154.5" r="12.6" fill="url(#earGlow)"/>
+  <circle cx="26.5" cy="161.5" r="12.6" fill="url(#earGlow)"/>
+  <circle cx="229.5" cy="161.5" r="12.6" fill="url(#earGlow)"/>
+  <circle cx="54.5" cy="154.5" r="12.6" fill="url(#earGlow)"/>
+  <circle cx="201.5" cy="154.5" r="12.6" fill="url(#earGlow)"/>
+  <circle cx="61.5" cy="168.5" r="12.6" fill="url(#earGlow)"/>
+  <circle cx="194.5" cy="168.5" r="12.6" fill="url(#earGlow)"/>
  </g>
  <path d="M110 16h72a12 12 0 0 1 12 12v36a12 12 0 0 1-12 12h-48l-20 22 4-22h-8a12 12 0 0 1-12-12v-36a12 12 0 0 1 12-12z"
        fill="#0b1f25" stroke="#29dfeb" stroke-width="5"/>

@@ -21,6 +21,7 @@
 #include <QRadialGradient>
 #include <QRandomGenerator>
 #include <algorithm>
+#include <iterator>
 #include <cmath>
 
 namespace {
@@ -92,6 +93,11 @@ QColor colorOf(char c)
 }
 
 const QPointF s_mouthCenter(17.5, 11.5);
+// glowing dots along the left antler (the right one is mirrored), each twinkling in its own rhythm
+const QPoint s_antlerDots[] = { { 2, 1 }, { 1, 4 }, { 4, 5 }, { 3, 6 }, { 7, 5 }, { 8, 7 } };
+// sparkles around the head, in cell coordinates, kept clear of the head and the speech bubble
+const QPointF s_sparkles[] = { { 3.5, 10.0 }, { 32.5, 10.0 }, { 6.5, 14.0 }, { 29.5, 14.0 }, { 8.5, 11.5 },
+                               { 27.5, 11.5 }, { 5.0, 1.5 },  { 31.0, 1.5 }, { 2.0, 16.0 }, { 34.0, 16.0 } };
 
 bool isHornCell(int x, int)
 {
@@ -313,9 +319,36 @@ void WardenWidget::paintEvent(QPaintEvent*)
                 }
             }
         }
+        // the glowing dots on this antler move with it
+        for (int i = 0; i < int(std::size(s_antlerDots)); i++) {
+            const int x = side == 0 ? s_antlerDots[i].x() : s_cols - 1 - s_antlerDots[i].x();
+            const int y = s_antlerDots[i].y();
+            const double twinkle = 0.5 + 0.5 * std::sin(m_time * (2.0 + 0.37 * i) + i * 1.7 + side * 0.9);
+            painter.setRenderHint(QPainter::Antialiasing, false);
+            drawCell(x, y, mix(QColor(0x29, 0xdf, 0xeb), QColor(0xe6, 0xfe, 0xff), twinkle));
+            painter.setRenderHint(QPainter::Antialiasing, true);
+            glowCell(x, y, 0.3 + 0.45 * twinkle + (m_excited ? 0.15 : 0.0));
+        }
         painter.restore();
     }
     painter.setRenderHint(QPainter::Antialiasing, true);
+
+    // sparkles around the head: little four-pointed stars that light up and fade one after another
+    for (int i = 0; i < int(std::size(s_sparkles)); i++) {
+        const double phase = std::fmod(m_time * 0.45 + i * 0.37, 1.0);
+        const double light = std::pow(std::max(0.0, std::sin(phase * s_pi)), 3.0);
+        if (light < 0.02) {
+            continue;
+        }
+        const QPointF center((s_sparkles[i].x() + 0.5) * cell, (s_sparkles[i].y() + 0.5) * cell);
+        const double arm = cell * (0.6 + 0.9 * light);
+        QColor color(0xc8, 0xfc, 0xff);
+        color.setAlphaF(light);
+        painter.setPen(QPen(color, std::max(1.0, cell * 0.35), Qt::SolidLine, Qt::RoundCap));
+        painter.drawLine(center - QPointF(arm, 0), center + QPointF(arm, 0));
+        painter.drawLine(center - QPointF(0, arm), center + QPointF(0, arm));
+        glowCell(s_sparkles[i].x(), s_sparkles[i].y(), 0.35 * light);
+    }
 
     // the souls in front of the head
     drawSouls(true);
