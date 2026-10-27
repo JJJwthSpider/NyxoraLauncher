@@ -91,6 +91,15 @@ QColor colorOf(char c)
     }
 }
 
+// bioluminescent sculk spots on the skin, like the glowing layer of the Warden in the game
+const QPoint s_glowSpots[] = {
+    { 12, 3 }, { 13, 4 }, { 22, 3 }, { 23, 4 },  // forehead
+    { 17, 5 }, { 18, 5 },                        // between the brows
+    { 11, 11 }, { 11, 12 }, { 24, 11 }, { 24, 12 }, // cheeks
+    { 12, 16 }, { 23, 16 }, { 17, 17 }, { 18, 17 }, // chin
+};
+const QPointF s_mouthCenter(17.5, 11.5);
+
 bool isHornCell(int x, int)
 {
     return x < s_headLeft || x > s_headRight;
@@ -221,6 +230,31 @@ void WardenWidget::paintEvent(QPaintEvent*)
         painter.setBrush(gradient);
         painter.drawEllipse(center, cell * 2.0, cell * 2.0);
     };
+    // three souls circling the head; the ones behind it are drawn before the head, the others after it
+    auto drawSouls = [&painter, cell, this](bool front) {
+        for (int i = 0; i < 3; i++) {
+            const double angle = m_time * 0.9 + i * 2.0 * s_pi / 3.0;
+            const double depth = std::sin(angle);  // in front of the head when positive
+            if ((depth >= 0) != front) {
+                continue;
+            }
+            const QPointF center((s_headLeft + s_headRight + 1) / 2.0 * cell + std::cos(angle) * 11.0 * cell,
+                                 (s_rows * 0.5 + depth * 2.5) * cell);
+            const double size = cell * (0.9 + 0.35 * depth);
+            QRadialGradient gradient(center, size * 2.6);
+            QColor c(0x8f, 0xf6, 0xfb);
+            c.setAlphaF(0.35 + 0.25 * depth);
+            QColor clear = c;
+            clear.setAlphaF(0);
+            gradient.setColorAt(0, c);
+            gradient.setColorAt(1, clear);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(gradient);
+            painter.drawEllipse(center, size * 2.6, size * 2.6);
+            painter.fillRect(QRectF(center.x() - size / 2, center.y() - size / 2, size, size), QColor(0xd8, 0xfd, 0xff));
+        }
+    };
+    drawSouls(false);
     const QColor soul(0x3f, 0xc8, 0xd2);
     const QColor tipBright(0xe2, 0xf4, 0xff);
 
@@ -234,6 +268,36 @@ void WardenWidget::paintEvent(QPaintEvent*)
             }
             drawCell(x, y, c == 'K' ? mix(colorOf('K'), soul, 0.15 + 0.55 * beat) : colorOf(c));
         }
+    }
+
+    // a soul glowing deep in the throat, brighter with every heartbeat
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    {
+        const QPointF center((s_mouthCenter.x() + 0.5) * cell, (s_mouthCenter.y() + 0.5) * cell);
+        QRadialGradient gradient(center, cell * 4.0);
+        QColor inner(0x5f, 0xf3, 0xfb);
+        inner.setAlphaF(std::clamp(0.25 + 0.55 * beat + (m_excited ? 0.15 : 0.0), 0.0, 1.0));
+        QColor outer = inner;
+        outer.setAlphaF(0.0);
+        gradient.setColorAt(0.0, inner);
+        gradient.setColorAt(1.0, outer);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(gradient);
+        painter.drawEllipse(center, cell * 4.0, cell * 2.6);
+    }
+
+    // the sculk spots light up in a wave that runs from the mouth outwards, one wave per heartbeat
+    painter.setRenderHint(QPainter::Antialiasing, false);
+    for (const auto& spot : s_glowSpots) {
+        const double distance = std::hypot(spot.x() - s_mouthCenter.x(), spot.y() - s_mouthCenter.y());
+        const double wave = heartbeat(m_beatPhase - distance * 0.025);
+        const double strength = std::clamp(0.35 + 0.65 * wave + (m_excited ? 0.15 : 0.0), 0.0, 1.0);
+        drawCell(spot.x(), spot.y(), mix(QColor(0x0e, 0x6f, 0x78), QColor(0x7f, 0xf6, 0xfb), strength));
+    }
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    for (const auto& spot : s_glowSpots) {
+        const double distance = std::hypot(spot.x() - s_mouthCenter.x(), spot.y() - s_mouthCenter.y());
+        glowCell(spot.x(), spot.y(), 0.12 + 0.45 * heartbeat(m_beatPhase - distance * 0.025));
     }
 
     // the antlers sway around where they grow out of the head, in opposite directions; the light tips shimmer
@@ -253,15 +317,29 @@ void WardenWidget::paintEvent(QPaintEvent*)
                 if (c == '.') {
                     continue;
                 }
-                drawCell(x, y, c == 'A' ? mix(colorOf('A'), tipBright, glow * 0.7) : colorOf(c));
+                // pulses of energy run from the head out to the tips of the antlers
+                const double along = std::abs(x + 0.5 - base.x());
+                const double pulse = std::pow(std::max(0.0, std::sin(m_time * (m_excited ? 6.0 : 3.5) - along * 0.55)), 6.0);
+                QColor color = colorOf(c);
                 if (c == 'A') {
-                    glowCell(x, y, 0.08 + 0.18 * glow + (m_excited ? 0.15 : 0.0));
+                    color = mix(mix(colorOf('A'), QColor(0x8f, 0xf6, 0xfb), 0.55), tipBright, glow * 0.6 + pulse * 0.4);
+                } else if (c == 'B' || c == 'C') {
+                    color = mix(color, QColor(0x29, 0xdf, 0xeb), 0.15 + 0.6 * pulse);
+                }
+                drawCell(x, y, color);
+                if (c == 'A') {
+                    glowCell(x, y, 0.25 + 0.3 * glow + 0.3 * pulse + (m_excited ? 0.15 : 0.0));
+                } else if (pulse > 0.3 && (c == 'B' || c == 'C')) {
+                    glowCell(x, y, 0.25 * pulse);
                 }
             }
         }
         painter.restore();
     }
     painter.setRenderHint(QPainter::Antialiasing, true);
+
+    // the souls in front of the head
+    drawSouls(true);
 
     // soul particles drifting up
     painter.setPen(Qt::NoPen);
