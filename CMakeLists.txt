@@ -159,6 +159,12 @@ endif()
 
 option(BUILD_TESTING "Build the testing tree." ON)
 
+# the sources are UTF-8 (Russian texts of the AI agent and the lobby among them); MSVC would read them in the
+# code page of the system otherwise
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 find_package(ECM NO_MODULE REQUIRED)
 set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
 
