@@ -754,9 +754,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("JvmArgs", "");
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
-        auto defaultEnableAutoJava = m_settings->get("JavaPath").toString().isEmpty();
-        m_settings->registerSetting("AutomaticJavaSwitch", defaultEnableAutoJava);
-        m_settings->registerSetting("AutomaticJavaDownload", defaultEnableAutoJava);
+        // the Java always follows the Minecraft version of the instance, and is downloaded when missing
+        m_settings->registerSetting("AutomaticJavaSwitch", true);
+        m_settings->registerSetting("AutomaticJavaDownload", true);
         m_settings->registerSetting("UserAskedAboutAutomaticJavaDownload", false);
 
         // Legacy settings

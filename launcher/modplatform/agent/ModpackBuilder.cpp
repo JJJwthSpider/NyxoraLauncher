@@ -150,7 +150,7 @@ void ModpackBuilder::build(const Plan& plan, bool useModrinth, bool useCurseForg
         sources << "CurseForge";
     emit log(
         tr("Minecraft %1, loader %2, mods from %3.").arg(m_plan.minecraftVersion, loaderDisplayName(m_plan.loader), sources.join(" + ")));
-    resolveLoaderVersion();
+    checkMinecraftVersion();
 }
 
 void ModpackBuilder::abort()
@@ -270,6 +270,29 @@ void ModpackBuilder::phaseDone()
     auto next = std::move(m_onPhaseDone);
     m_onPhaseDone = nullptr;
     next();
+}
+
+void ModpackBuilder::checkMinecraftVersion()
+{
+    // any version works as long as Minecraft has it and the loader supports it
+    emit log(tr("Checking that Minecraft %1 exists...").arg(m_plan.minecraftVersion));
+    m_minecraftList = APPLICATION->metadataIndex()->get("net.minecraft");
+    m_loaderTask = m_minecraftList->getLoadTask();
+    connect(m_loaderTask.get(), &Task::succeeded, this, [this] {
+        m_loaderTask.reset();
+        if (!m_minecraftList->hasVersion(m_plan.minecraftVersion)) {
+            m_running = false;
+            emit failed(tr("Minecraft %1 does not exist. Check the version number.").arg(m_plan.minecraftVersion));
+            return;
+        }
+        resolveLoaderVersion();
+    });
+    connect(m_loaderTask.get(), &Task::failed, this, [this](const QString& reason) {
+        m_loaderTask.reset();
+        m_running = false;
+        emit failed(tr("Could not load the list of Minecraft versions: %1").arg(reason));
+    });
+    m_loaderTask->start();
 }
 
 void ModpackBuilder::resolveLoaderVersion()

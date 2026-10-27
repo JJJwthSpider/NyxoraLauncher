@@ -67,7 +67,7 @@ void ResourceUpdateDialog::checkCandidates()
     }
 
     // Report failed metadata generation
-    if (!m_failedMetadata.empty()) {
+    if (!m_failedMetadata.empty() && !m_quiet) {
         QString text;
         for (const auto& failed : m_failedMetadata) {
             const auto& mod = std::get<0>(failed);
@@ -159,7 +159,7 @@ void ResourceUpdateDialog::checkCandidates()
     }
 
     // Report failed update checking
-    if (!m_failedCheckUpdate.empty()) {
+    if (!m_failedCheckUpdate.empty() && !m_quiet) {
         QString text;
         for (const auto& failed : m_failedCheckUpdate) {
             const auto& mod = std::get<0>(failed);
@@ -249,6 +249,7 @@ void ResourceUpdateDialog::checkCandidates()
 
                 appendResource(updatable, extraInfo.required_by);
                 m_tasks.insert(updatable.name, updatable.download);
+                m_dependencyNames << updatable.name;
             }
         }
     }
@@ -515,6 +516,17 @@ void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, Q
     ui->modTreeWidget->setItemWidget(changelog, 0, changelogArea);
 
     ui->modTreeWidget->addTopLevelItem(itemTop);
+}
+
+const QList<ResourceDownloadTask::Ptr> ResourceUpdateDialog::getDependencyTasks() const
+{
+    QList<ResourceDownloadTask::Ptr> list;
+    for (const auto& name : m_dependencyNames) {
+        if (auto task = m_tasks.find(name); task != m_tasks.end()) {
+            list.push_back(task.value());
+        }
+    }
+    return list;
 }
 
 auto ResourceUpdateDialog::getTasks() -> const QList<ResourceDownloadTask::Ptr>

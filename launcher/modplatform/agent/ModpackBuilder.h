@@ -112,6 +112,7 @@ class ModpackBuilder : public QObject {
     void requestDone();
     void phaseDone();
 
+    void checkMinecraftVersion();
     void resolveLoaderVersion();
     void resolveCurated();
     void tryCurated(const CuratedMod& curated, int alternative, bool curseForge);
@@ -141,6 +142,7 @@ class ModpackBuilder : public QObject {
     QList<AgentMod> m_mods;
     QSet<QString> m_triedProjects;
     QString m_loaderVersion;
+    Meta::VersionList::Ptr m_minecraftList;
     Meta::VersionList::Ptr m_loaderList;
     Task::Ptr m_loaderTask;
 

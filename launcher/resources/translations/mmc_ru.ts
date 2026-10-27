@@ -1008,7 +1008,7 @@ for details on the last update attempt.</source>
         <translation>При обновлении произошла ошибка
 
 Перед продолжением убедитесь, что ваша установка работает исправно.
-Проверьте журнал обновлений Prism Launcher по адресу: 
+Проверьте журнал обновлений SculkShoot Client по адресу: 
 %1
 для получения подробной информации о последней попытке обновления.</translation>
     </message>
@@ -4311,7 +4311,7 @@ NOTE: Make sure you made a backup of your important instance data before updatin
         <location filename="src/launcher/ui/pages/modplatform/flame/FlamePage.ui" line="22"/>
         <source>Note: CurseForge allows creators to block access to third-party tools like Prism Launcher. As such, you may need to manually download some mods to be able to install a modpack.</source>
         <oldsource>Note: CurseForge allows creators to block access to third-party tools like PolyMC. As such, you may need to manually download some mods to be able to install a modpack.</oldsource>
-        <translation>Примечание: CurseForge позволяет авторам блокировать доступ для сторонних приложений, таких как Prism Launcher. В связи с этим, вам может потребоваться загрузить некоторые моды вручную, чтобы установить сборку.</translation>
+        <translation>Примечание: CurseForge позволяет авторам блокировать доступ для сторонних приложений, таких как SculkShoot Client. В связи с этим, вам может потребоваться загрузить некоторые моды вручную, чтобы установить сборку.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/modplatform/flame/FlamePage.ui" line="37"/>
@@ -4701,7 +4701,7 @@ NOTE: Make sure you made a backup of your important instance data before updatin
         <location filename="src/launcher/ui/pages/modplatform/ImportPage.ui" line="63"/>
         <source>- Prism Launcher, PolyMC or MultiMC exported instances (ZIP)</source>
         <oldsource>- PolyMC / MultiMC exported instances (ZIP)</oldsource>
-        <translation>- Экспортированные экземпляры Prism Launcher, PolyMC или MultiMC (ZIP)</translation>
+        <translation>- Экспортированные экземпляры SculkShoot Client, PolyMC или MultiMC (ZIP)</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/modplatform/ImportPage.ui" line="73"/>
@@ -6313,7 +6313,7 @@ Please make sure that the maximum memory value is lower.</source>
         <location filename="src/launcher/ui/setupwizard/JavaWizardPage.cpp" line="85"/>
         <source>Please select how much memory to allocate to instances and if Prism Launcher should manage Java automatically or manually.</source>
         <oldsource>Please select how much memory to allocate to instances and if Prism Launcher should manage java automatically or manually.</oldsource>
-        <translation>Выберите объём выделяемой памяти для экземпляров, а также автоматический или ручной способ управления Java в Prism Launcher.</translation>
+        <translation>Выберите объём выделяемой памяти для экземпляров, а также автоматический или ручной способ управления Java в SculkShoot Client.</translation>
     </message>
     <message>
         <source>You do not have a working Java set up yet or it went missing.
@@ -7006,7 +7006,7 @@ You may have to fix your mods because the game is still logging to files and lik
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="305"/>
         <source>Folder where Prism Launcher stores automatically downloaded Java versions. Do NOT set this to your system Java installation.</source>
-        <translation>Папка, в которой Prism Launcher хранит автоматически скачанные версии Java. НЕ указывайте здесь путь к установленной в системе Java.</translation>
+        <translation>Папка, в которой SculkShoot Client хранит автоматически скачанные версии Java. НЕ указывайте здесь путь к установленной в системе Java.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/pages/global/LauncherPage.ui" line="89"/>
@@ -8984,7 +8984,7 @@ Reason:
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="464"/>
         <source>Prism Launcher (zip)</source>
-        <translation>Prism Launcher (zip)</translation>
+        <translation>SculkShoot Client (zip)</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.ui" line="472"/>
@@ -9592,7 +9592,7 @@ Are you sure?</source>
 Prism Launcher currently only supports modpack links such as modrinth://modpack/fabulously-optimized.</source>
         <translation>Неподдерживаемая ссылка Modrinth.
 
-В настоящее время Prism Launcher поддерживает только ссылки на сборки модов, например, modrinth://modpack/fabulously-optimized.</translation>
+В настоящее время SculkShoot Client поддерживает только ссылки на сборки модов, например, modrinth://modpack/fabulously-optimized.</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/MainWindow.cpp" line="1065"/>
@@ -13818,7 +13818,7 @@ The updater cannot continue until you fix this problem.</source>
     <message>
         <location filename="src/launcher/updater/prismupdater/PrismUpdater.cpp" line="458"/>
         <source>Actions outside of checking if an update is available are not supported when running the flatpak version of Prism Launcher.</source>
-        <translation>При работе Flatpack версии Prism Launcher доступна только проверка наличия обновлений.</translation>
+        <translation>При работе Flatpack версии SculkShoot Client доступна только проверка наличия обновлений.</translation>
     </message>
     <message>
         <source>Updating Not Supported</source>
@@ -15086,7 +15086,7 @@ Would you like to remove those existing saves as part of this update?</source>
     <message>
         <location filename="src/launcher/filelink/FileLink.cpp" line="49"/>
         <source>a batch MKLINK program for windows to be used with prismlauncher</source>
-        <translation>программа пакетной обработки MKLINK для Windows, которая будет использоваться с Prism Launcher</translation>
+        <translation>программа пакетной обработки MKLINK для Windows, которая будет использоваться с SculkShoot Client</translation>
     </message>
     <message>
         <location filename="src/launcher/ui/instanceview/VisualGroup.cpp" line="163"/>
@@ -15096,7 +15096,7 @@ Would you like to remove those existing saves as part of this update?</source>
     <message>
         <location filename="src/launcher/updater/prismupdater/PrismUpdater.cpp" line="86"/>
         <source>An auto-updater for Prism Launcher</source>
-        <translation>Автопроверка обновлений Prism Launcher</translation>
+        <translation>Автопроверка обновлений SculkShoot Client</translation>
     </message>
     <message>
         <source>Could not fix permissions for %1</source>

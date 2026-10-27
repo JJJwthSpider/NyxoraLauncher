@@ -187,7 +187,9 @@ Plan parseLocally(const QString& request)
     Plan plan;
     const auto lower = request.toLower();
 
-    static const QRegularExpression s_version(QStringLiteral("\\b(1\\.\\d{1,2}(?:\\.\\d{1,2})?)\\b"));
+    // classic versions (1.7.10, 1.12.2, 1.21.1) and the year based ones Mojang uses since 2026 (26.1, 26.1.2)
+    static const QRegularExpression s_version(
+        QStringLiteral("(?<![\\d.])(1\\.\\d{1,2}(?:\\.\\d{1,2})?|(?:2[5-9]|[3-9]\\d)\\.\\d{1,2}(?:\\.\\d{1,2})?)(?![\\d.])"));
     if (auto match = s_version.match(lower); match.hasMatch()) {
         plan.minecraftVersion = match.captured(1);
         plan.versionGiven = true;

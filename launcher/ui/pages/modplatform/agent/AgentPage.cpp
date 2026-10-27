@@ -53,9 +53,10 @@ const char* s_topicReplies[] = {
     QT_TRANSLATE_NOOP("AgentPage", "Technology and space"),
     QT_TRANSLATE_NOOP("AgentPage", "Just optimization for a weak PC"),
 };
-const char* s_setupReplies[] = { "NeoForge 1.21.1", "Fabric 1.21.1", "Forge 1.20.1", "Fabric 1.20.1" };
+// only examples: any Minecraft version works for which the chosen loader exists
+const char* s_setupReplies[] = { "NeoForge 1.21.1", "Fabric 1.20.1", "Forge 1.12.2", "Forge 1.7.10" };
 const char* s_loaderReplies[] = { "NeoForge", "Fabric", "Forge", "Quilt" };
-const char* s_versionReplies[] = { "1.21.1", "1.20.1", "1.19.2", "1.18.2" };
+const char* s_versionReplies[] = { "1.21.1", "1.20.1", "1.16.5", "1.12.2" };
 const char* s_afterReplies[] = {
     QT_TRANSLATE_NOOP("AgentPage", "Add magic"),
     QT_TRANSLATE_NOOP("AgentPage", "Add shaders"),
@@ -541,7 +542,8 @@ void AgentPage::continueConversation()
     const auto plan = ModpackAgent::planFor(m_topic, m_loader, m_version);
     if (m_loader.isEmpty() && m_version.isEmpty()) {
         m_stage = Stage::Setup;
-        agentSay(tr("Got it: <b>%1</b>. Now the loader and the Minecraft version, for example <i>NeoForge 1.21.1</i>.")
+        agentSay(tr("Got it: <b>%1</b>. Now write the loader and the Minecraft version. Any version that has the loader works, "
+                    "for example <i>NeoForge 1.21.1</i>, <i>Forge 1.12.2</i> or <i>Fabric 1.20.1</i>.")
                      .arg(themeList(plan).toHtmlEscaped()),
                  translated(s_setupReplies, std::size(s_setupReplies), false));
         return;
@@ -554,7 +556,8 @@ void AgentPage::continueConversation()
     }
     if (m_version.isEmpty()) {
         m_stage = Stage::Setup;
-        agentSay(tr("%1 it is. Which Minecraft version?").arg(ModpackAgent::loaderDisplayName(m_loader)),
+        agentSay(tr("%1 it is. Which Minecraft version? Write any version, for example 1.20.1 or 1.12.2.")
+                     .arg(ModpackAgent::loaderDisplayName(m_loader)),
                  translated(s_versionReplies, std::size(s_versionReplies), false));
         return;
     }

@@ -54,6 +54,7 @@ class AutoInstallJava : public LaunchStep {
 
    protected:
     void setJavaPath(QString path);
+    void downloadCompatibleJava();
     void setJavaPathFromPartial();
     void downloadJava(Meta::Version::Ptr version, QString javaName);
     void tryNextMajorJava();

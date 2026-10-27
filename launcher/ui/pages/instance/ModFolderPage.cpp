@@ -281,16 +281,36 @@ void ModFolderPage::updateMods(bool includeDeps, QList<Resource*> only, bool sil
     }
 
     ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList());
+    updateDialog.setQuiet(silentIfNothingFound);
     updateDialog.checkCandidates();
+
+    if (silentIfNothingFound) {
+        // mods added by hand: download what they depend on right away, without asking
+        const auto dependencies = updateDialog.aborted() ? QList<ResourceDownloadTask::Ptr>{} : updateDialog.getDependencyTasks();
+        if (dependencies.isEmpty()) {
+            return;  // the added mods have everything they need
+        }
+        auto* tasks = new ConcurrentTask(tr("Download dependencies"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(tasks, &Task::failed, [this, tasks](const QString& reason) {
+            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+            tasks->deleteLater();
+        });
+        connect(tasks, &Task::finished, tasks, &QObject::deleteLater);
+        for (const auto& task : dependencies) {
+            tasks->addTask(task);
+        }
+        ProgressDialog loadDialog(this);
+        loadDialog.setSkipButton(true, tr("Abort"));
+        loadDialog.execWithTask(tasks);
+        m_model->update();
+        return;
+    }
 
     if (updateDialog.aborted()) {
         CustomMessageBox::selectable(this, tr("Aborted"), tr("The mod updater was aborted!"), QMessageBox::Warning)->show();
         return;
     }
     if (updateDialog.noUpdates()) {
-        if (silentIfNothingFound) {
-            return;  // the added mods have everything they need
-        }
         QString message{ tr("'%1' is up-to-date! :)").arg(modsList.front()->name()) };
         if (modsList.size() > 1) {
             if (useAll) {

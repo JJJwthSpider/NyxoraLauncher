@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates the Warden launcher icon and logos of the Sculk edition.
+"""Generates the SculkShoot Client icon, logos and the Warden pictures.
 
 The head is pixel art (20x17) so it looks like Minecraft; the same grid is used by the
 animated Warden in the launcher (launcher/ui/widgets/WardenWidget.cpp).
@@ -106,17 +106,41 @@ def head(x0, y0, size):
   {glow_spots(x0, y0, size)}"""
 
 
+def emblem(cx, cy, scale):
+    """The SculkShoot emblem: a sniper reticle made of sculk. Two Warden horns grow out of the ring,
+    the centre is the glowing soul of a sculk sensor. Drawn for a 256 unit square and scaled."""
+    k = scale
+    def P(x, y):
+        return f"{cx + x * k:g} {cy + y * k:g}"
+    horn = lambda side: (
+        f'<path d="M{P(side * 46, -62)} C{P(side * 58, -92)} {P(side * 86, -104)} {P(side * 104, -118)} '
+        f'C{P(side * 96, -94)} {P(side * 84, -78)} {P(side * 70, -58)} Z" fill="#1a8c96" stroke="#29dfeb" stroke-width="{3 * k:g}"/>'
+        f'<circle cx="{cx + side * 98 * k:g}" cy="{cy - 110 * k:g}" r="{10 * k:g}" fill="url(#earGlow)"/>')
+    ticks = "".join(
+        f'<path d="M{P(x1, y1)} L{P(x2, y2)}" stroke="#29dfeb" stroke-width="{11 * k:g}" stroke-linecap="round"/>'
+        for x1, y1, x2, y2 in ((0, -96, 0, -66), (0, 66, 0, 96), (-96, 0, -66, 0), (66, 0, 96, 0)))
+    return f"""<circle cx="{cx:g}" cy="{cy:g}" r="{100 * k:g}" fill="url(#halo)"/>
+  {horn(-1)}
+  {horn(1)}
+  <circle cx="{cx:g}" cy="{cy:g}" r="{78 * k:g}" fill="#071418" stroke="#0e8f99" stroke-width="{4 * k:g}"/>
+  <circle cx="{cx:g}" cy="{cy:g}" r="{78 * k:g}" fill="none" stroke="#29dfeb" stroke-width="{10 * k:g}"
+          stroke-dasharray="{82 * k:g} {40.5 * k:g}" stroke-dashoffset="{-20 * k:g}"/>
+  {ticks}
+  <circle cx="{cx:g}" cy="{cy:g}" r="{44 * k:g}" fill="none" stroke="#0e8f99" stroke-width="{3 * k:g}" stroke-dasharray="{6 * k:g} {6 * k:g}"/>
+  <circle cx="{cx:g}" cy="{cy:g}" r="{40 * k:g}" fill="url(#soulGlow)"/>
+  <path d="M{P(0, -30)} L{P(26, 0)} L{P(0, 30)} L{P(-26, 0)} Z" fill="#0b5560" stroke="#29dfeb" stroke-width="{4 * k:g}"/>
+  <path d="M{P(0, -15)} L{P(13, 0)} L{P(0, 15)} L{P(-13, 0)} Z" fill="#b8fbff"/>"""
+
+
 def icon_svg(rounded=True):
     """Square app icon: the head on a dark sculk tile."""
     tile = '<rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)" stroke="#29dfeb" stroke-opacity="0.55" stroke-width="4"/>' if rounded else ""
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg width="256" height="256" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
- <title>Prism Launcher Sculk Edition</title>
+ <title>SculkShoot Client</title>
  {DEFS}
  {tile}
- <g shape-rendering="crispEdges">
-  {head(28, 44, 10)}
- </g>
+ {emblem(128, 140, 0.92)}
 </svg>
 """
 
@@ -125,12 +149,10 @@ def bigsur_svg():
     """macOS style icon: the tile is smaller and leaves the usual margin."""
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg width="1024" height="1024" version="1.1" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
- <title>Prism Launcher Sculk Edition</title>
+ <title>SculkShoot Client</title>
  {DEFS}
  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)" stroke="#29dfeb" stroke-opacity="0.5" stroke-width="8"/>
- <g shape-rendering="crispEdges">
-  {head(192, 172, 32)}
- </g>
+ {emblem(512, 552, 2.95)}
 </svg>
 """
 
@@ -150,14 +172,12 @@ def head_only_svg(size=256):
 def logo_svg(text_color):
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg width="1024" height="256" version="1.1" viewBox="0 0 1024 256" xmlns="http://www.w3.org/2000/svg">
- <title>Prism Launcher Sculk Edition</title>
+ <title>SculkShoot Client</title>
  {DEFS}
  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)" stroke="#29dfeb" stroke-opacity="0.55" stroke-width="4"/>
- <g shape-rendering="crispEdges">
-  {head(28, 44, 10)}
- </g>
- <text x="290" y="150" font-family="sans-serif" font-size="96" font-weight="bold" fill="{text_color}">Prism Launcher</text>
- <text x="294" y="208" font-family="sans-serif" font-size="44" fill="#29dfeb">Sculk Edition</text>
+ {emblem(128, 140, 0.92)}
+ <text x="290" y="150" font-family="sans-serif" font-size="104" font-weight="bold" fill="{text_color}">SculkShoot</text>
+ <text x="294" y="210" font-family="sans-serif" font-size="48" fill="#29dfeb">Client</text>
 </svg>
 """
 
@@ -193,8 +213,8 @@ def main():
         HERE / "org.prismlauncher.PrismLauncher.logo.source.svg": logo_svg("#14191e"),
         HERE / "org.prismlauncher.PrismLauncher.logo-darkmode.svg": logo_svg("#ffffff"),
         HERE / "org.prismlauncher.PrismLauncher.Social.svg": logo_svg("#ffffff"),
-        HERE / "PrismLauncher.icon/Assets/rainbow.svg": head_only_svg(),
-        HERE / "PrismLauncher.icon/Assets/block.svg": EMPTY,
+        HERE / "SculkShootClient.icon/Assets/rainbow.svg": head_only_svg(),
+        HERE / "SculkShootClient.icon/Assets/block.svg": EMPTY,
         HERE / "../launcher/resources/multimc/scalable/launcher.svg": icon_svg(),
         HERE / "../launcher/resources/multimc/scalable/instances/prismlauncher.svg": head_only_svg(),
         HERE / "../launcher/resources/sculk_theme/agent.svg": agent_svg(),

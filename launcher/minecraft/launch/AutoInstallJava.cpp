@@ -62,36 +62,50 @@ AutoInstallJava::AutoInstallJava(LaunchTask* parent)
 void AutoInstallJava::executeTask()
 {
     auto settings = m_instance->settings();
-    if (!APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() ||
-        (settings->get("OverrideJavaLocation").toBool() && QFileInfo::exists(settings->get("JavaPath").toString()))) {
+    // a Java the user picked by hand is kept; one this step picked earlier is checked again on every launch,
+    // so it changes together with the Minecraft version
+    const bool chosenByUser = settings->get("OverrideJavaLocation").toBool() && !settings->get("AutomaticJava").toBool() &&
+                              QFileInfo::exists(settings->get("JavaPath").toString());
+    if (!APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() || chosenByUser) {
         emitSucceeded();
         return;
     }
     auto packProfile = m_instance->getPackProfile();
-    if (!APPLICATION->settings()->get("AutomaticJavaDownload").toBool()) {
-        auto javas = APPLICATION->javalist();
-        m_current_task = javas->getLoadTask();
-        connect(m_current_task.get(), &Task::finished, this, [this, javas, packProfile] {
-            for (auto i = 0; i < javas->count(); i++) {
-                auto java = std::dynamic_pointer_cast<JavaInstall>(javas->at(i));
-                if (java && packProfile->getProfile()->getCompatibleJavaMajors().contains(java->id.major())) {
-                    if (!java->is_64bit) {
-                        emit logLine(tr("The automatic Java mechanism detected a 32-bit installation of Java."), MessageLevel::Launcher);
-                    }
-                    setJavaPath(java->path);
-                    return;
+    // the Java follows the Minecraft version: first look for an installed Java of a major version this
+    // Minecraft version needs (8, 17, 21, ...), and only download one when none is installed
+    auto javas = APPLICATION->javalist();
+    m_current_task = javas->getLoadTask();
+    connect(m_current_task.get(), &Task::finished, this, [this, javas, packProfile] {
+        const auto compatible = packProfile->getProfile()->getCompatibleJavaMajors();
+        for (auto i = 0; i < javas->count(); i++) {
+            auto java = std::dynamic_pointer_cast<JavaInstall>(javas->at(i));
+            if (java && compatible.contains(java->id.major())) {
+                if (!java->is_64bit) {
+                    emit logLine(tr("The automatic Java mechanism detected a 32-bit installation of Java."), MessageLevel::Launcher);
                 }
+                emit logLine(tr("Using Java %1 for this Minecraft version: %2").arg(java->id.toString(), java->path),
+                             MessageLevel::Launcher);
+                setJavaPath(java->path);
+                return;
             }
-            emit logLine(tr("No compatible Java version was found. Using the default one."), MessageLevel::Warning);
-            emitSucceeded();
-        });
-        connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
-        connect(m_current_task.get(), &Task::stepProgress, this, &AutoInstallJava::propagateStepProgress);
-        connect(m_current_task.get(), &Task::status, this, &AutoInstallJava::setStatus);
-        connect(m_current_task.get(), &Task::details, this, &AutoInstallJava::setDetails);
-        emit progressReportingRequest();
-        return;
-    }
+        }
+        if (APPLICATION->settings()->get("AutomaticJavaDownload").toBool()) {
+            downloadCompatibleJava();
+            return;
+        }
+        emit logLine(tr("No compatible Java version was found. Using the default one."), MessageLevel::Warning);
+        emitSucceeded();
+    });
+    connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
+    connect(m_current_task.get(), &Task::stepProgress, this, &AutoInstallJava::propagateStepProgress);
+    connect(m_current_task.get(), &Task::status, this, &AutoInstallJava::setStatus);
+    connect(m_current_task.get(), &Task::details, this, &AutoInstallJava::setDetails);
+    emit progressReportingRequest();
+}
+
+void AutoInstallJava::downloadCompatibleJava()
+{
+    auto packProfile = m_instance->getPackProfile();
     if (m_supported_arch.isEmpty()) {
         emit logLine(tr("Your system (%1-%2) is not compatible with automatic Java installation. Using the default Java path.")
                          .arg(SysInfo::currentSystem(), SysInfo::useQTForArch()),

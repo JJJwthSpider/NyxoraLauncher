@@ -24,6 +24,10 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
                                   QList<ModPlatform::ModLoaderType> loadersList = {});
 
     void checkCandidates();
+    /// no questions: resources without metadata or update info are simply skipped
+    void setQuiet(bool quiet) { m_quiet = quiet; }
+    /// only the downloads of missing dependencies (no updates of the checked resources)
+    const QList<ResourceDownloadTask::Ptr> getDependencyTasks() const;
 
     void appendResource(const CheckUpdateTask::Update& info, QStringList requiredBy = {});
 
@@ -44,6 +48,8 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
 
    private:
     QWidget* m_parent;
+    bool m_quiet = false;
+    QStringList m_dependencyNames;
 
     shared_qobject_ptr<ModrinthCheckUpdate> m_modrinthCheckTask;
     shared_qobject_ptr<FlameCheckUpdate> m_flameCheckTask;
