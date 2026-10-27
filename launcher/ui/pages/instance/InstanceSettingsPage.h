@@ -35,9 +35,11 @@
 
 #pragma once
 
+#include <QBoxLayout>
 #include <QWidget>
 #include "BaseInstance.h"
 #include "ui/pages/BasePage.h"
+#include "ui/widgets/InstanceIconBox.h"
 #include "ui/widgets/MinecraftSettingsWidget.h"
 
 class InstanceSettingsPage : public MinecraftSettingsWidget, public BasePage {
@@ -46,6 +48,10 @@ class InstanceSettingsPage : public MinecraftSettingsWidget, public BasePage {
    public:
     explicit InstanceSettingsPage(MinecraftInstance* instance, QWidget* parent = nullptr) : MinecraftSettingsWidget(instance, parent)
     {
+        // the icon of the instance can be changed right here, to one of the offered icons or to an own picture
+        if (auto* box = qobject_cast<QBoxLayout*>(layout())) {
+            box->insertWidget(0, new InstanceIconBox(instance, this));
+        }
         connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::apply);
         connect(APPLICATION, &Application::globalSettingsApplied, this, &InstanceSettingsPage::loadSettings);
     }

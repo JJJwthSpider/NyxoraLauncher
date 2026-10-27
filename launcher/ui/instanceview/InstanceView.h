@@ -85,6 +85,9 @@ class InstanceView : public QAbstractItemView {
     /// the "Play" button drawn at the bottom of every instance card
     static QRect playButtonRect(const QRect& itemRect);
     QModelIndex hoveredPlayIndex() const { return m_hoveredPlay; }
+    /// the icon at the top of every instance card: clicking it changes the icon
+    static QRect iconRect(const QRect& itemRect);
+    QModelIndex hoveredIconIndex() const { return m_hoveredIcon; }
     /// text shown when the list is empty, e.g. when the search finds nothing; empty means the welcome text
     void setEmptyText(const QString& text)
     {
@@ -107,6 +110,7 @@ class InstanceView : public QAbstractItemView {
     void droppedURLs(QList<QUrl> urls);
     void groupStateChanged(QString group, bool collapsed);
     void playRequested(QModelIndex index);
+    void iconChangeRequested(QModelIndex index);
 
    protected:
     bool isIndexHidden(const QModelIndex& index) const override;
@@ -156,6 +160,8 @@ class InstanceView : public QAbstractItemView {
     QPoint m_lastDragPosition;
     QPersistentModelIndex m_pressedPlay;
     QPersistentModelIndex m_hoveredPlay;
+    QPersistentModelIndex m_pressedIcon;
+    QPersistentModelIndex m_hoveredIcon;
 
     VisualGroup* category(const QModelIndex& index) const;
     VisualGroup* category(const QString& cat) const;
@@ -177,5 +183,6 @@ class InstanceView : public QAbstractItemView {
 
     QPoint offset() const;
     QModelIndex playIndexAt(const QPoint& visualPos) const;
+    QModelIndex iconIndexAt(const QPoint& visualPos) const;
     void setHoveredPlay(const QModelIndex& index);
 };

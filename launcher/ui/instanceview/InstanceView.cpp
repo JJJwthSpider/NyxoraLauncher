@@ -289,18 +289,34 @@ QModelIndex InstanceView::playIndexAt(const QPoint& visualPos) const
     return {};
 }
 
+QRect InstanceView::iconRect(const QRect& itemRect)
+{
+    // the delegate paints the 48x48 icon centered at the top of the card
+    return QRect(itemRect.center().x() - 26, itemRect.top(), 52, 50);
+}
+
+QModelIndex InstanceView::iconIndexAt(const QPoint& visualPos) const
+{
+    const QModelIndex index = indexAt(visualPos);
+    if (index.isValid() && (index.flags() & Qt::ItemIsEnabled) && iconRect(visualRect(index)).contains(visualPos)) {
+        return index;
+    }
+    return {};
+}
+
 void InstanceView::setHoveredPlay(const QModelIndex& index)
 {
     if (QModelIndex(m_hoveredPlay) == index) {
         return;
     }
     m_hoveredPlay = index;
-    viewport()->setCursor(index.isValid() ? Qt::PointingHandCursor : Qt::ArrowCursor);
+    viewport()->setCursor(index.isValid() || m_hoveredIcon.isValid() ? Qt::PointingHandCursor : Qt::ArrowCursor);
     viewport()->update();
 }
 
 void InstanceView::leaveEvent(QEvent* event)
 {
+    m_hoveredIcon = QModelIndex();
     setHoveredPlay({});
     QAbstractItemView::leaveEvent(event);
 }
@@ -314,13 +330,21 @@ void InstanceView::mousePressEvent(QMouseEvent* event)
 
     QPersistentModelIndex index = indexAt(visualPos);
 
-    // the Play button selects the instance and launches it on release, it never starts a drag
+    // the Play button and the icon select the instance and act on release, they never start a drag
     m_pressedPlay = QModelIndex();
+    m_pressedIcon = QModelIndex();
     if (event->button() == Qt::LeftButton) {
         if (const auto play = playIndexAt(visualPos); play.isValid()) {
             m_pressedPlay = play;
             m_pressedIndex = QModelIndex();
             selectionModel()->setCurrentIndex(play, QItemSelectionModel::ClearAndSelect);
+            event->accept();
+            return;
+        }
+        if (const auto icon = iconIndexAt(visualPos); icon.isValid()) {
+            m_pressedIcon = icon;
+            m_pressedIndex = QModelIndex();
+            selectionModel()->setCurrentIndex(icon, QItemSelectionModel::ClearAndSelect);
             event->accept();
             return;
         }
@@ -376,9 +400,16 @@ void InstanceView::mouseMoveEvent(QMouseEvent* event)
     }
 
     if (event->buttons() == Qt::NoButton) {
+        const QModelIndex icon = iconIndexAt(visualPos);
+        if (QModelIndex(m_hoveredIcon) != icon) {
+            m_hoveredIcon = icon;
+            viewport()->update();
+        }
         setHoveredPlay(playIndexAt(visualPos));
+        viewport()->setCursor(m_hoveredPlay.isValid() || m_hoveredIcon.isValid() ? Qt::PointingHandCursor : Qt::ArrowCursor);
+        viewport()->setToolTip(m_hoveredIcon.isValid() ? tr("Change the icon") : QString());
     }
-    if (m_pressedPlay.isValid()) {
+    if (m_pressedPlay.isValid() || m_pressedIcon.isValid()) {
         return;
     }
 
@@ -434,6 +465,16 @@ void InstanceView::mouseReleaseEvent(QMouseEvent* event)
         event->accept();
         return;
     }
+    if (m_pressedIcon.isValid()) {
+        const QModelIndex icon = m_pressedIcon;
+        m_pressedIcon = QModelIndex();
+        if (event->button() == Qt::LeftButton && iconIndexAt(visualPos) == icon) {
+            m_hoveredIcon = QModelIndex();
+            emit iconChangeRequested(icon);
+        }
+        event->accept();
+        return;
+    }
 
     VisualGroup::HitResults hitResult;
 
@@ -485,8 +526,8 @@ void InstanceView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     executeDelayedItemsLayout();
 
-    // a quick second click on Play must not launch the instance twice
-    if (playIndexAt(event->pos()).isValid()) {
+    // a quick second click on Play must not launch the instance twice, nor open the icon picker twice
+    if (playIndexAt(event->pos()).isValid() || iconIndexAt(event->pos()).isValid()) {
         event->accept();
         return;
     }

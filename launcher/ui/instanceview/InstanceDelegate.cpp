@@ -254,8 +254,11 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     textHighlightRect.adjust(0, iconSize + 5, 0, 0);
 
+    // the same delegate draws the icon picker; cards, versions and Play buttons belong to the instance list only
+    const bool instanceCard = qobject_cast<const InstanceView*>(opt.widget) != nullptr;
+
     // on the textured sculk floor every instance gets its own card, so the name stays readable
-    if (SculkTheme::isActive()) {
+    if (instanceCard && SculkTheme::isActive()) {
         QColor card = opt.palette.color(QPalette::Base);
         card.setAlphaF(0.82);
         painter->setRenderHint(QPainter::Antialiasing, true);
@@ -338,6 +341,26 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
         iconbox.setHeight(iconSize);
         opt.icon.paint(painter, iconbox, Qt::AlignCenter, mode, state);
     }
+    // hovering the icon shows that a click changes it: a frame around it and a pencil badge
+    if (const auto* view = qobject_cast<const InstanceView*>(opt.widget); view && view->hoveredIconIndex() == index) {
+        const QRect box = InstanceView::iconRect(opt.rect).adjusted(1, 1, -1, -1);
+        const QColor accent = opt.palette.color(QPalette::Highlight);
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        painter->setPen(QPen(accent.lighter(130), 1.5));
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRoundedRect(QRectF(box), 8, 8);
+        const QRectF badge(box.right() - 17, box.bottom() - 17, 20, 20);
+        painter->setPen(QPen(opt.palette.color(QPalette::Base), 1.5));
+        painter->setBrush(accent);
+        painter->drawEllipse(badge);
+        // a little pencil: the body from the bottom left to the top right, and its tip
+        const QPointF c = badge.center();
+        painter->setPen(QPen(opt.palette.color(QPalette::HighlightedText), 2.2, Qt::SolidLine, Qt::FlatCap));
+        painter->drawLine(c + QPointF(-3.5, 3.5), c + QPointF(4, -4));
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(opt.palette.color(QPalette::HighlightedText));
+        painter->drawPolygon(QPolygonF() << c + QPointF(-5.5, 5.5) << c + QPointF(-4.6, 2.6) << c + QPointF(-2.6, 4.6));
+    }
     // set the text colors
     QPalette::ColorGroup cg = opt.state & QStyle::State_Enabled ? QPalette::Normal : QPalette::Disabled;
     if (cg == QPalette::Normal && !(opt.state & QStyle::State_Active))
@@ -374,7 +397,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     auto instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole).value<void*>();
 
     // the Minecraft version and the loader, in a smaller and dimmer font
-    if (instance) {
+    if (instance && instanceCard) {
         if (const QString subtitle = instanceSubtitle(instance); !subtitle.isEmpty()) {
             QFont small = opt.font;
             small.setPointSizeF(opt.font.pointSizeF() * 0.85);
@@ -393,7 +416,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
                         index.data(InstanceViewRoles::ProgressMaximumRole).toInt());
 
     // the Play button at the bottom of the card
-    {
+    if (instanceCard) {
         const auto* view = qobject_cast<const InstanceView*>(opt.widget);
         const bool hovered = view && view->hoveredPlayIndex() == index;
         const bool running = instance && instance->isRunning();
@@ -431,11 +454,15 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QMode
 
     QStyle* style = opt.widget ? opt.widget->style() : QApplication::style();
     const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, &option, opt.widget) + 1;
-    int height = 48 + textMargin * 2 + 5 + 30 + 16;  // TODO: turn constants into variables; 30 Play button, 16 version line
+    int height = 48 + textMargin * 2 + 5;  // TODO: turn constants into variables
+    const bool instanceCard = qobject_cast<const InstanceView*>(option.widget) != nullptr;
+    if (instanceCard) {
+        height += 30 + 16;  // the Play button and the version line
+    }
     QSize szz = viewItemTextSize(&opt);
     height += szz.height();
     // FIXME: maybe the icon items could scale and keep proportions?
-    QSize sz(136, height);  // wide enough for "1.21.1 · NeoForge"
+    QSize sz(instanceCard ? 136 : 100, height);  // instance cards are wide enough for "1.21.1 · NeoForge"
     return sz;
 }
 

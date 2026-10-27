@@ -35,6 +35,8 @@
 IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui::IconPickerDialog)
 {
     ui->setupUi(this);
+    // room for six icons per row and for the button captions in the pixel font
+    resize(qMax(width(), 900), qMax(height(), 600));
     setWindowModality(Qt::WindowModal);
 
     searchBar = new QLineEdit(this);
@@ -129,12 +131,12 @@ void IconPickerDialog::addNewIcon()
     APPLICATION->icons()->installIcons(fileNames);
 }
 
-void IconPickerDialog::chooseOwnPicture()
+QString IconPickerDialog::installOwnPicture(QWidget* parent)
 {
     const auto filter = IconUtils::getIconFilter();
-    const auto file = QFileDialog::getOpenFileName(this, tr("Choose a picture for the instance"), QString(), tr("Pictures %1").arg(filter));
+    const auto file = QFileDialog::getOpenFileName(parent, tr("Choose a picture for the instance"), QString(), tr("Pictures %1").arg(filter));
     if (file.isEmpty()) {
-        return;
+        return {};
     }
     const QFileInfo info(file);
 
@@ -144,7 +146,14 @@ void IconPickerDialog::chooseOwnPicture()
         key = QString("%1-%2").arg(info.completeBaseName()).arg(i);
     }
     APPLICATION->icons()->installIcon(file, key + "." + info.suffix());
-    selectWhenAvailable(key, 30);
+    return key;
+}
+
+void IconPickerDialog::chooseOwnPicture()
+{
+    if (const auto key = installOwnPicture(this); !key.isEmpty()) {
+        selectWhenAvailable(key, 30);
+    }
 }
 
 void IconPickerDialog::selectWhenAvailable(const QString& key, int attemptsLeft)

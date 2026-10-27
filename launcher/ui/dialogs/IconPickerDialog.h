@@ -32,6 +32,10 @@ class IconPickerDialog : public QDialog {
     int execWithSelection(QString selection);
     QString selectedIconKey;
 
+    /// asks for any picture on the computer and copies it to the icons folder; returns its icon key, or an empty string
+    /// when nothing was chosen. The icon list picks the new file up a moment later through its file watcher.
+    static QString installOwnPicture(QWidget* parent);
+
    protected:
     virtual bool eventFilter(QObject*, QEvent*);
 

@@ -378,6 +378,44 @@
     </message>
 </context>
 <context>
+    <name>InstanceIconBox</name>
+    <message>
+        <source>Icon</source>
+        <translation>Иконка</translation>
+    </message>
+    <message>
+        <source>Click to change the icon</source>
+        <translation>Нажми, чтобы сменить иконку</translation>
+    </message>
+    <message>
+        <source>Pick one of the offered icons or use any picture from your computer.</source>
+        <translation>Выбери одну из предложенных иконок или поставь любую картинку с компьютера.</translation>
+    </message>
+    <message>
+        <source>Choose from the offered...</source>
+        <translation>Выбрать из предложенных...</translation>
+    </message>
+    <message>
+        <source>Your own picture...</source>
+        <translation>Своя картинка...</translation>
+    </message>
+</context>
+<context>
+    <name>InstanceView</name>
+    <message>
+        <source>Change the icon</source>
+        <translation>Сменить иконку</translation>
+    </message>
+    <message>
+        <source>Welcome!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Click &quot;Add Instance&quot; to get started.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>LaunchPanel</name>
     <message>
         <source>AI agent</source>

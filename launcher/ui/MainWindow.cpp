@@ -452,6 +452,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     }
     // start instance when double-clicked
     connect(view, &InstanceView::activated, this, &MainWindow::instanceActivated);
+    // clicking the icon of an instance card changes it
+    connect(view, &InstanceView::iconChangeRequested, this, [this](QModelIndex) { on_actionChangeInstIcon_triggered(); });
     // the Play button on every instance card
     connect(view, &InstanceView::playRequested, this, [this](QModelIndex index) {
         const QString id = index.data(InstanceList::InstanceIDRole).toString();
