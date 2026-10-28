@@ -99,6 +99,11 @@ class ModpackBuilder : public QObject {
     /// the mods the user named: what was found (titles) and what was not (as the user wrote it)
     QStringList foundRequested() const { return m_foundRequested; }
     QStringList missingRequested() const { return m_missingRequested; }
+    /// themes for which no fitting mod exists for this version and loader
+    QStringList emptyThemes() const { return m_emptyThemes; }
+    /// the loader and version that have the most mods for the first empty theme ("Forge 1.20.1"), and how many
+    QString suggestedSetup() const { return m_suggestedSetup; }
+    int suggestedSetupMods() const { return m_suggestedSetupMods; }
 
     /// modrinth.index.json for the enabled mods (see https://support.modrinth.com/en/articles/8802351)
     QByteArray makeIndex() const;
@@ -125,7 +130,12 @@ class ModpackBuilder : public QObject {
     void resolveCurated();
     void tryCurated(const CuratedMod& curated, int alternative, bool curseForge);
     void searchThemes();
-    void pickFromTheme(int themeIndex, QList<Candidate> candidates, int taken);
+    /// wide: the second try for themes that got too few mods, with more queries, more results and fewer downloads
+    void runThemeSearch(const QList<int>& themes, bool wide);
+    void widenThemes();
+    void themesDone();
+    void suggestSetup(const Theme& theme);
+    void pickFromTheme(int themeIndex, QList<Candidate> candidates);
     void resolveDependencies();
     void addLibrary(const QString& requiredId);
     void libraryFromOtherPlatform(const QString& requiredId, const Candidate& original, const QString& problem);
@@ -161,6 +171,10 @@ class ModpackBuilder : public QObject {
     QHash<QString, QString> m_libraryNames;  // prefixed id -> title, for messages about missing libraries
     QStringList m_foundRequested;
     QStringList m_missingRequested;
+    QList<int> m_themeTaken;
+    QStringList m_emptyThemes;
+    QString m_suggestedSetup;
+    int m_suggestedSetupMods = 0;
     QString m_loaderVersion;
     Meta::VersionList::Ptr m_minecraftList;
     Meta::VersionList::Ptr m_loaderList;

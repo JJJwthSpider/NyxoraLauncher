@@ -38,7 +38,7 @@ const QList<ThemeRule>& themeRules()
     static const QList<ThemeRule> s_rules = {
         { QT_TRANSLATE_NOOP("ModpackAgent", "Zombies"),
           { "zombie", "zombies", "undead", "apocalypse", "infection", "post-apocalyptic" },
-          { "zombie", "zombie apocalypse" },
+          { "zombie", "zombie apocalypse", "zombies", "undead", "infection" },
           4 },
         { QT_TRANSLATE_NOOP("ModpackAgent", "Weapons"),
           { "weapons", "weapon", "guns", "gun", "rifle", "pistol", "swords", "sword", "bow", "crossbow", "firearms" },
@@ -432,7 +432,8 @@ Plan parseLocally(const QString& request)
         }
         if (hit && !unwanted) {
             // "побольше оружия" doubles the number of weapon mods
-            plan.themes << Theme{ tr(rule.title), rule.queries, more ? std::min(rule.count * 2, 8) : rule.count };
+            plan.themes << Theme{ tr(rule.title), rule.queries, more ? std::min(rule.count * 2, 8) : rule.count,
+                                  rule.triggers + rule.queries };
         }
     }
 

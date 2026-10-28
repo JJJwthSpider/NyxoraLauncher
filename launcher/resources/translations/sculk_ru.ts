@@ -219,6 +219,22 @@
         <source>the mods you named</source>
         <translation>названные тобой моды</translation>
     </message>
+    <message>
+        <source>&lt;b&gt;For Minecraft %1 with %2 there are no mods about: %3.&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Для Minecraft %1 с %2 нет модов про: %3.&lt;/b&gt;</translation>
+    </message>
+    <message numerus="yes">
+        <source>Most of them are made for &lt;b&gt;%1&lt;/b&gt; (%n mod(s) found), write it or press the button below and I&apos;ll rebuild the pack.</source>
+        <translation>
+            <numerusform>Больше всего их для &lt;b&gt;%1&lt;/b&gt; (нашёл %n мод), напиши это или нажми кнопку внизу, и я пересоберу сборку.</numerusform>
+            <numerusform>Больше всего их для &lt;b&gt;%1&lt;/b&gt; (нашёл %n мода), напиши это или нажми кнопку внизу, и я пересоберу сборку.</numerusform>
+            <numerusform>Больше всего их для &lt;b&gt;%1&lt;/b&gt; (нашёл %n модов), напиши это или нажми кнопку внизу, и я пересоберу сборку.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Try another Minecraft version or loader.</source>
+        <translation>Попробуй другую версию Minecraft или другой загрузчик.</translation>
+    </message>
 </context>
 <context>
     <name>AppearanceWidget</name>
@@ -1484,6 +1500,10 @@ Are you sure?</source>
     <message>
         <source>Removed %1: it needs %2, which is not available for this version.</source>
         <translation>Убрал %1: ему нужна %2, а её нет для этой версии.</translation>
+    </message>
+    <message>
+        <source>Few mods found for: %1. Searching wider...</source>
+        <translation>Мало модов для: %1. Ищу шире...</translation>
     </message>
 </context>
 <context>

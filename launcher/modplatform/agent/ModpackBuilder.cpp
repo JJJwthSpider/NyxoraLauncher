@@ -17,6 +17,8 @@
 #include "ModpackBuilder.h"
 
 #include <QJsonObject>
+#include <QMap>
+#include <QRegularExpression>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -110,6 +112,37 @@ QString rawId(const QString& prefixedId)
     return prefixedId.mid(prefixedId.indexOf(':') + 1);
 }
 
+/// Word beginnings a mod of the theme must mention: "zombie" -> "zomb", so "zombies" and "zombified" match too.
+QRegularExpression themePattern(const Theme& theme)
+{
+    QStringList stems;
+    const auto words = theme.matchWords.isEmpty() ? theme.queries : theme.matchWords;
+    for (const auto& phrase : words) {
+        for (const auto& word : phrase.toLower().split(' ', Qt::SkipEmptyParts)) {
+            const auto stem = word.size() > 5 ? word.left(word.size() - 2) : word;
+            if (stem.size() >= 3 && !stems.contains(stem)) {
+                stems << QRegularExpression::escape(stem);
+            }
+        }
+    }
+    if (stems.isEmpty()) {
+        return QRegularExpression(QStringLiteral(".*"));
+    }
+    // only at the start of a word: "pet" must not match "carpet"
+    return QRegularExpression(QString("(?<![a-z])(?:%1)").arg(stems.join('|')), QRegularExpression::CaseInsensitiveOption);
+}
+
+/// 2: the name is about the theme, 1: only the description, 0: unrelated (search engines also return popular mods that
+/// merely mention the word somewhere)
+int themeScore(const QRegularExpression& pattern, const Candidate& candidate)
+{
+    if (pattern.match(candidate.title).hasMatch() || pattern.match(QString(candidate.slug).replace('-', ' ')).hasMatch())
+        return 2;
+    if (pattern.match(candidate.description).hasMatch())
+        return 1;
+    return 0;
+}
+
 /// How well a project matches a name the user wrote: 3 exact, 2 starts with it, 1 contains it, 0 no match.
 int nameScore(const QString& name, const Candidate& candidate)
 {
@@ -148,6 +181,10 @@ void ModpackBuilder::build(const Plan& plan, bool useModrinth, bool useCurseForg
     m_libraryNames.clear();
     m_foundRequested.clear();
     m_missingRequested.clear();
+    m_themeTaken.clear();
+    m_emptyThemes.clear();
+    m_suggestedSetup.clear();
+    m_suggestedSetupMods = 0;
     m_loaderVersion.clear();
     m_requestsDone = 0;
     m_requestsStarted = 0;
@@ -825,60 +862,97 @@ void ModpackBuilder::tryCurated(const CuratedMod& curated, int alternative, bool
 
 void ModpackBuilder::searchThemes()
 {
+    m_themeTaken = QList<int>(m_plan.themes.size(), 0);
     if (m_plan.themes.isEmpty()) {
         resolveDependencies();
         return;
     }
-    m_onPhaseDone = [this] { resolveDependencies(); };
+    QList<int> all;
+    for (int i = 0; i < m_plan.themes.size(); i++) {
+        all << i;
+    }
+    runThemeSearch(all, false);
+}
 
+void ModpackBuilder::runThemeSearch(const QList<int>& themes, bool wide)
+{
+    m_onPhaseDone = [this, wide] {
+        if (wide) {
+            themesDone();
+        } else {
+            widenThemes();
+        }
+    };
     const auto facets = modrinthFacets();
+    const int limit = wide ? 50 : s_searchLimit;
+    const int minimumDownloads = wide ? 100 : s_minimumDownloads;
 
-    for (int themeIndex = 0; themeIndex < m_plan.themes.size(); themeIndex++) {
+    for (const int themeIndex : themes) {
         const auto& theme = m_plan.themes.at(themeIndex);
-        emit log(tr("Searching mods for \"%1\"...").arg(theme.title));
+        auto queries = theme.queries;
+        if (wide) {
+            // the other words of the theme ("undead", "infection") find mods the first searches missed
+            for (const auto& word : theme.matchWords) {
+                if (queries.size() < 6 && !queries.contains(word, Qt::CaseInsensitive)) {
+                    queries << word;
+                }
+            }
+        } else {
+            emit log(tr("Searching mods for \"%1\"...").arg(theme.title));
+        }
+        const auto pattern = themePattern(theme);
 
         // one result list per query and platform; they are merged when all searches of the theme are back
         struct Collected {
             int remaining = 0;
-            QList<QList<Candidate>> lists;
+            QList<QList<std::pair<int, Candidate>>> lists;
         };
         auto collected = std::make_shared<Collected>();
         const int platforms = (m_useModrinth ? 1 : 0) + (m_useCurseForge ? 1 : 0);
-        collected->remaining = theme.queries.size() * platforms;
+        collected->remaining = queries.size() * platforms;
         collected->lists.resize(collected->remaining);
 
-        auto merge = [this, themeIndex, collected] {
+        auto merge = [this, themeIndex, collected, limit] {
             if (--collected->remaining > 0) {
                 return;
             }
-            // interleave all lists so every search and both platforms contribute their best matches
-            QList<Candidate> candidates;
-            for (int rank = 0; rank < s_searchLimit; rank++) {
+            // interleave all lists so every search and both platforms contribute their best matches,
+            // then put the mods whose name is about the theme first
+            QList<std::pair<int, Candidate>> merged;
+            for (int rank = 0; rank < limit; rank++) {
                 for (const auto& list : collected->lists) {
                     if (rank < list.size()) {
-                        candidates << list.at(rank);
+                        merged << list.at(rank);
                     }
                 }
             }
-            pickFromTheme(themeIndex, candidates, 0);
+            std::stable_sort(merged.begin(), merged.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
+            QList<Candidate> candidates;
+            for (const auto& [score, candidate] : merged) {
+                candidates << candidate;
+            }
+            pickFromTheme(themeIndex, candidates);
         };
 
         int listIndex = 0;
-        for (const auto& query : theme.queries) {
+        for (const auto& query : queries) {
             if (m_useModrinth) {
                 const int slot = listIndex++;
                 get(BuildConfig.MODRINTH_PROD_URL + "/search",
-                    { { "query", query }, { "facets", facets }, { "index", "relevance" }, { "limit", QString::number(s_searchLimit) } },
-                    false, [collected, slot, merge](const QJsonDocument& doc, int status) {
+                    { { "query", query }, { "facets", facets }, { "index", "relevance" }, { "limit", QString::number(limit) } }, false,
+                    [collected, slot, merge, pattern, minimumDownloads](const QJsonDocument& doc, int status) {
                         if (status == 200) {
                             for (const auto& value : doc.object()["hits"].toArray()) {
                                 const auto hit = value.toObject();
                                 const bool library = hit["categories"].toArray().contains("library");
                                 const bool serverOnly = hit["client_side"].toString() == "unsupported";
-                                if (library || serverOnly || hit["downloads"].toInteger() < s_minimumDownloads) {
+                                if (library || serverOnly || hit["downloads"].toInteger() < minimumDownloads) {
                                     continue;
                                 }
-                                collected->lists[slot] << modrinthCandidate(hit);
+                                const auto candidate = modrinthCandidate(hit);
+                                if (const int score = themeScore(pattern, candidate); score > 0) {
+                                    collected->lists[slot] << std::make_pair(score, candidate);
+                                }
                             }
                         }
                         merge();
@@ -894,15 +968,18 @@ void ModpackBuilder::searchThemes()
                       { "modLoaderType", QString::number(curseForgeLoaderType()) },
                       { "sortField", QString::number(s_cfSortByPopularity) },
                       { "sortOrder", "desc" },
-                      { "pageSize", QString::number(s_searchLimit) } },
-                    true, [collected, slot, merge](const QJsonDocument& doc, int status) {
+                      { "pageSize", QString::number(limit) } },
+                    true, [collected, slot, merge, pattern, minimumDownloads](const QJsonDocument& doc, int status) {
                         if (status == 200) {
                             for (const auto& value : doc.object()["data"].toArray()) {
                                 const auto mod = value.toObject();
-                                if (curseForgeIsLibrary(mod) || mod["downloadCount"].toDouble() < s_minimumDownloads) {
+                                if (curseForgeIsLibrary(mod) || mod["downloadCount"].toDouble() < minimumDownloads) {
                                     continue;
                                 }
-                                collected->lists[slot] << curseForgeCandidate(mod);
+                                const auto candidate = curseForgeCandidate(mod);
+                                if (const int score = themeScore(pattern, candidate); score > 0) {
+                                    collected->lists[slot] << std::make_pair(score, candidate);
+                                }
                             }
                         }
                         merge();
@@ -910,24 +987,118 @@ void ModpackBuilder::searchThemes()
             }
         }
     }
+    if (m_pending == 0) {
+        phaseDone();
+    }
 }
 
-void ModpackBuilder::pickFromTheme(int themeIndex, QList<Candidate> candidates, int taken)
+void ModpackBuilder::widenThemes()
+{
+    QList<int> lacking;
+    for (int i = 0; i < m_plan.themes.size(); i++) {
+        if (m_themeTaken.value(i) < m_plan.themes.at(i).count) {
+            lacking << i;
+        }
+    }
+    if (lacking.isEmpty()) {
+        themesDone();
+        return;
+    }
+    QStringList titles;
+    for (const int i : lacking) {
+        titles << m_plan.themes.at(i).title;
+    }
+    emit log(tr("Few mods found for: %1. Searching wider...").arg(titles.join(", ")));
+    runThemeSearch(lacking, true);
+}
+
+void ModpackBuilder::themesDone()
+{
+    const Theme* firstEmpty = nullptr;
+    for (int i = 0; i < m_plan.themes.size(); i++) {
+        if (m_themeTaken.value(i) == 0) {
+            const auto& theme = m_plan.themes.at(i);
+            emit log(tr("Nothing suitable was found for \"%1\".").arg(theme.title));
+            m_emptyThemes << theme.title;
+            if (!firstEmpty) {
+                firstEmpty = &theme;
+            }
+        }
+    }
+    if (firstEmpty) {
+        suggestSetup(*firstEmpty);
+    } else {
+        resolveDependencies();
+    }
+}
+
+void ModpackBuilder::suggestSetup(const Theme& theme)
+{
+    // look at every version and loader: where are the most mods for this theme?
+    m_onPhaseDone = [this] { resolveDependencies(); };
+    const auto pattern = themePattern(theme);
+    const auto current = m_plan.loader + '|' + m_plan.minecraftVersion;
+    get(BuildConfig.MODRINTH_PROD_URL + "/search",
+        { { "query", theme.queries.value(0) }, { "facets", R"([["project_type:mod"]])" }, { "index", "relevance" }, { "limit", "100" } },
+        false, [this, pattern, current](const QJsonDocument& doc, int status) {
+            if (status != 200) {
+                return;
+            }
+            static const QRegularExpression s_release(QStringLiteral("^1\\.\\d+(\\.\\d+)?$"));
+            QMap<QString, int> counts;
+            for (const auto& value : doc.object()["hits"].toArray()) {
+                const auto hit = value.toObject();
+                const auto categories = hit["categories"].toArray();
+                if (categories.contains("library") || hit["downloads"].toInteger() < s_minimumDownloads ||
+                    themeScore(pattern, modrinthCandidate(hit)) == 0) {
+                    continue;
+                }
+                for (const auto* loader : { "neoforge", "forge", "fabric", "quilt" }) {
+                    if (!categories.contains(QString(loader))) {
+                        continue;
+                    }
+                    for (const auto& version : hit["versions"].toArray()) {
+                        if (s_release.match(version.toString()).hasMatch()) {
+                            counts[QString(loader) + '|' + version.toString()]++;
+                        }
+                    }
+                }
+            }
+            // the most mods wins; on a tie the loader the user chose
+            const auto sameLoader = [this](const QString& key) { return key.startsWith(m_plan.loader + '|'); };
+            QString best;
+            for (auto it = counts.cbegin(); it != counts.cend(); ++it) {
+                if (it.key() == current) {
+                    continue;
+                }
+                const int bestCount = counts.value(best);
+                if (best.isEmpty() || it.value() > bestCount || (it.value() == bestCount && sameLoader(it.key()) && !sameLoader(best))) {
+                    best = it.key();
+                }
+            }
+            if (!best.isEmpty() && counts.value(best) >= 2) {
+                const auto parts = best.split('|');
+                m_suggestedSetup = loaderDisplayName(parts.at(0)) + ' ' + parts.at(1);
+                m_suggestedSetupMods = counts.value(best);
+            }
+        });
+}
+
+void ModpackBuilder::pickFromTheme(int themeIndex, QList<Candidate> candidates)
 {
     const auto& theme = m_plan.themes.at(themeIndex);
-    while (taken < theme.count && !candidates.isEmpty()) {
+    while (m_themeTaken.value(themeIndex) < theme.count && !candidates.isEmpty()) {
         const auto candidate = candidates.takeFirst();
         if (m_triedProjects.contains(candidate.id) || findSameMod(candidate)) {
             continue;
         }
-        fetchFile(candidate, [this, themeIndex, candidates, taken, candidate](const FileChoice& file) {
-            const bool added = addMod(candidate, file, m_plan.themes.at(themeIndex).title, false);
-            pickFromTheme(themeIndex, candidates, taken + (added ? 1 : 0));
+        fetchFile(candidate, [this, themeIndex, candidates, candidate](const FileChoice& file) {
+            if (addMod(candidate, file, m_plan.themes.at(themeIndex).title, false)) {
+                m_themeTaken[themeIndex]++;
+            }
+            pickFromTheme(themeIndex, candidates);
         });
         return;
-    }
-    if (taken == 0) {
-        emit log(tr("Nothing suitable was found for \"%1\".").arg(theme.title));
     }
 }
 
@@ -1097,15 +1268,15 @@ void ModpackBuilder::finish()
         }
     }
 
-    // keep the groups in the order of the plan: what the user named, curated, themes, libraries last
+    // what the pack is about comes first: the mods the user named, the themes, then optimization and comfort, libraries last
     QStringList order{ tr("You asked for") };
-    for (const auto& curated : m_plan.curated) {
-        if (!order.contains(curated.group))
-            order << curated.group;
-    }
     for (const auto& theme : m_plan.themes) {
         if (!order.contains(theme.title))
             order << theme.title;
+    }
+    for (const auto& curated : m_plan.curated) {
+        if (!order.contains(curated.group))
+            order << curated.group;
     }
     std::stable_sort(m_mods.begin(), m_mods.end(), [&order](const AgentMod& a, const AgentMod& b) {
         auto ia = a.dependency ? order.size() : order.indexOf(a.group);

@@ -27,6 +27,7 @@ struct Theme {
     QString title;        // shown to the user (already translated)
     QStringList queries;  // English search terms for Modrinth
     int count = 3;        // how many mods to take for this theme
+    QStringList matchWords;  // a found mod must mention one of these (English) in its name or description; empty: the queries
 };
 
 /// A hand-picked mod. The first slug of the alternatives that exists for the version/loader is used.

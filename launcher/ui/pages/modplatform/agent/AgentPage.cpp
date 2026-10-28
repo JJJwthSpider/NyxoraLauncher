@@ -680,7 +680,19 @@ void AgentPage::builderFinished()
         }
     }
     const int essentials = mods.size() - themed - libraries;
+    // name the mods of every theme, so the user sees right away that the pack is about what they asked for
     QString details;
+    for (const auto& theme : m_builder->plan().themes) {
+        QStringList titles;
+        for (const auto& mod : mods) {
+            if (!mod.dependency && mod.group == theme.title) {
+                titles << mod.title;
+            }
+        }
+        if (!titles.isEmpty()) {
+            details += QString("<br><b>%1</b>: %2.").arg(theme.title.toHtmlEscaped(), titles.join(", ").toHtmlEscaped());
+        }
+    }
     if (!m_builder->foundRequested().isEmpty()) {
         details += "<br>" + tr("Added the mods you asked for: <b>%1</b>.").arg(m_builder->foundRequested().join(", ").toHtmlEscaped());
     }
@@ -688,6 +700,22 @@ void AgentPage::builderFinished()
         details += "<br>" + tr("Not found for Minecraft %1 with %2: <b>%3</b>. Check the name or try another version.")
                                 .arg(m_builder->plan().minecraftVersion, ModpackAgent::loaderDisplayName(m_builder->plan().loader),
                                      m_builder->missingRequested().join(", ").toHtmlEscaped());
+    }
+    auto replies = translated(s_afterReplies, std::size(s_afterReplies), true);
+    if (!m_builder->emptyThemes().isEmpty()) {
+        QString warning = tr("<b>For Minecraft %1 with %2 there are no mods about: %3.</b>")
+                              .arg(m_builder->plan().minecraftVersion, ModpackAgent::loaderDisplayName(m_builder->plan().loader),
+                                   m_builder->emptyThemes().join(", ").toHtmlEscaped());
+        if (!m_builder->suggestedSetup().isEmpty()) {
+            warning += " " + tr("Most of them are made for <b>%1</b> (%n mod(s) found), write it or press the button below and "
+                                "I'll rebuild the pack.",
+                                "", m_builder->suggestedSetupMods())
+                                 .arg(m_builder->suggestedSetup());
+            replies.prepend(m_builder->suggestedSetup());
+        } else {
+            warning += " " + tr("Try another Minecraft version or loader.");
+        }
+        details += "<br>" + warning;
     }
     QStringList libraryNotes;
     for (const auto& mod : mods) {
@@ -704,7 +732,7 @@ void AgentPage::builderFinished()
                  details + "<br>" +
                  tr("The list is on the right, untick what you don't want: libraries nobody needs any more are left out by "
                     "themselves.<br>Press <b>OK</b> below to create the instance, or write me what to change."),
-             translated(s_afterReplies, std::size(s_afterReplies), true));
+             replies);
     suggestCurrent();
 }
 
