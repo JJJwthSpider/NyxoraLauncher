@@ -38,7 +38,9 @@ Decide:
 - minecraft_version: the version the user asked for. If none was given, use "1.21.1".
 - loader: the mod loader the user asked for (neoforge, forge, fabric or quilt). If none was given, use neoforge for 1.20.2 and newer, forge for older versions.
 - themes: 2 to 8 content themes that make up the pack. Each theme has a short title in the user's language, 1 to 3 English search queries, and how many mods to take for it (1 to 5). Think about what a player expects from such a pack: a zombie pack also wants weapons, armor and survival mods.
-- mods: project slugs (as used in Modrinth or CurseForge URLs) of well known content mods that clearly fit the request and exist for that version and loader. Only list slugs you are sure about; leave the list empty otherwise.
+- mods: project slugs (as used in Modrinth or CurseForge URLs) of well known content mods that clearly fit the request and exist for that version and loader. Every mod the user names must be in this list. Only list slugs you are sure about; leave the list empty otherwise.
+
+The request may be a whole conversation: read all of it, later messages change earlier ones. When the user asks to leave something out ("без", "убери", "не надо", "without", "remove"), plan no theme and no mod for it.
 - name: a short catchy pack name in the user's language.
 - summary: one or two sentences in the user's language describing the pack.
 
@@ -75,10 +77,17 @@ QJsonObject planSchema()
 
 ClaudePlanner::ClaudePlanner(QObject* parent) : QObject(parent) {}
 
-void ClaudePlanner::plan(const QString& request, const QString& apiKey)
+void ClaudePlanner::plan(const QString& request, const QString& apiKey, const QStringList& requestedMods, const QStringList& excluded)
 {
     abort();
     m_request = request;
+    auto message = request;
+    if (!requestedMods.isEmpty()) {
+        message += "\n\nMods the user named: " + requestedMods.join(", ");
+    }
+    if (!excluded.isEmpty()) {
+        message += "\nLeave out: " + excluded.join(", ");
+    }
 
     QNetworkRequest req(QUrl("https://api.anthropic.com/v1/messages"));
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -96,7 +105,7 @@ void ClaudePlanner::plan(const QString& request, const QString& apiKey)
         { "system", s_systemPrompt },
         { "output_config",
           QJsonObject{ { "effort", "low" }, { "format", QJsonObject{ { "type", "json_schema" }, { "schema", planSchema() } } } } },
-        { "messages", QJsonArray{ QJsonObject{ { "role", "user" }, { "content", request } } } },
+        { "messages", QJsonArray{ QJsonObject{ { "role", "user" }, { "content", message } } } },
     };
 
     m_reply = APPLICATION->network()->post(req, QJsonDocument(body).toJson(QJsonDocument::Compact));

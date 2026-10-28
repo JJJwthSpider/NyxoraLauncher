@@ -73,6 +73,8 @@ class AgentPage : public QWidget, public BasePage {
     void builderFinished();
     void builderFailed(const QString& reason);
     QString themeList(const ModpackAgent::Plan& plan) const;
+    QString unknownWordsNote() const;
+    QString wishesNote(const ModpackAgent::Plan& plan) const;
 
     // chat widgets
     void agentSay(const QString& html, const QStringList& replies = {});
@@ -96,6 +98,7 @@ class AgentPage : public QWidget, public BasePage {
 
     Stage m_stage = Stage::Topic;
     QString m_topic;
+    QStringList m_unknownWords;  // from the last message
     QString m_loader;
     QString m_version;
     bool m_fillingTree = false;

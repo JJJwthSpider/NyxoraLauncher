@@ -17,6 +17,7 @@
 #pragma once
 
 #include <QJsonArray>
+#include <QHash>
 #include <QJsonDocument>
 #include <QList>
 #include <QObject>
@@ -48,6 +49,8 @@ struct AgentMod {
     QString sha512;  // Modrinth only
     qint64 size = 0;
     bool dependency = false;           // pulled in because another mod needs it
+    bool requested = false;            // the user named this mod
+    QStringList neededBy;              // titles of the mods that need this library
     bool enabled = true;               // the user can switch mods off before creating the instance
     QStringList requiredProjects;      // prefixed ids
     QStringList incompatibleProjects;  // prefixed ids
@@ -93,6 +96,9 @@ class ModpackBuilder : public QObject {
     const Plan& plan() const { return m_plan; }
     QList<AgentMod>& mods() { return m_mods; }
     QString loaderVersion() const { return m_loaderVersion; }
+    /// the mods the user named: what was found (titles) and what was not (as the user wrote it)
+    QStringList foundRequested() const { return m_foundRequested; }
+    QStringList missingRequested() const { return m_missingRequested; }
 
     /// modrinth.index.json for the enabled mods (see https://support.modrinth.com/en/articles/8802351)
     QByteArray makeIndex() const;
@@ -114,16 +120,25 @@ class ModpackBuilder : public QObject {
 
     void checkMinecraftVersion();
     void resolveLoaderVersion();
+    void resolveRequested();
+    void tryRequested(const QString& name, QList<Candidate> candidates);
     void resolveCurated();
     void tryCurated(const CuratedMod& curated, int alternative, bool curseForge);
     void searchThemes();
     void pickFromTheme(int themeIndex, QList<Candidate> candidates, int taken);
     void resolveDependencies();
+    void addLibrary(const QString& requiredId);
+    void libraryFromOtherPlatform(const QString& requiredId, const Candidate& original, const QString& problem);
+    /// if the candidate is already in the pack, remembers requiredId as another id of it and returns true
+    bool aliasExisting(const Candidate& candidate, const QString& requiredId);
     void finish();
 
     // platform specific lookups; callbacks get an empty Candidate / invalid FileChoice when nothing fits
     void findBySlug(const QString& slug, bool curseForge, CandidateCallback callback);
     void findById(const QString& prefixedId, CandidateCallback callback);
+    /// searches by name; the callback gets the project whose title or slug is exactly that name, else an empty Candidate
+    void findByName(const QString& name, bool curseForge, CandidateCallback callback);
+    QString modrinthFacets() const;
     void fetchFile(const Candidate& candidate, FileCallback callback);
     void fetchModrinthFile(const Candidate& candidate, FileCallback callback);
     void fetchCurseForgeFile(const Candidate& candidate, FileCallback callback);
@@ -131,6 +146,7 @@ class ModpackBuilder : public QObject {
     /// adds a mod; returns false if it is already there (on any platform) or conflicts with another mod
     bool addMod(const Candidate& candidate, const FileChoice& file, const QString& group, bool dependency);
     const AgentMod* findSameMod(const Candidate& candidate) const;
+    int indexOfSameMod(const Candidate& candidate) const;
 
     QString modrinthLoaders() const;
     int curseForgeLoaderType() const;
@@ -141,6 +157,10 @@ class ModpackBuilder : public QObject {
     bool m_useCurseForge = true;
     QList<AgentMod> m_mods;
     QSet<QString> m_triedProjects;
+    QSet<QString> m_triedDependencies;
+    QHash<QString, QString> m_libraryNames;  // prefixed id -> title, for messages about missing libraries
+    QStringList m_foundRequested;
+    QStringList m_missingRequested;
     QString m_loaderVersion;
     Meta::VersionList::Ptr m_minecraftList;
     Meta::VersionList::Ptr m_loaderList;

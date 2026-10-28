@@ -107,6 +107,169 @@ QString tr(const char* text)
     return QCoreApplication::translate("ModpackAgent", text);
 }
 
+// classic versions (1.7.10, 1.12.2, 1.21.1) and the year based ones Mojang uses since 2026 (26.1, 26.1.2)
+const QRegularExpression& versionPattern()
+{
+    static const QRegularExpression s_version(
+        QStringLiteral("(?<![\\d.])(1\\.\\d{1,2}(?:\\.\\d{1,2})?|(?:2[5-9]|[3-9]\\d)\\.\\d{1,2}(?:\\.\\d{1,2})?)(?![\\d.])"));
+    return s_version;
+}
+
+/// English words that already mean something to the agent (themes, loaders, performance, shaders, maps)
+const QStringList& knownWords()
+{
+    static const QStringList s_known = [] {
+        QStringList known{ "neoforge", "forge",   "fabric",   "quilt", "optimization", "performance", "fps",
+                           "lag",      "shaders", "graphics", "map",   "minimap",      "textures" };
+        for (const auto& rule : themeRules()) {
+            known << rule.triggers;
+        }
+        return known;
+    }();
+    return s_known;
+}
+
+/// Loader names, versions and words that are never a theme or a mod name
+bool isSetupWord(const QString& word)
+{
+    static const QStringList s_setup{ "neoforge", "forge", "fabric", "quilt",  "neo", "minecraft", "mc",  "mod",  "mods",   "modpack",
+                                      "pack",     "the",   "a",      "an",     "and", "with",      "add", "plus", "please", "also",
+                                      "some",     "more",  "lots",   "me",     "my",  "i",         "to",  "of",   "in",     "for",
+                                      "version",  "loader" };
+    const auto lower = word.toLower();
+    return s_setup.contains(lower) || versionPattern().match(lower).hasMatch() || lower.toInt() > 0;
+}
+
+/// "Just Enough Items" and "just-enough-items" both become "justenoughitems"
+QString normalized(const QString& text)
+{
+    QString out;
+    for (const auto& c : text.toLower()) {
+        if (c.isLetterOrNumber()) {
+            out += c;
+        }
+    }
+    return out;
+}
+
+void addText(QStringList& list, const QString& text)
+{
+    if (!list.contains(text, Qt::CaseInsensitive)) {
+        list << text;
+    }
+}
+
+void removeText(QStringList& list, const QString& text)
+{
+    list.removeIf([&text](const QString& item) { return item.compare(text, Qt::CaseInsensitive) == 0; });
+}
+
+/// Part of a request: "сборка с зомби", "без магии", "добавь Create".
+struct Clause {
+    QString text;
+    bool negative = false;  // "убери ...", "без ...", "не надо ..."
+};
+
+QList<Clause> splitClauses(const QString& text)
+{
+    // a dot ends a sentence, but not inside a version like 1.21.1
+    static const QRegularExpression s_segments(QStringLiteral("[,;!?\\n]+|\\.(?!\\d)"));
+    // group 1: words that leave something out, group 2: words that ask for something
+    static const QRegularExpression s_markers(
+        QStringLiteral("(?<![\\w'])(?:(убери|уберите|убрать|удали|удалите|удалить|выкинь|выкини|выбрось|исключи|без|"
+                       "не\\s+надо|не\\s+нужн\\w*|не\\s+хочу|не\\s+добавляй|не\\s+ставь|не\\s+клади|remove|without|exclude|"
+                       "drop|don'?t\\s+(?:add|want|need|include))|"
+                       "(но|а|зато|добавь|добавьте|добавить|поставь|закинь|вставь|верни|хочу|ещё|еще|плюс|"
+                       "but|add|include|also|plus))(?![\\w'])"),
+        QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::CaseInsensitiveOption);
+    QList<Clause> clauses;
+    for (const auto& segment : text.split(s_segments, Qt::SkipEmptyParts)) {
+        qsizetype start = 0;
+        bool negative = false;
+        auto it = s_markers.globalMatch(segment);
+        while (it.hasNext()) {
+            const auto match = it.next();
+            if (auto piece = segment.mid(start, match.capturedStart() - start).trimmed(); !piece.isEmpty()) {
+                clauses << Clause{ piece, negative };
+            }
+            negative = !match.captured(1).isEmpty();
+            start = match.capturedEnd();
+        }
+        if (auto piece = segment.mid(start).trimmed(); !piece.isEmpty()) {
+            clauses << Clause{ piece, negative };
+        }
+    }
+    return clauses;
+}
+
+/// The request without the parts that ask to leave something out.
+QString positiveText(const QString& request)
+{
+    QStringList parts;
+    for (const auto& clause : splitClauses(request)) {
+        if (!clause.negative) {
+            parts << clause.text;
+        }
+    }
+    return parts.join(", ");
+}
+
+const QRegularExpression& morePattern()
+{
+    static const QRegularExpression s_more(QStringLiteral("(?<!\\w)(много|побольше|больше|кучу|куча|more|lots|plenty)(?!\\w)"),
+                                           QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::CaseInsensitiveOption);
+    return s_more;
+}
+
+/// Mod names in a clause: anything in quotes, Latin words inside Russian text ("сборка с Create и Farmer's Delight"),
+/// capitalized words in English text ("a zombie pack with Create").
+QStringList modNames(QString clause)
+{
+    QStringList candidates;
+    static const QRegularExpression s_quoted(QStringLiteral("[«\"“„]([^»\"”“]{2,60})[»\"”“]"));
+    for (auto it = s_quoted.globalMatch(clause); it.hasNext();) {
+        candidates << it.next().captured(1).trimmed();
+    }
+    clause.remove(s_quoted);
+
+    static const QRegularExpression s_latinRun(QStringLiteral("[A-Za-z0-9][A-Za-z0-9'’&+:.\\-]*(?:[ \\t]+[A-Za-z0-9][A-Za-z0-9'’&+:.\\-]*)*"));
+    static const QRegularExpression s_joiners(QStringLiteral("\\s+(?:and|&|\\+|with|или|и)\\s+"), QRegularExpression::CaseInsensitiveOption);
+    if (SearchTranslator::hasCyrillic(clause)) {
+        for (auto it = s_latinRun.globalMatch(clause); it.hasNext();) {
+            candidates << it.next().captured(0).split(s_joiners, Qt::SkipEmptyParts);
+        }
+    } else {
+        // English: only capitalized words are names, the rest is the description of the pack
+        static const QRegularExpression s_capitalized(
+            QStringLiteral("(?<![\\w'])[A-Z0-9][\\w'’&+:.\\-]*(?:[ \\t]+(?:of|the|n|'n')?[ \\t]*[A-Z0-9][\\w'’&+:.\\-]*)*"));
+        for (auto it = s_capitalized.globalMatch(clause); it.hasNext();) {
+            candidates << it.next().captured(0);
+        }
+    }
+
+    QStringList names;
+    const auto& known = knownWords();
+    for (const auto& candidate : candidates) {
+        auto tokens = candidate.simplified().split(' ', Qt::SkipEmptyParts);
+        while (!tokens.isEmpty() && isSetupWord(tokens.first()))
+            tokens.removeFirst();
+        while (!tokens.isEmpty() && isSetupWord(tokens.last()))
+            tokens.removeLast();
+        bool meaningful = false;
+        for (const auto& token : tokens) {
+            const auto lower = token.toLower();
+            if (!isSetupWord(lower) && !known.contains(lower) && !known.contains(lower + 's')) {
+                meaningful = true;
+            }
+        }
+        const auto name = tokens.join(' ');
+        if (meaningful && name.size() >= 2 && !names.contains(name, Qt::CaseInsensitive)) {
+            names << name;
+        }
+    }
+    return names;
+}
+
 }  // namespace
 
 QString defaultMinecraftVersion()
@@ -187,10 +350,7 @@ Plan parseLocally(const QString& request)
     Plan plan;
     const auto lower = request.toLower();
 
-    // classic versions (1.7.10, 1.12.2, 1.21.1) and the year based ones Mojang uses since 2026 (26.1, 26.1.2)
-    static const QRegularExpression s_version(
-        QStringLiteral("(?<![\\d.])(1\\.\\d{1,2}(?:\\.\\d{1,2})?|(?:2[5-9]|[3-9]\\d)\\.\\d{1,2}(?:\\.\\d{1,2})?)(?![\\d.])"));
-    if (auto match = s_version.match(lower); match.hasMatch()) {
+    if (auto match = versionPattern().match(lower); match.hasMatch()) {
         plan.minecraftVersion = match.captured(1);
         plan.versionGiven = true;
     } else {
@@ -212,35 +372,99 @@ Plan parseLocally(const QString& request)
         plan.loader = defaultLoader(plan.minecraftVersion);
     }
 
-    for (const auto& rule : themeRules()) {
-        bool hit = false;
-        for (const auto& trigger : rule.triggers) {
-            if (words.contains(trigger)) {
-                hit = true;
-                break;
+    // the conversation is read clause by clause and in order, so "add zombies" after "without zombies" brings them back
+    const auto& known = knownWords();
+    QStringList wanted;  // English keywords of everything the user asked for
+    QSet<QString> boosted;
+    for (const auto& clause : splitClauses(request)) {
+        const auto names = modNames(clause.text);
+        QStringList nameWords;
+        for (const auto& name : names) {
+            nameWords << SearchTranslator::keywords(name);
+        }
+        QStringList clauseWords;
+        for (const auto& word : SearchTranslator::keywords(clause.text)) {
+            if (word.size() >= 3 && !SearchTranslator::hasCyrillic(word) && !isSetupWord(word) && !nameWords.contains(word)) {
+                clauseWords << word;
             }
         }
-        if (hit) {
-            plan.themes << Theme{ tr(rule.title), rule.queries, rule.count };
-        }
-    }
 
-    // words that matched no theme are searched for as they are, so "сборка с ведьмами" still finds something
-    QStringList known{ "neoforge", "forge",   "fabric",   "quilt", "optimization", "performance", "fps",
-                       "lag",      "shaders", "graphics", "map",   "minimap",      "textures" };
-    for (const auto& rule : themeRules()) {
-        known << rule.triggers;
-    }
-    for (const auto& word : words) {
-        if (word.size() < 3 || known.contains(word) || s_version.match(word).hasMatch() || SearchTranslator::hasCyrillic(word)) {
+        if (clause.negative) {
+            for (const auto& name : names) {
+                removeText(plan.requestedMods, name);
+                addText(plan.excluded, name);
+            }
+            for (const auto& word : clauseWords) {
+                wanted.removeAll(word);
+                addText(plan.excluded, word);
+            }
             continue;
         }
-        plan.themes << Theme{ word, { word }, 2 };
+        for (const auto& name : names) {
+            removeText(plan.excluded, name);
+            addText(plan.requestedMods, name);
+        }
+        const bool more = morePattern().match(clause.text).hasMatch();
+        for (const auto& word : clauseWords) {
+            removeText(plan.excluded, word);
+            if (!wanted.contains(word)) {
+                wanted << word;
+            }
+            if (more) {
+                boosted.insert(word);
+            }
+        }
+        for (const auto& word : SearchTranslator::unknownWords(clause.text)) {
+            addText(plan.unknownWords, word);
+        }
     }
 
-    plan.curated = essentialMods(plan.loader, requestWantsShaders(request), requestWantsMap(request));
+    for (const auto& rule : themeRules()) {
+        bool hit = false;
+        bool more = false;
+        bool unwanted = false;
+        for (const auto& trigger : rule.triggers) {
+            if (wanted.contains(trigger)) {
+                hit = true;
+                more = more || boosted.contains(trigger);
+            }
+            unwanted = unwanted || plan.excluded.contains(trigger, Qt::CaseInsensitive);
+        }
+        if (hit && !unwanted) {
+            // "побольше оружия" doubles the number of weapon mods
+            plan.themes << Theme{ tr(rule.title), rule.queries, more ? std::min(rule.count * 2, 8) : rule.count };
+        }
+    }
+
+    // words that matched no theme are searched for as they are, so "сборка с witches" still finds something
+    for (const auto& word : wanted) {
+        if (known.contains(word) || versionPattern().match(word).hasMatch()) {
+            continue;
+        }
+        plan.themes << Theme{ word, { word }, boosted.contains(word) ? 4 : 2 };
+    }
+
+    const auto wishes = positiveText(request);
+    plan.curated = essentialMods(plan.loader, requestWantsShaders(wishes), requestWantsMap(wishes));
     describePlan(plan);
     return plan;
+}
+
+bool isExcluded(const Plan& plan, const QString& title, const QString& slug)
+{
+    const auto name = normalized(title);
+    const auto id = normalized(slug);
+    for (const auto& term : plan.excluded) {
+        auto key = normalized(term);
+        // "weapons" should also catch "Weapon Master"
+        if (key.size() > 4 && key.endsWith('s')) {
+            key.chop(1);
+        }
+        if (key.size() >= 3 && (name.contains(key) || id.contains(key))) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void describePlan(Plan& plan)
@@ -249,7 +473,10 @@ void describePlan(Plan& plan)
     for (const auto& theme : plan.themes) {
         titles << theme.title.toLower();
     }
-    if (titles.isEmpty()) {
+    if (titles.isEmpty() && !plan.requestedMods.isEmpty()) {
+        plan.name = tr("%1 pack %2").arg(plan.requestedMods.first(), plan.minecraftVersion);
+        plan.summary = tr("Mods for: %1. Plus performance and quality-of-life mods.").arg(plan.requestedMods.join(", "));
+    } else if (titles.isEmpty()) {
         plan.name = tr("Optimized %1 %2").arg(loaderDisplayName(plan.loader), plan.minecraftVersion);
         plan.summary = tr("A light pack with performance and quality-of-life mods.");
     } else {
@@ -271,7 +498,8 @@ Plan planFor(const QString& topic, const QString& loader, const QString& minecra
         plan.loader = loader;
         plan.loaderGiven = true;
     }
-    plan.curated = essentialMods(plan.loader, requestWantsShaders(topic), requestWantsMap(topic));
+    const auto wishes = positiveText(topic);
+    plan.curated = essentialMods(plan.loader, requestWantsShaders(wishes), requestWantsMap(wishes));
     describePlan(plan);
     return plan;
 }

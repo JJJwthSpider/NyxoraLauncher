@@ -32,7 +32,8 @@ class ClaudePlanner : public QObject {
    public:
     explicit ClaudePlanner(QObject* parent = nullptr);
 
-    void plan(const QString& request, const QString& apiKey);
+    /// requestedMods / excluded: what the built-in rules read from the conversation, passed on so Claude respects it
+    void plan(const QString& request, const QString& apiKey, const QStringList& requestedMods = {}, const QStringList& excluded = {});
     void abort();
 
    signals:

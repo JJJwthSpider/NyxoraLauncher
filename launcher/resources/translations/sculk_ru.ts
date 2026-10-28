@@ -116,14 +116,6 @@
         <translation>Я ещё собираю сборку, подожди немного.</translation>
     </message>
     <message>
-        <source>Tell me what to change: a theme to add (&quot;add magic&quot;), another loader or version (&quot;Fabric 1.20.1&quot;), or &quot;start over&quot;. Or press OK below to create the instance.</source>
-        <translation>Напиши, что поменять: добавить тему («добавь магию»), другой загрузчик или версию («Fabric 1.20.1») или «начать заново». Или нажми «ОК» внизу, чтобы создать установку.</translation>
-    </message>
-    <message>
-        <source>I didn&apos;t catch the theme. Tell me what should be in the pack: zombies, weapons, magic, technology, cities, adventure, horror, space...</source>
-        <translation>Не понял тему. Расскажи, что должно быть в сборке: зомби, оружие, магия, технологии, города, приключения, хоррор, космос...</translation>
-    </message>
-    <message>
         <source>optimization only</source>
         <translation>только оптимизация</translation>
     </message>
@@ -134,10 +126,6 @@
     <message>
         <source>Minecraft %1. Which loader: NeoForge, Fabric, Forge or Quilt?</source>
         <translation>Minecraft %1. Какой загрузчик: NeoForge, Fabric, Forge или Quilt?</translation>
-    </message>
-    <message>
-        <source>Understood! Theme: &lt;b&gt;%1&lt;/b&gt;. Minecraft &lt;b&gt;%2&lt;/b&gt; with &lt;b&gt;%3&lt;/b&gt;. I&apos;m looking for mods on %4 and adding optimization and the libraries they need.</source>
-        <translation>Понял! Тема: &lt;b&gt;%1&lt;/b&gt;. Minecraft &lt;b&gt;%2&lt;/b&gt; на &lt;b&gt;%3&lt;/b&gt;. Ищу моды на %4, добавляю оптимизацию и нужные им библиотеки.</translation>
     </message>
     <message>
         <source>Planning the pack...</source>
@@ -151,10 +139,6 @@
         <source>Something went wrong: %1&lt;br&gt;Let&apos;s try another loader or version.</source>
         <translation>Что-то пошло не так: %1&lt;br&gt;Давай попробуем другой загрузчик или версию.</translation>
     </message>
-    <message>
-        <source>Done! &lt;b&gt;%1&lt;/b&gt;: %2. For your themes: %3, optimization and comfort: %4, libraries the mods need: %5. The list is on the right, untick what you don&apos;t want.&lt;br&gt;Press &lt;b&gt;OK&lt;/b&gt; below to create the instance, or write me what to change.</source>
-        <translation>Готово! &lt;b&gt;%1&lt;/b&gt;: %2. По твоим темам: %3, оптимизация и удобство: %4, нужные модам библиотеки: %5. Список справа, лишнее можно снять галочкой.&lt;br&gt;Нажми &lt;b&gt;«ОК»&lt;/b&gt; внизу, чтобы создать установку, или напиши, что поменять.</translation>
-    </message>
     <message numerus="yes">
         <source>%n mod(s)</source>
         <translation>
@@ -164,12 +148,76 @@
         </translation>
     </message>
     <message>
-        <source>Got it: &lt;b&gt;%1&lt;/b&gt;. Now write the loader and the Minecraft version. Any version that has the loader works, for example &lt;i&gt;NeoForge 1.21.1&lt;/i&gt;, &lt;i&gt;Forge 1.12.2&lt;/i&gt; or &lt;i&gt;Fabric 1.20.1&lt;/i&gt;.</source>
-        <translation>Понял: &lt;b&gt;%1&lt;/b&gt;. Теперь напиши загрузчик и версию Minecraft. Подойдёт любая версия, для которой есть этот загрузчик, например &lt;i&gt;NeoForge 1.21.1&lt;/i&gt;, &lt;i&gt;Forge 1.12.2&lt;/i&gt; или &lt;i&gt;Fabric 1.20.1&lt;/i&gt;.</translation>
-    </message>
-    <message>
         <source>%1 it is. Which Minecraft version? Write any version, for example 1.20.1 or 1.12.2.</source>
         <translation>Значит, %1. Какая версия Minecraft? Напиши любую, например 1.20.1 или 1.12.2.</translation>
+    </message>
+    <message>
+        <source>Tell me what to change: a theme or a mod to add (&quot;add magic&quot;, &quot;add Create&quot;), something to remove (&quot;remove zombies&quot;), another loader or version (&quot;Fabric 1.20.1&quot;), or &quot;start over&quot;. Or press OK below to create the instance.</source>
+        <translation>Скажи, что поменять: добавить тему или мод («добавь магию», «добавь Create»), что-то убрать («убери зомби»), другой загрузчик или версию («Fabric 1.20.1») или «начать заново». Или нажми OK внизу, чтобы создать установку.</translation>
+    </message>
+    <message>
+        <source>I didn&apos;t catch the theme. Tell me what should be in the pack: zombies, weapons, magic, technology, cities, adventure, horror, space... You can also name mods in English, for example &lt;i&gt;Create&lt;/i&gt; or &lt;i&gt;Farmer&apos;s Delight&lt;/i&gt;.</source>
+        <translation>Я не понял тему. Расскажи, что должно быть в сборке: зомби, оружие, магия, технологии, города, приключения, хоррор, космос... Можно назвать и сами моды на английском, например &lt;i&gt;Create&lt;/i&gt; или &lt;i&gt;Farmer's Delight&lt;/i&gt;.</translation>
+    </message>
+    <message>
+        <source>I don&apos;t know these words: &lt;i&gt;%1&lt;/i&gt;. Say it differently, or write the mod&apos;s name in English as on Modrinth.</source>
+        <translation>Я не знаю этих слов: &lt;i&gt;%1&lt;/i&gt;. Скажи по-другому или напиши название мода на английском, как на Modrinth.</translation>
+    </message>
+    <message>
+        <source>Mods you named: &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation>Названные тобой моды: &lt;b&gt;%1&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>Leaving out: &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation>Не добавляю: &lt;b&gt;%1&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>Got it: &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation>Понял: &lt;b&gt;%1&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>Now write the loader and the Minecraft version. Any version that has the loader works, for example &lt;i&gt;NeoForge 1.21.1&lt;/i&gt;, &lt;i&gt;Forge 1.12.2&lt;/i&gt; or &lt;i&gt;Fabric 1.20.1&lt;/i&gt;.</source>
+        <translation>Теперь напиши загрузчик и версию Minecraft. Подойдёт любая версия, для которой есть загрузчик, например &lt;i&gt;NeoForge 1.21.1&lt;/i&gt;, &lt;i&gt;Forge 1.12.2&lt;/i&gt; или &lt;i&gt;Fabric 1.20.1&lt;/i&gt;.</translation>
+    </message>
+    <message>
+        <source>Understood! Theme: &lt;b&gt;%1&lt;/b&gt;. Minecraft &lt;b&gt;%2&lt;/b&gt; with &lt;b&gt;%3&lt;/b&gt;.</source>
+        <translation>Понял! Тема: &lt;b&gt;%1&lt;/b&gt;. Minecraft &lt;b&gt;%2&lt;/b&gt; с &lt;b&gt;%3&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>I&apos;m looking for mods on %1 and adding optimization and every library the mods need.</source>
+        <translation>Ищу моды на %1, добавляю оптимизацию и все библиотеки, которые нужны модам.</translation>
+    </message>
+    <message>
+        <source>Added the mods you asked for: &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation>Добавил запрошенные моды: &lt;b&gt;%1&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>Not found for Minecraft %1 with %2: &lt;b&gt;%3&lt;/b&gt;. Check the name or try another version.</source>
+        <translation>Не нашёл для Minecraft %1 с %2: &lt;b&gt;%3&lt;/b&gt;. Проверь название или попробуй другую версию.</translation>
+    </message>
+    <message>
+        <source>%1 (for %2)</source>
+        <translation>%1 (для %2)</translation>
+    </message>
+    <message>
+        <source>Libraries downloaded automatically: %1.</source>
+        <translation>Библиотеки, которые скачаются сами: %1.</translation>
+    </message>
+    <message>
+        <source>Done! &lt;b&gt;%1&lt;/b&gt;: %2. For your themes: %3, optimization and comfort: %4, libraries the mods need: %5.</source>
+        <translation>Готово! &lt;b&gt;%1&lt;/b&gt;: %2. По твоим темам: %3, оптимизация и удобство: %4, библиотеки для модов: %5.</translation>
+    </message>
+    <message>
+        <source>The list is on the right, untick what you don&apos;t want: libraries nobody needs any more are left out by themselves.&lt;br&gt;Press &lt;b&gt;OK&lt;/b&gt; below to create the instance, or write me what to change.</source>
+        <translation>Список справа, сними галочки с того, что не нужно: библиотеки, которые больше никому не нужны, уберутся сами.&lt;br&gt;Нажми &lt;b&gt;OK&lt;/b&gt; внизу, чтобы создать установку, или напиши, что поменять.</translation>
+    </message>
+    <message>
+        <source>Needed by: %1</source>
+        <translation>Нужна для: %1</translation>
+    </message>
+    <message>
+        <source>the mods you named</source>
+        <translation>названные тобой моды</translation>
     </message>
 </context>
 <context>
@@ -1392,6 +1440,50 @@ Are you sure?</source>
     <message>
         <source>Could not load the list of Minecraft versions: %1</source>
         <translation>Не удалось загрузить список версий Minecraft: %1</translation>
+    </message>
+    <message>
+        <source>Skipped %1: you asked for a pack without it.</source>
+        <translation>Пропустил %1: по твоей просьбе сборка без него.</translation>
+    </message>
+    <message>
+        <source>Looking for the mods you named: %1...</source>
+        <translation>Ищу названные тобой моды: %1...</translation>
+    </message>
+    <message>
+        <source>Could not find the mod &quot;%1&quot; for Minecraft %2 with %3. I&apos;ll look for mods like it.</source>
+        <translation>Не нашёл мод «%1» для Minecraft %2 с %3. Поищу похожие моды.</translation>
+    </message>
+    <message>
+        <source>You asked for</source>
+        <translation>По твоей просьбе</translation>
+    </message>
+    <message>
+        <source>%1 from %2 does not fit: %3.</source>
+        <translation>%1 с %2 не подходит: %3.</translation>
+    </message>
+    <message>
+        <source>A library the mods need (%1) was not found on its platform.</source>
+        <translation>Библиотека, нужная модам (%1), не найдена на своей площадке.</translation>
+    </message>
+    <message>
+        <source>no file for this version and loader</source>
+        <translation>нет файла для этой версии и загрузчика</translation>
+    </message>
+    <message>
+        <source>Library %1 is not available: %2.</source>
+        <translation>Библиотека %1 недоступна: %2.</translation>
+    </message>
+    <message>
+        <source>Library %1 is not available: %2. It is not on %3 either.</source>
+        <translation>Библиотека %1 недоступна: %2. На %3 её тоже нет.</translation>
+    </message>
+    <message>
+        <source>Library %1 was taken from %2 because %3.</source>
+        <translation>Библиотеку %1 взял с %2, потому что %3.</translation>
+    </message>
+    <message>
+        <source>Removed %1: it needs %2, which is not available for this version.</source>
+        <translation>Убрал %1: ему нужна %2, а её нет для этой версии.</translation>
     </message>
 </context>
 <context>

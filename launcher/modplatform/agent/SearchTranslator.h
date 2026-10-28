@@ -30,6 +30,9 @@ QString toEnglish(const QString& query);
 /// Same as toEnglish(), but returns the separate English keywords (filler words removed).
 QStringList keywords(const QString& query);
 
+/// Russian words of the text that the dictionary does not know (fillers left out).
+QStringList unknownWords(const QString& text);
+
 /// True if the text contains Cyrillic letters.
 bool hasCyrillic(const QString& text);
 

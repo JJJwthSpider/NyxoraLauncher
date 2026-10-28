@@ -43,6 +43,9 @@ struct Plan {
     QString loader;  // "neoforge", "forge", "fabric" or "quilt"
     QList<Theme> themes;
     QList<CuratedMod> curated;
+    QStringList requestedMods;  // mods the user named ("Create", "Farmer's Delight"), searched by name
+    QStringList excluded;       // what the user asked to leave out: mod names and English keywords
+    QStringList unknownWords;   // Russian words the agent did not understand, reported back to the user
     bool fromClaude = false;
     bool versionGiven = false;
     bool loaderGiven = false;
@@ -72,6 +75,9 @@ bool wantsOnlyPerformance(const QString& request);
 
 /// Performance and quality-of-life mods that are added to every pack.
 QList<CuratedMod> essentialMods(const QString& loader, bool wantsShaders, bool wantsMap);
+
+/// True if the mod should be left out because the user asked for a pack without it.
+bool isExcluded(const Plan& plan, const QString& title, const QString& slug);
 
 /// Detects shader / map wishes in a request (used to pick the right curated mods).
 bool requestWantsShaders(const QString& request);

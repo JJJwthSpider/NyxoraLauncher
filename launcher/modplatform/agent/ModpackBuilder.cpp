@@ -107,7 +107,24 @@ bool curseForgeIsLibrary(const QJsonObject& mod)
 
 QString rawId(const QString& prefixedId)
 {
-    return prefixedId.mid(3);
+    return prefixedId.mid(prefixedId.indexOf(':') + 1);
+}
+
+/// How well a project matches a name the user wrote: 3 exact, 2 starts with it, 1 contains it, 0 no match.
+int nameScore(const QString& name, const Candidate& candidate)
+{
+    const auto wanted = normalized(name);
+    const auto title = normalized(candidate.title);
+    const auto slug = normalized(candidate.slug);
+    if (wanted.isEmpty())
+        return 0;
+    if (title == wanted || slug == wanted)
+        return 3;
+    if (title.startsWith(wanted) || slug.startsWith(wanted))
+        return 2;
+    if (title.contains(wanted) || slug.contains(wanted))
+        return 1;
+    return 0;
 }
 
 }  // namespace
@@ -127,6 +144,10 @@ void ModpackBuilder::build(const Plan& plan, bool useModrinth, bool useCurseForg
     m_useCurseForge = useCurseForge;
     m_mods.clear();
     m_triedProjects.clear();
+    m_triedDependencies.clear();
+    m_libraryNames.clear();
+    m_foundRequested.clear();
+    m_missingRequested.clear();
     m_loaderVersion.clear();
     m_requestsDone = 0;
     m_requestsStarted = 0;
@@ -326,7 +347,7 @@ void ModpackBuilder::resolveLoaderVersion()
             return;
         }
         emit log(tr("%1 %2 will be installed.").arg(loaderDisplayName(m_plan.loader), m_loaderVersion));
-        resolveCurated();
+        resolveRequested();
     });
     connect(m_loaderTask.get(), &Task::failed, this, [this](const QString& reason) {
         m_loaderTask.reset();
@@ -373,6 +394,56 @@ void ModpackBuilder::findById(const QString& prefixedId, CandidateCallback callb
             callback(status == 200 ? curseForgeCandidate(doc.object()["data"].toObject()) : Candidate{});
         });
     }
+}
+
+QString ModpackBuilder::modrinthFacets() const
+{
+    if (m_plan.loader == "quilt") {
+        return QString(R"([["categories:quilt","categories:fabric"],["versions:%1"],["project_type:mod"]])").arg(m_plan.minecraftVersion);
+    }
+    return QString(R"([["categories:%1"],["versions:%2"],["project_type:mod"]])").arg(m_plan.loader, m_plan.minecraftVersion);
+}
+
+void ModpackBuilder::findByName(const QString& name, bool curseForge, CandidateCallback callback)
+{
+    if (!curseForge) {
+        get(BuildConfig.MODRINTH_PROD_URL + "/search",
+            { { "query", name }, { "facets", modrinthFacets() }, { "index", "relevance" }, { "limit", "10" } }, false,
+            [name, callback](const QJsonDocument& doc, int status) {
+                if (status == 200) {
+                    for (const auto& value : doc.object()["hits"].toArray()) {
+                        const auto candidate = modrinthCandidate(value.toObject());
+                        if (nameScore(name, candidate) == 3) {
+                            callback(candidate);
+                            return;
+                        }
+                    }
+                }
+                callback({});
+            });
+        return;
+    }
+    get(BuildConfig.FLAME_BASE_URL + "/mods/search",
+        { { "gameId", QString::number(s_cfMinecraftGameId) },
+          { "classId", QString::number(s_cfModsClassId) },
+          { "searchFilter", name },
+          { "gameVersion", m_plan.minecraftVersion },
+          { "modLoaderType", QString::number(curseForgeLoaderType()) },
+          { "sortField", QString::number(s_cfSortByPopularity) },
+          { "sortOrder", "desc" },
+          { "pageSize", "10" } },
+        true, [name, callback](const QJsonDocument& doc, int status) {
+            if (status == 200) {
+                for (const auto& value : doc.object()["data"].toArray()) {
+                    const auto candidate = curseForgeCandidate(value.toObject());
+                    if (nameScore(name, candidate) == 3) {
+                        callback(candidate);
+                        return;
+                    }
+                }
+            }
+            callback({});
+        });
 }
 
 void ModpackBuilder::fetchFile(const Candidate& candidate, FileCallback callback)
@@ -423,14 +494,17 @@ void ModpackBuilder::fetchModrinthFile(const Candidate& candidate, FileCallback 
             for (const auto& value : version["dependencies"].toArray()) {
                 const auto dep = value.toObject();
                 const auto project = dep["project_id"].toString();
-                if (project.isEmpty()) {
+                const auto versionId = dep["version_id"].toString();
+                // some mods name only the version of a dependency; its project is looked up later
+                const auto id = !project.isEmpty() ? "mr:" + project : !versionId.isEmpty() ? "mrv:" + versionId : QString();
+                if (id.isEmpty()) {
                     continue;
                 }
                 const auto type = dep["dependency_type"].toString();
                 if (type == "required") {
-                    choice.required << "mr:" + project;
-                } else if (type == "incompatible") {
-                    choice.incompatible << "mr:" + project;
+                    choice.required << id;
+                } else if (type == "incompatible" && !project.isEmpty()) {
+                    choice.incompatible << id;
                 }
             }
             choice.valid = !choice.fileName.isEmpty() && !choice.url.isEmpty() && !choice.sha512.isEmpty();
@@ -505,18 +579,40 @@ void ModpackBuilder::fetchCurseForgeFile(const Candidate& candidate, FileCallbac
 
 const AgentMod* ModpackBuilder::findSameMod(const Candidate& candidate) const
 {
+    const int index = indexOfSameMod(candidate);
+    return index < 0 ? nullptr : &m_mods.at(index);
+}
+
+int ModpackBuilder::indexOfSameMod(const Candidate& candidate) const
+{
     const auto name = normalized(candidate.title);
     const auto slug = normalized(candidate.slug);
-    for (const auto& mod : m_mods) {
+    for (int i = 0; i < m_mods.size(); i++) {
+        const auto& mod = m_mods.at(i);
         if (mod.projectId == candidate.id || mod.aliases.contains(candidate.id)) {
-            return &mod;
+            return i;
         }
         // the same mod published on both platforms
         if ((!name.isEmpty() && normalized(mod.title) == name) || (!slug.isEmpty() && normalized(mod.slug) == slug)) {
-            return &mod;
+            return i;
         }
     }
-    return nullptr;
+    return -1;
+}
+
+bool ModpackBuilder::aliasExisting(const Candidate& candidate, const QString& requiredId)
+{
+    const int index = indexOfSameMod(candidate);
+    if (index < 0) {
+        return false;
+    }
+    auto& mod = m_mods[index];
+    for (const auto& id : { requiredId, candidate.id }) {
+        if (mod.projectId != id && !mod.aliases.contains(id)) {
+            mod.aliases << id;
+        }
+    }
+    return true;
 }
 
 bool ModpackBuilder::addMod(const Candidate& candidate, const FileChoice& file, const QString& group, bool dependency)
@@ -528,6 +624,10 @@ bool ModpackBuilder::addMod(const Candidate& candidate, const FileChoice& file, 
                 mod.aliases << candidate.id;
             }
         }
+        return false;
+    }
+    if (!dependency && isExcluded(m_plan, candidate.title, candidate.slug)) {
+        emit log(tr("Skipped %1: you asked for a pack without it.").arg(candidate.title));
         return false;
     }
     if (!file.valid) {
@@ -572,6 +672,112 @@ bool ModpackBuilder::addMod(const Candidate& candidate, const FileChoice& file, 
 }
 
 /* ---------------------------------------------------------------- phases */
+
+void ModpackBuilder::resolveRequested()
+{
+    if (m_plan.requestedMods.isEmpty()) {
+        resolveCurated();
+        return;
+    }
+    emit log(tr("Looking for the mods you named: %1...").arg(m_plan.requestedMods.join(", ")));
+    m_onPhaseDone = [this] { resolveCurated(); };
+
+    for (const auto& name : m_plan.requestedMods) {
+        // both platforms are searched; the best name matches are tried first, Modrinth before CurseForge on a tie
+        struct Found {
+            int remaining = 0;
+            QList<std::pair<int, Candidate>> hits;
+        };
+        auto found = std::make_shared<Found>();
+        found->remaining = (m_useModrinth ? 1 : 0) + (m_useCurseForge ? 1 : 0);
+        auto collect = [found](const Candidate& candidate, int score) {
+            if (score > 0) {
+                found->hits << std::make_pair(score, candidate);
+            }
+        };
+        auto done = [this, name, found] {
+            if (--found->remaining > 0) {
+                return;
+            }
+            std::stable_sort(found->hits.begin(), found->hits.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
+            QList<Candidate> candidates;
+            for (const auto& [score, candidate] : found->hits) {
+                candidates << candidate;
+            }
+            tryRequested(name, candidates);
+        };
+        if (m_useModrinth) {
+            get(BuildConfig.MODRINTH_PROD_URL + "/search",
+                { { "query", name }, { "facets", modrinthFacets() }, { "index", "relevance" }, { "limit", "10" } }, false,
+                [name, collect, done](const QJsonDocument& doc, int status) {
+                    if (status == 200) {
+                        for (const auto& value : doc.object()["hits"].toArray()) {
+                            const auto candidate = modrinthCandidate(value.toObject());
+                            collect(candidate, nameScore(name, candidate));
+                        }
+                    }
+                    done();
+                });
+        }
+        if (m_useCurseForge) {
+            get(BuildConfig.FLAME_BASE_URL + "/mods/search",
+                { { "gameId", QString::number(s_cfMinecraftGameId) },
+                  { "classId", QString::number(s_cfModsClassId) },
+                  { "searchFilter", name },
+                  { "gameVersion", m_plan.minecraftVersion },
+                  { "modLoaderType", QString::number(curseForgeLoaderType()) },
+                  { "sortField", QString::number(s_cfSortByPopularity) },
+                  { "sortOrder", "desc" },
+                  { "pageSize", "10" } },
+                true, [name, collect, done](const QJsonDocument& doc, int status) {
+                    if (status == 200) {
+                        for (const auto& value : doc.object()["data"].toArray()) {
+                            const auto candidate = curseForgeCandidate(value.toObject());
+                            collect(candidate, nameScore(name, candidate));
+                        }
+                    }
+                    done();
+                });
+        }
+    }
+    if (m_pending == 0) {
+        phaseDone();
+    }
+}
+
+void ModpackBuilder::tryRequested(const QString& name, QList<Candidate> candidates)
+{
+    if (candidates.isEmpty()) {
+        m_missingRequested << name;
+        emit log(tr("Could not find the mod \"%1\" for Minecraft %2 with %3. I'll look for mods like it.")
+                     .arg(name, m_plan.minecraftVersion, loaderDisplayName(m_plan.loader)));
+        // maybe it was not a mod name but a theme ("vampires"), so it is searched like one
+        m_plan.themes << Theme{ name, { name }, 2 };
+        return;
+    }
+    const auto candidate = candidates.takeFirst();
+    if (const auto* same = findSameMod(candidate)) {
+        m_foundRequested << same->title;
+        return;
+    }
+    fetchFile(candidate, [this, name, candidates, candidate](const FileChoice& file) {
+        if (file.valid && addMod(candidate, file, tr("You asked for"), false)) {
+            m_mods.last().requested = true;
+            m_foundRequested << candidate.title;
+            return;
+        }
+        if (const auto* same = findSameMod(candidate)) {
+            m_foundRequested << same->title;
+            return;
+        }
+        if (!file.problem.isEmpty()) {
+            emit log(tr("%1 from %2 does not fit: %3.")
+                         .arg(candidate.title, candidate.platform == s_modrinth ? QStringLiteral("Modrinth") : QStringLiteral("CurseForge"),
+                              file.problem));
+        }
+        tryRequested(name, candidates);
+    });
+}
 
 void ModpackBuilder::resolveCurated()
 {
@@ -625,12 +831,7 @@ void ModpackBuilder::searchThemes()
     }
     m_onPhaseDone = [this] { resolveDependencies(); };
 
-    QString facets;
-    if (m_plan.loader == "quilt") {
-        facets = QString(R"([["categories:quilt","categories:fabric"],["versions:%1"],["project_type:mod"]])").arg(m_plan.minecraftVersion);
-    } else {
-        facets = QString(R"([["categories:%1"],["versions:%2"],["project_type:mod"]])").arg(m_plan.loader, m_plan.minecraftVersion);
-    }
+    const auto facets = modrinthFacets();
 
     for (int themeIndex = 0; themeIndex < m_plan.themes.size(); themeIndex++) {
         const auto& theme = m_plan.themes.at(themeIndex);
@@ -742,7 +943,7 @@ void ModpackBuilder::resolveDependencies()
     QStringList missing;
     for (const auto& mod : m_mods) {
         for (const auto& required : mod.requiredProjects) {
-            if (!present.contains(required) && !m_triedProjects.contains(required) && !missing.contains(required)) {
+            if (!present.contains(required) && !m_triedDependencies.contains(required) && !missing.contains(required)) {
                 missing << required;
             }
         }
@@ -755,31 +956,96 @@ void ModpackBuilder::resolveDependencies()
     emit log(tr("Adding libraries the mods need..."));
     m_onPhaseDone = [this] { resolveDependencies(); };
 
-    const auto group = tr("Libraries");
-    for (const auto& projectId : missing) {
-        m_triedProjects.insert(projectId);
-        if (projectId.startsWith("cf:") && !m_useCurseForge) {
+    for (const auto& requiredId : missing) {
+        m_triedDependencies.insert(requiredId);
+        if (requiredId.startsWith("mrv:")) {
+            // only the version is known: find out which project it belongs to, the next round adds that project
+            get(BuildConfig.MODRINTH_PROD_URL + "/version/" + rawId(requiredId), {}, false,
+                [this, requiredId](const QJsonDocument& doc, int status) {
+                    const auto project = doc.object()["project_id"].toString();
+                    if (status != 200 || project.isEmpty()) {
+                        return;
+                    }
+                    for (auto& mod : m_mods) {
+                        for (auto& required : mod.requiredProjects) {
+                            if (required == requiredId) {
+                                required = "mr:" + project;
+                            }
+                        }
+                    }
+                });
             continue;
         }
-        findById(projectId, [this, projectId, group](const Candidate& candidate) {
-            if (candidate.id.isEmpty()) {
-                return;
-            }
-            // the library may already be in the pack from the other platform
-            if (const auto* same = findSameMod(candidate)) {
-                for (auto& mod : m_mods) {
-                    if (&mod == same) {
-                        mod.aliases << projectId;
-                    }
-                }
-                return;
-            }
-            fetchFile(candidate, [this, candidate, group](const FileChoice& file) { addMod(candidate, file, group, true); });
-        });
+        addLibrary(requiredId);
     }
     if (m_pending == 0) {
         phaseDone();
     }
+}
+
+void ModpackBuilder::addLibrary(const QString& requiredId)
+{
+    findById(requiredId, [this, requiredId](const Candidate& candidate) {
+        if (candidate.id.isEmpty()) {
+            emit log(tr("A library the mods need (%1) was not found on its platform.").arg(requiredId));
+            return;
+        }
+        m_libraryNames.insert(requiredId, candidate.title);
+        // the library may already be in the pack, maybe from the other platform
+        if (aliasExisting(candidate, requiredId)) {
+            return;
+        }
+        fetchFile(candidate, [this, requiredId, candidate](const FileChoice& file) {
+            if (file.valid && addMod(candidate, file, tr("Libraries"), true)) {
+                return;
+            }
+            if (aliasExisting(candidate, requiredId)) {
+                return;
+            }
+            // no file for this version, or the author blocks downloads outside the CurseForge app: try the other platform
+            const auto problem = file.problem.isEmpty() ? tr("no file for this version and loader") : file.problem;
+            libraryFromOtherPlatform(requiredId, candidate, problem);
+        });
+    });
+}
+
+void ModpackBuilder::libraryFromOtherPlatform(const QString& requiredId, const Candidate& original, const QString& problem)
+{
+    const bool curseForge = original.platform == s_modrinth;
+    if (curseForge && !m_useCurseForge) {
+        emit log(tr("Library %1 is not available: %2.").arg(original.title, problem));
+        return;
+    }
+    const auto otherName = curseForge ? QStringLiteral("CurseForge") : QStringLiteral("Modrinth");
+    auto useOther = [this, requiredId, original, problem, otherName](const Candidate& other) {
+        if (other.id.isEmpty()) {
+            emit log(tr("Library %1 is not available: %2. It is not on %3 either.").arg(original.title, problem, otherName));
+            return;
+        }
+        if (aliasExisting(other, requiredId)) {
+            return;
+        }
+        fetchFile(other, [this, requiredId, original, other, problem, otherName](const FileChoice& file) {
+            if (file.valid && addMod(other, file, tr("Libraries"), true)) {
+                // mods that asked for the original project now see it as present
+                m_mods.last().aliases << requiredId;
+                emit log(tr("Library %1 was taken from %2 because %3.").arg(original.title, otherName, problem));
+                return;
+            }
+            if (aliasExisting(other, requiredId)) {
+                return;
+            }
+            emit log(tr("Library %1 is not available: %2. It is not on %3 either.").arg(original.title, problem, otherName));
+        });
+    };
+    // libraries usually keep the same slug on both platforms; if not, the exact name is searched
+    findBySlug(original.slug, curseForge, [this, original, curseForge, useOther](const Candidate& bySlug) {
+        if (!bySlug.id.isEmpty()) {
+            useOther(bySlug);
+            return;
+        }
+        findByName(original.title, curseForge, useOther);
+    });
 }
 
 void ModpackBuilder::finish()
@@ -798,7 +1064,16 @@ void ModpackBuilder::finish()
         for (int i = 0; i < m_mods.size() && !changed; i++) {
             for (const auto& required : m_mods.at(i).requiredProjects) {
                 if (!present.contains(required)) {
-                    emit log(tr("Removed %1: a library it needs is not available for this version.").arg(m_mods.at(i).title));
+                    const auto library = m_libraryNames.value(required);
+                    if (library.isEmpty()) {
+                        emit log(tr("Removed %1: a library it needs is not available for this version.").arg(m_mods.at(i).title));
+                    } else {
+                        emit log(tr("Removed %1: it needs %2, which is not available for this version.").arg(m_mods.at(i).title, library));
+                    }
+                    if (m_mods.at(i).requested) {
+                        m_foundRequested.removeAll(m_mods.at(i).title);
+                        m_missingRequested << m_mods.at(i).title;
+                    }
                     m_mods.removeAt(i);
                     changed = true;
                     break;
@@ -807,8 +1082,23 @@ void ModpackBuilder::finish()
         }
     }
 
-    // keep the groups in the order of the plan: curated first, then themes, libraries last
-    QStringList order;
+    // tell every library which mods need it
+    for (auto& library : m_mods) {
+        if (!library.dependency) {
+            continue;
+        }
+        library.neededBy.clear();
+        for (const auto& mod : m_mods) {
+            for (const auto& required : mod.requiredProjects) {
+                if ((required == library.projectId || library.aliases.contains(required)) && !library.neededBy.contains(mod.title)) {
+                    library.neededBy << mod.title;
+                }
+            }
+        }
+    }
+
+    // keep the groups in the order of the plan: what the user named, curated, themes, libraries last
+    QStringList order{ tr("You asked for") };
     for (const auto& curated : m_plan.curated) {
         if (!order.contains(curated.group))
             order << curated.group;
@@ -830,9 +1120,32 @@ void ModpackBuilder::finish()
 
 QByteArray ModpackBuilder::makeIndex() const
 {
+    // libraries are kept only while an enabled mod (directly or through another library) needs them
+    QSet<int> included;
+    QList<int> queue;
+    for (int i = 0; i < m_mods.size(); i++) {
+        if (m_mods.at(i).enabled && !m_mods.at(i).dependency) {
+            included.insert(i);
+            queue << i;
+        }
+    }
+    while (!queue.isEmpty()) {
+        const auto& mod = m_mods.at(queue.takeFirst());
+        for (const auto& required : mod.requiredProjects) {
+            for (int i = 0; i < m_mods.size(); i++) {
+                const auto& other = m_mods.at(i);
+                if (!included.contains(i) && (other.projectId == required || other.aliases.contains(required))) {
+                    included.insert(i);
+                    queue << i;
+                }
+            }
+        }
+    }
+
     QJsonArray files;
-    for (const auto& mod : m_mods) {
-        if (!mod.enabled) {
+    for (int i = 0; i < m_mods.size(); i++) {
+        const auto& mod = m_mods.at(i);
+        if (!included.contains(i)) {
             continue;
         }
         QJsonObject hashes{ { "sha1", mod.sha1 } };

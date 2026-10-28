@@ -228,6 +228,16 @@ const QSet<QString>& fillerWords()
         "нужна", "нужны", "нужно", "много",  "лучшие", "лучший",    "самые",  "самый",     "какой",   "какие", "чтобы",
         "был",   "была",  "были",  "есть",   "мне",    "майнкрафт", "майн",   "minecraft", "mod",     "mods",  "with",
         "and",   "for",   "the",   "a",      "pack",   "modpack",   "сделай", "собери",    "найди",
+        // chat words that are not part of the theme
+        "добавь", "добавить", "добавьте", "поставь", "поставить", "закинь", "засунь", "вставь", "положи", "включи", "пожалуйста",
+        "плиз", "пж", "ещё", "еще", "тоже", "также", "можно", "давай", "сделать", "собрать", "побольше", "больше", "поменьше",
+        "меньше", "немного", "чуть", "кучу", "куча", "типа", "всякие", "всякое", "разные", "разных", "крутые", "крутых",
+        "интересные", "новые", "версия", "версию", "версии", "лоадер", "загрузчик", "обратно", "пусть", "будет", "будут", "тогда",
+        "вообще", "только", "очень", "вот", "это", "этот", "эти", "там", "тут", "чтоб", "хочется", "хотел", "хотела", "бы", "ли",
+        "его", "её", "их", "мод", "модик", "модики", "модпак", "модпака", "сборке", "сборочку", "игра", "игру", "игры", "из",
+        "от", "до", "к", "ко", "у", "о", "об", "же", "уже", "все", "всё", "весь", "всю", "вся", "свой", "свою", "нормальный",
+        "нормальные", "хороший", "хорошие", "какую-нибудь", "какие-нибудь", "что-нибудь", "нибудь", "add", "please", "also",
+        "some", "more", "lots", "plus", "want", "need", "i", "me", "my", "of", "to", "in", "on",
     };
     return s_fillers;
 }
@@ -278,6 +288,22 @@ QStringList keywords(const QString& query)
     // Russian words without a translation would only spoil an English search;
     // keep them only when nothing else is left (it may be the name of a Russian mod)
     return result.isEmpty() ? unknown : result;
+}
+
+QStringList unknownWords(const QString& text)
+{
+    static const QRegularExpression s_separators(QStringLiteral("[^\\w\\-]+"), QRegularExpression::UseUnicodePropertiesOption);
+    QStringList result;
+    for (const auto& word : text.toLower().split(s_separators, Qt::SkipEmptyParts)) {
+        // short words are mostly prepositions and particles
+        if (word.size() < 4 || !hasCyrillic(word) || fillerWords().contains(word) || result.contains(word)) {
+            continue;
+        }
+        if (hasCyrillic(translateWord(word))) {
+            result << word;
+        }
+    }
+    return result;
 }
 
 QString toEnglish(const QString& query)

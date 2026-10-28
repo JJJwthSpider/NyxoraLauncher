@@ -259,7 +259,14 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
 
     connect(m_planner, &ModpackAgent::ClaudePlanner::planned, this, [this](const ModpackAgent::Plan& plan) {
         m_log->appendPlainText(tr("Claude understood the request: %1").arg(plan.summary));
-        startBuilder(plan);
+        // the mods the user named and what they want left out are kept exactly as the built-in rules read them
+        auto merged = plan;
+        for (const auto& name : m_pendingPlan.requestedMods) {
+            if (!merged.requestedMods.contains(name, Qt::CaseInsensitive))
+                merged.requestedMods << name;
+        }
+        merged.excluded = m_pendingPlan.excluded;
+        startBuilder(merged);
     });
     connect(m_planner, &ModpackAgent::ClaudePlanner::failed, this, [this](const QString& reason) {
         m_log->appendPlainText(tr("Claude is not available (%1). Using the built-in rules instead.").arg(reason));
@@ -452,6 +459,7 @@ void AgentPage::reset()
     setBusy(false);
     m_stage = Stage::Topic;
     m_topic.clear();
+    m_unknownWords.clear();
     m_loader.clear();
     m_version.clear();
     m_resultPanel->setVisible(false);
@@ -498,29 +506,57 @@ void AgentPage::userSaid(const QString& text)
         m_loader = parsed.loader;
         setupChanged = true;
     }
-    const bool topical = !parsed.themes.isEmpty() || ModpackAgent::wantsOnlyPerformance(text) || ModpackAgent::requestWantsShaders(text) ||
+    const bool topical = !parsed.themes.isEmpty() || !parsed.requestedMods.isEmpty() || !parsed.excluded.isEmpty() ||
+                         ModpackAgent::wantsOnlyPerformance(text) || ModpackAgent::requestWantsShaders(text) ||
                          ModpackAgent::requestWantsMap(text);
     if (topical) {
-        m_topic += (m_topic.isEmpty() ? QString() : QStringLiteral(", ")) + text;
+        // every message is kept, so later wishes ("убери зомби", "добавь Create") change the earlier ones
+        m_topic += (m_topic.isEmpty() ? QString() : QStringLiteral(". ")) + text;
     }
+    m_unknownWords = parsed.unknownWords;
 
     if (m_stage == Stage::Ready) {
         if (topical || setupChanged) {
             startBuild();
         } else {
-            agentSay(tr("Tell me what to change: a theme to add (\"add magic\"), another loader or version (\"Fabric 1.20.1\"), "
-                        "or \"start over\". Or press OK below to create the instance."),
+            agentSay(unknownWordsNote() +
+                         tr("Tell me what to change: a theme or a mod to add (\"add magic\", \"add Create\"), something to remove "
+                            "(\"remove zombies\"), another loader or version (\"Fabric 1.20.1\"), or \"start over\". "
+                            "Or press OK below to create the instance."),
                      translated(s_afterReplies, std::size(s_afterReplies), true));
         }
         return;
     }
     if (!topical && !setupChanged) {
-        agentSay(tr("I didn't catch the theme. Tell me what should be in the pack: zombies, weapons, magic, technology, "
-                    "cities, adventure, horror, space..."),
+        agentSay(unknownWordsNote() + tr("I didn't catch the theme. Tell me what should be in the pack: zombies, weapons, magic, "
+                                         "technology, cities, adventure, horror, space... You can also name mods in English, "
+                                         "for example <i>Create</i> or <i>Farmer's Delight</i>."),
                  translated(s_topicReplies, std::size(s_topicReplies), true));
         return;
     }
     continueConversation();
+}
+
+QString AgentPage::unknownWordsNote() const
+{
+    if (m_unknownWords.isEmpty()) {
+        return {};
+    }
+    return tr("I don't know these words: <i>%1</i>. Say it differently, or write the mod's name in English as on Modrinth.")
+               .arg(m_unknownWords.join(", ").toHtmlEscaped()) +
+           "<br>";
+}
+
+QString AgentPage::wishesNote(const ModpackAgent::Plan& plan) const
+{
+    QString note;
+    if (!plan.requestedMods.isEmpty()) {
+        note += " " + tr("Mods you named: <b>%1</b>.").arg(plan.requestedMods.join(", ").toHtmlEscaped());
+    }
+    if (!plan.excluded.isEmpty()) {
+        note += " " + tr("Leaving out: <b>%1</b>.").arg(plan.excluded.join(", ").toHtmlEscaped());
+    }
+    return note;
 }
 
 QString AgentPage::themeList(const ModpackAgent::Plan& plan) const
@@ -528,6 +564,9 @@ QString AgentPage::themeList(const ModpackAgent::Plan& plan) const
     QStringList titles;
     for (const auto& theme : plan.themes) {
         titles << theme.title.toLower();
+    }
+    if (titles.isEmpty() && !plan.requestedMods.isEmpty()) {
+        return tr("the mods you named");
     }
     return titles.isEmpty() ? tr("optimization only") : titles.join(", ");
 }
@@ -542,9 +581,10 @@ void AgentPage::continueConversation()
     const auto plan = ModpackAgent::planFor(m_topic, m_loader, m_version);
     if (m_loader.isEmpty() && m_version.isEmpty()) {
         m_stage = Stage::Setup;
-        agentSay(tr("Got it: <b>%1</b>. Now write the loader and the Minecraft version. Any version that has the loader works, "
-                    "for example <i>NeoForge 1.21.1</i>, <i>Forge 1.12.2</i> or <i>Fabric 1.20.1</i>.")
-                     .arg(themeList(plan).toHtmlEscaped()),
+        agentSay(unknownWordsNote() +
+                     tr("Got it: <b>%1</b>.").arg(themeList(plan).toHtmlEscaped()) + wishesNote(plan) + " " +
+                     tr("Now write the loader and the Minecraft version. Any version that has the loader works, "
+                        "for example <i>NeoForge 1.21.1</i>, <i>Forge 1.12.2</i> or <i>Fabric 1.20.1</i>."),
                  translated(s_setupReplies, std::size(s_setupReplies), false));
         return;
     }
@@ -578,17 +618,20 @@ void AgentPage::startBuild()
         sources << "Modrinth";
     if (m_useCurseForge->isChecked())
         sources << "CurseForge";
-    agentSay(tr("Understood! Theme: <b>%1</b>. Minecraft <b>%2</b> with <b>%3</b>. "
-                "I'm looking for mods on %4 and adding optimization and the libraries they need.")
+    agentSay(unknownWordsNote() +
+             tr("Understood! Theme: <b>%1</b>. Minecraft <b>%2</b> with <b>%3</b>.")
                  .arg(themeList(m_pendingPlan).toHtmlEscaped(), m_pendingPlan.minecraftVersion,
-                      ModpackAgent::loaderDisplayName(m_pendingPlan.loader), sources.join(" + ")));
+                      ModpackAgent::loaderDisplayName(m_pendingPlan.loader)) +
+             wishesNote(m_pendingPlan) + " " +
+             tr("I'm looking for mods on %1 and adding optimization and every library the mods need.").arg(sources.join(" + ")));
     showTyping(tr("Planning the pack..."));
 
     const auto apiKey = m_apiKey->text().trimmed();
     APPLICATION->settings()->set("AgentClaudeApiKey", apiKey);
     if (!apiKey.isEmpty()) {
         m_typingStatus = tr("Claude is reading your request...");
-        m_planner->plan(QString("%1. %2 %3").arg(m_topic, ModpackAgent::loaderDisplayName(m_loader), m_version), apiKey);
+        m_planner->plan(QString("%1. %2 %3").arg(m_topic, ModpackAgent::loaderDisplayName(m_loader), m_version), apiKey,
+                        m_pendingPlan.requestedMods, m_pendingPlan.excluded);
     } else {
         startBuilder(m_pendingPlan);
     }
@@ -637,11 +680,30 @@ void AgentPage::builderFinished()
         }
     }
     const int essentials = mods.size() - themed - libraries;
-    agentSay(tr("Done! <b>%1</b>: %2. For your themes: %3, optimization and comfort: %4, libraries the mods need: %5. "
-                "The list is on the right, untick what you don't want.<br>Press <b>OK</b> below to create the instance, "
-                "or write me what to change.")
-                 .arg(m_builder->plan().name.toHtmlEscaped(), tr("%n mod(s)", "", mods.size()), QString::number(themed),
-                      QString::number(essentials), QString::number(libraries)),
+    QString details;
+    if (!m_builder->foundRequested().isEmpty()) {
+        details += "<br>" + tr("Added the mods you asked for: <b>%1</b>.").arg(m_builder->foundRequested().join(", ").toHtmlEscaped());
+    }
+    if (!m_builder->missingRequested().isEmpty()) {
+        details += "<br>" + tr("Not found for Minecraft %1 with %2: <b>%3</b>. Check the name or try another version.")
+                                .arg(m_builder->plan().minecraftVersion, ModpackAgent::loaderDisplayName(m_builder->plan().loader),
+                                     m_builder->missingRequested().join(", ").toHtmlEscaped());
+    }
+    QStringList libraryNotes;
+    for (const auto& mod : mods) {
+        if (mod.dependency) {
+            libraryNotes << (mod.neededBy.isEmpty() ? mod.title : tr("%1 (for %2)").arg(mod.title, mod.neededBy.join(", ")));
+        }
+    }
+    if (!libraryNotes.isEmpty()) {
+        details += "<br>" + tr("Libraries downloaded automatically: %1.").arg(libraryNotes.join("; ").toHtmlEscaped());
+    }
+    agentSay(tr("Done! <b>%1</b>: %2. For your themes: %3, optimization and comfort: %4, libraries the mods need: %5.")
+                     .arg(m_builder->plan().name.toHtmlEscaped(), tr("%n mod(s)", "", mods.size()), QString::number(themed),
+                          QString::number(essentials), QString::number(libraries)) +
+                 details + "<br>" +
+                 tr("The list is on the right, untick what you don't want: libraries nobody needs any more are left out by "
+                    "themselves.<br>Press <b>OK</b> below to create the instance, or write me what to change."),
              translated(s_afterReplies, std::size(s_afterReplies), true));
     suggestCurrent();
 }
@@ -676,7 +738,11 @@ void AgentPage::fillModTree()
         if (mod.dependency) {
             // libraries are needed by other mods, switching them off would break the game
             item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-            item->setToolTip(0, tr("Needed by other mods in the pack"));
+            item->setToolTip(0, mod.neededBy.isEmpty() ? tr("Needed by other mods in the pack")
+                                                        : tr("Needed by: %1").arg(mod.neededBy.join(", ")));
+            if (!mod.neededBy.isEmpty()) {
+                item->setText(2, tr("Needed by: %1").arg(mod.neededBy.join(", ")));
+            }
         } else {
             item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable);
             item->setCheckState(0, mod.enabled ? Qt::Checked : Qt::Unchecked);
