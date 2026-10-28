@@ -140,6 +140,12 @@
 Код: `launcher/modplatform/agent/` (план, Claude, сборщик, импорт),
 `launcher/ui/pages/modplatform/agent/AgentPage.cpp` (чат).
 
+### Приложение для Android
+
+В папке `android/` — **SculkShoot Client для Android** (`android/build-apk.sh` собирает APK): чат с Варденом,
+который собирает сборку с Modrinth по тем же правилам, сохраняет чаты и отдаёт сборку `.mrpack` лаунчеру
+Minecraft на телефоне; там же расшифровка кодов приглашения. Подробности — в `android/README.md`.
+
 ### Игра с друзьями
 
 **Лобби** (кнопка «Лобби» сверху или «Играть с друзьями» у установки):
