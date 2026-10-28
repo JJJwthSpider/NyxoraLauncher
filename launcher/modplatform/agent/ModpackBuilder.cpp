@@ -211,6 +211,18 @@ void ModpackBuilder::build(const Plan& plan, bool useModrinth, bool useCurseForg
     checkMinecraftVersion();
 }
 
+void ModpackBuilder::restore(const Plan& plan, const QList<AgentMod>& mods, const QString& loaderVersion)
+{
+    abort();
+    m_plan = plan;
+    m_mods = mods;
+    m_loaderVersion = loaderVersion;
+    m_foundRequested.clear();
+    m_missingRequested.clear();
+    m_emptyThemes.clear();
+    m_suggestedSetup.clear();
+}
+
 void ModpackBuilder::abort()
 {
     m_running = false;

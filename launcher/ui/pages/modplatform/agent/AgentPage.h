@@ -30,6 +30,8 @@ class QGridLayout;
 class QGroupBox;
 class QLabel;
 class QLineEdit;
+class QListWidget;
+class QListWidgetItem;
 class QPlainTextEdit;
 class QProgressBar;
 class QPushButton;
@@ -76,9 +78,23 @@ class AgentPage : public QWidget, public BasePage {
     QString unknownWordsNote() const;
     QString wishesNote(const ModpackAgent::Plan& plan) const;
 
+    // saved chats: every conversation is kept in <data>/agent-chats/<id>.json with its messages and its pack
+    void newChat();
+    void saveChat();
+    void loadChat(const QString& id);
+    void deleteChat(const QString& id);
+    void refreshChatList();
+    void clearChatView();
+    QString chatFile(const QString& id) const;
+
     // chat widgets
     void agentSay(const QString& html, const QStringList& replies = {});
     void addUserMessage(const QString& text);
+    void showAgentBubble(const QString& html);
+    void showUserBubble(const QString& text);
+    int bubbleWidth() const;
+    void fitBubble(QLabel* label);
+    bool eventFilter(QObject* watched, QEvent* event) override;
     QWidget* addRow(QWidget* bubble, bool fromAgent);
     void setReplies(const QStringList& replies);
     void showTyping(const QString& status);
@@ -102,6 +118,19 @@ class AgentPage : public QWidget, public BasePage {
     QString m_loader;
     QString m_version;
     bool m_fillingTree = false;
+
+    QString m_chatId;
+    QString m_chatTitle;
+    bool m_chatTitleEdited = false;           // the user renamed the chat, the pack name no longer replaces it
+    QList<std::pair<bool, QString>> m_messages;  // (from the Warden, html or plain text)
+    QStringList m_currentReplies;
+    bool m_replaying = false;  // a saved chat is being shown: no animations, nothing is saved again
+    bool m_fillingChatList = false;
+    QWidget* m_chatsPanel = nullptr;
+    QLabel* m_chatsTitle = nullptr;
+    QListWidget* m_chatList = nullptr;
+    QPushButton* m_newChatButton = nullptr;
+    QToolButton* m_deleteChatButton = nullptr;
 
     WardenWidget* m_warden = nullptr;
     QLabel* m_title = nullptr;

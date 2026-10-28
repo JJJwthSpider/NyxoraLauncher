@@ -16,13 +16,28 @@
  */
 #include "AgentPage.h"
 
+#include <algorithm>
+
 #include <QCheckBox>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QDateTime>
+#include <QDir>
+#include <QEvent>
+#include <QFile>
+#include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLineEdit>
+#include <QListWidget>
+#include <QLocale>
+#include <QMessageBox>
+#include <QSaveFile>
+#include <QUuid>
 #include <QPlainTextEdit>
 #include <QProgressBar>
 #include <QPropertyAnimation>
@@ -62,6 +77,79 @@ const char* s_afterReplies[] = {
     QT_TRANSLATE_NOOP("AgentPage", "Add shaders"),
     QT_TRANSLATE_NOOP("AgentPage", "Start over"),
 };
+
+QJsonArray toJson(const QStringList& list)
+{
+    return QJsonArray::fromStringList(list);
+}
+
+QStringList fromJson(const QJsonValue& value)
+{
+    QStringList list;
+    for (const auto& item : value.toArray()) {
+        list << item.toString();
+    }
+    return list;
+}
+
+QJsonObject modToJson(const ModpackAgent::AgentMod& mod)
+{
+    return QJsonObject{
+        { "platform", mod.platform },
+        { "projectId", mod.projectId },
+        { "aliases", toJson(mod.aliases) },
+        { "slug", mod.slug },
+        { "title", mod.title },
+        { "description", mod.description },
+        { "group", mod.group },
+        { "versionNumber", mod.versionNumber },
+        { "fileName", mod.fileName },
+        { "url", mod.url },
+        { "sha1", mod.sha1 },
+        { "sha512", mod.sha512 },
+        { "size", mod.size },
+        { "dependency", mod.dependency },
+        { "requested", mod.requested },
+        { "enabled", mod.enabled },
+        { "neededBy", toJson(mod.neededBy) },
+        { "requiredProjects", toJson(mod.requiredProjects) },
+        { "incompatibleProjects", toJson(mod.incompatibleProjects) },
+    };
+}
+
+ModpackAgent::AgentMod modFromJson(const QJsonObject& obj)
+{
+    ModpackAgent::AgentMod mod;
+    mod.platform = obj["platform"].toString();
+    mod.projectId = obj["projectId"].toString();
+    mod.aliases = fromJson(obj["aliases"]);
+    mod.slug = obj["slug"].toString();
+    mod.title = obj["title"].toString();
+    mod.description = obj["description"].toString();
+    mod.group = obj["group"].toString();
+    mod.versionNumber = obj["versionNumber"].toString();
+    mod.fileName = obj["fileName"].toString();
+    mod.url = obj["url"].toString();
+    mod.sha1 = obj["sha1"].toString();
+    mod.sha512 = obj["sha512"].toString();
+    mod.size = obj["size"].toInteger();
+    mod.dependency = obj["dependency"].toBool();
+    mod.requested = obj["requested"].toBool();
+    mod.enabled = obj["enabled"].toBool(true);
+    mod.neededBy = fromJson(obj["neededBy"]);
+    mod.requiredProjects = fromJson(obj["requiredProjects"]);
+    mod.incompatibleProjects = fromJson(obj["incompatibleProjects"]);
+    return mod;
+}
+
+QJsonObject readJson(const QString& path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return {};
+    }
+    return QJsonDocument::fromJson(file.readAll()).object();
+}
 
 bool isReset(const QString& lower)
 {
@@ -155,6 +243,73 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
     splitter->setChildrenCollapsible(false);
     m_splitter = splitter;
 
+    // saved chats: one per pack, the newest on top
+    m_chatsPanel = new QWidget(splitter);
+    auto* chatsLayout = new QVBoxLayout(m_chatsPanel);
+    chatsLayout->setContentsMargins(0, 0, 0, 0);
+    chatsLayout->setSpacing(6);
+    m_chatsTitle = new QLabel(m_chatsPanel);
+    auto chatsFont = m_chatsTitle->font();
+    chatsFont.setBold(true);
+    m_chatsTitle->setFont(chatsFont);
+    chatsLayout->addWidget(m_chatsTitle);
+    m_newChatButton = new QPushButton(m_chatsPanel);
+    m_newChatButton->setObjectName("accentButton");
+    m_newChatButton->setIcon(QIcon::fromTheme("new"));
+    chatsLayout->addWidget(m_newChatButton);
+    m_chatList = new QListWidget(m_chatsPanel);
+    m_chatList->setTextElideMode(Qt::ElideRight);
+    m_chatList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_chatList->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
+    chatsLayout->addWidget(m_chatList, 1);
+    m_deleteChatButton = new QToolButton(m_chatsPanel);
+    m_deleteChatButton->setIcon(QIcon::fromTheme("delete"));
+    m_deleteChatButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_deleteChatButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    m_deleteChatButton->setEnabled(false);
+    chatsLayout->addWidget(m_deleteChatButton);
+    m_chatsPanel->setMinimumWidth(160);
+    m_chatsPanel->setMaximumWidth(240);
+    connect(m_newChatButton, &QPushButton::clicked, this, &AgentPage::newChat);
+    connect(m_chatList, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {
+        const auto id = item->data(Qt::UserRole).toString();
+        if (id != m_chatId) {
+            loadChat(id);
+        }
+    });
+    connect(m_chatList, &QListWidget::currentItemChanged, this,
+            [this](QListWidgetItem* item) { m_deleteChatButton->setEnabled(item != nullptr); });
+    connect(m_chatList, &QListWidget::itemChanged, this, [this](QListWidgetItem* item) {
+        // renamed with a double click
+        if (m_fillingChatList) {
+            return;
+        }
+        const auto id = item->data(Qt::UserRole).toString();
+        const auto title = item->text().trimmed();
+        if (title.isEmpty()) {
+            return;
+        }
+        if (id == m_chatId) {
+            m_chatTitle = title;
+            m_chatTitleEdited = true;
+            saveChat();
+        } else {
+            auto obj = readJson(chatFile(id));
+            obj["title"] = title;
+            obj["titleEdited"] = true;
+            QSaveFile file(chatFile(id));
+            if (file.open(QIODevice::WriteOnly)) {
+                file.write(QJsonDocument(obj).toJson());
+                file.commit();
+            }
+        }
+    });
+    connect(m_deleteChatButton, &QToolButton::clicked, this, [this] {
+        if (auto* item = m_chatList->currentItem()) {
+            deleteChat(item->data(Qt::UserRole).toString());
+        }
+    });
+
     m_chatArea = new QScrollArea(splitter);
     m_chatArea->setObjectName("chatArea");
     m_chatArea->setWidgetResizable(true);
@@ -167,6 +322,7 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
     m_chatLayout->setSpacing(10);
     m_chatLayout->addStretch(1);
     m_chatArea->setWidget(m_chatHost);
+    m_chatArea->viewport()->installEventFilter(this);
     // like any chat: when new messages make the conversation longer, glide to the newest one
     connect(m_chatArea->verticalScrollBar(), &QScrollBar::rangeChanged, this, [this](int, int max) {
         if (m_followUntil.isValid() && m_followUntil.elapsed() < 1500) {
@@ -220,8 +376,10 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
     resultLayout->addWidget(m_log);
     connect(m_logButton, &QToolButton::toggled, m_log, &QWidget::setVisible);
     m_resultPanel->setVisible(false);
-    splitter->setStretchFactor(0, 3);
-    splitter->setStretchFactor(1, 2);
+    splitter->setStretchFactor(0, 0);
+    splitter->setSizes({ 190, 800, 0 });
+    splitter->setStretchFactor(1, 3);
+    splitter->setStretchFactor(2, 2);
     layout->addWidget(splitter, 1);
 
     // quick replies and the input line
@@ -286,6 +444,7 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
     connect(m_builder, &ModpackAgent::ModpackBuilder::failed, this, &AgentPage::builderFailed);
 
     retranslate();
+    refreshChatList();
     reset();
 }
 
@@ -310,6 +469,11 @@ void AgentPage::retranslate()
     m_sendButton->setText(tr("Send"));
     m_modTree->setHeaderLabels({ tr("Mod"), tr("Source"), tr("What it does") });
     m_logButton->setText(tr("Show the work log"));
+    m_chatsTitle->setText(tr("My packs"));
+    m_newChatButton->setText(tr("New chat"));
+    m_newChatButton->setToolTip(tr("Start a conversation about another pack; this one stays saved"));
+    m_deleteChatButton->setText(tr("Delete chat"));
+    m_chatList->setToolTip(tr("Your conversations with the Warden. Click one to continue it, double click to rename."));
 }
 
 void AgentPage::openedImpl()
@@ -331,7 +495,8 @@ QWidget* AgentPage::addRow(QWidget* bubble, bool fromAgent)
         QTextDocument doc;
         doc.setHtml(label->text());
         const int natural = label->fontMetrics().horizontalAdvance(doc.toPlainText()) + 34;
-        label->setMinimumWidth(std::clamp(natural, 60, s_bubbleWidth));
+        label->setProperty("naturalWidth", natural);
+        fitBubble(label);
     }
     if (fromAgent) {
         auto* avatar = new QLabel(row);
@@ -346,12 +511,58 @@ QWidget* AgentPage::addRow(QWidget* bubble, bool fromAgent)
     // keep the typing indicator the last row
     const int index = m_typingRow ? m_chatLayout->indexOf(m_typingRow) : m_chatLayout->count();
     m_chatLayout->insertWidget(index, row);
-    Animations::growIn(row);
+    if (!m_replaying) {
+        Animations::growIn(row);
+    }
     scrollToBottom();
     return row;
 }
 
+int AgentPage::bubbleWidth() const
+{
+    // a comfortable reading width, but never wider than the chat column (minus the avatar)
+    return std::clamp(m_chatArea->viewport()->width() - 80, 120, s_bubbleWidth);
+}
+
+void AgentPage::fitBubble(QLabel* label)
+{
+    const int width = bubbleWidth();
+    label->setMaximumWidth(width);
+    label->setMinimumWidth(std::clamp(label->property("naturalWidth").toInt(), 60, width));
+}
+
+bool AgentPage::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == m_chatArea->viewport() && event->type() == QEvent::Resize) {
+        for (auto* label : m_chatHost->findChildren<QLabel*>()) {
+            if (label->property("naturalWidth").isValid()) {
+                fitBubble(label);
+            }
+        }
+    }
+    return QWidget::eventFilter(watched, event);
+}
+
 void AgentPage::agentSay(const QString& html, const QStringList& replies)
+{
+    showAgentBubble(html);
+    m_messages << std::make_pair(true, html);
+    setReplies(replies);
+    saveChat();
+}
+
+void AgentPage::addUserMessage(const QString& text)
+{
+    showUserBubble(text);
+    m_messages << std::make_pair(false, text);
+    if (m_chatTitle.isEmpty()) {
+        // until a pack is built the chat is named after the first wish
+        m_chatTitle = text.size() > 40 ? text.left(38).trimmed() + QStringLiteral("…") : text;
+    }
+    saveChat();
+}
+
+void AgentPage::showAgentBubble(const QString& html)
 {
     auto* bubble = new QLabel(html);
     bubble->setObjectName("agentBubble");
@@ -360,10 +571,9 @@ void AgentPage::agentSay(const QString& html, const QStringList& replies)
     bubble->setTextInteractionFlags(Qt::TextSelectableByMouse);
     bubble->setMaximumWidth(s_bubbleWidth);
     addRow(bubble, true);
-    setReplies(replies);
 }
 
-void AgentPage::addUserMessage(const QString& text)
+void AgentPage::showUserBubble(const QString& text)
 {
     auto* bubble = new QLabel(text.toHtmlEscaped());
     bubble->setObjectName("userBubble");
@@ -376,6 +586,7 @@ void AgentPage::addUserMessage(const QString& text)
 
 void AgentPage::setReplies(const QStringList& replies)
 {
+    m_currentReplies = replies;
     while (auto* item = m_repliesLayout->takeAt(0)) {
         // a reply may be the button that was just clicked: delete it once its click is fully handled
         if (auto* widget = item->widget()) {
@@ -405,7 +616,7 @@ void AgentPage::showTyping(const QString& status)
     bubble->setObjectName("agentBubble");
     bubble->setAttribute(Qt::WA_StyledBackground, true);
     bubble->setMinimumWidth(280);
-    bubble->setMaximumWidth(s_bubbleWidth);
+    bubble->setMaximumWidth(bubbleWidth());
     auto* bubbleLayout = new QVBoxLayout(bubble);
     bubbleLayout->setContentsMargins(12, 8, 12, 10);
     m_typingLabel = new QLabel(bubble);
@@ -457,6 +668,13 @@ void AgentPage::reset()
     m_builder->abort();
     hideTyping();
     setBusy(false);
+    clearChatView();
+    m_chatId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    m_chatTitle.clear();
+    m_chatTitleEdited = false;
+    m_messages.clear();
+    m_chatList->clearSelection();
+    m_chatList->setCurrentItem(nullptr);
     m_stage = Stage::Topic;
     m_topic.clear();
     m_unknownWords.clear();
@@ -483,14 +701,13 @@ void AgentPage::sendInput()
 
 void AgentPage::userSaid(const QString& text)
 {
-    addUserMessage(text);
     const auto lower = text.toLower();
-
     if (isReset(lower)) {
-        // a new conversation, the old messages stay visible above
+        // a new chat; the old one stays saved in the list
         reset();
         return;
     }
+    addUserMessage(text);
     if (m_stage == Stage::Building) {
         agentSay(tr("I'm still assembling the pack, give me a moment."));
         return;
@@ -656,12 +873,16 @@ void AgentPage::builderFinished()
     hideTyping();
     setBusy(false);
     m_stage = Stage::Ready;
+    if (!m_chatTitleEdited) {
+        m_chatTitle = m_builder->plan().name;
+    }
     fillModTree();
     if (!m_resultPanel->isVisible()) {
         m_resultPanel->setVisible(true);
         // the chat stays the bigger part, the pack list gets the rest
         const int total = m_splitter->width();
-        m_splitter->setSizes({ total * 55 / 100, total * 45 / 100 });
+        const int chats = m_chatsPanel->minimumWidth() + 30;
+        m_splitter->setSizes({ chats, (total - chats) * 60 / 100, (total - chats) * 40 / 100 });
         Animations::fadeIn(m_resultPanel, 300);
     }
 
@@ -797,6 +1018,7 @@ void AgentPage::modItemChanged(QTreeWidgetItem* item, int column)
     }
     mods[index].enabled = item->checkState(0) == Qt::Checked;
     suggestCurrent();
+    saveChat();
 }
 
 void AgentPage::suggestCurrent()
@@ -809,4 +1031,229 @@ void AgentPage::suggestCurrent()
         return;
     }
     m_dialog->setSuggestedPack(m_builder->plan().name, new ModpackAgent::AgentImportTask(m_builder->makeIndex(), this));
+}
+
+/* ---------------------------------------------------------------- saved chats */
+
+QString AgentPage::chatFile(const QString& id) const
+{
+    return QDir(APPLICATION->dataRoot()).filePath("agent-chats/" + id + ".json");
+}
+
+void AgentPage::newChat()
+{
+    if (m_stage == Stage::Building) {
+        // the pack being built stays in its chat and is built again when the chat is opened
+        saveChat();
+    }
+    reset();
+}
+
+void AgentPage::clearChatView()
+{
+    hideTyping();
+    while (auto* item = m_chatLayout->takeAt(0)) {
+        if (auto* widget = item->widget()) {
+            widget->deleteLater();
+        }
+        delete item;
+    }
+    m_chatLayout->addStretch(1);
+}
+
+void AgentPage::saveChat()
+{
+    // a chat with only the greeting is not worth keeping
+    if (m_replaying || m_chatId.isEmpty() ||
+        std::none_of(m_messages.cbegin(), m_messages.cend(), [](const auto& message) { return !message.first; })) {
+        return;
+    }
+    QJsonArray messages;
+    for (const auto& [fromAgent, text] : m_messages) {
+        messages.append(QJsonObject{ { "from", fromAgent ? "warden" : "user" }, { "text", text } });
+    }
+    QJsonObject obj{
+        { "formatVersion", 1 },
+        { "id", m_chatId },
+        { "title", m_chatTitle },
+        { "titleEdited", m_chatTitleEdited },
+        { "updated", QDateTime::currentDateTimeUtc().toString(Qt::ISODate) },
+        { "stage", static_cast<int>(m_stage) },
+        { "topic", m_topic },
+        { "loader", m_loader },
+        { "version", m_version },
+        { "messages", messages },
+        { "replies", toJson(m_currentReplies) },
+    };
+    if (m_stage == Stage::Ready) {
+        const auto& plan = m_builder->plan();
+        QJsonArray mods;
+        for (const auto& mod : m_builder->mods()) {
+            mods.append(modToJson(mod));
+        }
+        obj["pack"] = QJsonObject{
+            { "name", plan.name },
+            { "summary", plan.summary },
+            { "minecraftVersion", plan.minecraftVersion },
+            { "loader", plan.loader },
+            { "loaderVersion", m_builder->loaderVersion() },
+            { "mods", mods },
+            { "log", m_log->toPlainText() },
+        };
+    }
+
+    QDir().mkpath(QFileInfo(chatFile(m_chatId)).absolutePath());
+    QSaveFile file(chatFile(m_chatId));
+    if (!file.open(QIODevice::WriteOnly)) {
+        return;
+    }
+    file.write(QJsonDocument(obj).toJson());
+    if (file.commit()) {
+        refreshChatList();
+    }
+}
+
+void AgentPage::refreshChatList()
+{
+    struct Entry {
+        QString id;
+        QString title;
+        QString details;
+        QDateTime updated;
+    };
+    QList<Entry> entries;
+    const QDir dir(QDir(APPLICATION->dataRoot()).filePath("agent-chats"));
+    for (const auto& name : dir.entryList({ "*.json" }, QDir::Files)) {
+        const auto obj = readJson(dir.filePath(name));
+        if (obj["id"].toString().isEmpty()) {
+            continue;
+        }
+        Entry entry{ obj["id"].toString(), obj["title"].toString(), {},
+                     QDateTime::fromString(obj["updated"].toString(), Qt::ISODate).toLocalTime() };
+        const auto pack = obj["pack"].toObject();
+        entry.details = pack.isEmpty() ? tr("Not built yet")
+                                       : tr("Minecraft %1, %2, %n mod(s)", "", pack["mods"].toArray().size())
+                                             .arg(pack["minecraftVersion"].toString(),
+                                                  ModpackAgent::loaderDisplayName(pack["loader"].toString()));
+        if (entry.title.isEmpty()) {
+            entry.title = tr("Chat");
+        }
+        entries << entry;
+    }
+    std::sort(entries.begin(), entries.end(), [](const Entry& a, const Entry& b) { return a.updated > b.updated; });
+
+    m_fillingChatList = true;
+    m_chatList->clear();
+    for (const auto& entry : entries) {
+        auto* item = new QListWidgetItem(entry.title, m_chatList);
+        item->setData(Qt::UserRole, entry.id);
+        item->setToolTip(QString("%1\n%2\n%3").arg(entry.title, entry.details, QLocale().toString(entry.updated, QLocale::ShortFormat)));
+        item->setIcon(QIcon(":/sculk_theme/agent.svg"));
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+        if (entry.id == m_chatId) {
+            m_chatList->setCurrentItem(item);
+        }
+    }
+    m_fillingChatList = false;
+    m_deleteChatButton->setEnabled(m_chatList->currentItem() != nullptr);
+}
+
+void AgentPage::loadChat(const QString& id)
+{
+    const auto obj = readJson(chatFile(id));
+    if (obj.isEmpty()) {
+        refreshChatList();
+        return;
+    }
+    m_planner->abort();
+    m_builder->abort();
+    setBusy(false);
+    clearChatView();
+
+    m_chatId = id;
+    m_chatTitle = obj["title"].toString();
+    m_chatTitleEdited = obj["titleEdited"].toBool();
+    m_topic = obj["topic"].toString();
+    m_loader = obj["loader"].toString();
+    m_version = obj["version"].toString();
+    m_unknownWords.clear();
+    m_messages.clear();
+
+    // show the conversation as it was, without animations
+    m_replaying = true;
+    for (const auto& value : obj["messages"].toArray()) {
+        const auto message = value.toObject();
+        const bool fromAgent = message["from"].toString() == "warden";
+        const auto text = message["text"].toString();
+        if (fromAgent) {
+            showAgentBubble(text);
+        } else {
+            showUserBubble(text);
+        }
+        m_messages << std::make_pair(fromAgent, text);
+    }
+    m_replaying = false;
+    setReplies(fromJson(obj["replies"]));
+
+    const auto pack = obj["pack"].toObject();
+    if (!pack.isEmpty()) {
+        ModpackAgent::Plan plan;
+        plan.name = pack["name"].toString();
+        plan.summary = pack["summary"].toString();
+        plan.minecraftVersion = pack["minecraftVersion"].toString();
+        plan.loader = pack["loader"].toString();
+        QList<ModpackAgent::AgentMod> mods;
+        for (const auto& value : pack["mods"].toArray()) {
+            mods << modFromJson(value.toObject());
+        }
+        m_builder->restore(plan, mods, pack["loaderVersion"].toString());
+        m_log->setPlainText(pack["log"].toString());
+        fillModTree();
+        if (!m_resultPanel->isVisible()) {
+            m_resultPanel->setVisible(true);
+            const int total = m_splitter->width();
+            const int chats = m_chatsPanel->minimumWidth() + 30;
+            m_splitter->setSizes({ chats, (total - chats) * 60 / 100, (total - chats) * 40 / 100 });
+        }
+        m_stage = Stage::Ready;
+    } else {
+        m_resultPanel->setVisible(false);
+        m_modTree->clear();
+        m_log->clear();
+        m_stage = static_cast<Stage>(std::clamp(obj["stage"].toInt(), 0, static_cast<int>(Stage::Ready)));
+        if (m_stage == Stage::Ready) {
+            m_stage = Stage::Setup;
+        }
+    }
+    refreshChatList();
+    m_chatArea->verticalScrollBar()->setValue(m_chatArea->verticalScrollBar()->maximum());
+    scrollToBottom();
+
+    if (m_stage == Stage::Building) {
+        // the chat was closed while the pack was being assembled: finish the job
+        if (!m_topic.isEmpty() && !m_loader.isEmpty() && !m_version.isEmpty()) {
+            startBuild();
+        } else {
+            m_stage = Stage::Setup;
+        }
+    }
+    suggestCurrent();
+    m_input->setFocus();
+}
+
+void AgentPage::deleteChat(const QString& id)
+{
+    const auto obj = readJson(chatFile(id));
+    const auto title = obj["title"].toString();
+    const auto answer = QMessageBox::question(this, tr("Delete chat"),
+                                              tr("Delete the chat \"%1\"? The instances you created stay.").arg(title),
+                                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    if (answer != QMessageBox::Yes) {
+        return;
+    }
+    QFile::remove(chatFile(id));
+    if (id == m_chatId) {
+        reset();
+    }
+    refreshChatList();
 }

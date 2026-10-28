@@ -235,6 +235,46 @@
         <source>Try another Minecraft version or loader.</source>
         <translation>Попробуй другую версию Minecraft или другой загрузчик.</translation>
     </message>
+    <message>
+        <source>My packs</source>
+        <translation>Мои сборки</translation>
+    </message>
+    <message>
+        <source>New chat</source>
+        <translation>Новый чат</translation>
+    </message>
+    <message>
+        <source>Start a conversation about another pack; this one stays saved</source>
+        <translation>Начать разговор о другой сборке; этот чат сохранится</translation>
+    </message>
+    <message>
+        <source>Delete chat</source>
+        <translation>Удалить чат</translation>
+    </message>
+    <message>
+        <source>Your conversations with the Warden. Click one to continue it, double click to rename.</source>
+        <translation>Твои разговоры с Варденом. Нажми, чтобы продолжить, двойной щелчок — переименовать.</translation>
+    </message>
+    <message>
+        <source>Not built yet</source>
+        <translation>Ещё не собрана</translation>
+    </message>
+    <message numerus="yes">
+        <source>Minecraft %1, %2, %n mod(s)</source>
+        <translation>
+            <numerusform>Minecraft %1, %2, %n мод</numerusform>
+            <numerusform>Minecraft %1, %2, %n мода</numerusform>
+            <numerusform>Minecraft %1, %2, %n модов</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Chat</source>
+        <translation>Чат</translation>
+    </message>
+    <message>
+        <source>Delete the chat &quot;%1&quot;? The instances you created stay.</source>
+        <translation>Удалить чат «%1»? Созданные установки останутся.</translation>
+    </message>
 </context>
 <context>
     <name>AppearanceWidget</name>

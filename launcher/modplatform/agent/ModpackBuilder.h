@@ -105,6 +105,9 @@ class ModpackBuilder : public QObject {
     QString suggestedSetup() const { return m_suggestedSetup; }
     int suggestedSetupMods() const { return m_suggestedSetupMods; }
 
+    /// puts back a pack built earlier (a saved chat), so it can be shown and installed without searching again
+    void restore(const Plan& plan, const QList<AgentMod>& mods, const QString& loaderVersion);
+
     /// modrinth.index.json for the enabled mods (see https://support.modrinth.com/en/articles/8802351)
     QByteArray makeIndex() const;
 
