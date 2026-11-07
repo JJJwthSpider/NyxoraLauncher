@@ -1773,7 +1773,9 @@ public final class MainActivity extends Activity {
         text.append(major > 0 ? "Для Minecraft " + (inst != null ? inst.minecraftVersion : "") + " нужна Java " + major + " для Android. "
                               : "Java для Android, на которой работает игра. ");
         text.append(installed.isEmpty() ? "Сейчас Java не установлена." : "Сейчас есть: " + installed + ".");
-        text.append("\n\nЕё можно взять из PojavLauncher (или Amethyst), если он стоит на телефоне, или выбрать файл: "
+        text.append(major > 0 ? "\n\nОбычно Lullaby скачивает Java сам при «Играть», но сейчас не получилось (нет интернета?). "
+                              : "\n\nLullaby сам скачивает нужную Java при «Играть» (8, 17, 21 или 25 — по версии Minecraft). ");
+        text.append("Её можно также взять из PojavLauncher (или Amethyst), если он стоит на телефоне, или выбрать файл: "
                     + "APK PojavLauncher или архив Java (.tar.xz).");
         AlertDialog.Builder dialog = new AlertDialog.Builder(this).setTitle("Java для игры").setMessage(text.toString());
         if (!sources.isEmpty()) {

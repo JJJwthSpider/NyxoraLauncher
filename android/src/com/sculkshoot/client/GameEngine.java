@@ -36,8 +36,11 @@ abstract class GameEngine {
 
     /** which Java the game of this Minecraft version needs (8, 17 or 21) */
     static int javaFor(String minecraftVersion) {
-        if (!minecraftVersion.startsWith("1.") || Plan.compareVersions(minecraftVersion, "1.20.5") >= 0) {
-            return 21;  // 1.20.5+ and the new version numbers (26.x) need Java 21
+        if (!minecraftVersion.startsWith("1.")) {
+            return 25;  // the new version numbers (26.x) need Java 25
+        }
+        if (Plan.compareVersions(minecraftVersion, "1.20.5") >= 0) {
+            return 21;
         }
         return Plan.compareVersions(minecraftVersion, "1.17") >= 0 ? 17 : 8;
     }

@@ -230,6 +230,123 @@ public final class PojavEngine extends GameEngine {
         }
     }
 
+    /* ------------------------------------------------------------ Java, downloaded by itself */
+
+    /**
+     * Java for Android, built from OpenJDK by the PojavLauncher team's android-openjdk-build-multiarch and kept in
+     * Fold Craft Launcher's repository (GPL-3.0) as plain files: Java 8, 17, 21 and 25 for arm64, arm, x86 and x86_64,
+     * in PojavLauncher's own format (a common part and a part for the processor). The commit is pinned, so the
+     * files never change under us; jsDelivr serves the same files if GitHub is not reachable.
+     */
+    private static final String JAVA_COMMIT = "9ea040443effea5a78bd8aeed260e829ae349c2d";
+    private static final String[] JAVA_MIRRORS = {
+        "https://raw.githubusercontent.com/FCL-Team/FoldCraftLauncher/" + JAVA_COMMIT + "/FCL/src/main/jreAssets/app_runtime/java/",
+        "https://cdn.jsdelivr.net/gh/FCL-Team/FoldCraftLauncher@" + JAVA_COMMIT + "/FCL/src/main/jreAssets/app_runtime/java/",
+    };
+
+    /** the name of an installed Java of exactly this major version, or null */
+    private static String exactJava(int major) {
+        String found = null;
+        for (Runtime r : MultiRTUtils.getRuntimes()) {
+            if (r.javaVersion == major && (found == null || r.name.startsWith("Lullaby-"))) {
+                found = r.name;
+            }
+        }
+        return found;
+    }
+
+    /** makes sure Java of exactly this version is installed (downloading it the first time); returns its name */
+    static String ensureJava(int major, Builder.Listener log) throws IOException {
+        String installed = exactJava(major);
+        if (installed != null) {
+            return installed;
+        }
+        String arch = Architecture.archAsString(Tools.DEVICE_ARCHITECTURE);
+        File dir = new File(Tools.DIR_DATA, "lullaby-java");
+        dir.mkdirs();
+        File universal = new File(dir, "jre" + major + "-universal.tar.xz");
+        File bin = new File(dir, "jre" + major + "-bin-" + arch + ".tar.xz");
+        IOException last = null;
+        for (String mirror : JAVA_MIRRORS) {
+            try {
+                download(mirror + "jre" + major + "/universal.tar.xz", universal, "Скачиваю Java " + major + " (общая часть)", log);
+                download(mirror + "jre" + major + "/bin-" + arch + ".tar.xz", bin, "Скачиваю Java " + major + " для процессора " + arch, log);
+                last = null;
+                break;
+            } catch (IOException e) {
+                last = e;
+            }
+        }
+        if (last != null) {
+            throw last;
+        }
+        log.log("Распаковываю Java " + major + "...");
+        String name = "Lullaby-Java-" + major;
+        FileInputStream universalIn = new FileInputStream(universal);
+        FileInputStream binIn = new FileInputStream(bin);
+        try {
+            MultiRTUtils.installRuntimeNamedBinpack(universalIn, binIn, name, "lullaby-" + JAVA_COMMIT.substring(0, 7));
+        } finally {
+            universalIn.close();
+            binIn.close();
+        }
+        MultiRTUtils.postPrepare(name);
+        Runtime r = MultiRTUtils.forceReread(name);
+        universal.delete();
+        bin.delete();
+        if (r.javaVersion != major) {
+            MultiRTUtils.removeRuntimeNamed(name);
+            throw new IOException("скачанная Java не та (" + r.javaVersion + " вместо " + major + ")");
+        }
+        useAsDefault(name);
+        log.log("Java " + major + " установлена.");
+        return name;
+    }
+
+    /** a download with progress in the log, resumable only by starting over (the files are 5-35 MB) */
+    private static void download(String url, File target, String what, Builder.Listener log) throws IOException {
+        java.net.HttpURLConnection c = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+        c.setRequestProperty("User-Agent", Http.USER_AGENT);
+        c.setConnectTimeout(20000);
+        c.setReadTimeout(60000);
+        try {
+            if (c.getResponseCode() != 200) {
+                throw new IOException("HTTP " + c.getResponseCode() + " (" + url + ")");
+            }
+            long total = c.getContentLength();
+            File part = new File(target.getPath() + ".part");
+            InputStream in = c.getInputStream();
+            FileOutputStream out = new FileOutputStream(part);
+            try {
+                byte[] buffer = new byte[65536];
+                long done = 0;
+                int lastPercent = -1;
+                int n;
+                while ((n = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, n);
+                    done += n;
+                    int percent = total > 0 ? (int) (done * 100 / total) : -1;
+                    if (percent / 10 != lastPercent / 10) {
+                        lastPercent = percent;
+                        log.log(what + (percent >= 0 ? ": " + percent + "%" : ": " + done / (1024 * 1024) + " МБ"));
+                    }
+                }
+            } finally {
+                in.close();
+                out.close();
+            }
+            if (total > 0 && part.length() != total) {
+                part.delete();
+                throw new IOException("файл скачался не полностью");
+            }
+            if (!part.renameTo(target)) {
+                throw new IOException("не удалось сохранить " + target.getName());
+            }
+        } finally {
+            c.disconnect();
+        }
+    }
+
     /* ------------------------------------------------------------ playing */
 
     @Override
@@ -249,9 +366,17 @@ public final class PojavEngine extends GameEngine {
         if (!account.ownsJava) {
             return "На этом аккаунте Microsoft нет Minecraft: Java Edition, поэтому игра не запустится. Её можно купить на minecraft.net.";
         }
+        // the Java this Minecraft version needs: downloaded once, then used for every installation of such versions
         int java = javaFor(inst.minecraftVersion);
-        if (!hasJava(java)) {
-            return NEED_JAVA + java;
+        String runtime;
+        try {
+            runtime = ensureJava(java, log);
+        } catch (IOException e) {
+            if (exactJava(java) == null) {
+                log.log("Не удалось скачать Java " + java + ": " + e.getMessage());
+                return NEED_JAVA + java;  // offline: the dialog to take it from PojavLauncher or a file
+            }
+            runtime = exactJava(java);
         }
 
         // the account: a fresh Minecraft token from the Microsoft sign-in
@@ -306,6 +431,7 @@ public final class PojavEngine extends GameEngine {
         profile.lastVersionId = versionId;
         profile.gameDir = Tools.LAUNCHERPROFILES_RTPREFIX + "custom_instances/lullaby-" + inst.id;
         profile.controlFile = CONTROLS_FILE;
+        profile.javaDir = Tools.LAUNCHERPROFILES_RTPREFIX + runtime;  // exactly the Java this version needs
         LauncherProfiles.mainProfileJson.profiles.put(key, profile);
         LauncherProfiles.write();
         LauncherPreferences.DEFAULT_PREF.edit().putString(LauncherPreferences.PREF_KEY_CURRENT_PROFILE, key).commit();
