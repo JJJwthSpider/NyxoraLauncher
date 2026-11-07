@@ -118,7 +118,43 @@ public final class PojavEngine extends GameEngine {
         if (modern && compatible.contains(LTW)) {
             return LTW;
         }
+        // old versions: GL4ES is fast, but it cannot translate the GLSL shaders big mod packs bring (the game dies
+        // with SIGSEGV in GL4ES' shader converter); Zink runs them as real OpenGL on Vulkan
+        if (compatible.contains(ZINK) && (bigModPack(inst) || gl4esCrashed(activity, inst))) {
+            return ZINK;
+        }
         return compatible.contains(GL4ES) || compatible.isEmpty() ? GL4ES : compatible.get(0);
+    }
+
+    private static boolean bigModPack(Installation inst) {
+        int mods = 0;
+        for (Mod mod : inst.mods) {
+            mods += mod.enabled && Mod.MOD.equals(mod.kind) ? 1 : 0;
+        }
+        return mods >= 40;
+    }
+
+    /** the last start of this installation died in GL4ES (remembered, so it uses Zink from now on) */
+    private static boolean gl4esCrashed(Activity activity, Installation inst) {
+        android.content.SharedPreferences prefs = activity.getSharedPreferences("graphics", Activity.MODE_PRIVATE);
+        if (prefs.getBoolean("zink_" + inst.id, false)) {
+            return true;
+        }
+        try {
+            File log = new File(Tools.DIR_GAME_HOME, "latestlog.txt");
+            if (!log.isFile()) {
+                return false;
+            }
+            String text = Tools.read(log.getAbsolutePath());
+            boolean ours = text.contains("custom_instances/lullaby-" + inst.id);
+            boolean crashed = text.contains("A fatal error has been detected") || text.contains("compilation errors");
+            if (ours && crashed && text.contains("Initialising gl4es")) {
+                prefs.edit().putBoolean("zink_" + inst.id, true).apply();
+                return true;
+            }
+        } catch (IOException ignored) {
+        }
+        return false;
     }
 
     @Override
@@ -494,6 +530,13 @@ public final class PojavEngine extends GameEngine {
             // with LTW on Adreno the engine stops before the start to ask about the render distance (more than 7
             // makes too many buffers there); Lullaby sets it beforehand, so nothing waits for an answer
             limitRenderDistance(new File(Tools.DIR_GAME_HOME, "custom_instances/lullaby-" + inst.id), 7);
+        }
+        if (ZINK.equals(profile.pojavRendererName)) {
+            // the newest Adreno GPUs (8xx) are newer than the Turnip Vulkan driver inside the engine: use the phone's own
+            net.kdt.pojavlaunch.utils.GLInfoUtils.GLInfo gl = net.kdt.pojavlaunch.utils.GLInfoUtils.getGlInfo();
+            boolean newAdreno = gl.isAdreno() && gl.renderer.matches(".*Adreno \\(TM\\) [89]\\d\\d.*");
+            LauncherPreferences.PREF_ZINK_PREFER_SYSTEM_DRIVER = newAdreno;
+            LauncherPreferences.DEFAULT_PREF.edit().putBoolean("zinkPreferSystemDriver", newAdreno).commit();
         }
         log.log("Графика: " + (LTW.equals(profile.pojavRendererName) ? "LTW" : ZINK.equals(profile.pojavRendererName) ? "Zink" : "Holy GL4ES")
                 + ", Java " + java + ".");
