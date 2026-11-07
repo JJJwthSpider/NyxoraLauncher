@@ -276,6 +276,48 @@ def agent_svg():
 """
 
 
+def android_background_svg():
+    """Background layer of the Android adaptive icon (108 x 108 dp, fills the whole icon): sky, stars, rainbow."""
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<svg width="108" height="108" version="1.1" viewBox="0 0 108 108" xmlns="http://www.w3.org/2000/svg">
+ {DEFS}
+ <rect width="108" height="108" fill="url(#sky)"/>
+ {stars(4, 4, 100, 100, 22, 11)}
+ {rainbow_arc(112, 128, 92, 3.6, 0.34, 108, 108)}
+</svg>
+"""
+
+
+def android_foreground_svg():
+    """Foreground layer: the sleeping moon and the lullaby notes, big, inside the 66 dp safe circle."""
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<svg width="108" height="108" version="1.1" viewBox="0 0 108 108" xmlns="http://www.w3.org/2000/svg">
+ {DEFS}
+ {sleeping_moon(50, 57, 27)}
+ {note(70, 61, 5.6, "#ffb3c8")}
+ {note(72, 43, 4.6, "#b8dcff", double=True)}
+ {sparkle(79, 75, 3.6, 0.9)}
+ {sparkle(33, 32, 2.6, 0.8)}
+</svg>
+"""
+
+
+def android_legacy_svg():
+    """For Android 7 and older: the whole picture as one square icon without the margin of the desktop tile."""
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<svg width="108" height="108" version="1.1" viewBox="18 18 72 72" xmlns="http://www.w3.org/2000/svg">
+ {DEFS}
+ <rect x="18" y="18" width="72" height="72" rx="14" fill="url(#sky)"/>
+ {stars(22, 22, 64, 64, 12, 11)}
+ {rainbow_arc(112, 128, 92, 3.6, 0.34, 86, 86)}
+ {sleeping_moon(50, 57, 27)}
+ {note(70, 61, 5.6, "#ffb3c8")}
+ {note(72, 43, 4.6, "#b8dcff", double=True)}
+ {sparkle(79, 75, 3.6, 0.9)}
+</svg>
+"""
+
+
 EMPTY = """<?xml version="1.0" encoding="UTF-8"?>
 <svg width="256" height="256" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"/>
 """
@@ -295,8 +337,12 @@ def main():
         HERE / "../launcher/resources/multimc/scalable/launcher.svg": icon_svg(),
         HERE / "../launcher/resources/multimc/scalable/instances/prismlauncher.svg": moon_only_svg(),
         HERE / "../launcher/resources/sculk_theme/agent.svg": agent_svg(),
+        HERE / "../android/art/ic_launcher_background.svg": android_background_svg(),
+        HERE / "../android/art/ic_launcher_foreground.svg": android_foreground_svg(),
+        HERE / "../android/art/ic_launcher_legacy.svg": android_legacy_svg(),
     }
     for path, content in files.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
         print("wrote", path.resolve().relative_to(HERE.parent))
 

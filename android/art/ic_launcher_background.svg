@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="108" height="108" version="1.1" viewBox="0 0 108 108" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0" stop-color="#05060d"/>
+   <stop offset="0.65" stop-color="#0d1020"/>
+   <stop offset="1" stop-color="#1a1d36"/>
+  </linearGradient>
+  <radialGradient id="moonBody" cx="0.38" cy="0.36" r="0.75">
+   <stop offset="0" stop-color="#ffffff"/>
+   <stop offset="0.7" stop-color="#e6e8f1"/>
+   <stop offset="1" stop-color="#b9bccc"/>
+  </radialGradient>
+  <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+   <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.28"/>
+   <stop offset="1" stop-color="#dce4ff" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="nightHalf" cx="0.3" cy="0.3" r="0.9">
+   <stop offset="0" stop-color="#2c3150"/>
+   <stop offset="1" stop-color="#0e101c"/>
+  </radialGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+   <stop offset="0" stop-color="#ff5c78"/>
+   <stop offset="0.2" stop-color="#ffa84c"/>
+   <stop offset="0.4" stop-color="#ffe666"/>
+   <stop offset="0.6" stop-color="#6ce08c"/>
+   <stop offset="0.8" stop-color="#5cb6ff"/>
+   <stop offset="1" stop-color="#a880ff"/>
+  </linearGradient>
+  <radialGradient id="crescent" cx="0.3" cy="0.65" r="0.8">
+   <stop offset="0" stop-color="#ffffff"/>
+   <stop offset="0.6" stop-color="#eceef6"/>
+   <stop offset="1" stop-color="#b9bccc"/>
+  </radialGradient>
+  <radialGradient id="dayHalf" cx="0.7" cy="0.3" r="0.9">
+   <stop offset="0" stop-color="#ffffff"/>
+   <stop offset="1" stop-color="#c9ccdb"/>
+  </radialGradient>
+ </defs>
+ <rect width="108" height="108" fill="url(#sky)"/>
+ <circle cx="49.2" cy="60.0" r="1.8" fill="#ffffff" fill-opacity="0.62"/>
+  <circle cx="89.5" cy="23.0" r="1.8" fill="#ffffff" fill-opacity="0.73"/>
+  <circle cx="83.3" cy="13.4" r="1.4" fill="#ffffff" fill-opacity="0.44"/>
+  <circle cx="57.9" cy="93.0" r="0.9" fill="#ffffff" fill-opacity="0.71"/>
+  <circle cx="43.6" cy="49.3" r="1.1" fill="#ffffff" fill-opacity="0.72"/>
+  <circle cx="87.2" cy="10.3" r="0.9" fill="#ffffff" fill-opacity="0.46"/>
+  <circle cx="28.2" cy="7.0" r="1.8" fill="#ffffff" fill-opacity="0.55"/>
+  <circle cx="63.1" cy="23.5" r="1.1" fill="#ffffff" fill-opacity="0.73"/>
+  <circle cx="54.0" cy="70.2" r="1.8" fill="#ffffff" fill-opacity="0.74"/>
+  <circle cx="44.7" cy="59.1" r="0.9" fill="#ffffff" fill-opacity="0.77"/>
+  <circle cx="35.5" cy="27.0" r="1.4" fill="#ffffff" fill-opacity="0.37"/>
+  <circle cx="60.3" cy="14.8" r="0.9" fill="#ffffff" fill-opacity="0.86"/>
+  <circle cx="42.7" cy="99.8" r="0.9" fill="#ffffff" fill-opacity="0.48"/>
+  <circle cx="96.7" cy="9.2" r="1.8" fill="#ffffff" fill-opacity="0.94"/>
+  <circle cx="43.7" cy="11.3" r="1.1" fill="#ffffff" fill-opacity="0.82"/>
+  <circle cx="31.0" cy="12.7" r="1.4" fill="#ffffff" fill-opacity="0.36"/>
+  <circle cx="45.0" cy="96.3" r="1.1" fill="#ffffff" fill-opacity="0.50"/>
+  <circle cx="14.1" cy="10.0" r="1.8" fill="#ffffff" fill-opacity="0.46"/>
+  <circle cx="59.9" cy="48.7" r="1.1" fill="#ffffff" fill-opacity="0.94"/>
+  <circle cx="81.0" cy="45.9" r="1.8" fill="#ffffff" fill-opacity="0.42"/>
+  <circle cx="46.1" cy="25.3" r="1.4" fill="#ffffff" fill-opacity="0.87"/>
+  <circle cx="101.5" cy="63.3" r="0.9" fill="#ffffff" fill-opacity="0.48"/>
+ <path d="M22.2 108.0 A92.0 92.0 0 0 1 108.0 36.1" fill="none" stroke="#ff5c78" stroke-opacity="0.34" stroke-width="3.6"/>
+  <path d="M25.9 108.0 A88.4 88.4 0 0 1 108.0 39.7" fill="none" stroke="#ffa84c" stroke-opacity="0.34" stroke-width="3.6"/>
+  <path d="M29.6 108.0 A84.8 84.8 0 0 1 108.0 43.3" fill="none" stroke="#ffe666" stroke-opacity="0.34" stroke-width="3.6"/>
+  <path d="M33.3 108.0 A81.2 81.2 0 0 1 108.0 46.9" fill="none" stroke="#6ce08c" stroke-opacity="0.34" stroke-width="3.6"/>
+  <path d="M37.0 108.0 A77.6 77.6 0 0 1 108.0 50.5" fill="none" stroke="#5cb6ff" stroke-opacity="0.34" stroke-width="3.6"/>
+  <path d="M40.8 108.0 A74.0 74.0 0 0 1 108.0 54.1" fill="none" stroke="#a880ff" stroke-opacity="0.34" stroke-width="3.6"/>
+</svg>

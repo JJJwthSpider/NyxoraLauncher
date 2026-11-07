@@ -248,7 +248,10 @@ public final class MainActivity extends Activity {
         chatColumn.setOrientation(LinearLayout.VERTICAL);
         chatColumn.setPadding(dp(10), dp(10), dp(10), dp(10));
         chatScroll.addView(chatColumn);
-        root.addView(chatScroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        // the screen is landscape: the chat on the left, the finished pack in a column on the right
+        LinearLayout middle = new LinearLayout(this);
+        middle.addView(chatScroll, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
+        root.addView(middle, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
 
         // the finished pack: name, mod list and export
         packBar = new LinearLayout(this);
@@ -260,7 +263,8 @@ public final class MainActivity extends Activity {
         packTitle.setTextSize(13);
         packBar.addView(packTitle);
         LinearLayout packButtons = new LinearLayout(this);
-        packButtons.setPadding(0, dp(6), 0, 0);
+        packButtons.setOrientation(LinearLayout.VERTICAL);
+        packButtons.setPadding(0, dp(8), 0, 0);
         Button list = button("Моды", false);
         list.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -279,16 +283,25 @@ public final class MainActivity extends Activity {
                 showExportChoices();
             }
         });
-        LinearLayout.LayoutParams third = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
-        third.rightMargin = dp(6);
-        packButtons.addView(list, third);
-        packButtons.addView(play, new LinearLayout.LayoutParams(third));
-        packButtons.addView(share, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        // "Play" first and biggest, the other two below it
+        LinearLayout.LayoutParams row = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        row.bottomMargin = dp(5);
+        play.setMinHeight(dp(48));
+        play.setMinimumHeight(dp(48));
+        play.setTextSize(18);
+        for (Button small : new Button[] { list, share }) {
+            small.setMinHeight(dp(34));
+            small.setMinimumHeight(dp(34));
+            small.setPadding(dp(10), dp(2), dp(10), dp(2));
+        }
+        packButtons.addView(play, row);
+        packButtons.addView(list, new LinearLayout.LayoutParams(row));
+        packButtons.addView(share, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         packBar.addView(packButtons);
-        LinearLayout.LayoutParams packParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        packParams.setMargins(dp(8), dp(4), dp(8), dp(4));
+        LinearLayout.LayoutParams packParams = new LinearLayout.LayoutParams(dp(260), ViewGroup.LayoutParams.WRAP_CONTENT);
+        packParams.setMargins(dp(4), dp(8), dp(10), dp(4));
         packBar.setVisibility(View.GONE);
-        root.addView(packBar, packParams);
+        middle.addView(packBar, packParams);
 
         // quick replies
         repliesScroll = new HorizontalScrollView(this);
@@ -346,7 +359,8 @@ public final class MainActivity extends Activity {
         row.setGravity(fromMoony ? Gravity.START : Gravity.END);
         LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         rowParams.bottomMargin = dp(8);
-        int maxWidth = (int) (getResources().getDisplayMetrics().widthPixels * 0.82f);
+        // the screen is landscape: bubbles keep a comfortable reading width instead of spanning it
+        int maxWidth = Math.min((int) (getResources().getDisplayMetrics().widthPixels * 0.82f), dp(560));
         if (fromMoony) {
             ImageView avatar = new ImageView(this);
             avatar.setImageResource(R.drawable.moony);
@@ -452,7 +466,7 @@ public final class MainActivity extends Activity {
         typingStatus.setText(status);
         typingStatus.setTextColor(HINT);
         typingStatus.setTextSize(13);
-        typingStatus.setMaxWidth((int) (getResources().getDisplayMetrics().widthPixels * 0.7f));
+        typingStatus.setMaxWidth(Math.min((int) (getResources().getDisplayMetrics().widthPixels * 0.7f), dp(480)));
         bubble.addView(typingStatus);
         ProgressBar progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         progress.setIndeterminate(true);
