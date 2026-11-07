@@ -91,6 +91,7 @@ final class Builder {
         String slug = "";
         String title = "";
         String description = "";
+        String iconUrl = "";
 
         static Candidate from(JSONObject project) {
             Candidate c = new Candidate();
@@ -101,6 +102,7 @@ final class Builder {
             c.slug = project.optString("slug");
             c.title = project.optString("title");
             c.description = project.optString("description");
+            c.iconUrl = project.isNull("icon_url") ? "" : project.optString("icon_url");
             return c;
         }
     }
@@ -172,6 +174,7 @@ final class Builder {
         mod.slug = c.slug;
         mod.title = c.title;
         mod.description = c.description;
+        mod.iconUrl = c.iconUrl;
         mod.group = group;
         mod.dependency = dependency;
         mod.versionNumber = file.versionNumber;

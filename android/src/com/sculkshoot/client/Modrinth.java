@@ -183,6 +183,19 @@ final class Modrinth {
         return new JSONObject(r.body).optJSONArray("hits");
     }
 
+    /** many projects in one request (at most 100 ids): their titles, descriptions and icons */
+    static JSONArray projects(List<String> ids) throws IOException, JSONException {
+        JSONArray list = new JSONArray();
+        for (String id : ids) {
+            list.put(id);
+        }
+        Http.Response r = Http.get(Builder.MODRINTH + "/projects?ids=" + Http.encode(list.toString()));
+        if (!r.ok()) {
+            throw new IOException("HTTP " + r.status);
+        }
+        return new JSONArray(r.body);
+    }
+
     static JSONObject project(String idOrSlug) throws IOException, JSONException {
         return getObject(Builder.MODRINTH + "/project/" + Http.encode(idOrSlug));
     }

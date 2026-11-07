@@ -106,6 +106,30 @@ final class EditorScreen {
         body.addView(side, new LinearLayout.LayoutParams(dp(220), ViewGroup.LayoutParams.MATCH_PARENT));
 
         showTab(Mod.MOD);
+        fillIcons();
+    }
+
+    /** mods from modpacks (or made before icons were kept) get their Modrinth icons once */
+    private void fillIcons() {
+        boolean missing = false;
+        for (Mod mod : inst.mods) {
+            missing |= mod.iconUrl.isEmpty() && !mod.projectId.isEmpty();
+        }
+        if (!missing) {
+            return;
+        }
+        activity.background(new MainActivity.Job<Boolean>() {
+            public Boolean run() throws Exception {
+                return Installer.fillIcons(inst);
+            }
+
+            public void done(Boolean changed, Exception error) {
+                if (error == null && changed != null && changed) {
+                    activity.saveInstallation(inst);
+                    showTab(kind);
+                }
+            }
+        });
     }
 
     View view() {
@@ -179,7 +203,7 @@ final class EditorScreen {
             row.setPadding(dp(10), dp(8), dp(8), dp(8));
             row.setBackground(Ui.rounded(activity, Ui.GLASS, 10, Ui.LINE));
             ImageView icon = new ImageView(activity);
-            Icons.load(icon, mod.iconUrl, R.drawable.install_default);
+            Icons.load(icon, mod.iconUrl);
             row.addView(icon, new LinearLayout.LayoutParams(dp(40), dp(40)));
             LinearLayout text = new LinearLayout(activity);
             text.setOrientation(LinearLayout.VERTICAL);

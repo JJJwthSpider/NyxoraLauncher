@@ -165,6 +165,47 @@ final class Installer {
         return mod;
     }
 
+    /**
+     * Mods from modpacks or older versions may have no icon yet: looks them up on Modrinth (100 per request), so
+     * every row shows the same picture as on modrinth.com. Returns true if anything changed.
+     */
+    static boolean fillIcons(Installation inst) throws IOException, JSONException {
+        List<String> ids = new ArrayList<String>();
+        for (Mod mod : inst.mods) {
+            if (mod.iconUrl.isEmpty() && !mod.projectId.isEmpty() && !ids.contains(mod.projectId)) {
+                ids.add(mod.projectId);
+            }
+        }
+        boolean changed = false;
+        for (int from = 0; from < ids.size(); from += 100) {
+            JSONArray found = Modrinth.projects(ids.subList(from, Math.min(ids.size(), from + 100)));
+            for (int i = 0; i < found.length(); i++) {
+                JSONObject project = found.optJSONObject(i);
+                if (project == null) {
+                    continue;
+                }
+                String icon = project.isNull("icon_url") ? "" : project.optString("icon_url");
+                for (Mod mod : inst.mods) {
+                    if (mod.projectId.equals(project.optString("id"))) {
+                        if (!icon.equals(mod.iconUrl)) {
+                            mod.iconUrl = icon;
+                            changed = true;
+                        }
+                        if (mod.title.isEmpty() || mod.fileName.startsWith(mod.title)) {  // named after its file until now
+                            mod.title = project.optString("title", mod.title);
+                            changed = true;
+                        }
+                        if (mod.description.isEmpty()) {
+                            mod.description = project.optString("description");
+                            changed = changed || !mod.description.isEmpty();
+                        }
+                    }
+                }
+            }
+        }
+        return changed;
+    }
+
     /** removes a file and the libraries nobody needs any more */
     static void remove(Installation inst, Mod mod) {
         inst.mods.remove(mod);

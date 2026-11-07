@@ -223,7 +223,7 @@ final class BrowserScreen {
             row.setPadding(dp(10), dp(8), dp(10), dp(8));
             row.setBackground(Ui.rounded(activity, Ui.GLASS, 10, Ui.LINE));
             ImageView icon = new ImageView(activity);
-            Icons.load(icon, hit.isNull("icon_url") ? "" : hit.optString("icon_url"), R.drawable.install_default);
+            Icons.load(icon, hit.isNull("icon_url") ? "" : hit.optString("icon_url"));
             row.addView(icon, new LinearLayout.LayoutParams(dp(48), dp(48)));
             LinearLayout text = new LinearLayout(activity);
             text.setOrientation(LinearLayout.VERTICAL);
