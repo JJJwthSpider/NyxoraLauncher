@@ -122,8 +122,8 @@ final class BrowserScreen {
         LinearLayout info = new LinearLayout(activity);
         info.setGravity(Gravity.CENTER_VERTICAL);
         info.setPadding(dp(10), dp(6), dp(10), 0);
-        if (inst != null) {
-            // the same two sites as the desktop launcher
+        {
+            // the same two sites as the desktop launcher, for mods and for whole modpacks
             modrinthTab = Ui.button(activity, "Modrinth", true);
             curseForgeTab = Ui.button(activity, "CurseForge", false);
             modrinthTab.setTextSize(13);
@@ -142,6 +142,17 @@ final class BrowserScreen {
             tp.rightMargin = dp(6);
             info.addView(modrinthTab, tp);
             info.addView(curseForgeTab, new LinearLayout.LayoutParams(tp));
+            if (inst == null) {
+                // a pack file already on the phone: .mrpack (Modrinth) or .zip (CurseForge)
+                Button fromFile = Ui.button(activity, "Из файла", false);
+                fromFile.setTextSize(13);
+                fromFile.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        BrowserScreen.this.activity.pickPackFile();
+                    }
+                });
+                info.addView(fromFile, new LinearLayout.LayoutParams(tp));
+            }
         }
         status = Ui.label(activity, "", 12, Ui.HINT, false);
         status.setPadding(dp(8), 0, dp(8), 0);
@@ -313,7 +324,7 @@ final class BrowserScreen {
                         fail(name, error);
                         return;
                     }
-                    Toast.makeText(activity, "Сборка «" + pack.name + "» установлена: " + pack.describe(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(activity, "Сборка «" + pack.name + "» установлена: " + pack.describe() + disabledNote(pack), Toast.LENGTH_LONG).show();
                     activity.showHome(pack.id);
                 }
             });
@@ -341,6 +352,15 @@ final class BrowserScreen {
                 adapter.notifyDataSetChanged();
             }
         });
+    }
+
+    /** files of a CurseForge pack that could not be downloaded */
+    static String disabledNote(Installation pack) {
+        int off = 0;
+        for (Mod mod : pack.mods) {
+            off += !mod.enabled && mod.url.isEmpty() ? 1 : 0;
+        }
+        return off == 0 ? "" : "\nНе скачать без приложения CurseForge: " + off + " (они выключены, см. «Моды и ресурсы»)";
     }
 
     private void fail(String name, Exception error) {

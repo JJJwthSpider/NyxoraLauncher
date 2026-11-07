@@ -295,6 +295,84 @@ final class Installer {
         return changed;
     }
 
+    /**
+     * Like "Check for updates" of the desktop launcher: every mod, resource pack and shader that came from Modrinth or
+     * CurseForge gets its newest file for this Minecraft version and loader; libraries a new version needs are added.
+     * Returns the lines to show ("Sodium: 0.5.8 → 0.6.0").
+     */
+    static List<String> updateAll(Installation inst, Builder.Listener log) throws Exception {
+        List<String> changes = new ArrayList<String>();
+        List<Mod> mods = new ArrayList<Mod>(inst.mods);
+        int i = 0;
+        for (Mod mod : mods) {
+            i++;
+            if (mod.projectId.isEmpty() || Mod.FILE.equals(mod.kind) || (!mod.enabled && mod.url.isEmpty())) {
+                continue;
+            }
+            log.log("Проверяю " + i + "/" + mods.size() + ": " + mod.title);
+            String before = mod.versionNumber;
+            try {
+                if (CurseForge.isCurseForge(mod.projectId)) {
+                    CurseForge.FileChoice choice = CurseForge.bestFile(mod.projectId, inst, mod.kind);
+                    if (choice.file == null || choice.blocked || choice.file.optString("fileName").equals(mod.fileName)) {
+                        continue;
+                    }
+                    Mod fresh = CurseForge.toMod(new JSONObject().put("id", Long.parseLong(mod.projectId.substring(3))), choice.file, mod.kind,
+                                                 mod.dependency);
+                    mod.versionNumber = fresh.versionNumber;
+                    mod.fileName = fresh.fileName;
+                    mod.url = fresh.url;
+                    mod.sha1 = fresh.sha1;
+                    mod.sha512 = "";
+                    mod.size = fresh.size;
+                    mod.required = fresh.required;
+                    mod.incompatible = fresh.incompatible;
+                } else {
+                    Modrinth.FileChoice file = Modrinth.bestFile(mod.projectId, loadersFor(inst, mod.kind), inst.minecraftVersion);
+                    if (!file.valid || file.sha1.equalsIgnoreCase(mod.sha1) || file.fileName.equals(mod.fileName)) {
+                        continue;
+                    }
+                    mod.versionNumber = file.versionNumber;
+                    mod.fileName = file.fileName;
+                    mod.url = file.url;
+                    mod.sha1 = file.sha1;
+                    mod.sha512 = file.sha512;
+                    mod.size = file.size;
+                    mod.required = file.required;
+                    mod.incompatible = file.incompatible;
+                }
+            } catch (IOException e) {
+                continue;  // this one could not be checked now; the others still can
+            }
+            changes.add(mod.title + ": " + (before.isEmpty() ? "?" : before) + " → " + mod.versionNumber);
+        }
+        // libraries the new versions need
+        for (Mod mod : new ArrayList<Mod>(inst.mods)) {
+            for (String required : new ArrayList<String>(mod.required)) {
+                String id = required.startsWith("mr:") ? required.substring(3) : "";
+                if (id.isEmpty() || id.startsWith("mrv:") || inst.find(id) != null) {
+                    continue;
+                }
+                try {
+                    int sizeBefore = inst.mods.size();
+                    List<String> added = install(inst, id, Mod.MOD);
+                    for (int k = sizeBefore; k < inst.mods.size(); k++) {
+                        Mod library = inst.mods.get(k);
+                        library.dependency = true;
+                        library.group = Builder.GROUP_LIBRARIES;
+                        if (!library.neededBy.contains(mod.title)) {
+                            library.neededBy.add(mod.title);
+                        }
+                    }
+                    changes.add("+ " + Util.join(added, ", ") + " (нужно для " + mod.title + ")");
+                } catch (InstallException e) {
+                    changes.add("! " + mod.title + ": " + e.getMessage());
+                }
+            }
+        }
+        return changes;
+    }
+
     /** removes a file and the libraries nobody needs any more */
     static void remove(Installation inst, Mod mod) {
         inst.mods.remove(mod);
@@ -351,6 +429,9 @@ final class Installer {
 
     /** Downloads a Modrinth modpack (its newest release) and makes an installation of it; the original file is kept. */
     static Installation importModpack(String projectId, Installation.Store store, Builder.Listener log) throws Exception {
+        if (CurseForge.isCurseForge(projectId)) {
+            return importCurseForgePack(projectId, store, log);
+        }
         JSONObject project = Modrinth.project(projectId);
         if (project == null) {
             throw new InstallException("сборка не найдена на Modrinth");
@@ -442,6 +523,252 @@ final class Installer {
             return hex.toString();
         } catch (java.security.NoSuchAlgorithmException e) {
             throw new IOException(e.getMessage());
+        }
+    }
+
+    /* ------------------------------------------------------------ CurseForge modpacks and pack files */
+
+    /** downloads a CurseForge modpack (its newest release) and makes an installation of it */
+    static Installation importCurseForgePack(String projectId, Installation.Store store, Builder.Listener log) throws Exception {
+        JSONObject project = CurseForge.project(projectId);
+        if (project == null) {
+            throw new InstallException("сборка не найдена на CurseForge");
+        }
+        log.log("Ищу последнюю версию «" + project.optString("name") + "»...");
+        JSONObject file = CurseForge.newestPackFile(projectId);
+        if (file == null) {
+            throw new InstallException("у сборки нет файлов");
+        }
+        if (file.isNull("downloadUrl") || file.optString("downloadUrl").isEmpty()) {
+            throw new InstallException("автор сборки запретил скачивать её мимо приложения CurseForge");
+        }
+        log.log("Скачиваю " + file.optString("fileName") + "...");
+        File zip = File.createTempFile("cf-pack", ".zip", store.curseForgeCache());
+        try {
+            Http.download(file.optString("downloadUrl"), zip);
+            Installation inst = new Installation();
+            readCurseForgePack(inst, zip, store, log);
+            JSONObject logo = project.optJSONObject("logo");
+            inst.iconUrl = logo != null ? logo.optString("thumbnailUrl", logo.optString("url")) : "";
+            if (inst.name.isEmpty()) {
+                inst.name = project.optString("name");
+            }
+            return inst;
+        } finally {
+            zip.delete();
+        }
+    }
+
+    /** a pack file the user picked: a Modrinth .mrpack or a CurseForge .zip (manifest.json) */
+    static Installation importFile(File file, Installation.Store store, Builder.Listener log) throws Exception {
+        ZipFile zip;
+        try {
+            zip = new ZipFile(file);
+        } catch (IOException e) {
+            throw new InstallException("это не файл сборки (.mrpack или .zip)");
+        }
+        boolean modrinth;
+        boolean curseForge;
+        try {
+            modrinth = zip.getEntry("modrinth.index.json") != null;
+            curseForge = zip.getEntry("manifest.json") != null;
+        } finally {
+            zip.close();
+        }
+        Installation inst = new Installation();
+        if (modrinth) {
+            log.log("Читаю сборку Modrinth...");
+            File target = store.sourcePack(inst.id);
+            copyFile(file, target);
+            try {
+                readIndex(inst, target);
+            } catch (Exception e) {
+                target.delete();
+                throw new InstallException("файл сборки повреждён: " + e.getMessage());
+            }
+            inst.hasSourcePack = true;
+            return inst;
+        }
+        if (curseForge) {
+            readCurseForgePack(inst, file, store, log);
+            return inst;
+        }
+        throw new InstallException("в файле нет описания сборки (ни modrinth.index.json, ни manifest.json)");
+    }
+
+    private static void copyFile(File from, File to) throws IOException {
+        java.io.FileInputStream in = new java.io.FileInputStream(from);
+        FileOutputStream out = new FileOutputStream(to);
+        try {
+            byte[] buffer = new byte[65536];
+            int n;
+            while ((n = in.read(buffer)) > 0) {
+                out.write(buffer, 0, n);
+            }
+        } finally {
+            in.close();
+            out.close();
+        }
+    }
+
+    /**
+     * Reads a CurseForge pack (manifest.json): Minecraft, the loader and every file, asked from CurseForge in batches.
+     * Files whose authors forbid downloads outside the CurseForge app are looked up on Modrinth by their SHA-1 (most
+     * are there too); the rest are kept switched off with a note. The pack's own files (configs...) are kept like a
+     * Modrinth pack's: in the installation's source pack, under overrides/.
+     */
+    static void readCurseForgePack(Installation inst, File pack, Installation.Store store, Builder.Listener log) throws Exception {
+        ZipFile zip = new ZipFile(pack);
+        try {
+            ZipEntry manifestEntry = zip.getEntry("manifest.json");
+            if (manifestEntry == null) {
+                throw new InstallException("в сборке нет manifest.json");
+            }
+            JSONObject manifest = new JSONObject(Http.read(zip.getInputStream(manifestEntry)));
+            inst.name = manifest.optString("name");
+            JSONObject minecraft = manifest.optJSONObject("minecraft");
+            if (minecraft == null) {
+                throw new InstallException("в manifest.json нет версии Minecraft");
+            }
+            inst.minecraftVersion = minecraft.optString("version");
+            JSONArray loaders = minecraft.optJSONArray("modLoaders");
+            for (int i = 0; loaders != null && i < loaders.length(); i++) {
+                JSONObject l = loaders.getJSONObject(i);
+                String id = l.optString("id");  // "forge-47.2.0", "neoforge-21.1.80", "fabric-0.16.9", "quilt-0.27.1"
+                int dash = id.indexOf('-');
+                if (dash > 0 && (inst.loader.isEmpty() || l.optBoolean("primary"))) {
+                    inst.loader = id.substring(0, dash).toLowerCase(Locale.ROOT);
+                    inst.loaderVersion = id.substring(dash + 1);
+                }
+            }
+            if (inst.loader.isEmpty()) {
+                throw new InstallException("сборка без загрузчика модов");
+            }
+            if ("neoforge".equals(inst.loader) && inst.loaderVersion.startsWith("1.20.1-")) {
+                inst.loaderVersion = inst.loaderVersion.substring("1.20.1-".length());  // NeoForge for 1.20.1 is a Forge fork
+            }
+
+            // the pack's own files
+            String overrides = manifest.optString("overrides", "overrides");
+            File source = store.sourcePack(inst.id);
+            java.util.zip.ZipOutputStream out = new java.util.zip.ZipOutputStream(new FileOutputStream(source));
+            int extra = 0;
+            try {
+                byte[] buffer = new byte[65536];
+                Enumeration<? extends ZipEntry> entries = zip.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (entry.isDirectory() || !entry.getName().startsWith(overrides + "/")) {
+                        continue;
+                    }
+                    out.putNextEntry(new ZipEntry("overrides/" + entry.getName().substring(overrides.length() + 1)));
+                    InputStream in = zip.getInputStream(entry);
+                    int n;
+                    while ((n = in.read(buffer)) > 0) {
+                        out.write(buffer, 0, n);
+                    }
+                    in.close();
+                    out.closeEntry();
+                    extra++;
+                }
+            } finally {
+                out.close();
+            }
+            inst.hasSourcePack = true;
+
+            // the files, from CurseForge in batches of 100
+            JSONArray list = manifest.optJSONArray("files");
+            List<Long> fileIds = new ArrayList<Long>();
+            List<Long> modIds = new ArrayList<Long>();
+            for (int i = 0; list != null && i < list.length(); i++) {
+                JSONObject f = list.getJSONObject(i);
+                fileIds.add(f.optLong("fileID"));
+                modIds.add(f.optLong("projectID"));
+            }
+            log.log("В сборке " + fileIds.size() + " файлов и " + extra + " своих файлов (настройки и т. п.). Спрашиваю CurseForge...");
+            java.util.Map<Long, JSONObject> projects = new java.util.HashMap<Long, JSONObject>();
+            java.util.Map<Long, JSONObject> files = new java.util.HashMap<Long, JSONObject>();
+            for (int from = 0; from < fileIds.size(); from += 100) {
+                List<Long> ids = modIds.subList(from, Math.min(modIds.size(), from + 100));
+                JSONArray data = CurseForge.post("/mods", new JSONObject().put("modIds", new JSONArray(ids))).optJSONArray("data");
+                for (int i = 0; data != null && i < data.length(); i++) {
+                    projects.put(data.getJSONObject(i).optLong("id"), data.getJSONObject(i));
+                }
+                List<Long> fids = fileIds.subList(from, Math.min(fileIds.size(), from + 100));
+                data = CurseForge.post("/mods/files", new JSONObject().put("fileIds", new JSONArray(fids))).optJSONArray("data");
+                for (int i = 0; data != null && i < data.length(); i++) {
+                    files.put(data.getJSONObject(i).optLong("id"), data.getJSONObject(i));
+                }
+                log.log("Получено " + Math.min(fileIds.size(), from + 100) + " из " + fileIds.size() + "...");
+            }
+
+            List<Mod> blocked = new ArrayList<Mod>();
+            for (int i = 0; i < fileIds.size(); i++) {
+                JSONObject file = files.get(fileIds.get(i));
+                JSONObject project = projects.get(modIds.get(i));
+                if (file == null) {
+                    continue;
+                }
+                if (project == null) {
+                    project = new JSONObject().put("id", modIds.get(i)).put("name", file.optString("displayName"));
+                }
+                int classId = project.optInt("classId", 6);
+                String kind = classId == 12 ? Mod.RESOURCE_PACK : classId == 6552 ? Mod.SHADER : Mod.MOD;
+                Mod mod = CurseForge.toMod(project, file, kind, false);
+                mod.required.clear();  // the pack lists every file it needs itself
+                if (classId != 6 && classId != 12 && classId != 6552) {
+                    mod.kind = Mod.FILE;  // worlds, data packs...: kept as plain files of the pack
+                    mod.path = (classId == 6945 ? "datapacks/" : "") + mod.fileName;
+                }
+                if (mod.url.isEmpty()) {
+                    blocked.add(mod);
+                }
+                inst.mods.add(mod);
+            }
+
+            // files CurseForge does not give out: the same file (same SHA-1) is usually on Modrinth
+            if (!blocked.isEmpty()) {
+                log.log(blocked.size() + " файлов CurseForge не даёт скачать мимо своего приложения. Ищу их на Modrinth...");
+                JSONArray hashes = new JSONArray();
+                for (Mod mod : blocked) {
+                    if (!mod.sha1.isEmpty()) {
+                        hashes.put(mod.sha1);
+                    }
+                }
+                JSONObject found = new JSONObject();
+                if (hashes.length() > 0) {
+                    Http.Response r = Http.post(Builder.MODRINTH + "/version_files", "application/json",
+                                                new JSONObject().put("hashes", hashes).put("algorithm", "sha1").toString());
+                    if (r.ok()) {
+                        found = new JSONObject(r.body);
+                    }
+                }
+                int fromModrinth = 0;
+                for (Mod mod : blocked) {
+                    JSONObject version = found.optJSONObject(mod.sha1.toLowerCase(Locale.ROOT));
+                    JSONArray vfiles = version == null ? null : version.optJSONArray("files");
+                    for (int i = 0; vfiles != null && i < vfiles.length(); i++) {
+                        JSONObject vf = vfiles.getJSONObject(i);
+                        JSONObject h = vf.optJSONObject("hashes");
+                        if (h != null && mod.sha1.equalsIgnoreCase(h.optString("sha1"))) {
+                            mod.projectId = version.optString("project_id");
+                            mod.url = vf.optString("url");
+                            mod.sha512 = h.optString("sha512");
+                            mod.versionNumber = version.optString("version_number", mod.versionNumber);
+                            mod.iconUrl = "";
+                            fromModrinth++;
+                        }
+                    }
+                    if (mod.url.isEmpty()) {
+                        mod.enabled = false;
+                        mod.description = "Автор разрешил скачивать этот файл только через приложение CurseForge — скачай его там "
+                                          + "и положи в папку игры вручную.";
+                    }
+                }
+                log.log("С Modrinth: " + fromModrinth + ", недоступно: " + (blocked.size() - fromModrinth) + ".");
+            }
+        } finally {
+            zip.close();
         }
     }
 

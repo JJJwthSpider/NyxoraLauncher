@@ -26,7 +26,12 @@ final class CurseForge {
         return projectId != null && projectId.startsWith(PREFIX);
     }
 
+    static final int CLASS_MODPACK = 4471;
+
     static int classId(String kind) {
+        if (BrowserScreen.MODPACK.equals(kind)) {
+            return CLASS_MODPACK;
+        }
         if (Mod.RESOURCE_PACK.equals(kind)) {
             return 12;
         }
@@ -83,8 +88,10 @@ final class CurseForge {
         StringBuilder path = new StringBuilder("/mods/search?gameId=" + MINECRAFT + "&classId=" + classId(kind));
         path.append("&searchFilter=").append(Http.encode(query));
         path.append("&sortField=").append(sortField(index)).append("&sortOrder=desc");
-        path.append("&gameVersion=").append(Http.encode(inst.minecraftVersion));
-        if (Mod.MOD.equals(kind) && loaderType(inst.loader) != 0 && !"quilt".equals(inst.loader)) {
+        if (inst != null) {
+            path.append("&gameVersion=").append(Http.encode(inst.minecraftVersion));
+        }
+        if (inst != null && Mod.MOD.equals(kind) && loaderType(inst.loader) != 0 && !"quilt".equals(inst.loader)) {
             path.append("&modLoaderType=").append(loaderType(inst.loader));
         }
         path.append("&index=").append(offset).append("&pageSize=").append(limit);
@@ -108,6 +115,32 @@ final class CurseForge {
         JSONObject logo = mod.optJSONObject("logo");
         hit.put("icon_url", logo != null ? logo.optString("thumbnailUrl", logo.optString("url")) : "");
         return hit;
+    }
+
+    /** a POST with a JSON body (the batch requests: many files or projects at once) */
+    static JSONObject post(String path, JSONObject body) throws IOException, JSONException {
+        Http.Response r = Http.post(API + path, "application/json", body.toString(), "x-api-key", KEY);
+        if (r.status == 403 || r.status == 401) {
+            throw new IOException("CurseForge не принял ключ API");
+        }
+        if (!r.ok()) {
+            throw new IOException("CurseForge: HTTP " + r.status);
+        }
+        return new JSONObject(r.body);
+    }
+
+    /** the newest release file of a modpack (else the newest file at all) */
+    static JSONObject newestPackFile(String projectId) throws IOException, JSONException {
+        JSONArray files = get("/mods/" + projectId.substring(PREFIX.length()) + "/files?pageSize=50").optJSONArray("data");
+        JSONObject best = null;
+        for (int i = 0; files != null && i < files.length(); i++) {
+            JSONObject f = files.getJSONObject(i);
+            if (best == null || f.optInt("releaseType", 3) < best.optInt("releaseType", 3)
+                || (f.optInt("releaseType", 3) == best.optInt("releaseType", 3) && f.optString("fileDate").compareTo(best.optString("fileDate")) > 0)) {
+                best = f;
+            }
+        }
+        return best;
     }
 
     static JSONObject project(String projectId) throws IOException, JSONException {
@@ -183,7 +216,7 @@ final class CurseForge {
         mod.dependency = dependency;
         mod.versionNumber = file.optString("displayName");
         mod.fileName = file.optString("fileName");
-        mod.url = file.optString("downloadUrl");
+        mod.url = file.isNull("downloadUrl") ? "" : file.optString("downloadUrl");  // null: the author allows the CurseForge app only
         mod.size = file.optLong("fileLength");
         JSONArray hashes = file.optJSONArray("hashes");
         for (int i = 0; hashes != null && i < hashes.length(); i++) {

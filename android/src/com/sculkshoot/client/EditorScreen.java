@@ -99,6 +99,13 @@ final class EditorScreen {
             }
         });
         side.addView(play, new LinearLayout.LayoutParams(p));
+        Button update = Ui.button(activity, "Проверить обновления", false);
+        update.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                checkUpdates();
+            }
+        });
+        side.addView(update, new LinearLayout.LayoutParams(p));
         TextView hint = Ui.label(activity, "Библиотеки, нужные модам, ставятся и убираются сами. Снятая галочка — мод не попадёт в игру.",
                                  11, Ui.HINT, false);
         hint.setPadding(0, dp(12), 0, 0);
@@ -238,6 +245,34 @@ final class EditorScreen {
             return row;
         }
     };
+
+    /** newest versions of everything from Modrinth and CurseForge, like the desktop launcher's update check */
+    private void checkUpdates() {
+        final HomeScreen.Progress progress = new HomeScreen.Progress(activity, "Обновления для «" + inst.name + "»");
+        progress.log("Ищу новые версии на Modrinth и CurseForge...");
+        activity.background(new MainActivity.Job<List<String>>() {
+            public List<String> run() throws Exception {
+                return Installer.updateAll(inst, progress);
+            }
+
+            public void done(List<String> changes, Exception error) {
+                progress.dismiss();
+                if (error != null) {
+                    new AlertDialog.Builder(activity).setMessage("Не удалось проверить обновления: " + error.getMessage()).setPositiveButton("OK", null).show();
+                    return;
+                }
+                if (!changes.isEmpty()) {
+                    activity.saveInstallation(inst);
+                    showTab(kind);
+                }
+                new AlertDialog.Builder(activity)
+                    .setTitle(changes.isEmpty() ? "Всё уже новое" : "Обновлено: " + changes.size())
+                    .setMessage(changes.isEmpty() ? "Для " + inst.describe() + " новее версий нет." : Util.join(changes, "\n"))
+                    .setPositiveButton("OK", null)
+                    .show();
+            }
+        });
+    }
 
     private void confirmRemove(final Mod mod) {
         new AlertDialog.Builder(activity)

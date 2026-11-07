@@ -1826,6 +1826,65 @@ public final class MainActivity extends Activity {
         });
     }
 
+    private static final int REQUEST_IMPORT_PACK = 42;
+
+    /** "Из файла" in the modpack browser: a .mrpack or a CurseForge .zip from the phone */
+    void pickPackFile() {
+        Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        pick.addCategory(Intent.CATEGORY_OPENABLE);
+        pick.setType("*/*");
+        try {
+            startActivityForResult(pick, REQUEST_IMPORT_PACK);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "Нет приложения для выбора файлов", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void importPackFile(final Uri uri) {
+        final HomeScreen.Progress progress = new HomeScreen.Progress(this, "Импорт сборки");
+        progress.log("Читаю файл...");
+        background(new Job<Installation>() {
+            public Installation run() throws Exception {
+                File copy = new File(getCacheDir(), "pack-import.zip");
+                java.io.InputStream in = getContentResolver().openInputStream(uri);
+                java.io.FileOutputStream out = new java.io.FileOutputStream(copy);
+                try {
+                    byte[] buffer = new byte[65536];
+                    int n;
+                    while ((n = in.read(buffer)) > 0) {
+                        out.write(buffer, 0, n);
+                    }
+                } finally {
+                    in.close();
+                    out.close();
+                }
+                try {
+                    Installation inst = Installer.importFile(copy, installations, progress);
+                    if (inst.name.isEmpty()) {
+                        inst.name = "Импортированная сборка";
+                    }
+                    installations.save(inst);
+                    return inst;
+                } finally {
+                    copy.delete();
+                }
+            }
+
+            public void done(Installation inst, Exception error) {
+                progress.dismiss();
+                if (error != null) {
+                    new AlertDialog.Builder(MainActivity.this).setTitle("Не удалось импортировать сборку")
+                        .setMessage(error instanceof Installer.InstallException ? error.getMessage() : String.valueOf(error.getMessage()))
+                        .setPositiveButton("OK", null).show();
+                    return;
+                }
+                Toast.makeText(MainActivity.this, "Сборка «" + inst.name + "» добавлена: " + inst.describe() + BrowserScreen.disabledNote(inst),
+                               Toast.LENGTH_LONG).show();
+                showHome(inst.id);
+            }
+        });
+    }
+
     /** "Export" on the main screen: send or save the .mrpack */
     void exportInstallation(final Installation inst) {
         withPackFile(inst, "Экспорт «" + inst.name + "»", new Job<File>() {
@@ -1929,6 +1988,12 @@ public final class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_IMPORT_PACK) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                importPackFile(data.getData());
+            }
+            return;
+        }
         if (requestCode == GameEngine.REQUEST_JAVA_FILE) {
             if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                 importJava(null, data);
