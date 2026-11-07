@@ -250,6 +250,39 @@ void paintHood(Brush& b, const QList<Face>& all, const QColor& color, const std:
     b.face(findFace(all, Hat, Side::Front), [&](int lx, int ly, int, int) -> QColor { return open(lx, ly) ? QColor() : color; }, 8);
 }
 
+/// Steve and Alex as everybody knows them, painted from their colors
+QImage paintDefaultCharacter(bool alex, quint32 seed)
+{
+    QImage image = blankSkin();
+    Brush b(image, seed);
+    const auto all = faces(skinBoxes(alex));
+    Look look;
+    if (alex) {
+        look.skin = QColor(0xf0, 0xc8, 0xa0);
+        look.hair = QColor(0xd9, 0x77, 0x2a);
+        look.eyes = QColor(0x3f, 0x8a, 0x3b);
+        look.shirt = QColor(0x6f, 0xa8, 0x4f);
+        look.trim = QColor(0x5a, 0x3e, 0x26);
+        look.pants = QColor(0x6b, 0x4a, 0x2e);
+        look.shoes = QColor(0x4a, 0x4a, 0x4e);
+        look.hairLength = 2;
+    } else {
+        look.skin = QColor(0xc6, 0x96, 0x6c);
+        look.hair = QColor(0x3b, 0x26, 0x14);
+        look.eyes = QColor(0x4b, 0x3f, 0x96);
+        look.shirt = QColor(0x00, 0xa3, 0xa8);
+        look.trim = QColor(0x00, 0x86, 0x8a);
+        look.pants = QColor(0x3a, 0x3a, 0x8c);
+        look.shoes = QColor(0x5c, 0x5c, 0x60);
+        look.hairLength = 1;
+    }
+    look.mouth = look.skin.darker(150);
+    look.longSleeves = false;
+    look.beard = false;
+    paintPerson(b, all, look);
+    return image;
+}
+
 QImage paintSkin(int style, quint32 seed, bool slim)
 {
     QImage image = blankSkin();
@@ -449,6 +482,9 @@ void paintCape(Brush& b, const Pattern& pattern, const QColor& edge, const QColo
     }
 }
 
+// the patterns paintCapeStyle() knows: random, sculk, gradient, stripes, checkers, flame, emblem
+constexpr int s_capePatterns = 7;
+
 QImage paintCapeStyle(int style, quint32 seed)
 {
     QImage image = blankCape();
@@ -457,7 +493,7 @@ QImage paintCapeStyle(int style, quint32 seed)
     auto random = [&shapes](int from, int to) { return std::uniform_int_distribution<int>(from, to)(shapes); };
 
     if (style == 0) {
-        style = random(1, int(capeStyles().size()) - 1);
+        style = random(1, s_capePatterns - 1);
     }
     const QColor main = s_clothes[random(0, int(std::size(s_clothes)) - 1)];
     QColor second = s_clothes[random(0, int(std::size(s_clothes)) - 1)];
@@ -646,22 +682,45 @@ QPoint mirrorPixel(const QList<Box>& boxes, const QList<Face>& all, QPoint pixel
 
 QStringList skinStyles()
 {
-    return { tr("Random"), tr("Sculk"), tr("Knight"), tr("Ninja"), tr("Miner"), tr("Wizard"), tr("Zombie") };
+    return { tr("Steve"), tr("Alex"), tr("Random"), tr("Sculk"), tr("Knight"), tr("Ninja"), tr("Miner"), tr("Wizard"), tr("Zombie") };
 }
 
 QStringList capeStyles()
 {
-    return { tr("Random"), tr("Sculk"), tr("Gradient"), tr("Stripes"), tr("Checkers"), tr("Flame"), tr("Emblem") };
+    return { tr("White sheet"), tr("Random"), tr("Sculk"), tr("Gradient"), tr("Stripes"), tr("Checkers"), tr("Flame"), tr("Emblem") };
 }
 
 QImage generateSkin(int style, quint32 seed, bool slim)
 {
-    return paintSkin(style, seed, slim);
+    // 0 Steve, 1 Alex, then the looks of paintSkin()
+    if (style <= 1) {
+        return paintDefaultCharacter(style == 1, seed);
+    }
+    return paintSkin(style - 2, seed, slim);
 }
 
 QImage generateCape(int style, quint32 seed)
 {
-    return paintCapeStyle(style, seed);
+    // 0 is the white sheet, then the patterns of paintCapeStyle()
+    if (style == 0) {
+        return whiteCape();
+    }
+    return paintCapeStyle(style - 1, seed);
+}
+
+QImage whiteCape()
+{
+    QImage image = blankCape();
+    for (const auto& face : faces(capeBoxes())) {
+        // the edges a touch grey, so the sheet still shows its shape
+        const bool sheet = face.side == Side::Front || face.side == Side::Back;
+        for (int y = face.rect.top(); y <= face.rect.bottom(); y++) {
+            for (int x = face.rect.left(); x <= face.rect.right(); x++) {
+                image.setPixelColor(x, y, sheet ? QColor(Qt::white) : QColor(0xe6, 0xe6, 0xe6));
+            }
+        }
+    }
+    return image;
 }
 
 QImage blankSkin()

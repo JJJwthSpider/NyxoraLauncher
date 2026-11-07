@@ -65,7 +65,7 @@ QString sideName(Side side);
 /// The pixel that mirrors `pixel` on the other side of the body (or of the same part), or (-1, -1).
 QPoint mirrorPixel(const QList<Box>& boxes, const QList<Face>& faces, QPoint pixel);
 
-/// Styles the generators know; the first one picks a random look.
+/// Styles the generators know: skins start with Steve and Alex, capes with a white sheet.
 QStringList skinStyles();
 QStringList capeStyles();
 
@@ -78,5 +78,8 @@ QImage generateCape(int style, quint32 seed);
 /// An empty texture of the right size (all transparent).
 QImage blankSkin();
 QImage blankCape();
+
+/// A cape (and elytra) that is a plain white sheet to paint on.
+QImage whiteCape();
 
 }  // namespace SkinArt

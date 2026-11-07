@@ -2471,6 +2471,18 @@ In SculkShoot Client: Lobby → Join a friend, enter the code. Or in Minecraft: 
         <source>Emblem</source>
         <translation>Эмблема</translation>
     </message>
+    <message>
+        <source>Steve</source>
+        <translation>Стив</translation>
+    </message>
+    <message>
+        <source>Alex</source>
+        <translation>Алекс</translation>
+    </message>
+    <message>
+        <source>White sheet</source>
+        <translation>Белый лист</translation>
+    </message>
 </context>
 <context>
     <name>SkinEditorDialog</name>

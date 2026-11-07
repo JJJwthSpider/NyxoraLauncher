@@ -307,11 +307,17 @@ SkinEditorDialog::SkinEditorDialog(QWidget* parent, Mode mode, const QImage& sta
     connect(new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Y), this), &QShortcut::activated, m_canvas, &PixelCanvas::redo);
     connect(create, &QPushButton::clicked, this, [this] { generate(false); });
     connect(another, &QPushButton::clicked, this, [this] { generate(true); });
-    connect(clear, &QPushButton::clicked, this, [this, cape] { m_canvas->setImage(cape ? SkinArt::blankCape() : SkinArt::blankSkin(), false); });
+    // a cape starts over as a white sheet, a skin as an empty texture
+    connect(clear, &QPushButton::clicked, this, [this, cape] { m_canvas->setImage(cape ? SkinArt::whiteCape() : SkinArt::blankSkin(), false); });
     if (!cape) {
         connect(m_slim, &QRadioButton::toggled, this, [this](bool on) {
             m_canvas->setBoxes(SkinArt::skinBoxes(on));
             m_previewSkin.setModel(on ? SkinModel::SLIM : SkinModel::CLASSIC);
+            // an untouched Steve becomes Alex with the slim model and back
+            if (!m_generating && !m_canvas->canUndo() && m_style->currentIndex() <= 1) {
+                m_style->setCurrentIndex(on ? 1 : 0);
+                m_canvas->setImage(SkinArt::generateSkin(on ? 1 : 0, m_seed, on), true);
+            }
             updatePreview();
         });
     }
@@ -320,8 +326,9 @@ SkinEditorDialog::SkinEditorDialog(QWidget* parent, Mode mode, const QImage& sta
     m_hover->setText(tr("Point at the texture to see which part of the body it is."));
     if (start.isNull()) {
         // a fresh texture starts as a generated look, so there is something to paint on
-        m_style->setCurrentIndex(cape ? 1 : 0);
-        m_canvas->setImage(cape ? SkinArt::generateCape(1, m_seed) : SkinArt::generateSkin(0, m_seed, slim), true);
+        // a new skin starts as Steve (Alex for the slim model), a new cape as a white sheet
+        m_style->setCurrentIndex(cape ? 0 : (slim ? 1 : 0));
+        m_canvas->setImage(cape ? SkinArt::whiteCape() : SkinArt::generateSkin(slim ? 1 : 0, m_seed, slim), true);
     } else {
         QImage texture = start.convertToFormat(QImage::Format_ARGB32);
         if (!cape && texture.height() == 32) {
@@ -379,8 +386,14 @@ void SkinEditorDialog::generate(bool newSeed)
     if (newSeed) {
         m_seed = QRandomGenerator::global()->generate();
     }
-    const auto texture = m_mode == Mode::Cape ? SkinArt::generateCape(m_style->currentIndex(), m_seed)
-                                              : SkinArt::generateSkin(m_style->currentIndex(), m_seed, slim());
+    const int style = m_style->currentIndex();
+    if (m_mode == Mode::Skin && style <= 1) {
+        // Steve wears the classic model, Alex the slim one
+        m_generating = true;
+        (style == 1 ? m_slim : m_classic)->setChecked(true);
+        m_generating = false;
+    }
+    const auto texture = m_mode == Mode::Cape ? SkinArt::generateCape(style, m_seed) : SkinArt::generateSkin(style, m_seed, slim());
     m_canvas->setImage(texture, false);
 }
 

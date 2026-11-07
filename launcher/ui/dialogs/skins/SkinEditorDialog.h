@@ -61,6 +61,7 @@ class SkinEditorDialog : public QDialog, public SkinProvider {
 
     Mode m_mode;
     quint32 m_seed;
+    bool m_generating = false;  // the model is being switched to match Steve or Alex
     PixelCanvas* m_canvas = nullptr;
     SkinModel m_previewSkin;
     SkinOpenGLWindow* m_preview3d = nullptr;
