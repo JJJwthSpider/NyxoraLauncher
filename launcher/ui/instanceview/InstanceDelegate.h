@@ -18,6 +18,11 @@
 #include <QCache>
 #include <QStyledItemDelegate>
 
+class BaseInstance;
+
+/// "1.21.1 · NeoForge": the Minecraft version and the loader of an instance (cached until mmc-pack.json changes)
+QString instanceSubtitle(BaseInstance* instance);
+
 class ListViewDelegate : public QStyledItemDelegate {
     Q_OBJECT
 

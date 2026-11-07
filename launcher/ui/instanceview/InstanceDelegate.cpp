@@ -187,7 +187,7 @@ static QSize viewItemTextSize(const QStyleOptionViewItem* option)
 
 // "1.21.1 · NeoForge" under the name of the instance. Read from mmc-pack.json and cached until the file changes:
 // loading the pack profile from a paint event would start tasks while painting.
-static QString instanceSubtitle(BaseInstance* instance)
+QString instanceSubtitle(BaseInstance* instance)
 {
     struct Entry {
         QDateTime modified;

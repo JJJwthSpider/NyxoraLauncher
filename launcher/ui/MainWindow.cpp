@@ -66,6 +66,7 @@
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QMenu>
+#include <QStackedWidget>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QProgressDialog>
@@ -121,6 +122,8 @@
 #include "ui/pages/instance/ModFolderPage.h"
 #include "ui/widgets/LabeledToolButton.h"
 #include "ui/widgets/LaunchPanel.h"
+#include "ui/widgets/VelloraLobby.h"
+#include "ui/instanceview/InstanceDelegate.h"
 
 #include "minecraft/PackProfile.h"
 #include "minecraft/VersionFile.h"
@@ -209,7 +212,27 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(friendsAction, &QAction::triggered, this, [this] { openLobby(m_selectedInstance); });
         ui->instanceToolBar->insertActionBefore(ui->actionKillInstance, friendsAction);
 
-        auto* lobbyAction = new QAction(QIcon::fromTheme("accounts"), tr("Lobby"), this);
+        // the tabs of Millida Launcher: Лобби / Библиотека / Каталог, first in the main tool bar
+        auto* tabs = new QWidget(ui->mainToolBar);
+        auto* tabsLayout = new QHBoxLayout(tabs);
+        tabsLayout->setContentsMargins(4, 2, 12, 2);
+        tabsLayout->setSpacing(6);
+        m_lobbyTab = new QPushButton(tr("Lobby"), tabs);
+        m_libraryTab = new QPushButton(tr("Library"), tabs);
+        auto* catalogTab = new QPushButton(tr("Catalog"), tabs);
+        for (auto* tab : { m_lobbyTab, m_libraryTab }) {
+            tab->setCheckable(true);
+            tab->setAutoExclusive(true);
+        }
+        connect(m_lobbyTab, &QPushButton::clicked, this, [this] { showLobbyPage(true); });
+        connect(m_libraryTab, &QPushButton::clicked, this, [this] { showLobbyPage(false); });
+        connect(catalogTab, &QPushButton::clicked, this, [this] { addInstance(QString(), {}, "modrinth"); });
+        tabsLayout->addWidget(m_lobbyTab);
+        tabsLayout->addWidget(m_libraryTab);
+        tabsLayout->addWidget(catalogTab);
+        ui->mainToolBar->insertWidget(ui->mainToolBar->actions().value(0), tabs);
+
+        auto* lobbyAction = new QAction(QIcon::fromTheme("accounts"), tr("Play with friends"), this);
         lobbyAction->setToolTip(tr("Play with friends: create a lobby or join one"));
         connect(lobbyAction, &QAction::triggered, this, [this] { openLobby(m_selectedInstance); });
         ui->mainToolBar->insertAction(ui->actionFoldersButton, lobbyAction);
@@ -330,8 +353,33 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // The launch panel on the left: AI agent, ready packs, new instance
     {
-        m_launchPanel = new LaunchPanel(ui->centralWidget);
-        ui->horizontalLayout->addWidget(m_launchPanel);
+        // Vellora, like Millida Launcher: two pages, the lobby and the library (the launch panel and the instances)
+        m_pages = new QStackedWidget(ui->centralWidget);
+        m_lobby = new VelloraLobby(m_pages);
+        auto* libraryPage = new QWidget(m_pages);
+        m_libraryLayout = new QHBoxLayout(libraryPage);
+        m_libraryLayout->setContentsMargins(0, 0, 0, 0);
+        m_libraryLayout->setSpacing(0);
+        m_pages->addWidget(m_lobby);
+        m_pages->addWidget(libraryPage);
+        ui->horizontalLayout->addWidget(m_pages, 1);
+        connect(m_lobby, &VelloraLobby::playRequested, this, [this] {
+            BaseInstance* instance = lobbyInstance();
+            if (!instance) {
+                addInstance(QString(), {}, "quick");
+            } else if (!instance->isRunning()) {
+                APPLICATION->launch(instance);
+            }
+        });
+        connect(m_lobby, &VelloraLobby::chooseRequested, this, [this] { showLobbyPage(false); });
+        connect(m_lobby, &VelloraLobby::agentRequested, this, [this] { addInstance(QString(), {}, "agent"); });
+        connect(m_lobby, &VelloraLobby::packsRequested, this, [this] { addInstance(QString(), {}, "modrinth"); });
+        connect(m_lobby, &VelloraLobby::newInstanceRequested, this, [this] { addInstance(QString(), {}, "quick"); });
+        connect(m_lobby, &VelloraLobby::friendsRequested, this, [this] { openLobby(lobbyInstance()); });
+        connect(m_lobby, &VelloraLobby::skinRequested, this, &MainWindow::showProfileMenu);
+
+        m_launchPanel = new LaunchPanel(libraryPage);
+        m_libraryLayout->addWidget(m_launchPanel);
         connect(m_launchPanel, &LaunchPanel::agentRequested, this, [this] { addInstance(QString(), {}, "agent"); });
         connect(m_launchPanel, &LaunchPanel::packsRequested, this, [this] { addInstance(QString(), {}, "modrinth"); });
         connect(m_launchPanel, &LaunchPanel::newInstanceRequested, this, [this] { addInstance(QString(), {}, "quick"); });
@@ -414,7 +462,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         listLayout->addWidget(searchBar);
         listLayout->addWidget(view, 1);
-        ui->horizontalLayout->addWidget(listArea, 1);
+        m_libraryLayout->addWidget(listArea, 1);
 
         proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
         connect(m_instanceSearch, &QLineEdit::textChanged, this, [this](const QString& text) {
@@ -556,6 +604,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     view->setFocus();
 
     retranslateUi();
+
+    // Vellora opens on the lobby, like Millida Launcher
+    showLobbyPage(true);
 }
 
 // macOS always has a native menu bar, so these fixes are not applicable
@@ -1104,9 +1155,57 @@ void MainWindow::updateLaunchPanelProfile()
     const auto account = APPLICATION->accounts()->defaultAccount();
     if (!account) {
         m_launchPanel->setProfile(QString(), QPixmap());
+        if (m_lobby) {
+            m_lobby->setPlayer(QString(), QByteArray());
+        }
         return;
     }
     m_launchPanel->setProfile(account->profileName(), account->getFace(32, 32));
+    if (m_lobby) {
+        m_lobby->setPlayer(account->profileName(), account->accountData()->minecraftProfile.skin.data);
+    }
+}
+
+BaseInstance* MainWindow::lobbyInstance() const
+{
+    // the selected instance, or the one played last
+    if (m_selectedInstance) {
+        return m_selectedInstance;
+    }
+    BaseInstance* best = nullptr;
+    auto* instances = APPLICATION->instances();
+    for (int i = 0; i < instances->count(); i++) {
+        BaseInstance* instance = instances->at(i);
+        if (!best || instance->lastLaunch() > best->lastLaunch()) {
+            best = instance;
+        }
+    }
+    return best;
+}
+
+void MainWindow::updateLobby()
+{
+    if (!m_lobby) {
+        return;
+    }
+    BaseInstance* instance = lobbyInstance();
+    if (!instance) {
+        m_lobby->setToday(QString(), QString(), QIcon(), false);
+        return;
+    }
+    m_lobby->setToday(instance->name(), instanceSubtitle(instance), APPLICATION->icons()->getIcon(instance->iconKey()),
+                      instance->isRunning());
+}
+
+void MainWindow::showLobbyPage(bool lobby)
+{
+    m_pages->setCurrentIndex(lobby ? 0 : 1);
+    m_lobbyTab->setChecked(lobby);
+    m_libraryTab->setChecked(!lobby);
+    ui->instanceToolBar->setVisible(!lobby);
+    if (lobby) {
+        updateLobby();
+    }
 }
 
 void MainWindow::showProfileMenu()
@@ -1927,6 +2026,7 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
 
         connect(m_selectedInstance, &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
         connect(m_selectedInstance, &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
+        updateLobby();
     } else {
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();

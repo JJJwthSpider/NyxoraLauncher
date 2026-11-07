@@ -1153,6 +1153,8 @@ SET(LAUNCHER_SOURCES
     ui/Animations.cpp
     ui/Animations.h
     ui/widgets/LaunchPanel.cpp
+    ui/widgets/VelloraLobby.h
+    ui/widgets/VelloraLobby.cpp
     ui/widgets/LaunchPanel.h
     ui/widgets/MoonyWidget.cpp
     ui/widgets/MoonyWidget.h

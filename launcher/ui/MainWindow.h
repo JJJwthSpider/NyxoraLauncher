@@ -241,12 +241,22 @@ class MainWindow : public QMainWindow {
     // these are managed by Qt's memory management model!
     InstanceView* view = nullptr;
     LaunchPanel* m_launchPanel = nullptr;
+    class QStackedWidget* m_pages = nullptr;
+    class VelloraLobby* m_lobby = nullptr;
+    class QHBoxLayout* m_libraryLayout = nullptr;
+    class QPushButton* m_lobbyTab = nullptr;
+    class QPushButton* m_libraryTab = nullptr;
     // search and sorting above the instance list
     class QLineEdit* m_instanceSearch = nullptr;
     class QComboBox* m_instanceSort = nullptr;
     QLabel* m_instanceCount = nullptr;
     void updateInstanceCount();
     void openLobby(BaseInstance* instance);
+    /// the lobby (Millida-like home page) or the library of instances
+    void showLobbyPage(bool lobby);
+    void updateLobby();
+    /// the instance the lobby's Play button starts: the selected one, or the one played last
+    BaseInstance* lobbyInstance() const;
     void openServer(BaseInstance* instance);
     QPointer<class ServerWindow> m_serverWindow;
     InstanceProxyModel* proxymodel = nullptr;

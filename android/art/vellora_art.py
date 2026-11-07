@@ -127,24 +127,15 @@ def framed(box, size):
 
 
 def adaptive_layers(size):
-    """the background: the dark crimson inside of the frame; the foreground: the cube with its orbit, feathered at the
-    edges and small enough that every phone mask (circle, squircle) keeps it whole"""
+    """the user's picture exactly as it is: the foreground is the whole picture, sharp, over the visible part of the
+    adaptive icon (72 of 108dp, a little more so no dark seam shows), the background is the picture's dark edge colour"""
     inner = icon_square().convert("RGB")
-    small = inner.resize((8, 8), Image.BOX)
-    corner = small.getpixel((0, 7))
-    bg = Image.new("RGB", (size, size), corner)
-    glow = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    ImageDraw.Draw(glow).ellipse((size * 0.18, size * 0.18, size * 0.82, size * 0.82), fill=(120, 14, 38, 110))
-    bg = bg.convert("RGBA")
-    bg.alpha_composite(glow.filter(ImageFilter.GaussianBlur(size * 0.08)))
-    part = int(size * 74 / 108)
-    fg_img = inner.resize((part, part), Image.LANCZOS).convert("RGBA")
-    feather = Image.new("L", (part, part), 0)
-    ImageDraw.Draw(feather).ellipse((part * 0.03, part * 0.03, part * 0.97, part * 0.97), fill=255)
-    fg_img.putalpha(feather.filter(ImageFilter.GaussianBlur(part * 0.05)))
+    edge = inner.resize((16, 16), Image.BOX).getpixel((0, 15))
+    bg = Image.new("RGB", (size, size), edge)
+    part = int(size * 76 / 108)
     fg = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    fg.alpha_composite(fg_img, ((size - part) // 2, (size - part) // 2))
-    return bg.convert("RGB"), fg
+    fg.alpha_composite(inner.resize((part, part), Image.LANCZOS).convert("RGBA"), ((size - part) // 2, (size - part) // 2))
+    return bg, fg
 
 
 def main():

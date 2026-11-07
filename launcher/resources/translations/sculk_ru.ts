@@ -869,6 +869,14 @@ In Vellora Client: Lobby → Join a friend, paste the address. In Minecraft: Mul
 <context>
     <name>MainWindow</name>
     <message>
+        <source>Library</source>
+        <translation>Библиотека</translation>
+    </message>
+    <message>
+        <source>Catalog</source>
+        <translation>Каталог</translation>
+    </message>
+    <message>
         <source>Backspace</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3060,6 +3068,85 @@ Are you sure?</source>
     <message>
         <source>Could not save the cape to %1.</source>
         <translation>Не удалось сохранить плащ в %1.</translation>
+    </message>
+</context>
+<context>
+    <name>VelloraLobby</name>
+    <message>
+        <source>Ready-made packs</source>
+        <translation>Готовые сборки</translation>
+    </message>
+    <message>
+        <source>Modrinth and CurseForge</source>
+        <translation>Modrinth и CurseForge</translation>
+    </message>
+    <message>
+        <source>Play with friends</source>
+        <translation>Играть с друзьями</translation>
+    </message>
+    <message>
+        <source>Lobby, server, invite code</source>
+        <translation>Лобби, сервер, код приглашения</translation>
+    </message>
+    <message>
+        <source>New instance</source>
+        <translation>Новая установка</translation>
+    </message>
+    <message>
+        <source>Version, loader and mods</source>
+        <translation>Версия, загрузчик и моды</translation>
+    </message>
+    <message>
+        <source>My skin</source>
+        <translation>Мой скин</translation>
+    </message>
+    <message>
+        <source>AI WIZARD</source>
+        <translation>ИИ-МАГ</translation>
+    </message>
+    <message>
+        <source>Arkan</source>
+        <translation>Аркан</translation>
+    </message>
+    <message>
+        <source>Describe a pack in your own words and I will build it from mods</source>
+        <translation>Опиши сборку своими словами — я соберу её из модов</translation>
+    </message>
+    <message>
+        <source>Build with AI</source>
+        <translation>Собрать с ИИ</translation>
+    </message>
+    <message>
+        <source>TODAY WE PLAY</source>
+        <translation>СЕГОДНЯ ИГРАЕМ</translation>
+    </message>
+    <message>
+        <source>Change</source>
+        <translation>Сменить</translation>
+    </message>
+    <message>
+        <source>▶  Play</source>
+        <translation>▶  Играть</translation>
+    </message>
+    <message>
+        <source>Sign in to play</source>
+        <translation>Войди, чтобы играть</translation>
+    </message>
+    <message>
+        <source>Nothing yet</source>
+        <translation>Пока ничего</translation>
+    </message>
+    <message>
+        <source>Create an instance or pick a ready-made pack</source>
+        <translation>Создай установку или выбери готовую сборку</translation>
+    </message>
+    <message>
+        <source>+  New</source>
+        <translation>+  Новая</translation>
+    </message>
+    <message>
+        <source>■  Playing</source>
+        <translation>■  Идёт игра</translation>
     </message>
 </context>
 </TS>
