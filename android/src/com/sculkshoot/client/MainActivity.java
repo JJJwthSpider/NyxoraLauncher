@@ -1820,6 +1820,34 @@ public final class MainActivity extends Activity {
             .show();
     }
 
+    /** the few lines that tell why a start failed: graphics, Java, version and the errors */
+    static String summary(String[] lines) {
+        StringBuilder out = new StringBuilder("СВОДКА\n");
+        java.util.List<String> errors = new java.util.ArrayList<String>();
+        for (String line : lines) {
+            String l = line.trim();
+            if (l.startsWith("Added custom env: POJAV_RENDERER=")) {
+                out.append("Графика: ").append(l.substring("Added custom env: POJAV_RENDERER=".length())).append('\n');
+            } else if (l.startsWith("Info: Selected Minecraft version:") || l.startsWith("Info: Graphics device:")) {
+                out.append(l.substring(6)).append('\n');
+            } else if (l.contains("] [main/INFO]: Java is ")) {
+                out.append(l.substring(l.indexOf("Java is "))).append('\n');
+            } else if (l.startsWith("ERROR:") || l.contains("fatal error") || l.contains("SIGSEGV") || l.contains("SIGABRT")
+                       || l.startsWith("# C ") || l.startsWith("# J ") || l.contains("Exception in thread") || l.contains("OutOfMemoryError")
+                       || l.contains("zink") && l.toLowerCase(java.util.Locale.ROOT).contains("fail") || l.startsWith("Caused by:")) {
+                errors.add(l);
+            }
+        }
+        int from = Math.max(0, errors.size() - 12);
+        if (!errors.isEmpty()) {
+            out.append("Ошибки:\n");
+            for (int i = from; i < errors.size(); i++) {
+                out.append("• ").append(errors.get(i).length() > 160 ? errors.get(i).substring(0, 160) + "…" : errors.get(i)).append('\n');
+            }
+        }
+        return out.toString();
+    }
+
     /** the end of the last game start's log: what to send when the game does not start */
     void showGameLog() {
         final File log = GameEngine.get().gameLog();
@@ -1831,7 +1859,7 @@ public final class MainActivity extends Activity {
             for (int i = Math.max(0, lines.length - 60); i < lines.length; i++) {
                 tail.append(lines[i]).append('\n');
             }
-            text = tail.length() == 0 ? "Журнал пуст." : tail.toString();
+            text = tail.length() == 0 ? "Журнал пуст." : summary(lines) + "\n——— конец журнала ———\n" + tail;
         } catch (Exception e) {
             text = "Журнала ещё нет: игра не запускалась.";
         }
