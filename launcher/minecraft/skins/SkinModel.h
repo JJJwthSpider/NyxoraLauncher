@@ -45,6 +45,8 @@ class SkinModel {
     void setCapeId(QString capeID) { m_capeId = capeID; }
     void setModel(Model model);
     void setURL(QString url) { m_url = url; }
+    /// replaces the texture without touching the file (used by the editor for its live preview)
+    void setTexture(const QImage& texture);
     void refresh();
 
     QJsonObject toJSON() const;

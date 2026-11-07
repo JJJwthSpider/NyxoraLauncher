@@ -384,6 +384,8 @@ set(MINECRAFT_SOURCES
     minecraft/skins/SkinModel.h
     minecraft/skins/SkinList.cpp
     minecraft/skins/SkinList.h
+    minecraft/skins/SkinArt.cpp
+    minecraft/skins/SkinArt.h
 
     minecraft/Agent.h)
 
@@ -1122,6 +1124,10 @@ SET(LAUNCHER_SOURCES
 
     ui/dialogs/skins/SkinManageDialog.cpp
     ui/dialogs/skins/SkinManageDialog.h
+    ui/dialogs/skins/SkinEditorDialog.cpp
+    ui/dialogs/skins/SkinEditorDialog.h
+    ui/dialogs/skins/PixelCanvas.cpp
+    ui/dialogs/skins/PixelCanvas.h
 
     ui/dialogs/skins/draw/SkinOpenGLWindow.h
     ui/dialogs/skins/draw/SkinOpenGLWindow.cpp

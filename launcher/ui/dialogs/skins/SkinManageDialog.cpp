@@ -18,6 +18,7 @@
 
 #include "SkinManageDialog.h"
 #include "ui/dialogs/skins/draw/SkinOpenGLWindow.h"
+#include "ui/dialogs/skins/SkinEditorDialog.h"
 #include "ui_SkinManageDialog.h"
 
 #include <FileSystem.h>
@@ -25,12 +26,15 @@
 #include <QDialog>
 #include <QEventLoop>
 #include <QFileDialog>
+#include <QDir>
 #include <QFileInfo>
+#include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QListView>
 #include <QMenu>
 #include <QMimeDatabase>
 #include <QPainter>
+#include <QTimer>
 #include <QUrl>
 
 #include "Application.h"
@@ -106,6 +110,37 @@ SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
     });
 
     setupCapes();
+
+    // paint your own skins and capes
+    auto* createRow = new QHBoxLayout;
+    auto* createSkin = new QPushButton(QIcon::fromTheme("new"), tr("Create skin..."), this);
+    createSkin->setObjectName("primaryAction");
+    createSkin->setToolTip(tr("Paint a new skin or start from a ready-made look"));
+    auto* editSkin = new QPushButton(tr("Edit skin..."), this);
+    editSkin->setToolTip(tr("Open the selected skin in the editor"));
+    auto* createCape = new QPushButton(tr("Create cape..."), this);
+    createCape->setToolTip(tr("Paint your own cape and elytra"));
+    m_editCapeBtn = new QPushButton(tr("Edit cape..."), this);
+    m_editCapeBtn->setToolTip(tr("Open the selected cape of your own in the editor"));
+    m_editCapeBtn->setEnabled(false);
+    createRow->addWidget(createSkin);
+    createRow->addWidget(editSkin);
+    createRow->addWidget(createCape);
+    createRow->addWidget(m_editCapeBtn);
+    createRow->addStretch(1);
+    m_ui->verticalLayout->insertLayout(1, createRow);
+    connect(createSkin, &QPushButton::clicked, this, [this] { openSkinEditor(false); });
+    connect(editSkin, &QPushButton::clicked, this, [this] { openSkinEditor(true); });
+    connect(createCape, &QPushButton::clicked, this, [this] { openCapeEditor(false); });
+    connect(m_editCapeBtn, &QPushButton::clicked, this, [this] { openCapeEditor(true); });
+
+    m_customCapeNote = new QLabel(tr("Your own cape: you see it here in the launcher. In the game Mojang shows only the capes "
+                                     "it gave you, so OK keeps your current game cape."),
+                                  this);
+    m_customCapeNote->setObjectName("hintLabel");
+    m_customCapeNote->setWordWrap(true);
+    m_customCapeNote->setVisible(false);
+    m_ui->capeBox->layout()->addWidget(m_customCapeNote);
 
     m_ui->listView->setCurrentIndex(m_list.index(m_list.getSelectedAccountSkin()));
 
@@ -252,11 +287,46 @@ void SkinManageDialog::setupCapes()
 
         m_capesIdx[cape.id] = index;
     }
+    addCustomCapes(index);
+}
+
+QString SkinManageDialog::customCapesDir() const
+{
+    return FS::PathCombine(m_list.getDir(), "capes", "custom");
+}
+
+void SkinManageDialog::addCustomCapes(int& index)
+{
+    // capes painted in the editor: shown only in the launcher, Mojang does not accept them
+    const QDir dir(customCapesDir());
+    for (const auto& file : dir.entryInfoList({ "*.png" }, QDir::Files, QDir::Name | QDir::IgnoreCase)) {
+        QImage capeImage;
+        if (!capeImage.load(file.absoluteFilePath()) || capeImage.width() != 64 || capeImage.height() != 32) {
+            continue;
+        }
+        const auto id = "custom:" + file.completeBaseName();
+        if (m_capesIdx.contains(id)) {
+            m_capes[id] = capeImage;
+            m_ui->capeCombo->setItemIcon(m_capesIdx[id], previewCape(capeImage, m_ui->elytraCB->isChecked()));
+            continue;
+        }
+        index++;
+        m_capes[id] = capeImage;
+        m_ui->capeCombo->addItem(previewCape(capeImage, m_ui->elytraCB->isChecked()), tr("%1 (your own)").arg(file.completeBaseName()), id);
+        m_capesIdx[id] = index;
+    }
 }
 
 void SkinManageDialog::on_capeCombo_currentIndexChanged(int index)
 {
     auto id = m_ui->capeCombo->currentData();
+    const bool custom = id.toString().startsWith("custom:");
+    if (m_customCapeNote) {
+        m_customCapeNote->setVisible(custom);
+    }
+    if (m_editCapeBtn) {
+        m_editCapeBtn->setEnabled(custom);
+    }
     auto cape = m_capes.value(id.toString(), {});
     if (!cape.isNull()) {
         m_ui->capeImage->setPixmap(
@@ -312,6 +382,10 @@ void SkinManageDialog::accept()
     skinUpload->addNetAction(SkinUpload::make(m_acct->accessToken(), skin->getPath(), skin->getModelString()));
 
     auto selectedCape = skin->getCapeId();
+    // capes of your own are only shown in the launcher: the game keeps the cape the account already wears
+    if (selectedCape.startsWith("custom:")) {
+        selectedCape = m_acct->accountData()->minecraftProfile.currentCape;
+    }
     if (selectedCape != m_acct->accountData()->minecraftProfile.currentCape) {
         skinUpload->addNetAction(CapeChange::make(m_acct->accessToken(), selectedCape));
     }
@@ -591,4 +665,117 @@ SkinModel* SkinManageDialog::getSelectedSkin()
 QHash<QString, QImage> SkinManageDialog::capes()
 {
     return m_capes;
+}
+
+void SkinManageDialog::showSkin(const QString& name)
+{
+    // the list reloads the folder when it sees the new file: select the skin once that has happened
+    QTimer::singleShot(300, this, [this, name] {
+        const int row = m_list.getSkinIndex(name);
+        if (row < 0) {
+            return;
+        }
+        m_ui->listView->setCurrentIndex(m_list.index(row));
+        m_ui->listView->scrollTo(m_list.index(row));
+        if (auto* skin = m_list.skin(name)) {
+            m_selectedSkinKey = name;
+            if (m_skinPreview) {
+                m_skinPreview->updateScene(skin);
+            } else {
+                m_skinPreviewLabel->setPixmap(QPixmap::fromImage(skin->getPreview())
+                                                  .scaled(m_skinPreviewLabel->size(), Qt::KeepAspectRatio, Qt::FastTransformation));
+            }
+            m_ui->steveBtn->setChecked(skin->getModel() == SkinModel::CLASSIC);
+            m_ui->alexBtn->setChecked(skin->getModel() == SkinModel::SLIM);
+        }
+    });
+}
+
+void SkinManageDialog::openSkinEditor(bool editSelected)
+{
+    QImage start;
+    bool slim = m_ui->alexBtn->isChecked();
+    QString name = tr("My skin");
+    if (editSelected) {
+        auto* skin = getSelectedSkin();
+        if (!skin) {
+            CustomMessageBox::selectable(this, tr("Skin editor"), tr("Choose a skin in the list first."), QMessageBox::Information)->show();
+            return;
+        }
+        start = skin->getTexture();
+        slim = skin->getModel() == SkinModel::SLIM;
+        name = skin->name();
+    }
+
+    SkinEditorDialog editor(this, SkinEditorDialog::Mode::Skin, start, slim, {}, name);
+    if (editor.exec() != QDialog::Accepted) {
+        return;
+    }
+    const auto path = FS::PathCombine(m_list.getDir(), editor.name() + ".png");
+    auto* existing = m_list.skin(editor.name());
+    const bool sameSkin = editSelected && editor.name() == name;
+    if (existing && !sameSkin) {
+        auto answer = CustomMessageBox::selectable(this, tr("Skin editor"), tr("A skin named \"%1\" already exists. Replace it?").arg(editor.name()),
+                                                   QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                          ->exec();
+        if (answer != QMessageBox::Yes) {
+            return;
+        }
+    }
+    if (!editor.image().save(path, "PNG")) {
+        CustomMessageBox::selectable(this, tr("Skin editor"), tr("Could not save the skin to %1.").arg(path), QMessageBox::Critical)->show();
+        return;
+    }
+    if (existing) {
+        existing->refresh();
+        existing->setModel(editor.slim() ? SkinModel::SLIM : SkinModel::CLASSIC);
+        m_list.updateSkin(existing);
+    } else {
+        SkinModel skin(path);
+        skin.setModel(editor.slim() ? SkinModel::SLIM : SkinModel::CLASSIC);
+        m_list.updateSkin(&skin);
+    }
+    showSkin(editor.name());
+}
+
+void SkinManageDialog::openCapeEditor(bool editSelected)
+{
+    QImage start;
+    QString name = tr("My cape");
+    const auto id = m_ui->capeCombo->currentData().toString();
+    if (editSelected && id.startsWith("custom:")) {
+        start = m_capes.value(id);
+        name = id.mid(QStringLiteral("custom:").size());
+    }
+    // the cape is shown on the skin chosen in the list
+    QImage previewSkin;
+    bool slim = false;
+    if (auto* skin = getSelectedSkin()) {
+        previewSkin = skin->getTexture();
+        slim = skin->getModel() == SkinModel::SLIM;
+    }
+
+    SkinEditorDialog editor(this, SkinEditorDialog::Mode::Cape, start, slim, previewSkin, name);
+    if (editor.exec() != QDialog::Accepted) {
+        return;
+    }
+    FS::ensureFolderPathExists(customCapesDir());
+    const auto path = FS::PathCombine(customCapesDir(), editor.name() + ".png");
+    const auto newId = "custom:" + editor.name();
+    if (QFileInfo::exists(path) && !(editSelected && newId == id)) {
+        auto answer = CustomMessageBox::selectable(this, tr("Cape editor"), tr("A cape named \"%1\" already exists. Replace it?").arg(editor.name()),
+                                                   QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                          ->exec();
+        if (answer != QMessageBox::Yes) {
+            return;
+        }
+    }
+    if (!editor.image().save(path, "PNG")) {
+        CustomMessageBox::selectable(this, tr("Cape editor"), tr("Could not save the cape to %1.").arg(path), QMessageBox::Critical)->show();
+        return;
+    }
+    int index = m_ui->capeCombo->count() - 1;
+    addCustomCapes(index);
+    m_ui->capeCombo->setCurrentIndex(m_capesIdx.value(newId));
+    on_capeCombo_currentIndexChanged(m_capesIdx.value(newId));
 }

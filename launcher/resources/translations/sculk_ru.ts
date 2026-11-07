@@ -472,7 +472,7 @@
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Open Folder</source>
@@ -994,7 +994,7 @@ To clear the metadata cache manually, press Folders -&gt; View Launcher Root Fol
     </message>
     <message>
         <source>Confirm Deletion</source>
-        <translation type="unfinished"></translation>
+        <translation>Подтверждение удаления</translation>
     </message>
     <message>
         <source>You are about to delete &quot;%1&quot;%2.
@@ -1558,7 +1558,7 @@ Are you sure?</source>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Cancel</source>
@@ -2311,6 +2311,603 @@ In SculkShoot Client: Lobby → Join a friend, enter the code. Or in Minecraft: 
     <message>
         <source>Through the free bore.pub tunnel: no port forwarding and no account needed</source>
         <translation>Через бесплатный туннель bore.pub: без проброса портов и без регистрации</translation>
+    </message>
+</context>
+<context>
+    <name>SkinArt</name>
+    <message>
+        <source>Head</source>
+        <translation>Голова</translation>
+    </message>
+    <message>
+        <source>Hat (2nd layer)</source>
+        <translation>Шапка (2-й слой)</translation>
+    </message>
+    <message>
+        <source>Body</source>
+        <translation>Тело</translation>
+    </message>
+    <message>
+        <source>Jacket (2nd layer)</source>
+        <translation>Куртка (2-й слой)</translation>
+    </message>
+    <message>
+        <source>Right arm</source>
+        <translation>Правая рука</translation>
+    </message>
+    <message>
+        <source>Right sleeve (2nd layer)</source>
+        <translation>Правый рукав (2-й слой)</translation>
+    </message>
+    <message>
+        <source>Left arm</source>
+        <translation>Левая рука</translation>
+    </message>
+    <message>
+        <source>Left sleeve (2nd layer)</source>
+        <translation>Левый рукав (2-й слой)</translation>
+    </message>
+    <message>
+        <source>Right leg</source>
+        <translation>Правая нога</translation>
+    </message>
+    <message>
+        <source>Right trouser leg (2nd layer)</source>
+        <translation>Правая штанина (2-й слой)</translation>
+    </message>
+    <message>
+        <source>Left leg</source>
+        <translation>Левая нога</translation>
+    </message>
+    <message>
+        <source>Left trouser leg (2nd layer)</source>
+        <translation>Левая штанина (2-й слой)</translation>
+    </message>
+    <message>
+        <source>Cape</source>
+        <translation>Плащ</translation>
+    </message>
+    <message>
+        <source>Elytra</source>
+        <translation>Элитры</translation>
+    </message>
+    <message>
+        <source>top</source>
+        <translation>верх</translation>
+    </message>
+    <message>
+        <source>bottom</source>
+        <translation>низ</translation>
+    </message>
+    <message>
+        <source>right side</source>
+        <translation>правый бок</translation>
+    </message>
+    <message>
+        <source>front</source>
+        <translation>перед</translation>
+    </message>
+    <message>
+        <source>left side</source>
+        <translation>левый бок</translation>
+    </message>
+    <message>
+        <source>back</source>
+        <translation>спина</translation>
+    </message>
+    <message>
+        <source>Cape — outside (seen from behind)</source>
+        <translation>Плащ — снаружи (виден со спины)</translation>
+    </message>
+    <message>
+        <source>Cape — inside</source>
+        <translation>Плащ — изнанка</translation>
+    </message>
+    <message>
+        <source>Cape — edge</source>
+        <translation>Плащ — край</translation>
+    </message>
+    <message>
+        <source>Elytra — %1</source>
+        <translation>Элитры — %1</translation>
+    </message>
+    <message>
+        <source>wing</source>
+        <translation>крыло</translation>
+    </message>
+    <message>
+        <source>edge</source>
+        <translation>край</translation>
+    </message>
+    <message>
+        <source>Head — face</source>
+        <translation>Голова — лицо</translation>
+    </message>
+    <message>
+        <source>Random</source>
+        <translation>Случайный</translation>
+    </message>
+    <message>
+        <source>Sculk</source>
+        <translation>Скалк</translation>
+    </message>
+    <message>
+        <source>Knight</source>
+        <translation>Рыцарь</translation>
+    </message>
+    <message>
+        <source>Ninja</source>
+        <translation>Ниндзя</translation>
+    </message>
+    <message>
+        <source>Miner</source>
+        <translation>Шахтёр</translation>
+    </message>
+    <message>
+        <source>Wizard</source>
+        <translation>Волшебник</translation>
+    </message>
+    <message>
+        <source>Zombie</source>
+        <translation>Зомби</translation>
+    </message>
+    <message>
+        <source>Gradient</source>
+        <translation>Градиент</translation>
+    </message>
+    <message>
+        <source>Stripes</source>
+        <translation>Полосы</translation>
+    </message>
+    <message>
+        <source>Checkers</source>
+        <translation>Шахматы</translation>
+    </message>
+    <message>
+        <source>Flame</source>
+        <translation>Пламя</translation>
+    </message>
+    <message>
+        <source>Emblem</source>
+        <translation>Эмблема</translation>
+    </message>
+</context>
+<context>
+    <name>SkinEditorDialog</name>
+    <message>
+        <source>Cape editor</source>
+        <translation>Редактор плащей</translation>
+    </message>
+    <message>
+        <source>Skin editor</source>
+        <translation>Редактор скинов</translation>
+    </message>
+    <message>
+        <source>Pattern:</source>
+        <translation>Узор:</translation>
+    </message>
+    <message>
+        <source>Look:</source>
+        <translation>Образ:</translation>
+    </message>
+    <message>
+        <source>A pattern for the cape and the elytra; you can paint over it afterwards</source>
+        <translation>Узор для плаща и элитр; потом можно дорисовать</translation>
+    </message>
+    <message>
+        <source>A ready-made character; you can paint over it afterwards</source>
+        <translation>Готовый персонаж; потом можно дорисовать</translation>
+    </message>
+    <message>
+        <source>Create</source>
+        <translation>Создать</translation>
+    </message>
+    <message>
+        <source>Replace the picture with the chosen look (can be undone)</source>
+        <translation>Заменить рисунок выбранным образом (можно отменить)</translation>
+    </message>
+    <message>
+        <source>Another variant</source>
+        <translation>Другой вариант</translation>
+    </message>
+    <message>
+        <source>The same look with other colors and details</source>
+        <translation>Тот же образ, но с другими цветами и деталями</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Очистить</translation>
+    </message>
+    <message>
+        <source>Start from an empty texture</source>
+        <translation>Начать с чистой текстуры</translation>
+    </message>
+    <message>
+        <source>Model:</source>
+        <translation>Модель:</translation>
+    </message>
+    <message>
+        <source>Classic</source>
+        <translation>Классическая</translation>
+    </message>
+    <message>
+        <source>Slim</source>
+        <translation>Стройная</translation>
+    </message>
+    <message>
+        <source>Arms 4 pixels wide, like Steve</source>
+        <translation>Руки шириной 4 пикселя, как у Стива</translation>
+    </message>
+    <message>
+        <source>Arms 3 pixels wide, like Alex</source>
+        <translation>Руки шириной 3 пикселя, как у Алекс</translation>
+    </message>
+    <message>
+        <source>Tool</source>
+        <translation>Инструмент</translation>
+    </message>
+    <message>
+        <source>Pencil</source>
+        <translation>Карандаш</translation>
+    </message>
+    <message>
+        <source>Paints with the color (P). Right button erases.</source>
+        <translation>Рисует цветом (P). Правая кнопка стирает.</translation>
+    </message>
+    <message>
+        <source>Eraser</source>
+        <translation>Ластик</translation>
+    </message>
+    <message>
+        <source>Makes pixels transparent (E): useful on the 2nd layer</source>
+        <translation>Делает пиксели прозрачными (E): пригодится на 2-м слое</translation>
+    </message>
+    <message>
+        <source>Fill</source>
+        <translation>Заливка</translation>
+    </message>
+    <message>
+        <source>Fills an area of one color on one face (F). Right button clears it.</source>
+        <translation>Заливает область одного цвета на одной грани (F). Правая кнопка очищает её.</translation>
+    </message>
+    <message>
+        <source>Picker</source>
+        <translation>Пипетка</translation>
+    </message>
+    <message>
+        <source>Takes the color of a pixel (I)</source>
+        <translation>Берёт цвет пикселя (I)</translation>
+    </message>
+    <message>
+        <source>Shade</source>
+        <translation>Тени</translation>
+    </message>
+    <message>
+        <source>Left button darkens, right button lightens (S): shadows and highlights</source>
+        <translation>Левая кнопка затемняет, правая осветляет (S): тени и блики</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Цвет</translation>
+    </message>
+    <message>
+        <source>Other color...</source>
+        <translation>Другой цвет...</translation>
+    </message>
+    <message>
+        <source>Choose a color</source>
+        <translation>Выбери цвет</translation>
+    </message>
+    <message>
+        <source>Options</source>
+        <translation>Настройки</translation>
+    </message>
+    <message>
+        <source>Symmetric</source>
+        <translation>Симметрично</translation>
+    </message>
+    <message>
+        <source>Mirror left and right</source>
+        <translation>Зеркально слева и справа</translation>
+    </message>
+    <message>
+        <source>Paints both halves of the cape at once</source>
+        <translation>Рисует сразу обе половины плаща</translation>
+    </message>
+    <message>
+        <source>Paints the other arm or leg and the other half of the head and body at the same time</source>
+        <translation>Одновременно рисует вторую руку или ногу и вторую половину головы и тела</translation>
+    </message>
+    <message>
+        <source>Grid</source>
+        <translation>Сетка</translation>
+    </message>
+    <message>
+        <source>Both layers</source>
+        <translation>Оба слоя</translation>
+    </message>
+    <message>
+        <source>Highlight 1st layer</source>
+        <translation>Выделить 1-й слой</translation>
+    </message>
+    <message>
+        <source>Highlight 2nd layer</source>
+        <translation>Выделить 2-й слой</translation>
+    </message>
+    <message>
+        <source>The 2nd layer (hat, jacket, sleeves) lies over the body and may be transparent</source>
+        <translation>2-й слой (шапка, куртка, рукава) лежит поверх тела и может быть прозрачным</translation>
+    </message>
+    <message>
+        <source>Show elytra</source>
+        <translation>Показать элитры</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Отменить</translation>
+    </message>
+    <message>
+        <source>Ctrl+Z</source>
+        <translation>Ctrl+Z</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Повторить</translation>
+    </message>
+    <message>
+        <source>Ctrl+Y</source>
+        <translation>Ctrl+Y</translation>
+    </message>
+    <message>
+        <source>Drag to turn the model, scroll to zoom.</source>
+        <translation>Тяни мышью, чтобы повернуть модель, колёсиком — приблизить.</translation>
+    </message>
+    <message>
+        <source>Name:</source>
+        <translation>Название:</translation>
+    </message>
+    <message>
+        <source>Mojang lets players wear only the capes they were given, so your own cape is shown here, in the launcher. It is saved with your skins and you can pick it in the cape list to see it on any skin.</source>
+        <translation>Mojang разрешает носить в игре только выданные плащи, поэтому свой плащ виден здесь, в лаунчере. Он сохранится вместе со скинами, и его можно выбрать в списке плащей, чтобы посмотреть на любом скине.</translation>
+    </message>
+    <message>
+        <source>Body parts must not be transparent, the 2nd layer may be. After saving, choose the skin and press OK to wear it in the game.</source>
+        <translation>Части тела не должны быть прозрачными, 2-й слой может. После сохранения выбери скин и нажми OK, чтобы носить его в игре.</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Сохранить</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>Point at the texture to see which part of the body it is.</source>
+        <translation>Наведи на текстуру, чтобы увидеть, какая это часть тела.</translation>
+    </message>
+    <message>
+        <source>Give it a name first.</source>
+        <translation>Сначала придумай название.</translation>
+    </message>
+    <message>
+        <source>The name must not contain \ / : * ? &quot; &lt; &gt; |</source>
+        <translation>В названии не должно быть \ / : * ? &quot; &lt; &gt; |</translation>
+    </message>
+</context>
+<context>
+    <name>SkinManageDialog</name>
+    <message>
+        <source>Create skin...</source>
+        <translation>Создать скин...</translation>
+    </message>
+    <message>
+        <source>Paint a new skin or start from a ready-made look</source>
+        <translation>Нарисовать новый скин или начать с готового образа</translation>
+    </message>
+    <message>
+        <source>Edit skin...</source>
+        <translation>Изменить скин...</translation>
+    </message>
+    <message>
+        <source>Open the selected skin in the editor</source>
+        <translation>Открыть выбранный скин в редакторе</translation>
+    </message>
+    <message>
+        <source>Create cape...</source>
+        <translation>Создать плащ...</translation>
+    </message>
+    <message>
+        <source>Paint your own cape and elytra</source>
+        <translation>Нарисовать свой плащ и элитры</translation>
+    </message>
+    <message>
+        <source>Edit cape...</source>
+        <translation>Изменить плащ...</translation>
+    </message>
+    <message>
+        <source>Open the selected cape of your own in the editor</source>
+        <translation>Открыть выбранный свой плащ в редакторе</translation>
+    </message>
+    <message>
+        <source>Your own cape: you see it here in the launcher. In the game Mojang shows only the capes it gave you, so OK keeps your current game cape.</source>
+        <translation>Свой плащ: его видно здесь, в лаунчере. В игре Mojang показывает только выданные плащи, поэтому OK оставит твой текущий игровой плащ.</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>OK</translation>
+    </message>
+    <message>
+        <source>Select Skin Texture</source>
+        <translation>Выбери текстуру скина</translation>
+    </message>
+    <message>
+        <source>Selected file is not a valid skin</source>
+        <translation>Выбранный файл не является скином</translation>
+    </message>
+    <message>
+        <source>No Cape</source>
+        <translation>Без плаща</translation>
+    </message>
+    <message>
+        <source>Download capes</source>
+        <translation>Загрузка плащей</translation>
+    </message>
+    <message>
+        <source>%1 (your own)</source>
+        <translation>%1 (свой)</translation>
+    </message>
+    <message>
+        <source>Change skin</source>
+        <translation>Смена скина</translation>
+    </message>
+    <message>
+        <source>Skin Upload</source>
+        <translation>Отправить скин</translation>
+    </message>
+    <message>
+        <source>Skin file does not exist!</source>
+        <translation>Файл скина не существует!</translation>
+    </message>
+    <message>
+        <source>Failed to upload skin!</source>
+        <translation>Не удалось отправить скин!</translation>
+    </message>
+    <message>
+        <source>Reset skin</source>
+        <translation>Сброс скина</translation>
+    </message>
+    <message>
+        <source>Skin Delete</source>
+        <translation>Удаление скина</translation>
+    </message>
+    <message>
+        <source>Failed to delete current skin!</source>
+        <translation>Не удалось удалить текущий скин!</translation>
+    </message>
+    <message>
+        <source>Context menu</source>
+        <translation>Контекстное меню</translation>
+    </message>
+    <message>
+        <source>Delete error</source>
+        <translation>Ошибка удаления</translation>
+    </message>
+    <message>
+        <source>Can not delete skin that is in use.</source>
+        <translation>Нельзя удалить скин, который сейчас используется.</translation>
+    </message>
+    <message>
+        <source>Confirm Deletion</source>
+        <translation>Подтверждение удаления</translation>
+    </message>
+    <message>
+        <source>You are about to delete &quot;%1&quot;.
+Are you sure?</source>
+        <translation>Ты собираешься удалить «%1».
+Точно?</translation>
+    </message>
+    <message>
+        <source>Invalid url</source>
+        <translation>Неверный адрес</translation>
+    </message>
+    <message>
+        <source>Download skin</source>
+        <translation>Загрузка скина</translation>
+    </message>
+    <message>
+        <source>URL is not a valid skin</source>
+        <translation>По адресу нет скина</translation>
+    </message>
+    <message>
+        <source>Skin images must be 64x64 or 64x32 pixel PNG files.</source>
+        <translation>Скин должен быть PNG-файлом 64x64 или 64x32 пикселя.</translation>
+    </message>
+    <message>
+        <source>Unable to download the skin: &apos;%1&apos;.</source>
+        <translation>Не удалось скачать скин: «%1».</translation>
+    </message>
+    <message>
+        <source>Download user skin</source>
+        <translation>Загрузка скина игрока</translation>
+    </message>
+    <message>
+        <source>failed to get user UUID</source>
+        <translation>не удалось получить UUID игрока</translation>
+    </message>
+    <message>
+        <source>failed to get user profile</source>
+        <translation>не удалось получить профиль игрока</translation>
+    </message>
+    <message>
+        <source>failed to download skin</source>
+        <translation>не удалось скачать скин</translation>
+    </message>
+    <message>
+        <source>failed to parse get user UUID response</source>
+        <translation>не удалось разобрать ответ с UUID игрока</translation>
+    </message>
+    <message>
+        <source>user id is empty</source>
+        <translation>пустой id игрока</translation>
+    </message>
+    <message>
+        <source>failed to parse get user profile response</source>
+        <translation>не удалось разобрать профиль игрока</translation>
+    </message>
+    <message>
+        <source>the skin is invalid</source>
+        <translation>скин повреждён</translation>
+    </message>
+    <message>
+        <source>Username not found</source>
+        <translation>Игрок не найден</translation>
+    </message>
+    <message>
+        <source>Unable to find the skin for &apos;%1&apos;
+ because: %2.</source>
+        <translation>Не удалось найти скин игрока «%1»,
+ потому что: %2.</translation>
+    </message>
+    <message>
+        <source>My skin</source>
+        <translation>Мой скин</translation>
+    </message>
+    <message>
+        <source>Skin editor</source>
+        <translation>Редактор скинов</translation>
+    </message>
+    <message>
+        <source>Choose a skin in the list first.</source>
+        <translation>Сначала выбери скин в списке.</translation>
+    </message>
+    <message>
+        <source>A skin named &quot;%1&quot; already exists. Replace it?</source>
+        <translation>Скин «%1» уже есть. Заменить его?</translation>
+    </message>
+    <message>
+        <source>Could not save the skin to %1.</source>
+        <translation>Не удалось сохранить скин в %1.</translation>
+    </message>
+    <message>
+        <source>My cape</source>
+        <translation>Мой плащ</translation>
+    </message>
+    <message>
+        <source>Cape editor</source>
+        <translation>Редактор плащей</translation>
+    </message>
+    <message>
+        <source>A cape named &quot;%1&quot; already exists. Replace it?</source>
+        <translation>Плащ «%1» уже есть. Заменить его?</translation>
+    </message>
+    <message>
+        <source>Could not save the cape to %1.</source>
+        <translation>Не удалось сохранить плащ в %1.</translation>
     </message>
 </context>
 </TS>

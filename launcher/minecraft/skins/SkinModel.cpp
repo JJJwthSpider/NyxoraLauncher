@@ -231,3 +231,9 @@ void SkinModel::setModel(Model model)
     m_model = model;
     m_preview = generatePreviews(m_texture, m_model == Model::SLIM);
 }
+
+void SkinModel::setTexture(const QImage& texture)
+{
+    m_texture = improveSkin(texture);
+    m_preview = generatePreviews(m_texture, m_model == Model::SLIM);
+}

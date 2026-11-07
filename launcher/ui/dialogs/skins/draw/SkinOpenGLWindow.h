@@ -44,6 +44,8 @@ class SkinOpenGLWindow : public QOpenGLWindow, protected QOpenGLFunctions {
     void updateScene(SkinModel* skin);
     void updateCape(const QImage& cape);
     void setElytraVisible(bool visible);
+    /// turns the model around its vertical axis (90: facing the viewer, 270: showing the back)
+    void setYaw(float yaw);
 
     static bool hasOpenGL();
 

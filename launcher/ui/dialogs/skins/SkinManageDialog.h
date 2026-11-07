@@ -22,6 +22,7 @@
 #include <QItemSelection>
 #include <QLabel>
 #include <QPixmap>
+#include <QPushButton>
 
 #include "minecraft/auth/MinecraftAccount.h"
 #include "minecraft/skins/SkinList.h"
@@ -60,6 +61,11 @@ class SkinManageDialog : public QDialog, public SkinProvider {
 
    private:
     void setupCapes();
+    void addCustomCapes(int& index);
+    void openSkinEditor(bool editSelected);
+    void openCapeEditor(bool editSelected);
+    void showSkin(const QString& name);
+    QString customCapesDir() const;
 
    private:
     MinecraftAccountPtr m_acct;
@@ -70,4 +76,6 @@ class SkinManageDialog : public QDialog, public SkinProvider {
     QHash<QString, int> m_capesIdx;
     SkinOpenGLWindow* m_skinPreview = nullptr;
     QLabel* m_skinPreviewLabel = nullptr;
+    QLabel* m_customCapeNote = nullptr;
+    QPushButton* m_editCapeBtn = nullptr;
 };

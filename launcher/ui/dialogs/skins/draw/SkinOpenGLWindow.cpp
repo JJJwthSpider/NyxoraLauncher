@@ -330,6 +330,12 @@ void SkinOpenGLWindow::setElytraVisible(bool visible)
         m_scene->setElytraVisible(visible);
 }
 
+void SkinOpenGLWindow::setYaw(float yaw)
+{
+    m_yaw = yaw;
+    update();
+}
+
 bool SkinOpenGLWindow::hasOpenGL()
 {
     if (!QProcessEnvironment::systemEnvironment()
