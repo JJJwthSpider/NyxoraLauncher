@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
@@ -484,6 +485,11 @@ public final class PojavEngine extends GameEngine {
         profile.controlFile = CONTROLS_FILE;
         profile.javaDir = Tools.LAUNCHERPROFILES_RTPREFIX + runtime;  // exactly the Java this version needs
         profile.pojavRendererName = rendererFor(activity, inst);
+        // the Java heap for this start (the engine's default is 2 GB whatever the pack; big packs need more)
+        int memory = memoryFor(activity, inst);
+        LauncherPreferences.PREF_RAM_ALLOCATION = memory;
+        LauncherPreferences.DEFAULT_PREF.edit().putInt("allocation", memory).commit();
+        log.log("Память для игры: " + (memory >= 1024 ? String.format(Locale.ROOT, "%.1f ГБ", memory / 1024f) : memory + " МБ") + ".");
         if (LTW.equals(profile.pojavRendererName)) {
             // with LTW on Adreno the engine stops before the start to ask about the render distance (more than 7
             // makes too many buffers there); Lullaby sets it beforehand, so nothing waits for an answer

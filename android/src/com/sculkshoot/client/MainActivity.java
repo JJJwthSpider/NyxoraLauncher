@@ -400,7 +400,7 @@ public final class MainActivity extends Activity {
 
     void showAppMenu() {
         new AlertDialog.Builder(this)
-            .setItems(GameEngine.get() != null ? new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении", "Java для игры", "Журнал игры", "Графика" }
+            .setItems(GameEngine.get() != null ? new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении", "Java для игры", "Журнал игры", "Графика", "Память для игры" }
                                                : new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении" },
                       new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int which) {
@@ -416,6 +416,8 @@ public final class MainActivity extends Activity {
                         showGameLog();
                     } else if (which == 6) {
                         showGraphics();
+                    } else if (which == 7) {
+                        showMemory();
                     } else {
                         showAbout();
                     }
@@ -1763,6 +1765,34 @@ public final class MainActivity extends Activity {
                 }
             }
         });
+    }
+
+    /** how much memory the game gets: automatic by the size of the pack, or 2-8 GB */
+    void showMemory() {
+        int phone = GameEngine.phoneMemory(this);
+        final java.util.List<Integer> values = new java.util.ArrayList<Integer>();
+        java.util.List<String> names = new java.util.ArrayList<String>();
+        values.add(0);
+        names.add("Авто — по размеру сборки (рекомендуется)");
+        for (int gb : new int[] { 2, 3, 4, 5, 6, 8 }) {
+            if (gb * 1024 <= phone * 75 / 100) {
+                values.add(gb * 1024);
+                names.add(gb + " ГБ" + (gb >= 6 ? " — для очень больших сборок" : gb <= 2 ? " — без модов и маленькие сборки" : ""));
+            }
+        }
+        int current = GameEngine.chosenMemory(this);
+        int checked = Math.max(0, values.indexOf(current));
+        new AlertDialog.Builder(this)
+            .setTitle("Память для игры (в телефоне " + Math.round(phone / 1024f) + " ГБ)")
+            .setSingleChoiceItems(names.toArray(new String[0]), checked, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int which) {
+                    GameEngine.chooseMemory(MainActivity.this, values.get(which));
+                    Toast.makeText(MainActivity.this, "Будет при следующем «Играть»", Toast.LENGTH_SHORT).show();
+                    d.dismiss();
+                }
+            })
+            .setNegativeButton("Отмена", null)
+            .show();
     }
 
     /** which graphics the game uses (the engine's renderers, the ones this phone supports) */
