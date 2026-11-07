@@ -75,7 +75,22 @@ for folder in os.listdir(os.path.join(ANDROID, "res")):
     os.makedirs(os.path.join(res, folder), exist_ok=True)
     for name in os.listdir(os.path.join(ANDROID, "res", folder)):
         shutil.copy(os.path.join(ANDROID, "res", folder, name), os.path.join(res, folder, name))
-shutil.copy(os.path.join(ANDROID, "res", "values", "styles.xml"), os.path.join(res, "values", "lullaby_styles.xml"))
+# the theme on AppCompat: the engine shows its own dialogs (errors, Java checks) as AppCompat dialogs on the open
+# window, and those fail silently on a plain Material window
+with open(os.path.join(ANDROID, "res", "values", "styles.xml"), encoding="utf-8") as f:
+    styles = f.read()
+styles = styles.replace('parent="@android:style/Theme.Material.NoActionBar">',
+                        'parent="Theme.AppCompat.NoActionBar">\n        <item name="alertDialogTheme">@style/SculkDialogCompat</item>'
+                        '\n        <item name="colorAccent">#DCCFFF</item>', 1)
+styles = styles.replace("</resources>", """    <style name="SculkDialogCompat" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="colorAccent">#DCCFFF</item>
+        <item name="android:background">#14151F</item>
+    </style>
+</resources>""", 1)
+if "Theme.AppCompat.NoActionBar" not in styles:
+    sys.exit("prepare.py: the Lullaby theme was not found in res/values/styles.xml")
+with open(os.path.join(res, "values", "lullaby_styles.xml"), "w", encoding="utf-8") as f:
+    f.write(styles)
 for name in os.listdir(os.path.join(ANDROID, "assets")):
     shutil.copy(os.path.join(ANDROID, "assets", name), os.path.join(MAIN, "assets", name))
 

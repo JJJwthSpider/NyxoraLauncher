@@ -353,7 +353,7 @@ public final class PojavEngine extends GameEngine {
     void play(final MainActivity activity, final Installation inst, final Account account, final Builder.Listener log, final Done done) {
         new Thread(() -> {
             try {
-                String problem = prepare(activity, inst, account, log);
+                String problem = prepare(activity, inst, account, log, done);
                 activity.runOnUiThread(() -> done.finished(problem == null, problem));
             } catch (Throwable e) {
                 activity.runOnUiThread(() -> done.finished(false, "Не получилось подготовить игру: " + e.getMessage()));
@@ -362,7 +362,7 @@ public final class PojavEngine extends GameEngine {
     }
 
     /** everything before the engine takes over; returns a message for the user when the game cannot start yet */
-    private String prepare(MainActivity activity, Installation inst, Account account, Builder.Listener log) throws Exception {
+    private String prepare(final MainActivity activity, Installation inst, Account account, final Builder.Listener log, final Done done) throws Exception {
         if (!account.ownsJava) {
             return "На этом аккаунте Microsoft нет Minecraft: Java Edition, поэтому игра не запустится. Её можно купить на minecraft.net.";
         }
@@ -441,10 +441,14 @@ public final class PojavEngine extends GameEngine {
         waitForVersionList();
         final String normalized = AsyncMinecraftDownloader.normalizeVersionId(versionId);
         final JMinecraftVersionList.Version listed = AsyncMinecraftDownloader.getListedVersion(normalized);
+        final long[] lastProgress = { System.currentTimeMillis() };
         ProgressListener progress = new ProgressListener() {
-            public void onProgressStarted() {}
+            public void onProgressStarted() {
+                lastProgress[0] = System.currentTimeMillis();
+            }
 
             public void onProgressUpdated(int value, int resid, Object... va) {
+                lastProgress[0] = System.currentTimeMillis();
                 if (resid != 0) {
                     try {
                         log.log(activity.getString(resid, va) + (value > 0 ? " (" + value + "%)" : ""));
@@ -457,12 +461,46 @@ public final class PojavEngine extends GameEngine {
             public void onProgressEnded() {}
         };
         ProgressKeeper.addListener(com.kdt.mcgui.ProgressLayout.DOWNLOAD_MINECRAFT, progress);
+        // the engine's own error dialogs need an AppCompat window; Lullaby shows the outcome itself
+        final ContextAwareDoneListener startGame = new ContextAwareDoneListener(activity, normalized);
+        final boolean[] finished = { false };
+        final AsyncMinecraftDownloader.DoneListener outcome = new AsyncMinecraftDownloader.DoneListener() {
+            public void onDownloadDone() {
+                finished[0] = true;
+                log.log("Minecraft скачан. Открываю игру...");
+                startGame.onDownloadDone();
+            }
+
+            public void onDownloadFailed(Throwable error) {
+                finished[0] = true;
+                android.util.Log.e("Lullaby", "Minecraft download failed", error);
+                final String why = describe(error);
+                activity.runOnUiThread(() -> done.finished(false, "Не удалось скачать Minecraft " + inst.minecraftVersion + ":\n" + why
+                                                                       + "\n\nПроверь интернет и нажми «Играть» ещё раз — уже скачанное не скачивается заново."));
+            }
+        };
         final CountDownLatch started = new CountDownLatch(1);
         activity.runOnUiThread(() -> {
-            new MinecraftDownloader().start(activity, listed, normalized, new ContextAwareDoneListener(activity, normalized));
+            new MinecraftDownloader().start(activity, listed, normalized, outcome);
             started.countDown();
         });
         started.await();
+        // a download that stands still for long: say so instead of spinning silently
+        new Thread(() -> {
+            boolean warned = false;
+            while (!finished[0]) {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    return;
+                }
+                long quiet = System.currentTimeMillis() - lastProgress[0];
+                if (!warned && quiet > 90_000) {
+                    warned = true;
+                    log.log("Скачивание стоит уже " + quiet / 1000 + " с. Если так и останется — проверь интернет и запусти ещё раз.");
+                }
+            }
+        }, "LullabyDownloadWatch").start();
         return null;
     }
 
@@ -470,6 +508,17 @@ public final class PojavEngine extends GameEngine {
         for (int i = 0; i < 300 && ExtraCore.getValue(ExtraConstants.RELEASE_TABLE) == null; i++) {
             Thread.sleep(100);
         }
+    }
+
+    /** an error and its causes, short enough for a dialog */
+    static String describe(Throwable error) {
+        StringBuilder out = new StringBuilder();
+        Throwable t = error;
+        for (int depth = 0; t != null && depth < 4; depth++, t = t.getCause()) {
+            String message = t.getMessage();
+            out.append(depth == 0 ? "" : "\n← ").append(t.getClass().getSimpleName()).append(message == null ? "" : ": " + message);
+        }
+        return out.toString();
     }
 
     /** the name of the version in versions/ the engine starts */
