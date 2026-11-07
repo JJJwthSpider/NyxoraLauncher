@@ -1823,6 +1823,7 @@ public final class MainActivity extends Activity {
     /** the few lines that tell why a start failed: graphics, Java, version and the errors */
     static String summary(String[] lines) {
         StringBuilder out = new StringBuilder("СВОДКА\n");
+        String crashReport = null;
         java.util.List<String> errors = new java.util.ArrayList<String>();
         for (String line : lines) {
             String l = line.trim();
@@ -1832,7 +1833,9 @@ public final class MainActivity extends Activity {
                 out.append(l.substring(6)).append('\n');
             } else if (l.contains("] [main/INFO]: Java is ")) {
                 out.append(l.substring(l.indexOf("Java is "))).append('\n');
-            } else if (l.startsWith("ERROR:") || l.contains("fatal error") || l.contains("SIGSEGV") || l.contains("SIGABRT")
+            } else if (l.contains("Crash report saved to:")) {
+                crashReport = l.substring(l.indexOf("Crash report saved to:") + "Crash report saved to:".length()).replace("#@!@#", "").trim();
+            } else if (l.contains("/ERROR]") || l.contains("/FATAL]") || l.startsWith("ERROR:") || l.contains("fatal error") || l.contains("SIGSEGV") || l.contains("SIGABRT")
                        || l.startsWith("# C ") || l.startsWith("# J ") || l.contains("Exception in thread") || l.contains("OutOfMemoryError")
                        || l.contains("zink") && l.toLowerCase(java.util.Locale.ROOT).contains("fail") || l.startsWith("Caused by:")) {
                 errors.add(l);
@@ -1843,6 +1846,30 @@ public final class MainActivity extends Activity {
             out.append("Ошибки:\n");
             for (int i = from; i < errors.size(); i++) {
                 out.append("• ").append(errors.get(i).length() > 160 ? errors.get(i).substring(0, 160) + "…" : errors.get(i)).append('\n');
+            }
+        }
+        // Minecraft's own crash report says what broke and in which mod: its beginning goes into the summary
+        if (crashReport != null) {
+            try {
+                String[] report = Http.read(new java.io.FileInputStream(crashReport)).split("\n");
+                out.append("Отчёт о сбое:\n");
+                int shown = 0;
+                boolean started = false;
+                for (String line : report) {
+                    String l = line.replace("\t", "  ").trim();
+                    if (!started && (l.startsWith("Description:") || l.startsWith("Time:"))) {
+                        started = true;
+                    }
+                    if (started && !l.isEmpty() && !l.startsWith("// ") && shown < 22) {
+                        out.append(l.length() > 170 ? l.substring(0, 170) + "…" : l).append('\n');
+                        shown++;
+                    }
+                    if (l.contains("Suspected Mod") || l.contains("Mod File:")) {
+                        out.append("→ ").append(l).append('\n');
+                    }
+                }
+            } catch (Exception e) {
+                out.append("Отчёт о сбое: ").append(crashReport).append('\n');
             }
         }
         return out.toString();
