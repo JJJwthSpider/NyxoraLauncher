@@ -388,7 +388,7 @@ void LaunchPanel::retranslate()
 {
     m_agentTile->setText(tr("AI agent"));
     m_agentTile->setSubtitle(tr("A pack from your description"));
-    m_agentTile->setToolTip(tr("Describe a pack in your own words and Moony assembles it with mods from Modrinth and CurseForge"));
+    m_agentTile->setToolTip(tr("Describe a pack in your own words and Arkan assembles it with mods from Modrinth and CurseForge"));
     m_packsTile->setText(tr("Ready packs"));
     m_packsTile->setSubtitle(tr("From Modrinth and CurseForge"));
     m_packsTile->setToolTip(tr("Install a ready-made mod pack from the internet"));

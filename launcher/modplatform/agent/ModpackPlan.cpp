@@ -18,6 +18,8 @@
 
 #include <QCoreApplication>
 #include <QRegularExpression>
+#include <algorithm>
+#include <cmath>
 
 #include "SearchTranslator.h"
 #include "Version.h"
@@ -94,6 +96,12 @@ const QList<ThemeRule>& themeRules()
         { QT_TRANSLATE_NOOP("ModpackAgent", "Storage"), { "storage", "chests", "backpacks", "inventory" }, { "storage", "backpacks" }, 2 },
         { QT_TRANSLATE_NOOP("ModpackAgent", "Mining and tools"), { "mining", "ores", "tools", "pickaxe" }, { "mining", "tools" }, 2 },
         { QT_TRANSLATE_NOOP("ModpackAgent", "Skills and levels"), { "skills", "levels", "classes" }, { "skills", "leveling" }, 2 },
+        { QT_TRANSLATE_NOOP("ModpackAgent", "Pokemon"), { "pokemon", "cobblemon", "pixelmon" }, { "cobblemon", "pokemon" }, 2 },
+        { QT_TRANSLATE_NOOP("ModpackAgent", "Dinosaurs"), { "dinosaurs", "dinosaur", "jurassic", "prehistoric" }, { "dinosaurs", "prehistoric" }, 2 },
+        { QT_TRANSLATE_NOOP("ModpackAgent", "Fishing"), { "fishing", "fish" }, { "fishing" }, 2 },
+        { QT_TRANSLATE_NOOP("ModpackAgent", "Skyblock"), { "skyblock", "islands", "oneblock" }, { "skyblock", "floating islands" }, 2 },
+        { QT_TRANSLATE_NOOP("ModpackAgent", "Anime"), { "anime", "naruto", "ninja" }, { "anime" }, 2 },
+        { QT_TRANSLATE_NOOP("ModpackAgent", "Military"), { "military", "army", "tanks", "tank", "war", "soldiers" }, { "military", "tanks" }, 3 },
         { QT_TRANSLATE_NOOP("ModpackAgent", "Atmosphere"),
           { "sounds", "music", "animations", "physics", "lighting", "blood" },
           { "immersive", "animations" },
@@ -447,10 +455,68 @@ Plan parseLocally(const QString& request)
         plan.themes << Theme{ word, { word }, boosted.contains(word) ? 4 : 2 };
     }
 
-    const auto wishes = positiveText(request);
-    plan.curated = essentialMods(plan.loader, requestWantsShaders(wishes), requestWantsMap(wishes));
-    describePlan(plan);
+    finishPlan(plan, request);
     return plan;
+}
+
+void finishPlan(Plan& plan, const QString& request)
+{
+    // what goes beyond the themes: a weak PC or phone, playing with friends, the number of mods, OptiFine
+    static const QRegularExpression s_lowEnd(
+        QStringLiteral("слаб\\w*\\s+(?:телефон|смартфон|пк|комп|ноут|устройств|желез|видеокарт)|для\\s+слаб|картошк|потато|"
+                       "low[ -]?end|weak\\s+(?:pc|phone|laptop)|potato"),
+        QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
+    static const QRegularExpression s_multiplayer(
+        QStringLiteral("(?<!\\w)(?:с\\s+друз|с\\s+друг(?:ом|ой)|друзьями|мультиплеер|кооп|по\\s+сети|вдво[её]м|втро[её]м|multiplayer|co-?op|"
+                       "with\\s+friends)"),
+        QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
+    static const QRegularExpression s_count(QStringLiteral("(?<![\\d.])(\\d{1,3})\\s*(?:мод|mods?\\b)"),
+                                            QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
+    const auto lower = request.toLower();
+    const auto wishes = positiveText(request);
+    bool shaders = requestWantsShaders(wishes);
+    plan.notes.clear();
+    plan.lowEnd = s_lowEnd.match(lower).hasMatch();
+    plan.multiplayer = s_multiplayer.match(wishes.toLower()).hasMatch();
+    for (qsizetype i = plan.requestedMods.size() - 1; i >= 0; i--) {
+        if (normalized(plan.requestedMods.at(i)).startsWith("optifine")) {
+            plan.requestedMods.removeAt(i);
+            shaders = true;
+            plan.notes << tr("instead of OptiFine: Sodium and Iris, they are faster, work with other mods and show shaders too");
+        }
+    }
+    if (plan.lowEnd) {
+        plan.notes << (shaders ? tr("no shaders: they are slow on a weak computer (you can add them later)")
+                               : tr("for a weak computer: only light mods and all the performance mods"));
+        shaders = false;
+        for (auto& theme : plan.themes) {
+            theme.count = std::min(theme.count, 2);
+        }
+    }
+    plan.curated = essentialMods(plan.loader, shaders, requestWantsMap(wishes));
+    if (plan.multiplayer) {
+        plan.curated << CuratedMod{ { "simple-voice-chat", "plasmo-voice" }, tr("Playing with friends") };
+        plan.notes << tr("a voice chat for playing with friends: Simple Voice Chat");
+    }
+    plan.targetMods = 0;
+    if (auto match = s_count.match(lower); match.hasMatch()) {
+        const int wanted = match.captured(1).toInt();
+        if (wanted >= 5 && wanted <= 300) {
+            plan.targetMods = wanted;
+            int themed = 0;
+            for (const auto& theme : plan.themes) {
+                themed += theme.count;
+            }
+            const int room = wanted - int(plan.curated.size()) - int(plan.requestedMods.size());
+            if (themed > 0 && room > 0) {
+                for (auto& theme : plan.themes) {
+                    theme.count = std::clamp(int(std::lround(theme.count * double(room) / themed)), 1, 15);
+                }
+            }
+            plan.notes << tr("about %1 mods, as asked").arg(wanted);
+        }
+    }
+    describePlan(plan);
 }
 
 bool isExcluded(const Plan& plan, const QString& title, const QString& slug)
@@ -488,6 +554,9 @@ void describePlan(Plan& plan)
         plan.name = tr("%1 pack %2").arg(first, plan.minecraftVersion);
         plan.summary = tr("Mods for: %1. Plus performance and quality-of-life mods.").arg(titles.join(", "));
     }
+    for (const auto& note : plan.notes) {
+        plan.summary += " " + note.left(1).toUpper() + note.mid(1) + ".";
+    }
 }
 
 Plan planFor(const QString& topic, const QString& loader, const QString& minecraftVersion)
@@ -501,9 +570,7 @@ Plan planFor(const QString& topic, const QString& loader, const QString& minecra
         plan.loader = loader;
         plan.loaderGiven = true;
     }
-    const auto wishes = positiveText(topic);
-    plan.curated = essentialMods(plan.loader, requestWantsShaders(wishes), requestWantsMap(wishes));
-    describePlan(plan);
+    finishPlan(plan, topic);
     return plan;
 }
 

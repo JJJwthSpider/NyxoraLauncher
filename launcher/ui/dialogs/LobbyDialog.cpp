@@ -364,7 +364,7 @@ QString LobbyDialog::invitation() const
         const auto info = Lobby::describe(instance);
         version = info.loader.isEmpty() ? info.minecraftVersion : info.minecraftVersion + " " + info.loaderName;
     }
-    return tr("Join me in Minecraft %1!\nAddress: %2\nIn Lullaby Launcher: Lobby → Join a friend, paste the address. "
+    return tr("Join me in Minecraft %1!\nAddress: %2\nIn Vellora Client: Lobby → Join a friend, paste the address. "
               "In Minecraft: Multiplayer → Direct Connection.")
         .arg(version, m_internetAddress.isEmpty() ? m_lanAddress : m_internetAddress);
 }

@@ -412,7 +412,7 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
         if (m_typingLabel) {
             m_typingLabel->setText(
                 QString("<b>%1</b>%2<br>%3")
-                    .arg(tr("Moony is working"), QString(".").repeated(m_typingDots), m_typingStatus.toHtmlEscaped()));
+                    .arg(tr("Arkan is working"), QString(".").repeated(m_typingDots), m_typingStatus.toHtmlEscaped()));
         }
     });
 
@@ -453,7 +453,7 @@ AgentPage::~AgentPage() = default;
 
 void AgentPage::retranslate()
 {
-    m_title->setText(tr("Moony, the pack builder"));
+    m_title->setText(tr("Arkan the wizard, the pack builder"));
     m_subtitle->setText(
         tr("Tell me what the pack should be about, and the loader and version. "
            "I will find the mods, add optimization and everything they need."));
@@ -466,7 +466,7 @@ void AgentPage::retranslate()
            "<a href=\"https://console.anthropic.com/\">console.anthropic.com</a>. The key is stored in the launcher "
            "settings on this computer."));
     m_apiKey->setPlaceholderText(tr("Anthropic API key (sk-ant-...)"));
-    m_input->setPlaceholderText(tr("Write to Moony, e.g.: a zombie apocalypse pack with cities, zombies and weapons"));
+    m_input->setPlaceholderText(tr("Write to Arkan, e.g.: a zombie apocalypse pack with cities, zombies and weapons"));
     m_sendButton->setText(tr("Send"));
     m_modTree->setHeaderLabels({ tr("Mod"), tr("Source"), tr("What it does") });
     m_logButton->setText(tr("Show the work log"));
@@ -474,7 +474,7 @@ void AgentPage::retranslate()
     m_newChatButton->setText(tr("New chat"));
     m_newChatButton->setToolTip(tr("Start a conversation about another pack; this one stays saved"));
     m_deleteChatButton->setText(tr("Delete chat"));
-    m_chatList->setToolTip(tr("Your conversations with Moony. Click one to continue it, double click to rename."));
+    m_chatList->setToolTip(tr("Your conversations with Arkan. Click one to continue it, double click to rename."));
 }
 
 void AgentPage::openedImpl()
@@ -501,7 +501,7 @@ QWidget* AgentPage::addRow(QWidget* bubble, bool fromAgent)
     }
     if (fromAgent) {
         auto* avatar = new QLabel(row);
-        avatar->setPixmap(QIcon(":/sculk_theme/agent.svg").pixmap(36, 36));
+        avatar->setPixmap(QIcon(":/sculk_theme/wizard.png").pixmap(36, 36));
         rowLayout->addWidget(avatar, 0, Qt::AlignTop);
         rowLayout->addWidget(bubble);
         rowLayout->addStretch(1);
@@ -623,7 +623,7 @@ void AgentPage::showTyping(const QString& status)
     m_typingLabel = new QLabel(bubble);
     m_typingLabel->setWordWrap(true);
     m_typingLabel->setTextFormat(Qt::RichText);
-    m_typingLabel->setText(QString("<b>%1</b><br>%2").arg(tr("Moony is working"), status.toHtmlEscaped()));
+    m_typingLabel->setText(QString("<b>%1</b><br>%2").arg(tr("Arkan is working"), status.toHtmlEscaped()));
     bubbleLayout->addWidget(m_typingLabel);
     m_typingProgress = new QProgressBar(bubble);
     m_typingProgress->setTextVisible(false);
@@ -684,7 +684,7 @@ void AgentPage::reset()
     m_resultPanel->setVisible(false);
     m_modTree->clear();
     m_log->clear();
-    agentSay(tr("Hi! I'm Moony and I build mod packs. <b>What should your pack be about?</b> "
+    agentSay(tr("Hi! I'm Arkan and I build mod packs. <b>What should your pack be about?</b> "
                 "Tell me the theme and what must be in it, for example: <i>a zombie apocalypse with cities, zombies and weapons</i>."),
              translated(s_topicReplies, std::size(s_topicReplies), true));
     suggestCurrent();
@@ -1150,7 +1150,7 @@ void AgentPage::refreshChatList()
         auto* item = new QListWidgetItem(entry.title, m_chatList);
         item->setData(Qt::UserRole, entry.id);
         item->setToolTip(QString("%1\n%2\n%3").arg(entry.title, entry.details, QLocale().toString(entry.updated, QLocale::ShortFormat)));
-        item->setIcon(QIcon(":/sculk_theme/agent.svg"));
+        item->setIcon(QIcon(":/sculk_theme/wizard.png"));
         item->setFlags(item->flags() | Qt::ItemIsEditable);
         if (entry.id == m_chatId) {
             m_chatList->setCurrentItem(item);

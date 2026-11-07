@@ -1640,7 +1640,8 @@ endif()
 #### The bundle mess! ####
 # Bundle utilities are used to complete packages for different platforms - they add all the libraries that would otherwise be missing on the target system.
 # NOTE: it seems that this absolutely has to be here, and nowhere else.
-if(WIN32 OR (UNIX AND APPLE))
+# Vellora: Qt older than 6.5 (the Windows cross build with MinGW) has no deploy script; that build bundles itself
+if((WIN32 OR (UNIX AND APPLE)) AND COMMAND qt_generate_deploy_script)
     if(WIN32)
         set(QT_DEPLOY_TOOL_OPTIONS "--no-opengl-sw --no-quick-import --no-system-d3d-compiler --no-system-dxc-compiler --skip-plugin-types generic,networkinformation")
     endif()

@@ -256,24 +256,24 @@
         <translation>Удалить чат «%1»? Созданные установки останутся.</translation>
     </message>
     <message>
-        <source>Moony is working</source>
-        <translation>Лунни работает</translation>
+        <source>Arkan is working</source>
+        <translation>Аркан работает</translation>
     </message>
     <message>
-        <source>Moony, the pack builder</source>
-        <translation>Лунни-сборщик</translation>
+        <source>Arkan the wizard, the pack builder</source>
+        <translation>Маг Аркан, сборщик</translation>
     </message>
     <message>
-        <source>Write to Moony, e.g.: a zombie apocalypse pack with cities, zombies and weapons</source>
-        <translation>Напиши Лунни, например: сборка про зомби-апокалипсис, должны быть города, зомби и оружие</translation>
+        <source>Write to Arkan, e.g.: a zombie apocalypse pack with cities, zombies and weapons</source>
+        <translation>Напиши Аркану, например: сборка про зомби-апокалипсис, должны быть города, зомби и оружие</translation>
     </message>
     <message>
-        <source>Your conversations with Moony. Click one to continue it, double click to rename.</source>
-        <translation>Твои разговоры с Лунни. Нажми, чтобы продолжить, двойной щелчок — переименовать.</translation>
+        <source>Your conversations with Arkan. Click one to continue it, double click to rename.</source>
+        <translation>Твои разговоры с Арканом. Нажми, чтобы продолжить, двойной щелчок — переименовать.</translation>
     </message>
     <message>
-        <source>Hi! I&apos;m Moony and I build mod packs. &lt;b&gt;What should your pack be about?&lt;/b&gt; Tell me the theme and what must be in it, for example: &lt;i&gt;a zombie apocalypse with cities, zombies and weapons&lt;/i&gt;.</source>
-        <translation>Привет! Я Лунни, собираю сборки модов. &lt;b&gt;Про что будет твоя сборка?&lt;/b&gt; Расскажи тему и что в ней должно быть, например: &lt;i&gt;зомби-апокалипсис, должны быть города, зомби и оружие&lt;/i&gt;.</translation>
+        <source>Hi! I&apos;m Arkan and I build mod packs. &lt;b&gt;What should your pack be about?&lt;/b&gt; Tell me the theme and what must be in it, for example: &lt;i&gt;a zombie apocalypse with cities, zombies and weapons&lt;/i&gt;.</source>
+        <translation>Привет! Я Аркан, маг-сборщик, собираю сборки модов. &lt;b&gt;Про что будет твоя сборка?&lt;/b&gt; Расскажи тему и что в ней должно быть, например: &lt;i&gt;зомби-апокалипсис, должны быть города, зомби и оружие&lt;/i&gt;.</translation>
     </message>
 </context>
 <context>
@@ -661,8 +661,8 @@ You may solve this issue by remounting /tmp as &apos;exec&apos; or setting the j
         <translation>Войти</translation>
     </message>
     <message>
-        <source>Describe a pack in your own words and Moony assembles it with mods from Modrinth and CurseForge</source>
-        <translation>Опишите сборку своими словами — Лунни соберёт её из модов с Modrinth и CurseForge</translation>
+        <source>Describe a pack in your own words and Arkan assembles it with mods from Modrinth and CurseForge</source>
+        <translation>Опишите сборку своими словами — Аркан соберёт её из модов с Modrinth и CurseForge</translation>
     </message>
 </context>
 <context>
@@ -856,10 +856,10 @@ You may solve this issue by remounting /tmp as &apos;exec&apos; or setting the j
     <message>
         <source>Join me in Minecraft %1!
 Address: %2
-In Lullaby Launcher: Lobby → Join a friend, paste the address. In Minecraft: Multiplayer → Direct Connection.</source>
+In Vellora Client: Lobby → Join a friend, paste the address. In Minecraft: Multiplayer → Direct Connection.</source>
         <translation>Заходи ко мне в Minecraft %1!
 Адрес: %2
-В Lullaby Launcher: Лобби → Присоединиться к другу, вставь адрес. В Minecraft: Сетевая игра → Прямое подключение.</translation>
+В Vellora Client: Лобби → Присоединиться к другу, вставь адрес. В Minecraft: Сетевая игра → Прямое подключение.</translation>
     </message>
     <message>
         <source>Invite code like LL-8N4Q-2ZKD-1X, or an address like brave-creeper.e4mc.link</source>
@@ -1325,6 +1325,54 @@ Are you sure?</source>
 <context>
     <name>ModpackAgent</name>
     <message>
+        <source>Pokemon</source>
+        <translation>Покемоны</translation>
+    </message>
+    <message>
+        <source>Dinosaurs</source>
+        <translation>Динозавры</translation>
+    </message>
+    <message>
+        <source>Fishing</source>
+        <translation>Рыбалка</translation>
+    </message>
+    <message>
+        <source>Skyblock</source>
+        <translation>Скайблок</translation>
+    </message>
+    <message>
+        <source>Anime</source>
+        <translation>Аниме</translation>
+    </message>
+    <message>
+        <source>Military</source>
+        <translation>Военное</translation>
+    </message>
+    <message>
+        <source>instead of OptiFine: Sodium and Iris, they are faster, work with other mods and show shaders too</source>
+        <translation>вместо OptiFine — Sodium и Iris: они быстрее, работают с другими модами и тоже показывают шейдеры</translation>
+    </message>
+    <message>
+        <source>no shaders: they are slow on a weak computer (you can add them later)</source>
+        <translation>шейдеры не добавил: на слабом компьютере они сильно тормозят (их можно включить потом)</translation>
+    </message>
+    <message>
+        <source>for a weak computer: only light mods and all the performance mods</source>
+        <translation>для слабого компьютера: только лёгкие моды и вся оптимизация</translation>
+    </message>
+    <message>
+        <source>Playing with friends</source>
+        <translation>Игра с друзьями</translation>
+    </message>
+    <message>
+        <source>a voice chat for playing with friends: Simple Voice Chat</source>
+        <translation>для игры с друзьями добавил голосовой чат Simple Voice Chat</translation>
+    </message>
+    <message>
+        <source>about %1 mods, as asked</source>
+        <translation>около %1 модов, как просили</translation>
+    </message>
+    <message>
         <source>Zombies</source>
         <translation>Зомби</translation>
     </message>
@@ -1687,8 +1735,8 @@ Are you sure?</source>
         <translation>Современная тема в цветах скалка из Minecraft</translation>
     </message>
     <message>
-        <source>Lullaby (Moon)</source>
-        <translation>Lullaby (Луна)</translation>
+        <source>Vellora (Red rain)</source>
+        <translation>Vellora (Красный дождь)</translation>
     </message>
     <message>
         <source>Night black and moon white with stars and a see-through rainbow</source>
@@ -2170,12 +2218,12 @@ The author likely blocked third-party launchers.</source>
         <translation>Останавливаю сервер и сохраняю мир...</translation>
     </message>
     <message>
-        <source>[Lullaby] Mods on the server: %1. Client-only, left out: %2.</source>
-        <translation>[Lullaby] Моды на сервере: %1. Только для клиента, не перенесены: %2.</translation>
+        <source>[Vellora] Mods on the server: %1. Client-only, left out: %2.</source>
+        <translation>[Vellora] Моды на сервере: %1. Только для клиента, не перенесены: %2.</translation>
     </message>
     <message>
-        <source>Lullaby server</source>
-        <translation>Сервер Lullaby</translation>
+        <source>Vellora server</source>
+        <translation>Сервер Vellora</translation>
     </message>
 </context>
 <context>
@@ -2393,16 +2441,16 @@ The author likely blocked third-party launchers.</source>
         <translation>Через бесплатный туннель bore.pub: без проброса портов и без регистрации</translation>
     </message>
     <message>
-        <source>Lullaby server</source>
-        <translation>Сервер Lullaby</translation>
+        <source>Vellora server</source>
+        <translation>Сервер Vellora</translation>
     </message>
     <message>
         <source>Join my Minecraft server!
 Invite code: %1
-In Lullaby Launcher: Lobby → Join a friend, enter the code. Or in Minecraft: Multiplayer → Direct Connection → %2</source>
+In Vellora Client: Lobby → Join a friend, enter the code. Or in Minecraft: Multiplayer → Direct Connection → %2</source>
         <translation>Заходи на мой сервер Minecraft!
 Код приглашения: %1
-В Lullaby Launcher: Лобби → Присоединиться к другу, введи код. Или в Minecraft: Сетевая игра → Прямое подключение → %2</translation>
+В Vellora Client: Лобби → Присоединиться к другу, введи код. Или в Minecraft: Сетевая игра → Прямое подключение → %2</translation>
     </message>
 </context>
 <context>

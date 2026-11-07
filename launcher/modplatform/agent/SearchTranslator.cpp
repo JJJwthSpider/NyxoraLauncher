@@ -16,6 +16,8 @@
  */
 #include "SearchTranslator.h"
 
+#include <algorithm>
+
 #include <QRegularExpression>
 #include <QSet>
 
@@ -213,6 +215,23 @@ const Entry s_dictionary[] = {
     { "библиот", "library" },
     { "сервер", "server" },
     // loaders
+    { "покемон", "pokemon" },
+    { "кобблмон", "cobblemon" },
+    { "пиксельмон", "pixelmon" },
+    { "динозавр", "dinosaurs" },
+    { "юрск", "jurassic" },
+    { "доисторич", "prehistoric" },
+    { "скайблок", "skyblock" },
+    { "ванблок", "oneblock" },
+    { "остров", "islands" },
+    { "аниме", "anime" },
+    { "наруто", "naruto" },
+    { "ниндз", "ninja" },
+    { "воен", "military" },
+    { "арми", "army" },
+    { "танк", "tanks" },
+    { "войн", "war" },
+    { "солдат", "soldiers" },
     { "неофордж", "neoforge" },
     { "фордж", "forge" },
     { "фабрик", "fabric" },
@@ -255,6 +274,37 @@ QString translateWord(const QString& word)
         if (word.startsWith(stem) && stem.size() > bestLength) {
             best = &entry;
             bestLength = stem.size();
+        }
+    }
+    if (!best && word.size() >= 5) {
+        // a typo ("зомьби", "драконнов"): the stem that differs from the beginning of the word by one letter;
+        // the first two letters must be right
+        auto distance = [](const QString& a, const QString& b) {
+            QList<int> previous(b.size() + 1), current(b.size() + 1);
+            for (qsizetype j = 0; j <= b.size(); j++) {
+                previous[j] = int(j);
+            }
+            for (qsizetype i = 1; i <= a.size(); i++) {
+                current[0] = int(i);
+                for (qsizetype j = 1; j <= b.size(); j++) {
+                    const int change = a[i - 1] == b[j - 1] ? 0 : 1;
+                    current[j] = std::min({ current[j - 1] + 1, previous[j] + 1, previous[j - 1] + change });
+                }
+                std::swap(previous, current);
+            }
+            return previous[b.size()];
+        };
+        int bestDistance = 2;
+        for (const auto& entry : s_dictionary) {
+            const auto stem = QString::fromUtf8(entry.stem);
+            if (stem.size() < 4 || !word.startsWith(stem.left(2))) {
+                continue;
+            }
+            const int d = std::min(distance(stem, word.left(stem.size())), distance(stem, word.left(stem.size() + 1)));
+            if (d < bestDistance) {
+                best = &entry;
+                bestDistance = d;
+            }
         }
     }
     return best ? QString::fromUtf8(best->english) : word;

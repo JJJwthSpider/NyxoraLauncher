@@ -22,9 +22,9 @@
 
 class QPainter;
 
-/// The face of the mod pack agent: Moony, a little moon whose one half is night dark and the other
-/// half moon white. It floats gently, its glow breathes, stars twinkle around it; it opens its sleepy
-/// eyes when the mouse comes near and talks while the agent is working.
+/// The face of the mod pack agent: Arkan, a burgundy wizard in a hood (pixel art) with a red tesseract turning in
+/// four dimensions above his hand. It turns faster and glows brighter when the mouse comes near and while the agent
+/// is working. (The class keeps its old name, Moony, so nothing else has to change.)
 class MoonyWidget : public QWidget {
     Q_OBJECT
    public:
@@ -38,7 +38,7 @@ class MoonyWidget : public QWidget {
     void setTalking(bool talking);
     QSize sizeHint() const override { return { 96, 96 }; }
 
-    /// paints Moony into a square (also used for the static agent icon)
+    /// paints Arkan into a square (also used for the static agent icon)
     static void paintMoon(QPainter& painter, const QRectF& square, double time, double wake, double talk);
 
    protected:

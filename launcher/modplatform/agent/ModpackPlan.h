@@ -51,6 +51,10 @@ struct Plan {
     bool fromClaude = false;
     bool versionGiven = false;
     bool loaderGiven = false;
+    bool lowEnd = false;       // "для слабого ПК": light mods only, no shaders
+    bool multiplayer = false;  // "с друзьями": a voice chat
+    int targetMods = 0;        // "сборка на 30 модов": about this many mods (0: as many as the themes give)
+    QStringList notes;         // what was understood beyond the themes, told to the player
 };
 
 /// The Minecraft version used when the request does not name one.
@@ -68,6 +72,9 @@ Plan parseLocally(const QString& request);
 /// The plan for a topic described in a chat, with the loader and version the user chose separately.
 /// Empty loader / version fall back to what the topic says or to the defaults.
 Plan planFor(const QString& topic, const QString& loader, const QString& minecraftVersion);
+
+/// a weak PC, playing with friends, the number of mods and OptiFine; then fills the name and the summary
+void finishPlan(Plan& plan, const QString& request);
 
 /// Fills name and summary from the themes, version and loader.
 void describePlan(Plan& plan);

@@ -55,7 +55,7 @@ class AgentPage : public QWidget, public BasePage {
     ~AgentPage() override;
 
     QString displayName() const override { return tr("AI pack"); }
-    QIcon icon() const override { return QIcon(":/sculk_theme/agent.svg"); }
+    QIcon icon() const override { return QIcon(":/sculk_theme/wizard.png"); }
     QString id() const override { return "agent"; }
     QString helpPage() const override { return QString(); }
     bool shouldDisplay() const override { return true; }

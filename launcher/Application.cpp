@@ -804,6 +804,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("TheCat", false);
         m_settings->registerSetting("SculkBackgroundAnimation", true);
         m_settings->registerSetting("LullabyDesignApplied", false);
+        m_settings->registerSetting("VelloraDesignApplied", false);
         m_settings->registerSetting("CatOpacity", 100);
         m_settings->registerSetting("CatFit", "fit");
 
@@ -1239,6 +1240,13 @@ bool Application::createSetupWizard()
             m_themeManager->applyCurrentlySelectedTheme();
         }
     }
+    // the launcher became Vellora Client: the burgundy red rain look (theme id "lunar") once for everyone
+    if (!settings()->get("VelloraDesignApplied").toBool()) {
+        settings()->set("VelloraDesignApplied", true);
+        settings()->set("ApplicationTheme", QString("lunar"));
+        settings()->set("IconTheme", QString("lunar"));
+        m_themeManager->applyCurrentlySelectedTheme();
+    }
     bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
     bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
     bool login = !m_accounts->anyAccountIsValid() && capabilities() & Application::SupportsMSA;
@@ -1249,7 +1257,7 @@ bool Application::createSetupWizard()
         if (!validIcons)
             settings()->set("IconTheme", QString("lunar"));
         if (!validWidgets) {
-            // the lunar Lullaby theme is the default look of the launcher
+            // the Vellora theme (id "lunar") is the default look of the launcher
             const QString style = QStringLiteral("lunar");
             settings()->set("ApplicationTheme", style);
         }

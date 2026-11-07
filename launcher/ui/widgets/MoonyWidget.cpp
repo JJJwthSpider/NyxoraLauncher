@@ -24,37 +24,31 @@
 #include <cmath>
 
 namespace {
-const QColor s_night(0x1c, 0x1f, 0x33);
-const QColor s_nightEdge(0x0e, 0x10, 0x1c);
-const QColor s_moon(0xf6, 0xf7, 0xfc);
-const QColor s_moonEdge(0xc9, 0xcc, 0xdb);
-const QColor s_glow(220, 228, 255);
+// Arkan, the wizard of Vellora Client: the picture is pixel art (resources/sculk_theme/wizard_body.png, drawn by
+// android/art/wizard.py), the tesseract above his hand is drawn every frame. HAND and SIZE are in parts of the picture.
+constexpr double s_handX = 47.5 / 64, s_handY = 20.5 / 64, s_tesseractSize = 38.0 / 64, s_glowSize = 12.0 / 64;
+const QColor s_crimson(255, 70, 84);
+const QColor s_corner(255, 200, 205);
 
-// the sparkles around Moony: position (in moon radii from its center), size, phase
-struct Sparkle {
-    double x, y, size, phase;
-};
-const Sparkle s_sparkles[] = {
-    { -1.32, -0.78, 0.13, 0.0 }, { 1.30, -0.95, 0.10, 1.7 }, { 1.42, 0.55, 0.12, 3.1 }, { -1.38, 0.62, 0.09, 4.4 }, { 0.15, -1.38, 0.08, 2.3 },
-};
-
-// one of the see-through rainbow colors, for the blush on the cheeks
-const QColor s_blush(255, 150, 175);
-
-void drawSparkle(QPainter& p, const QPointF& c, double size, double brightness)
+const QPixmap& wizardBody()
 {
-    QColor color = s_glow;
-    color.setAlphaF(std::clamp(brightness, 0.0, 1.0));
-    QPainterPath star;
-    // four pointed star: thin rays with a round middle
-    star.moveTo(c.x(), c.y() - size);
-    star.quadTo(c.x(), c.y(), c.x() + size, c.y());
-    star.quadTo(c.x(), c.y(), c.x(), c.y() + size);
-    star.quadTo(c.x(), c.y(), c.x() - size, c.y());
-    star.quadTo(c.x(), c.y(), c.x(), c.y() - size);
-    p.setPen(Qt::NoPen);
-    p.setBrush(color);
-    p.drawPath(star);
+    static const QPixmap body(QStringLiteral(":/sculk_theme/wizard_body.png"));
+    return body;
+}
+
+/// the 16 corners of a tesseract turned in 4D by `turn`, projected to 2D around the origin
+void tesseractCorners(double turn, double size, QPointF out[16])
+{
+    for (int i = 0; i < 16; i++) {
+        const double x = (i & 1) ? 1 : -1, y = (i & 2) ? 1 : -1, z = (i & 4) ? 1 : -1, w = (i & 8) ? 1 : -1;
+        const double a = turn, b = turn * 0.7;
+        const double x1 = x * std::cos(a) - w * std::sin(a), w1 = x * std::sin(a) + w * std::cos(a);
+        const double y1 = y * std::cos(b) - z * std::sin(b), z1 = y * std::sin(b) + z * std::cos(b);
+        const double x2 = x1 * std::cos(0.5) - z1 * std::sin(0.5), z2 = x1 * std::sin(0.5) + z1 * std::cos(0.5);
+        const double k4 = 1.0 / (3.0 - w1);
+        const double k3 = 1.0 / (4.0 - z2 * k4);
+        out[i] = QPointF(x2 * k4 * k3 * size, y1 * k4 * k3 * size);
+    }
 }
 }  // namespace
 
@@ -111,117 +105,47 @@ void MoonyWidget::tick()
 void MoonyWidget::paintMoon(QPainter& p, const QRectF& square, double time, double wake, double talk)
 {
     p.save();
+    // the wizard floats a little; the pixels stay sharp
+    const double side = square.width();
+    const QRectF body(square.left(), square.top() + std::sin(time * 1.2) * side * 0.012, side, side);
+    p.setRenderHint(QPainter::SmoothPixmapTransform, false);
+    p.drawPixmap(body, wizardBody(), QRectF(wizardBody().rect()));
+
+    // the red tesseract: it turns faster and glows brighter when Arkan is awake or working
     p.setRenderHint(QPainter::Antialiasing, true);
-    const double r = square.width() * 0.34;
-    const QPointF c = square.center() + QPointF(0, std::sin(time * 1.2) * r * 0.05);
-
-    // the glow breathes slowly and gets brighter when Moony is awake
-    const double breath = 0.5 + 0.5 * std::sin(time * 1.6);
-    QRadialGradient halo(c, r * 1.55);
-    QColor inner = s_glow;
-    inner.setAlphaF(0.20 + 0.15 * breath + 0.2 * wake);
-    QColor outer = s_glow;
+    const double energy = std::clamp(0.35 + 0.65 * std::max(wake, talk), 0.0, 1.0);
+    const QPointF c(body.left() + side * s_handX, body.top() + side * s_handY + std::sin(time * 2.0) * side * 0.012);
+    const double pulse = 0.75 + 0.25 * std::sin(time * (3.0 + 4.0 * energy));
+    const double glowRadius = side * s_glowSize * (1.0 + 0.3 * energy);
+    QRadialGradient glow(c, glowRadius);
+    QColor inner(255, 40, 60);
+    inner.setAlphaF(std::clamp((0.25 + 0.3 * energy) * pulse, 0.0, 1.0));
+    QColor outer(255, 40, 60);
     outer.setAlphaF(0.0);
-    halo.setColorAt(0.55, inner);
-    halo.setColorAt(1.0, outer);
+    glow.setColorAt(0, inner);
+    glow.setColorAt(1, outer);
     p.setPen(Qt::NoPen);
-    p.setBrush(halo);
-    p.drawEllipse(c, r * 1.55, r * 1.55);
+    p.setBrush(glow);
+    p.drawEllipse(c, glowRadius, glowRadius);
 
-    // sparkles twinkle around the moon
-    for (const auto& s : s_sparkles) {
-        const double twinkle = 0.5 + 0.5 * std::sin(time * 2.3 + s.phase);
-        drawSparkle(p, c + QPointF(s.x * r, s.y * r), s.size * r * (0.7 + 0.5 * twinkle), 0.35 + 0.65 * twinkle);
-    }
-
-    // one half night, the other half moon white
-    QPainterPath disk;
-    disk.addEllipse(c, r, r);
-    p.save();
-    p.setClipPath(disk);
-    QRadialGradient dark(c - QPointF(r * 0.3, r * 0.3), r * 1.4);
-    dark.setColorAt(0, s_night.lighter(130));
-    dark.setColorAt(1, s_nightEdge);
-    p.setBrush(dark);
-    p.drawRect(QRectF(c.x() - r, c.y() - r, r, 2 * r));
-    QRadialGradient light(c + QPointF(r * 0.2, -r * 0.3), r * 1.3);
-    light.setColorAt(0, s_moon);
-    light.setColorAt(1, s_moonEdge);
-    p.setBrush(light);
-    p.drawRect(QRectF(c.x(), c.y() - r, r, 2 * r));
-    // craters: light ones on the dark half, gray ones on the white half
-    struct Crater {
-        double x, y, size;
-    };
-    const Crater craters[] = { { -0.55, -0.45, 0.13 }, { -0.62, 0.40, 0.09 }, { 0.55, 0.50, 0.12 }, { 0.62, -0.50, 0.08 } };
-    for (const auto& cr : craters) {
-        p.setBrush(cr.x < 0 ? QColor(255, 255, 255, 26) : QColor(0x9a, 0x9e, 0xb4, 70));
-        p.drawEllipse(c + QPointF(cr.x * r, cr.y * r), cr.size * r, cr.size * r);
-    }
-    // a tiny star on the night half
-    drawSparkle(p, c + QPointF(-0.35 * r, -0.62 * r), 0.09 * r, 0.6 + 0.4 * breath);
-    p.restore();
-
-    // the line between the halves and the rim
-    p.setBrush(Qt::NoBrush);
-    p.setPen(QPen(QColor(255, 255, 255, 120), std::max(1.0, r * 0.04)));
-    p.drawEllipse(c, r, r);
-
-    // the face: on each half its features are in the color of the other half
-    const double eyeY = c.y() - r * 0.05;
-    const double eyeX = r * 0.38;
-    const double eyeW = r * 0.2;
-    const QColor onDark = s_moon;
-    const QColor onLight = s_nightEdge;
-    const double pen = std::max(1.2, r * 0.07);
-    for (int side = -1; side <= 1; side += 2) {
-        const QPointF e(c.x() + side * eyeX, eyeY);
-        const QColor color = side < 0 ? onDark : onLight;
-        if (wake < 0.5) {
-            // sleeping: closed eyes are soft arcs
-            p.setPen(QPen(color, pen, Qt::SolidLine, Qt::RoundCap));
-            p.setBrush(Qt::NoBrush);
-            QPainterPath arc;
-            arc.moveTo(e.x() - eyeW, e.y());
-            arc.quadTo(e.x(), e.y() + eyeW * (0.9 - wake), e.x() + eyeW, e.y());
-            p.drawPath(arc);
-        } else {
-            // awake: round eyes with a twinkle in them
-            const double open = (wake - 0.5) * 2.0;
-            p.setPen(Qt::NoPen);
-            p.setBrush(color);
-            p.drawEllipse(e, eyeW * 0.65, eyeW * (0.25 + 0.55 * open));
-            p.setBrush(side < 0 ? onLight : onDark);
-            p.drawEllipse(e + QPointF(eyeW * 0.2, -eyeW * 0.2 * open), eyeW * 0.18 * open, eyeW * 0.18 * open);
+    QPointF corners[16];
+    tesseractCorners(time * (0.6 + 1.2 * energy), side * s_tesseractSize, corners);
+    QColor edge = s_crimson;
+    edge.setAlphaF(std::clamp(0.75 + 0.25 * pulse, 0.0, 1.0));
+    p.setPen(QPen(edge, std::max(1.0, side / 140.0), Qt::SolidLine, Qt::RoundCap));
+    for (int i = 0; i < 16; i++) {
+        for (int k = 0; k < 4; k++) {
+            const int j = i ^ (1 << k);
+            if (i < j) {
+                p.drawLine(c + corners[i], c + corners[j]);
+            }
         }
-        // a little blush in a rainbow pink
-        QColor blush = s_blush;
-        blush.setAlphaF(side < 0 ? 0.35 : 0.45);
-        p.setPen(Qt::NoPen);
-        p.setBrush(blush);
-        p.drawEllipse(QPointF(c.x() + side * r * 0.55, eyeY + r * 0.28), r * 0.13, r * 0.07);
     }
-    // the smile runs across both halves: each half in the other color
-    const double mouthY = c.y() + r * 0.3;
-    const double mouthW = r * 0.22;
-    const double open = talk * r * 0.12;
-    for (int side = -1; side <= 1; side += 2) {
-        p.save();
-        p.setClipRect(side < 0 ? QRectF(c.x() - r, c.y() - r, r, 2 * r) : QRectF(c.x(), c.y() - r, r, 2 * r));
-        const QColor color = side < 0 ? onDark : onLight;
-        if (open > 0.5) {
-            p.setPen(Qt::NoPen);
-            p.setBrush(color);
-            p.drawEllipse(QPointF(c.x(), mouthY + open * 0.3), mouthW * 0.55, open);
-        } else {
-            p.setPen(QPen(color, pen, Qt::SolidLine, Qt::RoundCap));
-            p.setBrush(Qt::NoBrush);
-            QPainterPath smile;
-            smile.moveTo(c.x() - mouthW, mouthY);
-            smile.quadTo(c.x(), mouthY + mouthW * 0.8, c.x() + mouthW, mouthY);
-            p.drawPath(smile);
-        }
-        p.restore();
+    p.setPen(Qt::NoPen);
+    p.setBrush(s_corner);
+    const double dot = std::max(1.0, side / 110.0);
+    for (const auto& corner : corners) {
+        p.drawEllipse(c + corner, dot, dot);
     }
     p.restore();
 }
@@ -252,12 +176,12 @@ void MoonyWidget::paintBubble(QPainter& painter, const QRectF& box)
          << QPointF(box.left() + w * 0.38, box.bottom() - 1);
     path.addPolygon(tail);
     path = path.simplified();
-    painter.setPen(QPen(QColor(255, 255, 255, 220), std::max(1.5, w * 0.045)));
-    painter.setBrush(QColor(0x14, 0x15, 0x1f));
+    painter.setPen(QPen(QColor(255, 90, 110, 230), std::max(1.5, w * 0.045)));
+    painter.setBrush(QColor(0x1c, 0x08, 0x0d));
     painter.drawPath(path);
 
-    // three dots in see-through rainbow colors
-    const QColor dots[] = { QColor(255, 168, 196), QColor(255, 236, 160), QColor(160, 210, 255) };
+    // three dots in crimson shades
+    const QColor dots[] = { QColor(255, 90, 110), QColor(232, 54, 79), QColor(255, 140, 152) };
     const double r = h * 0.12;
     for (int i = 0; i < 3; i++) {
         double lift = 0;
