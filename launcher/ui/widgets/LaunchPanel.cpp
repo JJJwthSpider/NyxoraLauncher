@@ -16,6 +16,7 @@
  */
 #include "LaunchPanel.h"
 
+#include <QEvent>
 #include <QPainter>
 #include <QPainterPath>
 #include <QVBoxLayout>

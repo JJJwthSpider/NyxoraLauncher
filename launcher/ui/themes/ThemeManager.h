@@ -19,6 +19,7 @@
 #pragma once
 
 #include <QDir>
+#include <QFont>
 #include <QLoggingCategory>
 #include <QString>
 #include <memory>

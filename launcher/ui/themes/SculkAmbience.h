@@ -21,6 +21,7 @@
 #include <QList>
 #include <QObject>
 #include <QPointer>
+#include <QRect>
 #include <QTimer>
 
 class QPainter;

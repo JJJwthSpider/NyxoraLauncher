@@ -37,6 +37,7 @@
 #include "Application.h"
 #include "BaseInstance.h"
 #include "DesktopServices.h"
+#include "FileSystem.h"
 #include "InstanceList.h"
 #include "icons/IconList.h"
 #include "minecraft/MinecraftInstance.h"

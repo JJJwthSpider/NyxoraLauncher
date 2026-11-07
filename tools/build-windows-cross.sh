@@ -79,7 +79,7 @@ export PKG_CONFIG_SYSROOT_DIR="$W/sysroot"
 cmake -S "$SRC" -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE="$W/toolchain.cmake" -DCMAKE_BUILD_TYPE=Release \
       -DQT_HOST_PATH=/usr -DQT_HOST_PATH_CMAKE_DIR=/usr/lib/x86_64-linux-gnu/cmake \
       -DCMAKE_PREFIX_PATH="$W/qt/6.4.2/mingw_64;$W/prefix;$W/sysroot/mingw64" \
-      -DLauncher_APP_BINARY_NAME=vellora -DCMAKE_INSTALL_PREFIX="$W/install" -DBUILD_TESTING=OFF
+      -DLauncher_APP_BINARY_NAME=vellora -DLauncher_USE_PCH=OFF -DCMAKE_INSTALL_PREFIX="$W/install" -DBUILD_TESTING=OFF
 ninja -C build
 rm -rf install
 cmake --install build
@@ -92,7 +92,7 @@ w = sys.argv[1]
 out = os.path.join(w, 'install')
 search = [os.path.join(w, 'sysroot/mingw64/bin'), os.path.join(w, 'qt/6.4.2/mingw_64/bin'), os.path.join(w, 'prefix/bin')]
 plugins = {'platforms': ['qwindows.dll'], 'styles': ['qwindowsvistastyle.dll'], 'iconengines': ['qsvgicon.dll'],
-           'imageformats': ['qsvg.dll', 'qjpeg.dll', 'qgif.dll', 'qico.dll', 'qwebp.dll', 'qtga.dll', 'qwbmp.dll', 'qtiff.dll'],
+           'imageformats': ['qsvg.dll', 'qjpeg.dll', 'qgif.dll', 'qico.dll', 'qtga.dll', 'qwbmp.dll', 'qtiff.dll'],
            'tls': ['qschannelbackend.dll', 'qcertonlybackend.dll']}
 qt_plugins = os.path.join(w, 'qt/6.4.2/mingw_64/plugins')
 todo = [os.path.join(out, f) for f in os.listdir(out) if f.lower().endswith('.exe')]
