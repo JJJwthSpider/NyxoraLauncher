@@ -9,7 +9,7 @@ import android.view.Gravity;
 import android.widget.Button;
 import android.widget.TextView;
 
-/** The look of the app in one place: night black and moon white, main buttons wear a see-through rainbow. */
+/** The look of the app in one place: burgundy and crimson, buttons and panels made of blocks like Millida Launcher. */
 final class Ui {
     private Ui() {}
 
@@ -36,29 +36,20 @@ final class Ui {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, context.getResources().getDisplayMetrics());
     }
 
-    static GradientDrawable rounded(Context context, int color, float radius, int stroke) {
-        GradientDrawable d = new GradientDrawable();
-        d.setColor(color);
-        d.setCornerRadius(dp(context, radius));
-        if (stroke != 0) {
-            d.setStroke(dp(context, 1), stroke);
-        }
-        return d;
+    /** a panel or card made of blocks (Millida-like), outlined in `stroke` (0: a dark outline) */
+    static android.graphics.drawable.Drawable rounded(Context context, int color, float radius, int stroke) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return PixelDrawable.panel(color, stroke != 0 ? stroke : 0xFF060103, density);
     }
 
-    static GradientDrawable rainbow(Context context, float radius) {
-        GradientDrawable d = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, RAINBOW_PASTEL);
-        d.setCornerRadius(dp(context, radius));
-        d.setStroke(dp(context, 1), 0xFFFF8A98);
-        return d;
+    /** the crimson main button, a raised block */
+    static android.graphics.drawable.Drawable rainbow(Context context, float radius) {
+        return PixelDrawable.accent(context.getResources().getDisplayMetrics().density);
     }
 
-    /** a frame with a rainbow edge: the selected card */
-    static GradientDrawable rainbowFrame(Context context, float radius) {
-        GradientDrawable d = new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[] { 0x33FF3B4F, 0x33FF6B7D, 0x33A3182F, 0x337A1426 });
-        d.setCornerRadius(dp(context, radius));
-        d.setStroke(dp(context, 2), 0xFFFF5A6E);
-        return d;
+    /** the selected card: a crimson glow inside a bright crimson outline */
+    static android.graphics.drawable.Drawable rainbowFrame(Context context, float radius) {
+        return PixelDrawable.panel(0xCC4A1420, 0xFFFF5A6E, context.getResources().getDisplayMetrics().density);
     }
 
     static Button button(Context context, String text, boolean accent) {
@@ -68,8 +59,8 @@ final class Ui {
         b.setTypeface(pixel(context));
         b.setTextSize(15);
         b.setTextColor(accent ? Color.WHITE : TEXT);
-        b.setBackground(accent ? rainbow(context, 10) : rounded(context, PANEL_LIGHT, 10, LINE));
-        b.setPadding(dp(context, 14), dp(context, 6), dp(context, 14), dp(context, 6));
+        b.setBackground(accent ? rainbow(context, 10) : PixelDrawable.plain(context.getResources().getDisplayMetrics().density));
+        b.setPadding(dp(context, 14), dp(context, 6), dp(context, 14), dp(context, 9));
         b.setMinHeight(dp(context, 40));
         b.setMinimumHeight(dp(context, 40));
         return b;
@@ -78,8 +69,8 @@ final class Ui {
     /** switches a button between the rainbow (chosen) and the plain look */
     static void styleButton(Context context, Button b, boolean accent) {
         b.setTextColor(accent ? Color.WHITE : TEXT);
-        b.setBackground(accent ? rainbow(context, 10) : rounded(context, PANEL_LIGHT, 10, LINE));
-        b.setPadding(dp(context, 14), dp(context, 6), dp(context, 14), dp(context, 6));
+        b.setBackground(accent ? rainbow(context, 10) : PixelDrawable.plain(context.getResources().getDisplayMetrics().density));
+        b.setPadding(dp(context, 14), dp(context, 6), dp(context, 14), dp(context, 9));
     }
 
     static TextView label(Context context, String text, float size, int color, boolean pixelFont) {

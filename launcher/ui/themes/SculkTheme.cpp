@@ -1064,6 +1064,82 @@ QTabBar::tab:selected {
 QSlider::sub-page:horizontal {
     background: @rainbowStrong@;
 }
+/* Vellora, made like Millida Launcher: buttons are raised blocks with a dark outline, a light top edge and a thick
+   dark bottom edge; pressed, the bottom edge goes away as if the block was pushed in */
+QPushButton, QToolBar QToolButton, QToolButton#quickChip {
+    background-color: #2b0e15;
+    color: #fbeff1;
+    border-radius: 2px;
+    border: 2px solid #060103;
+    border-top: 2px solid #4a1a26;
+    border-bottom: 5px solid #12040a;
+    padding: 4px 12px 3px 12px;
+    font-weight: bold;
+}
+QPushButton:hover, QToolBar QToolButton:hover {
+    background-color: #3d121c;
+    border-top-color: #6a2232;
+}
+QPushButton:pressed, QToolBar QToolButton:pressed {
+    border-bottom: 2px solid #12040a;
+    padding: 7px 12px 3px 12px;
+}
+QPushButton:disabled, QToolBar QToolButton:disabled {
+    background-color: #1c080d;
+    color: #8a5a62;
+    border-bottom-color: #0b0205;
+}
+QToolBar#instanceToolBar QToolButton#primaryAction, QPushButton#primaryAction, QPushButton#accentButton, QPushButton:default {
+    background-color: #e8364f;
+    color: #ffffff;
+    border: 2px solid #1e0408;
+    border-top: 2px solid #ff7586;
+    border-bottom: 5px solid #8e1428;
+}
+QToolBar#instanceToolBar QToolButton#primaryAction:hover, QPushButton#primaryAction:hover, QPushButton#accentButton:hover,
+QPushButton:default:hover {
+    background-color: #ff4a62;
+    color: #ffffff;
+}
+QPushButton:checked, QToolBar QToolButton:checked {
+    background-color: #e8364f;
+    color: #ffffff;
+    border-top-color: #ff7586;
+    border-bottom: 5px solid #8e1428;
+}
+QLineEdit, QComboBox, QSpinBox, QPlainTextEdit, QTextEdit {
+    border-radius: 2px;
+    border: 2px solid #5a1e2a;
+    background-color: #140509;
+}
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QPlainTextEdit:focus, QTextEdit:focus {
+    border-color: #e8364f;
+}
+QTabBar::tab {
+    border-radius: 2px;
+    border: 2px solid #060103;
+    border-bottom: 4px solid #12040a;
+    background-color: #2b0e15;
+    padding: 5px 14px;
+    margin-right: 4px;
+    font-weight: bold;
+}
+QTabBar::tab:selected {
+    background-color: #e8364f;
+    color: #ffffff;
+    border-bottom: 4px solid #8e1428;
+}
+QMenu, QToolTip {
+    border-radius: 2px;
+    border: 2px solid #5a1e2a;
+}
+QProgressBar {
+    border-radius: 2px;
+    border: 2px solid #060103;
+}
+QProgressBar::chunk {
+    border-radius: 0px;
+}
 )QSS");
     }
     const auto& c = colors();

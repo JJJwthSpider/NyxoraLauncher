@@ -110,6 +110,87 @@ final class Icons {
         });
     }
 
+    /**
+     * The whole player, seen from the front (the lobby of Millida Launcher shows the player like this): head, body,
+     * arms and legs from the skin with every outer layer (hat, jacket, sleeves, trousers), pixels kept sharp.
+     */
+    static void loadBody(final ImageView view, final String skinUrl, int fallback) {
+        final String key = "body:" + skinUrl;
+        view.setTag(key);
+        Bitmap cached = skinUrl == null || skinUrl.isEmpty() ? null : CACHE.get(key);
+        if (cached != null) {
+            view.setImageBitmap(cached);
+            return;
+        }
+        view.setImageResource(fallback);
+        if (skinUrl == null || skinUrl.isEmpty()) {
+            return;
+        }
+        POOL.execute(new Runnable() {
+            public void run() {
+                Bitmap skin = fetchRaw(skinUrl);
+                if (skin == null || skin.getWidth() < 64 || skin.getHeight() < 32) {
+                    return;
+                }
+                final Bitmap body = renderBody(skin, 16);
+                CACHE.put(key, body);
+                MAIN.post(new Runnable() {
+                    public void run() {
+                        if (key.equals(view.getTag())) {
+                            view.setImageBitmap(body);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    /** the front of a 64x64 (or old 64x32) skin as a 16x32 figure, scaled by `scale` */
+    static Bitmap renderBody(Bitmap skin, int scale) {
+        boolean modern = skin.getHeight() >= 64;
+        Bitmap out = Bitmap.createBitmap(16 * scale, 32 * scale, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(out);
+        Paint sharp = new Paint();
+        sharp.setFilterBitmap(false);
+        // { from x, from y, width, height, to x, to y, mirrored }
+        int[][] parts = {
+            { 8, 8, 8, 8, 4, 0, 0 },     // head
+            { 20, 20, 8, 12, 4, 8, 0 },  // body
+            { 44, 20, 4, 12, 0, 8, 0 },  // right arm
+            { 4, 20, 4, 12, 4, 20, 0 },  // right leg
+        };
+        for (int[] p : parts) {
+            part(canvas, skin, p[0], p[1], p[2], p[3], p[4], p[5], false, scale, sharp);
+        }
+        if (modern) {
+            part(canvas, skin, 36, 52, 4, 12, 12, 8, false, scale, sharp);  // left arm
+            part(canvas, skin, 20, 52, 4, 12, 8, 20, false, scale, sharp);  // left leg
+            part(canvas, skin, 20, 36, 8, 12, 4, 8, false, scale, sharp);   // jacket
+            part(canvas, skin, 44, 36, 4, 12, 0, 8, false, scale, sharp);   // right sleeve
+            part(canvas, skin, 52, 52, 4, 12, 12, 8, false, scale, sharp);  // left sleeve
+            part(canvas, skin, 4, 36, 4, 12, 4, 20, false, scale, sharp);   // right trouser
+            part(canvas, skin, 4, 52, 4, 12, 8, 20, false, scale, sharp);   // left trouser
+        } else {
+            part(canvas, skin, 44, 20, 4, 12, 12, 8, true, scale, sharp);
+            part(canvas, skin, 4, 20, 4, 12, 8, 20, true, scale, sharp);
+        }
+        part(canvas, skin, 40, 8, 8, 8, 4, 0, false, scale, sharp);         // hat
+        return out;
+    }
+
+    private static void part(Canvas canvas, Bitmap skin, int x, int y, int w, int h, int toX, int toY, boolean mirror, int scale, Paint paint) {
+        if (x + w > skin.getWidth() || y + h > skin.getHeight()) {
+            return;
+        }
+        Bitmap piece = Bitmap.createBitmap(skin, x, y, w, h);
+        if (mirror) {
+            android.graphics.Matrix flip = new android.graphics.Matrix();
+            flip.preScale(-1, 1);
+            piece = Bitmap.createBitmap(piece, 0, 0, w, h, flip, false);
+        }
+        canvas.drawBitmap(piece, null, new android.graphics.Rect(toX * scale, toY * scale, (toX + w) * scale, (toY + h) * scale), paint);
+    }
+
     private static Bitmap fetch(String url) {
         Bitmap full = fetchRaw(url);
         return full == null ? null : rounded(full);

@@ -31,8 +31,9 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * The main screen, like the main window of the desktop launcher: the tiles on the left (Moony, ready packs, new
- * installation), the installations in the middle and what to do with the selected one on the right.
+ * The main screen, made like Millida Launcher in Vellora's colours: the lobby (picture tiles on the left, the player in
+ * the middle, Arkan the wizard on the right, "Сегодня играем" with a big Play button below) and the library (search,
+ * "Мои сборки" and what to do with the selected one); the catalog opens from the tabs at the top.
  */
 final class HomeScreen {
     private final MainActivity activity;
@@ -51,6 +52,12 @@ final class HomeScreen {
     private ImageView playIcon;
     private TextView playName;
     private TextView playInfo;
+    private LinearLayout lobby;    // like Millida Launcher: the lobby with the player and Play
+    private LinearLayout library;  // and the library of installations
+    private Button lobbyTab;
+    private Button libraryTab;
+    private ImageView playerBody;
+    private TextView playerName;
 
     HomeScreen(MainActivity activity) {
         this.activity = activity;
@@ -58,147 +65,150 @@ final class HomeScreen {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackground(new RainDrawable(activity.getResources().getDisplayMetrics().density));
 
-        // top bar: name, search, menu
+        // the top bar like Millida Launcher's: the name, the tabs, square icon buttons and the player
         LinearLayout bar = new LinearLayout(activity);
         bar.setGravity(Gravity.CENTER_VERTICAL);
-        bar.setPadding(dp(12), dp(6), dp(8), dp(6));
-        bar.setBackgroundColor(0xCC140509);
+        bar.setPadding(dp(10), dp(6), dp(8), dp(6));
+        bar.setBackgroundColor(0xE60B0305);
         ImageView logo = new ImageView(activity);
         logo.setImageResource(R.drawable.install_default);
         bar.addView(logo, new LinearLayout.LayoutParams(dp(34), dp(34)));
-        TextView title = Ui.label(activity, "Vellora Client", 18, Ui.ACCENT, true);
-        title.setPadding(dp(10), 0, dp(16), 0);
+        TextView title = Ui.label(activity, "VELLORA", 17, Ui.ACCENT, true);
+        title.setPadding(dp(8), 0, dp(14), 0);
         bar.addView(title);
-        search = new EditText(activity);
-        search.setHint("Найти установку...");
-        search.setHintTextColor(Ui.HINT);
-        search.setTextColor(Ui.TEXT);
-        search.setTextSize(14);
-        search.setSingleLine(true);
-        search.setBackground(Ui.rounded(activity, Ui.GLASS, 18, Ui.LINE));
-        search.setPadding(dp(12), dp(6), dp(12), dp(6));
-        search.addTextChangedListener(new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            public void afterTextChanged(Editable s) {
-                filter();
+        lobbyTab = tab("Лобби", true);
+        libraryTab = tab("Библиотека", false);
+        Button catalogTab = tab("Каталог", false);
+        lobbyTab.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                showPage(true);
             }
         });
-        bar.addView(search, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        Button controlsButton = Ui.button(activity, "Управление", false);
-        controlsButton.setOnClickListener(new View.OnClickListener() {
+        libraryTab.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                showPage(false);
+            }
+        });
+        catalogTab.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                HomeScreen.this.activity.openBrowser(null, BrowserScreen.MODPACK);
+            }
+        });
+        bar.addView(lobbyTab);
+        bar.addView(libraryTab);
+        bar.addView(catalogTab);
+        bar.addView(new View(activity), new LinearLayout.LayoutParams(0, 1, 1));
+        bar.addView(square("🎮", "Управление", new Runnable() {
+            public void run() {
                 HomeScreen.this.activity.openControls();
             }
-        });
-        LinearLayout.LayoutParams first = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        first.leftMargin = dp(8);
-        bar.addView(controlsButton, first);
-        Button chats = Ui.button(activity, "Чаты", false);
-        chats.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+        }));
+        bar.addView(square("💬", "Чаты с Арканом", new Runnable() {
+            public void run() {
                 HomeScreen.this.activity.showChatList();
             }
-        });
-        LinearLayout.LayoutParams barButton = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        barButton.leftMargin = dp(8);
-        bar.addView(chats, barButton);
-        Button more = Ui.button(activity, "⋮", false);
-        more.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+        }));
+        bar.addView(square("⚙", "Меню", new Runnable() {
+            public void run() {
                 HomeScreen.this.activity.showAppMenu();
             }
-        });
-        bar.addView(more, new LinearLayout.LayoutParams(dp(44), ViewGroup.LayoutParams.WRAP_CONTENT));
-        // the signed-in player: head and name, like the account button of the desktop launcher
+        }));
+        // the signed-in player: head and name
         accountChip = new LinearLayout(activity);
         accountChip.setGravity(Gravity.CENTER_VERTICAL);
-        accountChip.setPadding(dp(8), dp(4), dp(10), dp(4));
-        accountChip.setBackground(Ui.rounded(activity, Ui.GLASS, 18, Ui.LINE));
+        accountChip.setPadding(dp(8), dp(4), dp(10), dp(6));
+        accountChip.setBackground(PixelDrawable.plain(activity.getResources().getDisplayMetrics().density));
         head = new ImageView(activity);
         accountChip.addView(head, new LinearLayout.LayoutParams(dp(28), dp(28)));
+        LinearLayout who = new LinearLayout(activity);
+        who.setOrientation(LinearLayout.VERTICAL);
+        who.setPadding(dp(8), 0, 0, 0);
         accountName = Ui.label(activity, "", 13, Ui.TEXT, true);
-        accountName.setPadding(dp(8), 0, 0, 0);
-        accountChip.addView(accountName);
+        who.addView(accountName);
+        accountChip.addView(who);
         accountChip.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 HomeScreen.this.activity.showAccount();
             }
         });
-        LinearLayout.LayoutParams chipParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        chipParams.leftMargin = dp(8);
+        LinearLayout.LayoutParams chipParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(44));
+        chipParams.leftMargin = dp(6);
         bar.addView(accountChip, chipParams);
         root.addView(bar);
 
-        LinearLayout body = new LinearLayout(activity);
-        root.addView(body, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        android.widget.FrameLayout pages = new android.widget.FrameLayout(activity);
+        root.addView(pages, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
 
-        // left: the three tiles of the desktop launcher
+        /* ---------------- the lobby: tiles on the left, the player in the middle, Arkan on the right, Play below */
+        lobby = new LinearLayout(activity);
+        lobby.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout stage = new LinearLayout(activity);
+        lobby.addView(stage, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         LinearLayout tiles = new LinearLayout(activity);
         tiles.setOrientation(LinearLayout.VERTICAL);
-        tiles.setPadding(dp(10), dp(10), dp(4), dp(10));
-        tiles.addView(tile(R.drawable.wizard, "ИИ-маг Аркан", "Сборка по описанию", new Runnable() {
-            public void run() {
-                HomeScreen.this.activity.openChat(null);
-            }
-        }), tileParams());
-        tiles.addView(tile(R.drawable.tile_packs, "Готовые сборки", "Модпаки с Modrinth", new Runnable() {
+        tiles.setPadding(dp(10), dp(10), dp(4), dp(6));
+        tiles.addView(tile(R.drawable.tile_packs, "Готовые сборки", "Modrinth и CurseForge", new Runnable() {
             public void run() {
                 HomeScreen.this.activity.openBrowser(null, BrowserScreen.MODPACK);
             }
         }), tileParams());
-        tiles.addView(tile(R.drawable.tile_new, "Новая установка", "Версия, загрузчик и моды", new Runnable() {
+        tiles.addView(tile(R.drawable.tile_new, "Новая сборка", "Версия, загрузчик, моды", new Runnable() {
             public void run() {
                 newInstallation();
             }
         }), tileParams());
-        body.addView(tiles, new LinearLayout.LayoutParams(dp(170), ViewGroup.LayoutParams.MATCH_PARENT));
+        tiles.addView(tile(R.drawable.install_default, "Мой скин", "Скин и ник", new Runnable() {
+            public void run() {
+                HomeScreen.this.activity.showAccount();
+            }
+        }), tileParams());
+        stage.addView(tiles, new LinearLayout.LayoutParams(dp(170), ViewGroup.LayoutParams.MATCH_PARENT));
 
-        // middle: the installations
+        // the player, big, like the character in Millida's lobby
         LinearLayout middle = new LinearLayout(activity);
         middle.setOrientation(LinearLayout.VERTICAL);
-        grid = new GridView(activity);
-        grid.setNumColumns(GridView.AUTO_FIT);
-        grid.setColumnWidth(dp(150));
-        grid.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
-        grid.setHorizontalSpacing(dp(8));
-        grid.setVerticalSpacing(dp(8));
-        grid.setPadding(dp(8), dp(10), dp(8), dp(10));
-        grid.setClipToPadding(false);
-        grid.setSelector(new android.graphics.drawable.ColorDrawable(0));
-        grid.setAdapter(adapter);
-        grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                select(shown.get(position).id);
+        middle.setGravity(Gravity.CENTER);
+        playerBody = new ImageView(activity);
+        playerBody.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        middle.addView(playerBody, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        playerName = Ui.label(activity, "", 16, Ui.TEXT, true);
+        playerName.setGravity(Gravity.CENTER);
+        middle.addView(playerName);
+        stage.addView(middle, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
+
+        // Arkan's card: the wizard and "Собрать с ИИ"
+        LinearLayout arkan = new LinearLayout(activity);
+        arkan.setOrientation(LinearLayout.VERTICAL);
+        arkan.setGravity(Gravity.CENTER_HORIZONTAL);
+        arkan.setPadding(dp(10), dp(10), dp(10), dp(10));
+        arkan.setBackground(Ui.rounded(activity, 0xE6140509, 0, 0xFF8A3442));
+        TextView arkanTop = Ui.label(activity, "ИИ-МАГ", 11, 0xFFFF8090, true);
+        arkan.addView(arkanTop);
+        WizardView wizard = new WizardView(activity);
+        arkan.addView(wizard, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        TextView arkanName = Ui.label(activity, "Аркан", 18, Ui.TEXT, true);
+        arkan.addView(arkanName);
+        TextView arkanText = Ui.label(activity, "Опиши сборку словами — соберу её из модов", 12, Ui.HINT, false);
+        arkanText.setGravity(Gravity.CENTER);
+        arkan.addView(arkanText);
+        Button ask = Ui.button(activity, "Собрать с ИИ", true);
+        ask.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                HomeScreen.this.activity.openChat(null);
             }
         });
-        empty = Ui.label(activity, "Привет! Чтобы начать играть, нажми «Новая установка», выбери «Готовые сборки» или попроси Аркана собрать сборку.",
-                         16, Ui.TEXT, true);
-        empty.setGravity(Gravity.CENTER);
-        empty.setPadding(dp(18), dp(14), dp(18), dp(14));
-        empty.setBackground(Ui.rounded(activity, Ui.GLASS, 12, Ui.ACCENT));
-        LinearLayout.LayoutParams emptyParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        emptyParams.setMargins(dp(24), dp(40), dp(24), 0);
-        middle.addView(empty, emptyParams);
-        middle.addView(grid, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
-        body.addView(middle, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
+        LinearLayout.LayoutParams askParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        askParams.topMargin = dp(6);
+        arkan.addView(ask, askParams);
+        LinearLayout.LayoutParams arkanParams = new LinearLayout.LayoutParams(dp(200), ViewGroup.LayoutParams.MATCH_PARENT);
+        arkanParams.setMargins(dp(4), dp(10), dp(10), dp(6));
+        stage.addView(arkan, arkanParams);
 
-        // right: what to do with the selected installation
-        ScrollView side = new ScrollView(activity);
-        actions = new LinearLayout(activity);
-        actions.setOrientation(LinearLayout.VERTICAL);
-        actions.setPadding(dp(10), dp(10), dp(10), dp(10));
-        side.addView(actions);
-        side.setBackgroundColor(0x99140509);
-        body.addView(side, new LinearLayout.LayoutParams(dp(210), ViewGroup.LayoutParams.MATCH_PARENT));
-
-        // bottom: what we play today
+        // bottom: what we play today and the big Play button
         playBar = new LinearLayout(activity);
         playBar.setGravity(Gravity.CENTER_VERTICAL);
-        playBar.setPadding(dp(12), dp(8), dp(12), dp(8));
-        playBar.setBackground(Ui.rounded(activity, 0xE61C080D, 14, 0xFF8A3442));
+        playBar.setPadding(dp(12), dp(8), dp(12), dp(10));
+        playBar.setBackground(Ui.rounded(activity, 0xE61C080D, 0, 0xFF8A3442));
         playIcon = new ImageView(activity);
         playBar.addView(playIcon, new LinearLayout.LayoutParams(dp(46), dp(46)));
         LinearLayout texts = new LinearLayout(activity);
@@ -212,21 +222,157 @@ final class HomeScreen {
         playInfo = Ui.label(activity, "", 12, Ui.HINT, false);
         texts.addView(playInfo);
         playBar.addView(texts, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button choose = Ui.button(activity, "Сменить", false);
+        choose.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                showPage(false);
+            }
+        });
+        playBar.addView(choose, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(48)));
         Button play = Ui.button(activity, "▶  Играть", true);
-        play.setTextSize(20);
+        play.setTextSize(22);
         play.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Installation inst = selected();
                 if (inst != null) {
                     HomeScreen.this.activity.playInstallation(inst);
+                } else {
+                    newInstallation();
                 }
             }
         });
-        playBar.addView(play, new LinearLayout.LayoutParams(dp(180), dp(52)));
+        LinearLayout.LayoutParams playParams = new LinearLayout.LayoutParams(dp(220), dp(56));
+        playParams.leftMargin = dp(8);
+        playBar.addView(play, playParams);
         LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        barParams.setMargins(dp(8), 0, dp(8), dp(8));
-        middle.addView(playBar, barParams);  // under the installations: the tiles and the side panel keep their height
-        playBar.setVisibility(View.GONE);
+        barParams.setMargins(dp(10), 0, dp(10), dp(8));
+        lobby.addView(playBar, barParams);
+        pages.addView(lobby);
+
+        /* ---------------- the library: search, the installations, what to do with the selected one */
+        library = new LinearLayout(activity);
+        LinearLayout listColumn = new LinearLayout(activity);
+        listColumn.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout searchRow = new LinearLayout(activity);
+        searchRow.setGravity(Gravity.CENTER_VERTICAL);
+        searchRow.setPadding(dp(10), dp(8), dp(4), 0);
+        search = new EditText(activity);
+        search.setHint("Сборка, мод или просьба к ИИ...");
+        search.setHintTextColor(Ui.HINT);
+        search.setTextColor(Ui.TEXT);
+        search.setTextSize(14);
+        search.setSingleLine(true);
+        search.setBackground(Ui.rounded(activity, 0xE6140509, 0, 0xFF5A1E2A));
+        search.setPadding(dp(12), dp(8), dp(12), dp(8));
+        search.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            public void afterTextChanged(Editable s) {
+                filter();
+            }
+        });
+        searchRow.addView(search, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button withAi = Ui.button(activity, "Собрать с ИИ", false);
+        withAi.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                HomeScreen.this.activity.askWizard(search.getText().toString());
+            }
+        });
+        LinearLayout.LayoutParams aiParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        aiParams.leftMargin = dp(6);
+        searchRow.addView(withAi, aiParams);
+        Button add = Ui.button(activity, "+ Новая", true);
+        add.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                newInstallation();
+            }
+        });
+        searchRow.addView(add, aiParams);
+        listColumn.addView(searchRow);
+        TextView mine = Ui.label(activity, "Мои сборки", 20, Ui.TEXT, true);
+        mine.setPadding(dp(12), dp(10), 0, 0);
+        listColumn.addView(mine);
+        grid = new GridView(activity);
+        grid.setNumColumns(GridView.AUTO_FIT);
+        grid.setColumnWidth(dp(150));
+        grid.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+        grid.setHorizontalSpacing(dp(8));
+        grid.setVerticalSpacing(dp(8));
+        grid.setPadding(dp(8), dp(8), dp(8), dp(10));
+        grid.setClipToPadding(false);
+        grid.setSelector(new android.graphics.drawable.ColorDrawable(0));
+        grid.setAdapter(adapter);
+        grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                select(shown.get(position).id);
+            }
+        });
+        empty = Ui.label(activity, "Пока пусто. Нажми «+ Новая», загляни в «Каталог» или попроси Аркана собрать сборку.", 16, Ui.TEXT, true);
+        empty.setGravity(Gravity.CENTER);
+        empty.setPadding(dp(18), dp(14), dp(18), dp(16));
+        empty.setBackground(Ui.rounded(activity, Ui.GLASS, 0, 0xFFFF5A6E));
+        LinearLayout.LayoutParams emptyParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        emptyParams.setMargins(dp(24), dp(30), dp(24), 0);
+        listColumn.addView(empty, emptyParams);
+        listColumn.addView(grid, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        library.addView(listColumn, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
+        ScrollView side = new ScrollView(activity);
+        actions = new LinearLayout(activity);
+        actions.setOrientation(LinearLayout.VERTICAL);
+        actions.setPadding(dp(10), dp(10), dp(10), dp(10));
+        side.addView(actions);
+        side.setBackgroundColor(0xCC0B0305);
+        library.addView(side, new LinearLayout.LayoutParams(dp(210), ViewGroup.LayoutParams.MATCH_PARENT));
+        pages.addView(library);
+        showPage(true);
+    }
+
+    /** the lobby or the library */
+    void showPage(boolean lobbyPage) {
+        lobby.setVisibility(lobbyPage ? View.VISIBLE : View.GONE);
+        library.setVisibility(lobbyPage ? View.GONE : View.VISIBLE);
+        Ui.styleButton(activity, lobbyTab, lobbyPage);
+        Ui.styleButton(activity, libraryTab, !lobbyPage);
+        if (!lobbyPage) {
+            // the grid does not lay itself out while hidden: refresh it when it comes back
+            adapter.notifyDataSetChanged();
+            grid.invalidateViews();
+            grid.requestLayout();
+        }
+    }
+
+    private Button tab(String text, boolean chosen) {
+        Button b = Ui.button(activity, text, chosen);
+        b.setTextSize(14);
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        p.rightMargin = dp(4);
+        b.setLayoutParams(p);
+        return b;
+    }
+
+    /** a square icon button of the top bar */
+    private Button square(String icon, final String what, final Runnable action) {
+        Button b = Ui.button(activity, icon, false);
+        b.setTextSize(18);
+        b.setPadding(0, 0, 0, dp(3));
+        b.setContentDescription(what);
+        b.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                action.run();
+            }
+        });
+        b.setOnLongClickListener(new View.OnLongClickListener() {
+            public boolean onLongClick(View v) {
+                android.widget.Toast.makeText(activity, what, android.widget.Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(dp(46), dp(46));
+        p.leftMargin = dp(6);
+        b.setLayoutParams(p);
+        return b;
     }
 
     private void updatePlayBar() {
@@ -258,23 +404,27 @@ final class HomeScreen {
         return p;
     }
 
+    /** a big picture tile with its name on a dark strip over the bottom of the picture, like the tiles in Millida's lobby */
     private View tile(int picture, String title, String subtitle, final Runnable action) {
-        LinearLayout tile = new LinearLayout(activity);
-        tile.setOrientation(LinearLayout.VERTICAL);
-        tile.setGravity(Gravity.CENTER);
-        tile.setPadding(dp(6), dp(6), dp(6), dp(6));
-        tile.setBackground(Ui.rounded(activity, Ui.GLASS, 12, 0xCCFF5A6E));
+        android.widget.FrameLayout tile = new android.widget.FrameLayout(activity);
+        tile.setPadding(dp(4), dp(4), dp(4), dp(7));
+        tile.setBackground(PixelDrawable.plain(activity.getResources().getDisplayMetrics().density));
         ImageView image = new ImageView(activity);
         image.setImageResource(picture);
-        image.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        image.setAdjustViewBounds(true);
-        tile.addView(image, new LinearLayout.LayoutParams(dp(54), 0, 1));  // shrinks on short screens, the words stay
+        image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        image.setBackgroundColor(0xFF1E070D);
+        tile.addView(image, new android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        LinearLayout strip = new LinearLayout(activity);
+        strip.setOrientation(LinearLayout.VERTICAL);
+        strip.setBackgroundColor(0xD9140509);
+        strip.setPadding(dp(8), dp(3), dp(6), dp(4));
         TextView t = Ui.label(activity, title, 14, Ui.TEXT, true);
-        t.setGravity(Gravity.CENTER);
-        tile.addView(t);
-        TextView s = Ui.label(activity, subtitle, 11, Ui.HINT, false);
-        s.setGravity(Gravity.CENTER);
-        tile.addView(s);
+        strip.addView(t);
+        TextView s = Ui.label(activity, subtitle, 10, Ui.HINT, false);
+        s.setSingleLine(true);
+        strip.addView(s);
+        tile.addView(strip, new android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                                         ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
         tile.setClickable(true);
         tile.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -294,6 +444,8 @@ final class HomeScreen {
         accountChip.setVisibility(View.VISIBLE);
         accountName.setText(account.ownsJava ? account.name : "Без Java Edition");
         Icons.loadHead(head, account.skinUrl, R.drawable.wizard);
+        Icons.loadBody(playerBody, account.skinUrl, R.drawable.install_default);
+        playerName.setText(account.name);
     }
 
     /* ------------------------------------------------------------ the list */
@@ -309,6 +461,7 @@ final class HomeScreen {
 
     void select(String id) {
         selectedId = id;
+        showPage(false);  // a chosen installation is shown with its actions in the library
         adapter.notifyDataSetChanged();
         updateActions();
     }
@@ -602,6 +755,7 @@ final class HomeScreen {
                 }
                 selectedId = inst.id;
                 refresh();
+                select(inst.id);  // the new installation opens in the library, with its actions
                 Toast.makeText(activity, "Установка «" + inst.name + "» готова. Добавь моды в «Моды и ресурсы».", Toast.LENGTH_LONG).show();
             }
         });

@@ -506,14 +506,8 @@ public final class MainActivity extends Activity {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, getResources().getDisplayMetrics());
     }
 
-    private GradientDrawable rounded(int color, float radius, int stroke) {
-        GradientDrawable d = new GradientDrawable();
-        d.setColor(color);
-        d.setCornerRadius(dp(radius));
-        if (stroke != 0) {
-            d.setStroke(dp(1), stroke);
-        }
-        return d;
+    private android.graphics.drawable.Drawable rounded(int color, float radius, int stroke) {
+        return Ui.rounded(this, color, radius, stroke);
     }
 
     private Button button(String text, boolean accent) {
@@ -523,15 +517,8 @@ public final class MainActivity extends Activity {
         b.setTypeface(pixel);
         b.setTextSize(15);
         b.setTextColor(accent ? Color.WHITE : TEXT);
-        if (accent) {
-            GradientDrawable rainbow = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, RAINBOW_PASTEL);
-            rainbow.setCornerRadius(dp(10));
-            rainbow.setStroke(dp(1), 0xFFFF8A98);
-            b.setBackground(rainbow);
-        } else {
-            b.setBackground(rounded(PANEL_LIGHT, 10, LINE));
-        }
-        b.setPadding(dp(14), dp(6), dp(14), dp(6));
+        b.setBackground(accent ? Ui.rainbow(this, 10) : PixelDrawable.plain(getResources().getDisplayMetrics().density));
+        b.setPadding(dp(14), dp(6), dp(14), dp(9));
         b.setMinHeight(dp(40));
         b.setMinimumHeight(dp(40));
         return b;
