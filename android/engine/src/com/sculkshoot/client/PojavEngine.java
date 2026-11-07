@@ -476,6 +476,10 @@ public final class PojavEngine extends GameEngine {
         // the files: mods, resource packs, shaders and the modpack's own files
         File gameDir = new File(Tools.DIR_GAME_HOME, "custom_instances/lullaby-" + inst.id);
         installFiles(activity, inst, gameDir, log);
+        // mods that close the game on purpose on a phone (Sodium): their check is switched off
+        for (String fixed : ModFixes.fixMods(new File(gameDir, "mods"))) {
+            log.log("Исправил для телефона: " + fixed);
+        }
 
         // the loader
         String versionId = versionId(inst);
@@ -765,7 +769,7 @@ public final class PojavEngine extends GameEngine {
             String path = mod.targetPath();
             now.add(path);
             File target = new File(gameDir, path);
-            if (target.isFile() && (mod.sha1.isEmpty() || mod.sha1.equalsIgnoreCase(Installer.sha1(target)))) {
+            if (target.isFile() && (mod.sha1.isEmpty() || ModFixes.fixedUnchanged(target) || mod.sha1.equalsIgnoreCase(Installer.sha1(target)))) {
                 continue;
             }
             log.log("Скачиваю " + i + "/" + included.size() + ": " + mod.title);

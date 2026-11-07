@@ -76,7 +76,7 @@ abstract class GameEngine {
 
     /**
      * The memory for one start: what the player picked, or by the size of the installation: 2 GB for vanilla and small
-     * packs, about 12 MB more for every mod above 60 (big packs like Insane Craft get 4-6 GB), never more than about
+     * packs (3 GB with mods on 1.18 and newer), about 12 MB more for every mod above 60 (big packs like Insane Craft get 4-6 GB), never more than about
      * half of the phone's memory, so Android does not close the game.
      */
     static int memoryFor(Activity activity, Installation inst) {
@@ -90,7 +90,9 @@ abstract class GameEngine {
         for (Mod mod : inst.mods) {
             mods += mod.enabled && Mod.MOD.equals(mod.kind) ? 1 : 0;
         }
-        int mb = 2048 + Math.max(0, mods - 60) * 12;
+        // the new loaders (NeoForge, Forge and Fabric on 1.18 and newer) start with more of their own code: 3 GB
+        boolean modernModded = mods > 0 && (!inst.minecraftVersion.startsWith("1.") || Plan.compareVersions(inst.minecraftVersion, "1.18") >= 0);
+        int mb = (modernModded ? 3072 : 2048) + Math.max(0, mods - 60) * 12;
         mb = Math.min(cap, mb);
         return Math.max(1024, mb / 256 * 256);
     }
