@@ -45,6 +45,9 @@ final class ControlsScreen {
     private final LinearLayout root;
     private final Controls controls;
     private final Preview preview;
+    private Controls.Custom selected;   // the own button being moved or edited
+    private TextView selectedLabel;
+    private LinearLayout selectedPanel;
 
     ControlsScreen(MainActivity activity) {
         this.activity = activity;
@@ -113,6 +116,53 @@ final class ControlsScreen {
             }
         }));
 
+        // the player's own buttons: any key, put anywhere on the preview
+        TextView ownTitle = Ui.label(activity, "Свои кнопки", 15, Ui.ACCENT, true);
+        ownTitle.setPadding(0, dp(14), 0, dp(2));
+        side.addView(ownTitle);
+        side.addView(Ui.label(activity, "Добавь кнопку с любой клавишей и перетащи её на превью пальцем.", 11, Ui.HINT, false));
+        Button addOwn = Ui.button(activity, "+ Добавить кнопку", true);
+        addOwn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                editCustom(null);
+            }
+        });
+        LinearLayout.LayoutParams ap = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        ap.topMargin = dp(8);
+        side.addView(addOwn, ap);
+        selectedPanel = new LinearLayout(activity);
+        selectedPanel.setOrientation(LinearLayout.VERTICAL);
+        selectedPanel.setVisibility(View.GONE);
+        selectedLabel = Ui.label(activity, "", 13, Ui.TEXT, false);
+        selectedLabel.setPadding(0, dp(8), 0, dp(4));
+        selectedPanel.addView(selectedLabel);
+        LinearLayout row = new LinearLayout(activity);
+        Button edit = Ui.button(activity, "Изменить", false);
+        edit.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (selected != null) {
+                    editCustom(selected);
+                }
+            }
+        });
+        Button delete = Ui.button(activity, "Удалить", false);
+        delete.setTextColor(Ui.DANGER);
+        delete.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (selected != null) {
+                    controls.custom.remove(selected);
+                    select(null);
+                    changedSettings();
+                }
+            }
+        });
+        LinearLayout.LayoutParams half = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+        half.rightMargin = dp(4);
+        row.addView(edit, half);
+        row.addView(delete, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        selectedPanel.addView(row);
+        side.addView(selectedPanel);
+
         if (GameEngine.get() != null) {
             // the full build: the game starts inside Lullaby with these buttons, nothing to send
             TextView built = Ui.label(activity, "Эти кнопки сами появятся в игре, когда нажмёшь «Играть».", 13, Ui.ACCENT, false);
@@ -151,6 +201,10 @@ final class ControlsScreen {
     }
 
     private View slider(final String name, final int min, int max, int value, final Changed changed) {
+        return slider(name, min, max, value, changed, true);
+    }
+
+    private View slider(final String name, final int min, int max, int value, final Changed changed, final boolean live) {
         LinearLayout box = new LinearLayout(activity);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(0, dp(10), 0, 0);
@@ -164,7 +218,9 @@ final class ControlsScreen {
                 int v = min + progress * 5;
                 label.setText(name + ": " + v + "%");
                 changed.to(v);
-                changedSettings();
+                if (live) {
+                    changedSettings();
+                }
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -188,6 +244,146 @@ final class ControlsScreen {
             }
         });
         return box;
+    }
+
+    private void select(Controls.Custom c) {
+        selected = c;
+        selectedPanel.setVisibility(c == null ? View.GONE : View.VISIBLE);
+        if (c != null) {
+            selectedLabel.setText("Выбрана «" + c.name + "»: " + keysText(c) + (c.toggle ? ", держится" : ""));
+        }
+        preview.invalidate();
+    }
+
+    static String keysText(Controls.Custom c) {
+        return Controls.keyName(c.key) + (c.key2 != 0 ? " + " + Controls.keyName(c.key2) : "");
+    }
+
+    /** the dialog for a new button (c == null) or an existing one: keys, label, size, hold or toggle */
+    private void editCustom(final Controls.Custom existing) {
+        final Controls.Custom c = new Controls.Custom();
+        if (existing != null) {
+            c.name = existing.name;
+            c.key = existing.key;
+            c.key2 = existing.key2;
+            c.size = existing.size;
+            c.toggle = existing.toggle;
+            c.fx = existing.fx;
+            c.fy = existing.fy;
+        } else {
+            c.key = 'R';
+            c.name = "R";
+        }
+        final List<Object[]> keys = Controls.keyCatalogue();
+        final String[] keyNames = new String[keys.size()];
+        for (int i = 0; i < keys.size(); i++) {
+            keyNames[i] = (String) keys.get(i)[1];
+        }
+
+        LinearLayout box = new LinearLayout(activity);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(18), dp(8), dp(18), 0);
+        final Button keyButton = Ui.button(activity, "Клавиша: " + Controls.keyName(c.key), true);
+        final Button key2Button = Ui.button(activity, "Вместе с: " + (c.key2 == 0 ? "ничем" : Controls.keyName(c.key2)), false);
+        final android.widget.EditText name = new android.widget.EditText(activity);
+        name.setSingleLine(true);
+        name.setText(c.name);
+        name.setHint("Подпись на кнопке");
+        name.setTextColor(Ui.TEXT);
+        name.setHintTextColor(Ui.HINT);
+        keyButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                new AlertDialog.Builder(activity).setTitle("Какую клавишу нажимать").setItems(keyNames, new android.content.DialogInterface.OnClickListener() {
+                    public void onClick(android.content.DialogInterface d, int which) {
+                        String oldName = Controls.keyName(c.key);
+                        c.key = (Integer) keys.get(which)[0];
+                        keyButton.setText("Клавиша: " + keyNames[which]);
+                        // the label follows the key until the player writes their own
+                        String label = name.getText().toString().trim();
+                        if (label.isEmpty() || label.equals(oldName) || label.length() <= 2) {
+                            name.setText(shortName(keyNames[which]));
+                        }
+                    }
+                }).show();
+            }
+        });
+        key2Button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                final String[] withNone = new String[keyNames.length + 1];
+                withNone[0] = "ничем (одна клавиша)";
+                System.arraycopy(keyNames, 0, withNone, 1, keyNames.length);
+                new AlertDialog.Builder(activity).setTitle("Нажимать вместе с (например, F3 + G)").setItems(withNone, new android.content.DialogInterface.OnClickListener() {
+                    public void onClick(android.content.DialogInterface d, int which) {
+                        c.key2 = which == 0 ? 0 : (Integer) keys.get(which - 1)[0];
+                        key2Button.setText("Вместе с: " + (c.key2 == 0 ? "ничем" : withNone[which]));
+                    }
+                }).show();
+            }
+        });
+        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        bp.topMargin = dp(6);
+        box.addView(keyButton, bp);
+        box.addView(key2Button, new LinearLayout.LayoutParams(bp));
+        box.addView(name, new LinearLayout.LayoutParams(bp));
+        box.addView(slider("Размер", 60, 160, c.size, new Changed() {
+            public void to(int value) {
+                c.size = value;
+            }
+        }, false));
+        CheckBox toggle = new CheckBox(activity);
+        toggle.setText("Нажал — держится, нажал ещё раз — отпустилась");
+        toggle.setTextColor(Ui.TEXT);
+        toggle.setChecked(c.toggle);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton button, boolean checked) {
+                c.toggle = checked;
+            }
+        });
+        box.addView(toggle);
+        android.widget.ScrollView scroll = new android.widget.ScrollView(activity);
+        scroll.addView(box);
+
+        new AlertDialog.Builder(activity)
+            .setTitle(existing == null ? "Новая кнопка" : "Кнопка «" + existing.name + "»")
+            .setView(scroll)
+            .setPositiveButton(existing == null ? "Добавить" : "Сохранить", new android.content.DialogInterface.OnClickListener() {
+                public void onClick(android.content.DialogInterface d, int which) {
+                    c.name = name.getText().toString().trim();
+                    if (c.name.isEmpty()) {
+                        c.name = shortName(Controls.keyName(c.key));
+                    }
+                    Controls.Custom target = existing;
+                    if (target == null) {
+                        target = c;
+                        controls.custom.add(target);
+                    } else {
+                        target.name = c.name;
+                        target.key = c.key;
+                        target.key2 = c.key2;
+                        target.size = c.size;
+                        target.toggle = c.toggle;
+                    }
+                    select(target);
+                    changedSettings();
+                    if (existing == null) {
+                        Toast.makeText(activity, "Кнопка в центре превью — перетащи её пальцем", Toast.LENGTH_LONG).show();
+                    }
+                }
+            })
+            .setNegativeButton("Отмена", null)
+            .show();
+    }
+
+    /** a label that fits on a button: "Стрелка вверх" → "↑" */
+    static String shortName(String keyName) {
+        if (keyName.startsWith("Стрелка ")) {
+            return keyName.endsWith("вверх") ? "↑" : keyName.endsWith("вниз") ? "↓" : keyName.endsWith("влево") ? "←" : "→";
+        }
+        if (keyName.contains("мыши")) {
+            return keyName.startsWith("Левая") ? "ЛКМ" : keyName.startsWith("Правая") ? "ПКМ" : "СКМ";
+        }
+        int space = keyName.indexOf(" (");
+        return space > 0 ? keyName.substring(0, space) : keyName;
     }
 
     private void changedSettings() {
@@ -261,8 +457,52 @@ final class ControlsScreen {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final RectF rect = new RectF();
 
+        private float scale = 1;
+        private Controls.Custom dragging;
+
         Preview(Context context) {
             super(context);
+        }
+
+        /** touch an own button to select it, move the finger to put it somewhere else */
+        @Override
+        public boolean onTouchEvent(android.view.MotionEvent e) {
+            float sx = (e.getX() - rect.left) / rect.width();
+            float sy = (e.getY() - rect.top) / rect.height();
+            switch (e.getActionMasked()) {
+                case android.view.MotionEvent.ACTION_DOWN:
+                    dragging = null;
+                    List<Controls.Button> all = controls.buttons();
+                    for (int i = all.size() - 1; i >= 0 && dragging == null; i--) {
+                        Controls.Button b = all.get(i);
+                        if (b.custom == null) {
+                            continue;
+                        }
+                        float l = rect.left + b.left(800) * scale;
+                        float t = rect.top + b.top(370) * scale;
+                        if (e.getX() >= l - 8 && e.getX() <= l + b.width * scale + 8 && e.getY() >= t - 8 && e.getY() <= t + b.height * scale + 8) {
+                            dragging = b.custom;
+                        }
+                    }
+                    select(dragging);
+                    return dragging != null;
+                case android.view.MotionEvent.ACTION_MOVE:
+                    if (dragging != null) {
+                        dragging.fx = Math.max(0.03f, Math.min(0.97f, sx));
+                        dragging.fy = Math.max(0.05f, Math.min(0.95f, sy));
+                        invalidate();
+                    }
+                    return dragging != null;
+                case android.view.MotionEvent.ACTION_UP:
+                case android.view.MotionEvent.ACTION_CANCEL:
+                    if (dragging != null) {
+                        changedSettings();
+                    }
+                    dragging = null;
+                    return true;
+                default:
+                    return dragging != null;
+            }
         }
 
         @Override
@@ -270,7 +510,7 @@ final class ControlsScreen {
             // a typical phone: 800 x 370 dp; fitted into the view
             float screenW = 800;
             float screenH = 370;
-            float scale = Math.min(getWidth() / screenW, getHeight() / screenH);
+            scale = Math.min(getWidth() / screenW, getHeight() / screenH);
             float ox = (getWidth() - screenW * scale) / 2;
             float oy = (getHeight() - screenH * scale) / 2;
             rect.set(ox, oy, ox + screenW * scale, oy + screenH * scale);
@@ -306,9 +546,10 @@ final class ControlsScreen {
                 paint.setAlpha(Math.round(paint.getAlpha() * controls.opacity / 100f));
                 canvas.drawRoundRect(r, radius, radius, paint);
                 paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(Math.max(1, 1.5f * scale));
-                paint.setColor(0xFFFFFFFF);
-                paint.setAlpha(alpha);
+                boolean picked = b.custom != null && b.custom == selected;
+                paint.setStrokeWidth(Math.max(1, (picked ? 3.5f : 1.5f) * scale));
+                paint.setColor(picked ? 0xFFFFE36E : 0xFFFFFFFF);
+                paint.setAlpha(picked ? 255 : alpha);
                 canvas.drawRoundRect(r, radius, radius, paint);
                 if (b.joystick) {
                     paint.setStyle(Paint.Style.FILL);
@@ -318,7 +559,8 @@ final class ControlsScreen {
                     continue;
                 }
                 text.setAlpha(alpha);
-                text.setTextSize(Math.min(r.height() * 0.36f, r.width() * 0.2f));
+                // short labels ("R", "F5") big, long ones ("Инвентарь") smaller, so every one fits
+                text.setTextSize(Math.min(r.height() * 0.42f, r.width() * 1.7f / Math.max(2, b.name.length())));
                 canvas.drawText(b.name, r.centerX(), r.centerY() - (text.descent() + text.ascent()) / 2, text);
             }
         }

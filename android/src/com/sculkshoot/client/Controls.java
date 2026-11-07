@@ -31,6 +31,11 @@ final class Controls {
         boolean round;
         boolean inMenus;  // also shown in the inventory and menus
         boolean joystick;
+        int key2;            // a second key pressed together (F3 + G), 0 if none
+        boolean free;        // placed by the player: centre at (fx, fy) of the screen
+        float fx;
+        float fy;
+        Custom custom;       // the player's own button this one shows
 
         Button(String name, int key, boolean right, boolean bottom, float x, float y, float width, float height) {
             this.name = name;
@@ -60,13 +65,86 @@ final class Controls {
 
         /** the left edge on a screen of this width (dp), for the preview */
         float left(float screenWidth) {
+            if (free) {
+                return fx * screenWidth - width / 2;
+            }
             return right ? screenWidth - width - x : x;
         }
 
         float top(float screenHeight) {
+            if (free) {
+                return fy * screenHeight - height / 2;
+            }
             return bottom ? screenHeight - height - y : y;
         }
     }
+
+    /** the keys a button can press: { GLFW code, name } (mouse buttons are PojavLauncher's special codes) */
+    static List<Object[]> keyCatalogue() {
+        List<Object[]> keys = new ArrayList<Object[]>();
+        for (char c = 'A'; c <= 'Z'; c++) {
+            keys.add(new Object[] { (int) c, String.valueOf(c) });
+        }
+        for (char c = '0'; c <= '9'; c++) {
+            keys.add(new Object[] { (int) c, String.valueOf(c) });
+        }
+        for (int f = 1; f <= 12; f++) {
+            keys.add(new Object[] { 289 + f, "F" + f });
+        }
+        Object[][] other = {
+            { SPACE, "Пробел" }, { ESCAPE, "Esc" }, { 257, "Enter" }, { 258, "Tab" }, { 259, "Backspace" }, { 261, "Delete" },
+            { LEFT_SHIFT, "Shift" }, { LEFT_CONTROL, "Ctrl" }, { 342, "Alt" }, { 280, "Caps Lock" },
+            { 265, "Стрелка вверх" }, { 264, "Стрелка вниз" }, { 263, "Стрелка влево" }, { 262, "Стрелка вправо" },
+            { 268, "Home" }, { 269, "End" }, { 266, "Page Up" }, { 267, "Page Down" }, { 260, "Insert" },
+            { 96, "` (тильда)" }, { 45, "-" }, { 61, "=" }, { 91, "[" }, { 93, "]" }, { 59, ";" }, { 39, "'" }, { 44, "," }, { 46, "." },
+            { 47, "/" }, { 92, "\\" },
+            { MOUSE_LEFT, "Левая кнопка мыши" }, { MOUSE_RIGHT, "Правая кнопка мыши" }, { -6, "Средняя кнопка мыши" },
+            { SCROLL_UP, "Колесо вверх" }, { SCROLL_DOWN, "Колесо вниз" }, { KEYBOARD, "Клавиатура на экране" },
+        };
+        for (Object[] k : other) {
+            keys.add(k);
+        }
+        return keys;
+    }
+
+    static String keyName(int code) {
+        for (Object[] k : keyCatalogue()) {
+            if ((Integer) k[0] == code) {
+                return (String) k[1];
+            }
+        }
+        return "#" + code;
+    }
+
+    /** a button the player added: any key (or two together), placed anywhere */
+    static final class Custom {
+        String name = "";
+        int key;
+        int key2;
+        float fx = 0.5f;   // centre, as a part of the screen width / height
+        float fy = 0.5f;
+        int size = 100;    // percent
+        boolean toggle;
+
+        JSONObject toJson() throws JSONException {
+            return new JSONObject().put("name", name).put("key", key).put("key2", key2).put("fx", (double) fx).put("fy", (double) fy)
+                       .put("size", size).put("toggle", toggle);
+        }
+
+        static Custom fromJson(JSONObject o) {
+            Custom c = new Custom();
+            c.name = o.optString("name");
+            c.key = o.optInt("key");
+            c.key2 = o.optInt("key2");
+            c.fx = (float) o.optDouble("fx", 0.5);
+            c.fy = (float) o.optDouble("fy", 0.5);
+            c.size = o.optInt("size", 100);
+            c.toggle = o.optBoolean("toggle");
+            return c;
+        }
+    }
+
+    List<Custom> custom = new ArrayList<Custom>();
 
     int size = 100;       // percent
     int opacity = 80;     // percent
@@ -125,6 +203,17 @@ final class Controls {
                 button.right = !button.right;
             }
         }
+        // the player's own buttons stay exactly where they were put
+        for (Custom c : custom) {
+            float ownWidth = Math.max(48, 14 + 9 * c.name.length()) * c.size / 100f;
+            Button own = new Button(c.name, c.key, false, false, 0, 0, Math.min(ownWidth, 140), 46 * c.size / 100f).toggle(c.toggle);
+            own.key2 = c.key2;
+            own.free = true;
+            own.fx = c.fx;
+            own.fy = c.fy;
+            own.custom = c;
+            b.add(own);
+        }
         return b;
     }
 
@@ -135,10 +224,16 @@ final class Controls {
         for (Button b : buttons()) {
             JSONObject o = new JSONObject();
             o.put("name", b.joystick ? "" : b.name);
-            o.put("keycodes", new JSONArray().put(b.key).put(0).put(0).put(0));
+            o.put("keycodes", new JSONArray().put(b.key).put(b.key2).put(0).put(0));
             // positions are expressions PojavLauncher computes for each screen: ${right} = screen width - button width
-            o.put("dynamicX", b.right ? "${right} - px(" + num(b.x) + ")" : "px(" + num(b.x) + ")");
-            o.put("dynamicY", b.bottom ? "${bottom} - px(" + num(b.y) + ")" : "px(" + num(b.y) + ")");
+            if (b.free) {
+                // a part of the screen, so the button sits at the same spot on any phone
+                o.put("dynamicX", "${screen_width} * " + num4(b.fx) + " - ${width} / 2");
+                o.put("dynamicY", "${screen_height} * " + num4(b.fy) + " - ${height} / 2");
+            } else {
+                o.put("dynamicX", b.right ? "${right} - px(" + num(b.x) + ")" : "px(" + num(b.x) + ")");
+                o.put("dynamicY", b.bottom ? "${bottom} - px(" + num(b.y) + ")" : "px(" + num(b.y) + ")");
+            }
             o.put("width", round1(b.width));
             o.put("height", round1(b.height));
             o.put("opacity", opacity / 100.0);
@@ -168,6 +263,10 @@ final class Controls {
         return layout.toString(2);
     }
 
+    private static String num4(float v) {
+        return String.valueOf(Math.round(v * 10000) / 10000.0);
+    }
+
     private static String num(float v) {
         return String.valueOf(round1(v));
     }
@@ -186,7 +285,25 @@ final class Controls {
         c.leftHanded = p.getBoolean("leftHanded", c.leftHanded);
         c.sneakToggle = p.getBoolean("sneakToggle", c.sneakToggle);
         c.sprintToggle = p.getBoolean("sprintToggle", c.sprintToggle);
+        try {
+            JSONArray list = new JSONArray(p.getString("custom", "[]"));
+            for (int i = 0; i < list.length(); i++) {
+                c.custom.add(Custom.fromJson(list.getJSONObject(i)));
+            }
+        } catch (JSONException ignored) {
+        }
         return c;
+    }
+
+    private String customJson() {
+        JSONArray list = new JSONArray();
+        for (Custom c : custom) {
+            try {
+                list.put(c.toJson());
+            } catch (JSONException ignored) {
+            }
+        }
+        return list.toString();
     }
 
     void save(android.content.Context context) {
@@ -196,6 +313,7 @@ final class Controls {
             .putBoolean("leftHanded", leftHanded)
             .putBoolean("sneakToggle", sneakToggle)
             .putBoolean("sprintToggle", sprintToggle)
+            .putString("custom", customJson())
             .apply();
     }
 }
