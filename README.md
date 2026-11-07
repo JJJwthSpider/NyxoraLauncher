@@ -226,6 +226,12 @@ cmake --build build
 
 Подробнее о зависимостях: https://prismlauncher.org/wiki/development/build-instructions/
 
+**Windows без Windows.** `tools/build-windows-cross.sh` собирает 64-битную версию для Windows прямо на Linux:
+MinGW-w64 GCC, Qt 6.4.2 для MinGW (aqtinstall), библиотеки из MSYS2 (libarchive, qrencode, zlib, toml++ и
+среда выполнения GCC) и cmark, собранный тут же. Получается переносимая папка и `VelloraClient-Windows.zip`:
+распаковать куда угодно и запустить `vellora.exe`. На самой Windows по-прежнему можно собрать через
+`build-windows.bat` (см. `HOW-TO-BUILD-RU.txt`).
+
 ---
 
 <p align="center">

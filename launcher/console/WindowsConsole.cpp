@@ -24,7 +24,9 @@
 #endif
 #include <windows.h>
 
-#include <consoleapi.h>
+#if __has_include(<consoleapi.h>)
+#include <consoleapi.h>  // older MinGW headers have the console API only in windows.h
+#endif
 #include <fcntl.h>
 #include <fileapi.h>
 #include <io.h>
