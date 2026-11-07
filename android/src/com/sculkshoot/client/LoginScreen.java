@@ -24,6 +24,9 @@ final class LoginScreen {
     private final FrameLayout root;
     private final TextView message;
     private final TextView code;
+    private final ImageView logo;
+    private final ImageView qr;
+    private final LinearLayout codeRow;
     private final Button signIn;
     private final Button openPage;
     private final Button copy;
@@ -42,7 +45,7 @@ final class LoginScreen {
         card.setPadding(dp(28), dp(20), dp(28), dp(20));
         card.setBackground(Ui.rounded(activity, 0xE00D0E16, 18, Ui.LINE));
 
-        ImageView logo = new ImageView(activity);
+        logo = new ImageView(activity);
         logo.setImageResource(R.drawable.install_default);
         card.addView(logo, new LinearLayout.LayoutParams(dp(64), dp(64)));
         TextView title = Ui.label(activity, "Lullaby Launcher", 22, Ui.ACCENT, true);
@@ -57,8 +60,29 @@ final class LoginScreen {
         code.setGravity(Gravity.CENTER);
         code.setLetterSpacing(0.15f);
         code.setPadding(0, dp(10), 0, dp(4));
-        code.setVisibility(View.GONE);
-        card.addView(code);
+        // like Prism Launcher: a QR code for another phone's camera next to the code itself
+        codeRow = new LinearLayout(activity);
+        codeRow.setGravity(Gravity.CENTER_VERTICAL);
+        codeRow.setVisibility(View.GONE);
+        qr = new ImageView(activity);
+        qr.setBackground(Ui.rounded(activity, 0xFFFFFFFF, 10, 0xFFFFFFFF));
+        qr.setPadding(dp(6), dp(6), dp(6), dp(6));
+        codeRow.addView(qr, new LinearLayout.LayoutParams(dp(150), dp(150)));
+        LinearLayout codeColumn = new LinearLayout(activity);
+        codeColumn.setOrientation(LinearLayout.VERTICAL);
+        codeColumn.setGravity(Gravity.CENTER_HORIZONTAL);
+        codeColumn.setPadding(dp(18), 0, 0, 0);
+        TextView codeTitle = Ui.label(activity, "Код для входа", 13, Ui.HINT, false);
+        codeTitle.setGravity(Gravity.CENTER);
+        codeColumn.addView(codeTitle);
+        codeColumn.addView(code);
+        TextView scan = Ui.label(activity, "Наведи камеру другого телефона на QR-код —\nкод подставится сам", 12, Ui.HINT, false);
+        scan.setGravity(Gravity.CENTER);
+        codeColumn.addView(scan);
+        codeRow.addView(codeColumn);
+        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        rowParams.topMargin = dp(10);
+        card.addView(codeRow, rowParams);
 
         LinearLayout buttons = new LinearLayout(activity);
         buttons.setGravity(Gravity.CENTER);
@@ -94,7 +118,14 @@ final class LoginScreen {
 
         FrameLayout.LayoutParams center = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
                                                                        Gravity.CENTER);
-        root.addView(card, center);
+        // small phones in landscape are low: the card scrolls instead of being cut off
+        android.widget.ScrollView scroll = new android.widget.ScrollView(activity);
+        scroll.setFillViewport(true);
+        FrameLayout holder = new FrameLayout(activity);
+        holder.setPadding(dp(8), dp(8), dp(8), dp(8));
+        holder.addView(card, center);
+        scroll.addView(holder, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        root.addView(scroll, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
     View view() {
@@ -128,11 +159,14 @@ final class LoginScreen {
                 device = result;
                 code.setText(result.userCode);
                 code.setVisibility(View.VISIBLE);
+                qr.setImageBitmap(qrBitmap(linkWithCode(result)));
+                codeRow.setVisibility(View.VISIBLE);
+                logo.setVisibility(View.GONE);
                 openPage.setVisibility(View.VISIBLE);
                 copy.setVisibility(View.VISIBLE);
                 signIn.setText("Новый код");
                 signIn.setVisibility(View.VISIBLE);
-                message.setText("Открой " + result.verificationUri.replace("https://", "") + " (можно на компьютере) и введи этот код. "
+                message.setText("Отсканируй QR-код телефоном или открой " + result.verificationUri.replace("https://", "") + " (можно на компьютере) и введи код. "
                                 + "Я подожду и сам открою меню.");
                 waitFor(result, mine);
             }
@@ -164,7 +198,8 @@ final class LoginScreen {
                 waiting = false;
                 if (error != null) {
                     message.setText(problem(error));
-                    LoginScreen.this.code.setVisibility(View.GONE);
+                    codeRow.setVisibility(View.GONE);
+                    logo.setVisibility(View.VISIBLE);
                     openPage.setVisibility(View.GONE);
                     copy.setVisibility(View.GONE);
                     signIn.setText("Войти через Microsoft");
@@ -187,10 +222,37 @@ final class LoginScreen {
         }
         copyCode();
         try {
-            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(device.verificationUri)));
+            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linkWithCode(device))));
         } catch (android.content.ActivityNotFoundException e) {
             Toast.makeText(activity, "Нет браузера. Открой " + device.verificationUri + " на другом устройстве.", Toast.LENGTH_LONG).show();
         }
+    }
+
+    /** microsoft.com/link takes the code in the link (?otc=), so the page opens with it filled in, as in Prism Launcher */
+    static String linkWithCode(Account.DeviceCode device) {
+        String url = device.verificationUri;
+        if (url.startsWith("https://www.microsoft.com/link") && !url.contains("?")) {
+            url += "?otc=" + Uri.encode(device.userCode);
+        }
+        return url;
+    }
+
+    /** the QR code as a picture: dark modules on white, sharp pixels */
+    static android.graphics.Bitmap qrBitmap(String text) {
+        QrCode code = QrCode.encode(text);
+        int border = 2;
+        int n = code.size + border * 2;
+        android.graphics.Bitmap small = android.graphics.Bitmap.createBitmap(n, n, android.graphics.Bitmap.Config.ARGB_8888);
+        small.eraseColor(0xFFFFFFFF);
+        for (int y = 0; y < code.size; y++) {
+            for (int x = 0; x < code.size; x++) {
+                if (code.dark(x, y)) {
+                    small.setPixel(x + border, y + border, 0xFF000000);
+                }
+            }
+        }
+        int scale = Math.max(1, 360 / n);
+        return android.graphics.Bitmap.createScaledBitmap(small, n * scale, n * scale, false);
     }
 
     private void copyCode() {
