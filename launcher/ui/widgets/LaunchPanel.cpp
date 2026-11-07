@@ -409,7 +409,7 @@ void LaunchPanel::setProfile(const QString& name, const QPixmap& face)
 void LaunchPanel::updatePictures()
 {
     const bool lunar = SculkTheme::isLunar();
-    m_packsTile->setPicture(QIcon(lunar ? ":/sculk_theme/tile-wrenches-lunar.svg" : ":/sculk_theme/tile-wrenches.svg"));
+    m_packsTile->setPicture(QIcon(lunar ? ":/sculk_theme/tile-packs-vellora.png" : ":/sculk_theme/tile-wrenches.svg"));
     m_newTile->setPicture(QIcon(lunar ? ":/sculk_theme/tile-plus-lunar.svg" : ":/sculk_theme/tile-plus.svg"));
 }
 

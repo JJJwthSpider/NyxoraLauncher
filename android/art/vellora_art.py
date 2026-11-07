@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Vellora Client's pictures: the app icon (a crimson crystal "V" in red rain), the logo used inside the app
-(res/drawable-nodpi/install_default.png) and the tiles "Новая установка" (tile_new.png) and "Готовые сборки"
-(tile_packs.png). Writes them into res/ and a preview art/vellora_preview.png.
+"""Vellora Client's pictures. The app icon is the user's picture (art/vellora_icons_source.png, object 1: a dark cube
+with a crimson glow and an orbit with a star in a glowing frame); its second object is the tile "Готовые сборки".
+Writes the adaptive icon layers and the legacy icon, the logo used inside the app (res/drawable-nodpi/install_default.png),
+the tiles "Новая установка" (tile_new.png, drawn here) and "Готовые сборки" (tile_packs.png), and a preview
+art/vellora_preview.png. (sky() and crystal_v() are the earlier drawn "V" icon, kept for reference.)
 Run:  python3 art/vellora_art.py   (from android/)
 """
 import math
@@ -99,26 +101,59 @@ def tile(symbol):
     return img
 
 
+SOURCE = HERE / "vellora_icons_source.png"
+ICON_BOX = (205, 150, 790, 735)    # object 1 with its frame, in the source picture
+INNER_BOX = (232, 177, 763, 708)   # object 1 inside the frame line
+PACKS_BOX = (977, 150, 1564, 737)  # object 2 with its frame
+
+
+def framed(box, size):
+    """an object of the source with its frame, the outside of the rounded square see-through"""
+    img = Image.open(SOURCE).convert("RGBA").crop(box).resize((size, size), Image.LANCZOS)
+    mask = Image.new("L", (size * 4, size * 4), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((6, 6, size * 4 - 7, size * 4 - 7), radius=int(size * 4 * 0.205), fill=255)
+    img.putalpha(mask.resize((size, size), Image.LANCZOS))
+    return img
+
+
+def adaptive_layers(size):
+    """the background: the dark crimson inside of the frame; the foreground: the cube with its orbit, feathered at the
+    edges and small enough that every phone mask (circle, squircle) keeps it whole"""
+    src = Image.open(SOURCE).convert("RGB")
+    inner = src.crop(INNER_BOX)
+    small = inner.resize((8, 8), Image.BOX)
+    corner = small.getpixel((0, 7))
+    bg = Image.new("RGB", (size, size), corner)
+    glow = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    ImageDraw.Draw(glow).ellipse((size * 0.18, size * 0.18, size * 0.82, size * 0.82), fill=(120, 14, 38, 110))
+    bg = bg.convert("RGBA")
+    bg.alpha_composite(glow.filter(ImageFilter.GaussianBlur(size * 0.08)))
+    part = int(size * 68 / 108)
+    fg_img = inner.resize((part, part), Image.LANCZOS).convert("RGBA")
+    feather = Image.new("L", (part, part), 0)
+    ImageDraw.Draw(feather).ellipse((part * 0.03, part * 0.03, part * 0.97, part * 0.97), fill=255)
+    fg_img.putalpha(feather.filter(ImageFilter.GaussianBlur(part * 0.05)))
+    fg = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    fg.alpha_composite(fg_img, ((size - part) // 2, (size - part) // 2))
+    return bg.convert("RGB"), fg
+
+
 def main():
-    bg = sky()
-    fg = crystal_v(scale=0.78, cy=S * 0.52)
-    full = bg.copy()
-    full.alpha_composite(fg)
     for name, k in DENSITIES.items():
         folder = RES / f"mipmap-{name}"
         size = round(108 * k)
-        bg.convert("RGB").resize((size, size), Image.LANCZOS).save(folder / "ic_launcher_background.png")
+        bg, fg = adaptive_layers(size * 2)
+        bg.resize((size, size), Image.LANCZOS).save(folder / "ic_launcher_background.png")
         fg.resize((size, size), Image.LANCZOS).save(folder / "ic_launcher_foreground.png")
-        cut = S * 18 // 108
-        legacy = rounded(full.crop((cut, cut, S - cut, S - cut)).resize((round(48 * k) * 4,) * 2, Image.LANCZOS))
-        legacy.resize((round(48 * k),) * 2, Image.LANCZOS).save(folder / "ic_launcher.png")
+        framed(ICON_BOX, round(48 * k)).save(folder / "ic_launcher.png")
     nodpi = RES / "drawable-nodpi"
-    logo = sky(768, seed=9, drops=40)
-    logo.alpha_composite(crystal_v(768, scale=1.15, cy=768 * 0.53))
-    rounded(logo).save(nodpi / "install_default.png")
+    framed(ICON_BOX, 384).save(nodpi / "install_default.png")
     tile("plus").save(nodpi / "tile_new.png")
-    tile("packs").save(nodpi / "tile_packs.png")
-    # the preview: the icon in a circle, the logo and the tiles
+    framed(PACKS_BOX, 384).save(nodpi / "tile_packs.png")
+    # the preview: the adaptive icon in a circle, the logo and the tiles
+    bg, fg = adaptive_layers(540)
+    full = bg.convert("RGBA")
+    full.alpha_composite(fg)
     prev = Image.new("RGBA", (4 * 300, 300), (40, 40, 40, 255))
     view = full.resize((300, 300), Image.LANCZOS)
     mask = Image.new("L", (300, 300), 0)
