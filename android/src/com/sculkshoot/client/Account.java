@@ -18,7 +18,8 @@ final class Account {
     static String XBOX_USER = "https://user.auth.xboxlive.com/user/authenticate";
     static String XSTS = "https://xsts.auth.xboxlive.com/xsts/authorize";
     static String MINECRAFT = "https://api.minecraftservices.com";
-    private static final String SCOPE = "XboxLive.signin offline_access";
+    /** exactly what Prism Launcher asks for with this app id (MSADeviceCodeStep.cpp) */
+    private static final String SCOPE = "XboxLive.SignIn XboxLive.offline_access";
 
     static final class LoginException extends Exception {
         LoginException(String message) {
@@ -78,6 +79,33 @@ final class Account {
             .apply();
     }
 
+    /** the code waiting to be entered survives leaving the app: Lullaby keeps waiting when it is opened again */
+    static void savePending(Context context, DeviceCode code) {
+        prefs(context).edit()
+            .putString("pendingDevice", code.deviceCode)
+            .putString("pendingUser", code.userCode)
+            .putString("pendingUri", code.verificationUri)
+            .putInt("pendingInterval", code.interval)
+            .putLong("pendingExpires", code.expiresAt)
+            .apply();
+    }
+
+    static DeviceCode loadPending(Context context) {
+        SharedPreferences p = prefs(context);
+        DeviceCode code = new DeviceCode();
+        code.deviceCode = p.getString("pendingDevice", "");
+        code.userCode = p.getString("pendingUser", "");
+        code.verificationUri = p.getString("pendingUri", code.verificationUri);
+        code.interval = p.getInt("pendingInterval", 5);
+        code.expiresAt = p.getLong("pendingExpires", 0);
+        return code.deviceCode.isEmpty() || code.expiresAt < System.currentTimeMillis() ? null : code;
+    }
+
+    static void clearPending(Context context) {
+        prefs(context).edit().remove("pendingDevice").remove("pendingUser").remove("pendingUri").remove("pendingInterval")
+            .remove("pendingExpires").apply();
+    }
+
     static void signOut(Context context) {
         prefs(context).edit().clear().apply();
     }
@@ -109,10 +137,18 @@ final class Account {
         if (System.currentTimeMillis() > code.expiresAt) {
             throw new LoginException("Код устарел. Нажми «Войти» ещё раз.");
         }
-        Http.Response r = Http.post(MICROSOFT + "/token", "application/x-www-form-urlencoded",
-                                    Http.form("grant_type", "urn:ietf:params:oauth:grant-type:device_code", "client_id", CLIENT_ID,
-                                              "device_code", code.deviceCode));
-        JSONObject o = new JSONObject(r.body.isEmpty() ? "{}" : r.body);
+        Http.Response r;
+        JSONObject o;
+        try {
+            r = Http.post(MICROSOFT + "/token", "application/x-www-form-urlencoded",
+                          Http.form("grant_type", "urn:ietf:params:oauth:grant-type:device_code", "client_id", CLIENT_ID,
+                                    "device_code", code.deviceCode));
+            o = new JSONObject(r.body.isEmpty() ? "{}" : r.body);
+        } catch (java.io.IOException | org.json.JSONException e) {
+            // no internet for a moment, or a page that is not JSON: like Prism, just ask again a bit later
+            code.interval = Math.min(code.interval * 2, 30);
+            return null;
+        }
         if (r.ok()) {
             refreshToken = o.optString("refresh_token", refreshToken);
             return o.getString("access_token");
@@ -131,7 +167,12 @@ final class Account {
         if ("expired_token".equals(error)) {
             throw new LoginException("Код устарел. Нажми «Войти» ещё раз.");
         }
-        throw new LoginException("Microsoft отказал во входе: " + (error.isEmpty() ? "HTTP " + r.status : error));
+        if (error.isEmpty() && r.status >= 500) {
+            return null;  // Microsoft's servers are busy: try again
+        }
+        String why = o.optString("error_description", "");
+        throw new LoginException("Microsoft отказал во входе: " + (error.isEmpty() ? "HTTP " + r.status : error)
+                                 + (why.isEmpty() ? "" : "\n" + why.split("\r?\n")[0]));
     }
 
     /** a new Microsoft access token from the saved refresh token (the silent sign-in on the next start) */
@@ -179,10 +220,20 @@ final class Account {
         JSONObject xstsJson = new JSONObject(xsts.body);
         String uhs = xstsJson.getJSONObject("DisplayClaims").getJSONArray("xui").getJSONObject(0).getString("uhs");
 
-        Http.Response mc = Http.post(MINECRAFT + "/authentication/login_with_xbox", "application/json",
-                                     new JSONObject().put("identityToken", "XBL3.0 x=" + uhs + ";" + xstsJson.getString("Token")).toString());
+        // the Minecraft token, the way Prism Launcher gets it (LauncherLoginStep.cpp); the older login_with_xbox only if that fails
+        String xtoken = "XBL3.0 x=" + uhs + ";" + xstsJson.getString("Token");
+        Http.Response mc = Http.post(MINECRAFT + "/launcher/login", "application/json",
+                                     new JSONObject().put("xtoken", xtoken).put("platform", "PC_LAUNCHER").toString());
         if (!mc.ok()) {
-            throw new LoginException("Сервер Minecraft не принял вход (HTTP " + mc.status + ")");
+            Http.Response old = Http.post(MINECRAFT + "/authentication/login_with_xbox", "application/json",
+                                          new JSONObject().put("identityToken", xtoken).toString());
+            if (old.ok()) {
+                mc = old;
+            }
+        }
+        if (!mc.ok()) {
+            throw new LoginException("Сервер Minecraft не принял вход (HTTP " + mc.status + ")"
+                                     + (mc.body.length() > 0 && mc.body.length() < 300 ? ": " + mc.body : ""));
         }
         JSONObject mcJson = new JSONObject(mc.body);
         minecraftToken = mcJson.getString("access_token");

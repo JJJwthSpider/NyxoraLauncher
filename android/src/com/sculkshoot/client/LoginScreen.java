@@ -31,8 +31,6 @@ final class LoginScreen {
     private final Button openPage;
     private final Button copy;
     private Account.DeviceCode device;
-    private volatile boolean waiting;
-    private int attempt;  // a new "Войти" stops the old wait
 
     LoginScreen(MainActivity activity) {
         this.activity = activity;
@@ -141,8 +139,13 @@ final class LoginScreen {
         return Ui.dp(activity, v);
     }
 
+    /* The wait for the code runs on its own thread, not tied to this screen: Android may recreate the window
+       while the player is in the browser, and the result must still reach whatever window is open then. */
+    private static int attemptCounter;
+    private static volatile int currentAttempt;
+    private static volatile Thread poller;
+
     private void start() {
-        final int mine = ++attempt;
         signIn.setEnabled(false);
         message.setText("Получаю код у Microsoft...");
         activity.background(new MainActivity.Job<Account.DeviceCode>() {
@@ -156,64 +159,103 @@ final class LoginScreen {
                     message.setText(problem(error));
                     return;
                 }
-                device = result;
-                code.setText(result.userCode);
-                code.setVisibility(View.VISIBLE);
-                qr.setImageBitmap(qrBitmap(linkWithCode(result)));
-                codeRow.setVisibility(View.VISIBLE);
-                logo.setVisibility(View.GONE);
-                openPage.setVisibility(View.VISIBLE);
-                copy.setVisibility(View.VISIBLE);
-                signIn.setText("Новый код");
-                signIn.setVisibility(View.VISIBLE);
-                message.setText("Отсканируй QR-код телефоном или открой " + result.verificationUri.replace("https://", "") + " (можно на компьютере) и введи код. "
-                                + "Я подожду и сам открою меню.");
-                waitFor(result, mine);
+                Account.savePending(activity, result);
+                showCode(result);
+                startPolling(activity.getApplicationContext(), result, true);
             }
         });
     }
 
-    /** asks Microsoft every few seconds whether the code was entered, then finishes the sign-in */
-    private void waitFor(final Account.DeviceCode code, final int mine) {
-        waiting = true;
-        activity.background(new MainActivity.Job<Account>() {
-            public Account run() throws Exception {
-                Account account = new Account();
-                String token = null;
-                while (token == null) {
-                    if (mine != attempt) {
-                        return null;  // a newer code replaced this one
+    /** when Lullaby opens again with a code still waiting: show it and keep waiting */
+    void resumePending() {
+        Account.DeviceCode pending = Account.loadPending(activity);
+        if (pending != null) {
+            showCode(pending);
+            startPolling(activity.getApplicationContext(), pending, false);
+        }
+    }
+
+    private void showCode(Account.DeviceCode result) {
+        device = result;
+        code.setText(result.userCode);
+        code.setVisibility(View.VISIBLE);
+        qr.setImageBitmap(qrBitmap(linkWithCode(result)));
+        codeRow.setVisibility(View.VISIBLE);
+        logo.setVisibility(View.GONE);
+        openPage.setVisibility(View.VISIBLE);
+        copy.setVisibility(View.VISIBLE);
+        signIn.setText("Новый код");
+        signIn.setVisibility(View.VISIBLE);
+        message.setText("Отсканируй QR-код телефоном или открой " + result.verificationUri.replace("https://", "")
+                        + " (можно на компьютере) и введи код. Я подожду и сам открою меню.");
+    }
+
+    /** shows the sign-in again after an error */
+    void failed(String why) {
+        message.setText(why);
+        codeRow.setVisibility(View.GONE);
+        logo.setVisibility(View.VISIBLE);
+        openPage.setVisibility(View.GONE);
+        copy.setVisibility(View.GONE);
+        signIn.setText("Войти через Microsoft");
+    }
+
+    /**
+     * Asks Microsoft every few seconds whether the code was entered, then finishes the sign-in and saves the account.
+     * A new code replaces the old wait; reopening the app with the same code keeps the running one.
+     */
+    private static synchronized void startPolling(final android.content.Context app, final Account.DeviceCode code, boolean fresh) {
+        if (!fresh && poller != null && poller.isAlive()) {
+            return;
+        }
+        final int mine = ++attemptCounter;
+        currentAttempt = mine;
+        final android.os.Handler main = new android.os.Handler(android.os.Looper.getMainLooper());
+        poller = new Thread(new Runnable() {
+            public void run() {
+                String problem = null;
+                try {
+                    Account account = new Account();
+                    String token = null;
+                    while (token == null) {
+                        if (mine != currentAttempt) {
+                            return;  // a newer code replaced this one
+                        }
+                        Thread.sleep(code.interval * 1000L);
+                        token = account.pollDeviceCode(code);
                     }
-                    Thread.sleep(code.interval * 1000L);
-                    token = account.pollDeviceCode(code);
-                }
-                account.finish(token);
-                return account;
-            }
-
-            public void done(Account account, Exception error) {
-                if (mine != attempt) {
+                    if (mine != currentAttempt) {
+                        return;
+                    }
+                    account.finish(token);
+                    account.save(app);
+                } catch (InterruptedException e) {
                     return;
+                } catch (Exception e) {
+                    problem = problem(e);
                 }
-                waiting = false;
-                if (error != null) {
-                    message.setText(problem(error));
-                    codeRow.setVisibility(View.GONE);
-                    logo.setVisibility(View.VISIBLE);
-                    openPage.setVisibility(View.GONE);
-                    copy.setVisibility(View.GONE);
-                    signIn.setText("Войти через Microsoft");
-                    return;
-                }
-                if (account != null) {
-                    activity.signedIn(account);
-                }
+                Account.clearPending(app);
+                final String finalProblem = problem;
+                main.post(new Runnable() {
+                    public void run() {
+                        MainActivity shown = MainActivity.resumed();
+                        if (shown != null) {
+                            shown.signInFinished(finalProblem);
+                        } else if (finalProblem != null) {
+                            lastProblem = finalProblem;  // shown when the app is opened again
+                        }
+                    }
+                });
             }
-        });
+        }, "MicrosoftSignIn");
+        poller.start();
     }
+
+    /** an error that happened while no window was open */
+    static String lastProblem;
 
     boolean isWaiting() {
-        return waiting;
+        return poller != null && poller.isAlive();
     }
 
     private void openPage() {

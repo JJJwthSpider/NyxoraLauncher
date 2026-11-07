@@ -181,17 +181,47 @@ public final class MainActivity extends Activity {
         }
     }
 
+    private static MainActivity resumedActivity;
+
+    /** the window on screen now, or null (the Microsoft sign-in reports to it) */
+    static MainActivity resumed() {
+        return resumedActivity;
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+        resumedActivity = this;
         if (GameEngine.get() != null) {
             GameEngine.get().attach(this);
+        }
+        // back from the browser: the sign-in may have finished meanwhile
+        if (login != null && current == login.view()) {
+            signInFinished(LoginScreen.lastProblem);
+        }
+    }
+
+    /** the Microsoft sign-in thread is done: open the menu, or show why it did not work */
+    void signInFinished(String problem) {
+        LoginScreen.lastProblem = null;
+        Account saved = Account.load(this);
+        if (saved.signedIn()) {
+            if (login != null && current == login.view()) {
+                signedIn(saved);
+            }
+            return;
+        }
+        if (problem != null && login != null) {
+            login.failed(problem);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        if (resumedActivity == this) {
+            resumedActivity = null;
+        }
         if (GameEngine.get() != null) {
             GameEngine.get().detach(this);
         }
@@ -208,6 +238,7 @@ public final class MainActivity extends Activity {
         if (why != null) {
             login.setMessage(why);
         }
+        login.resumePending();  // a code entered while the app was closed is still being waited for
         show(login.view());
     }
 
@@ -215,6 +246,7 @@ public final class MainActivity extends Activity {
     void signedIn(Account signed) {
         account = signed;
         account.save(this);
+        Account.clearPending(this);
         login = null;
         showHome();
         if (!account.ownsJava) {
