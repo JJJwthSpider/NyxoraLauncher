@@ -1,14 +1,14 @@
 <resources>
     <style name="SculkTheme" parent="@android:style/Theme.Material.NoActionBar">
-        <item name="android:colorPrimary">#0E3A44</item>
-        <item name="android:colorPrimaryDark">#071A1F</item>
-        <item name="android:colorAccent">#29DFEB</item>
+        <item name="android:colorPrimary">#14151F</item>
+        <item name="android:colorPrimaryDark">#0A0B12</item>
+        <item name="android:colorAccent">#DCCFFF</item>
         <item name="android:windowBackground">@android:color/black</item>
-        <item name="android:textColorPrimary">#E6FBFF</item>
+        <item name="android:textColorPrimary">#F4F5FB</item>
         <item name="android:alertDialogTheme">@style/SculkDialog</item>
     </style>
     <style name="SculkDialog" parent="@android:style/Theme.Material.Dialog.Alert">
-        <item name="android:colorAccent">#29DFEB</item>
-        <item name="android:background">#10272E</item>
+        <item name="android:colorAccent">#DCCFFF</item>
+        <item name="android:background">#14151F</item>
     </style>
 </resources>

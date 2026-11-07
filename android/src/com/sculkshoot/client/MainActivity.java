@@ -65,6 +65,15 @@ import java.util.zip.ZipOutputStream;
 public final class MainActivity extends Activity {
     private static final int STAGE_TOPIC = 0, STAGE_SETUP = 1, STAGE_BUILDING = 2, STAGE_READY = 3;
     private static final int REQUEST_SAVE = 1;
+    private static final int REQUEST_STORAGE = 2;
+
+    /** Minecraft: Java Edition launchers for Android that can install Modrinth packs (name, package) */
+    private static final String[][] JAVA_LAUNCHERS = {
+        { "PojavLauncher", "net.kdt.pojavlaunch" },
+        { "Amethyst", "org.angelauramc.amethyst" },
+        { "Fold Craft Launcher", "com.tungsten.fcl" },
+        { "Zalith Launcher", "com.movtery.zalithlauncher" },
+    };
 
     // sculk colors of the desktop theme
     // night black and moon white; main buttons wear a see-through rainbow
@@ -258,10 +267,10 @@ public final class MainActivity extends Activity {
                 showModList();
             }
         });
-        Button play = button("В лаунчер", true);
+        Button play = button("Играть", true);
         play.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                exportPack(0);
+                play();
             }
         });
         Button share = button("Файл", false);
@@ -514,7 +523,7 @@ public final class MainActivity extends Activity {
             } else {
                 say(unknownNote() + "Скажи, что поменять: добавить тему или мод («добавь магию», «добавь Create»), что-то убрать "
                         + "(«убери зомби»), другой загрузчик или версию («Fabric 1.20.1») или «начать заново». "
-                        + "Или нажми <b>В лаунчер</b>, чтобы поставить сборку.", AFTER_REPLIES);
+                        + "Или нажми <b>Играть</b>, чтобы поставить сборку.", AFTER_REPLIES);
             }
             return;
         }
@@ -709,7 +718,7 @@ public final class MainActivity extends Activity {
         }
         sayWithReplies("Готово! <b>" + Util.escape(packPlan.name) + "</b>: модов — " + packMods.size() + ". По твоим темам: " + themed
                            + ", оптимизация и удобство: " + (packMods.size() - themed - libraries) + ", библиотеки для модов: " + libraries + "."
-                           + details + "<br>Нажми <b>В лаунчер</b>, чтобы открыть сборку в лаунчере Minecraft на телефоне, "
+                           + details + "<br>Нажми <b>Играть</b>: я сохраню сборку и открою лаунчер Minecraft на телефоне, "
                            + "или <b>Моды</b>, чтобы снять лишнее. Или напиши, что поменять.",
                        replies);
     }
@@ -1082,7 +1091,7 @@ public final class MainActivity extends Activity {
             .setMessage("Лунни собирает сборки модов с Modrinth: понимает тему, названия модов, «убери» и «побольше», "
                         + "сам добавляет оптимизацию и все нужные библиотеки.\n\n"
                         + "Сама Minecraft: Java Edition на телефоне запускается в лаунчере для Android, который умеет ставить сборки "
-                        + "Modrinth (.mrpack). Кнопка «В лаунчер» открывает сборку в нём, «Файл» — сохраняет или отправляет .mrpack.\n\n"
+                        + "Modrinth (.mrpack). Кнопка «Играть» сохраняет сборку в «Загрузки/Lullaby» и открывает такой лаунчер, «Файл» — отправляет .mrpack.\n\n"
                         + "Шрифт Tiny5 — SIL Open Font License.")
             .setPositiveButton("OK", null)
             .show();
@@ -1227,11 +1236,163 @@ public final class MainActivity extends Activity {
         }
     }
 
+    /* ------------------------------------------------------------ play on the phone */
+
+    /** Saves the pack into Downloads/Lullaby, where every launcher's "import modpack" finds it; returns where it is, or null. */
+    private String saveToDownloads(File pack) {
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                android.content.ContentValues values = new android.content.ContentValues();
+                values.put("_display_name", pack.getName());
+                values.put("mime_type", "application/octet-stream");  // keeps the .mrpack extension
+                values.put("relative_path", "Download/Lullaby");
+                Uri target = getContentResolver().insert(Uri.parse("content://media/external/downloads"), values);
+                if (target == null) {
+                    return null;
+                }
+                copy(pack, getContentResolver().openOutputStream(target));
+                return "Загрузки/Lullaby/" + pack.getName();
+            }
+            if (!hasStoragePermission()) {
+                requestPermissions(new String[] { android.Manifest.permission.WRITE_EXTERNAL_STORAGE }, REQUEST_STORAGE);
+                return null;
+            }
+            File dir = new File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "Lullaby");
+            dir.mkdirs();
+            File target = new File(dir, pack.getName());
+            copy(pack, new FileOutputStream(target));
+            return "Загрузки/Lullaby/" + pack.getName();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** Android 5 grants the permission at install time, Android 6 to 9 ask for it */
+    private boolean hasStoragePermission() {
+        return android.os.Build.VERSION.SDK_INT < 23
+               || checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == android.content.pm.PackageManager.PERMISSION_GRANTED;
+    }
+
+    private static void copy(File from, OutputStream out) throws java.io.IOException {
+        java.io.FileInputStream in = new java.io.FileInputStream(from);
+        try {
+            byte[] buffer = new byte[16384];
+            int n;
+            while ((n = in.read(buffer)) > 0) {
+                out.write(buffer, 0, n);
+            }
+        } finally {
+            in.close();
+            out.close();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(requestCode, permissions, results);
+        if (requestCode == REQUEST_STORAGE && results.length > 0 && results[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            play();
+        }
+    }
+
+    /** The Java Edition launchers that are installed on this phone. */
+    private List<String[]> installedLaunchers() {
+        List<String[]> found = new ArrayList<String[]>();
+        for (String[] launcher : JAVA_LAUNCHERS) {
+            if (getPackageManager().getLaunchIntentForPackage(launcher[1]) != null) {
+                found.add(launcher);
+            }
+        }
+        return found;
+    }
+
+    /**
+     * Minecraft: Java Edition itself runs in a Java launcher for Android; Lullaby hands the pack over to it:
+     * the pack goes to Downloads, the launcher opens, and its "import modpack" installs Minecraft, the loader and every mod.
+     */
+    private void play() {
+        if (packPlan == null) {
+            return;
+        }
+        File file;
+        try {
+            file = writePack();
+        } catch (Exception e) {
+            Toast.makeText(this, "Не удалось создать файл: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (android.os.Build.VERSION.SDK_INT < 29 && !hasStoragePermission()) {
+            // asks for the permission; play() runs again once it is granted
+            saveToDownloads(file);
+            return;
+        }
+        final String saved = saveToDownloads(file);
+        final List<String[]> launchers = installedLaunchers();
+
+        StringBuilder steps = new StringBuilder();
+        steps.append(saved != null ? "1. Сборка сохранена: <b>" + Util.escape(saved) + "</b>"
+                                   : "1. Сохрани сборку кнопкой <b>Файл → Сохранить в файлы</b>");
+        steps.append("<br><br>2. В лаунчере Minecraft открой <b>импорт сборки</b> (Modpack / .mrpack) и выбери этот файл. "
+                     + "Лаунчер сам скачает Minecraft " + Util.escape(packPlan.minecraftVersion) + ", " + Plan.loaderName(packPlan.loader)
+                     + " и все моды.");
+        steps.append("<br><br>3. Войди аккаунтом Microsoft, на котором куплена Minecraft: Java Edition, и нажми <b>Играть</b>.");
+        if (launchers.isEmpty()) {
+            steps.append("<br><br>На телефоне пока нет лаунчера Java Edition. Установи, например, PojavLauncher, Amethyst, "
+                         + "Fold Craft Launcher или Zalith Launcher и нажми «Играть» ещё раз.");
+        }
+        steps.append("<br><br><i>Моды на телефоне работают медленнее, чем на компьютере: для слабого телефона лучше сборка "
+                     + "с небольшим числом модов.</i>");
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this).setTitle("Как поиграть на телефоне").setMessage(Html.fromHtml(steps.toString()));
+        if (launchers.isEmpty()) {
+            dialog.setPositiveButton("Найти лаунчер", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int which) {
+                    openStoreSearch();
+                }
+            });
+        } else {
+            final String[] launcher = launchers.get(0);
+            dialog.setPositiveButton("Открыть " + launcher[0], new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int which) {
+                    openLauncher(launcher[1]);
+                }
+            });
+            if (launchers.size() > 1) {
+                final String[] second = launchers.get(1);
+                dialog.setNeutralButton("Открыть " + second[0], new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface d, int which) {
+                        openLauncher(second[1]);
+                    }
+                });
+            }
+        }
+        dialog.setNegativeButton("Закрыть", null).show();
+    }
+
+    private void openLauncher(String packageName) {
+        Intent launch = getPackageManager().getLaunchIntentForPackage(packageName);
+        if (launch == null) {
+            openStoreSearch();
+            return;
+        }
+        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(launch);
+    }
+
+    private void openStoreSearch() {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=Minecraft%20Java%20launcher%20PojavLauncher&c=apps")));
+        } catch (ActivityNotFoundException e) {
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                                     Uri.parse("https://play.google.com/store/search?q=Minecraft%20Java%20launcher%20PojavLauncher&c=apps")));
+        }
+    }
+
     private void noLauncher() {
         new AlertDialog.Builder(this)
             .setTitle("Нужен лаунчер Minecraft")
             .setMessage("Чтобы играть со сборкой на телефоне, установи лаунчер Minecraft: Java Edition для Android, который умеет "
-                        + "импортировать сборки Modrinth (.mrpack). Потом нажми «В лаунчер» ещё раз или сохрани файл через «Файл» и "
+                        + "импортировать сборки Modrinth (.mrpack). Потом нажми «Играть» ещё раз или сохрани файл через «Файл» и "
                         + "открой его в лаунчере.")
             .setPositiveButton("OK", null)
             .show();
