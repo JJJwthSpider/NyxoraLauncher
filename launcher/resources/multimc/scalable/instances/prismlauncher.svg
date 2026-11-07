@@ -19,6 +19,19 @@
    <stop offset="0" stop-color="#2c3150"/>
    <stop offset="1" stop-color="#0e101c"/>
   </radialGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+   <stop offset="0" stop-color="#ff5c78"/>
+   <stop offset="0.2" stop-color="#ffa84c"/>
+   <stop offset="0.4" stop-color="#ffe666"/>
+   <stop offset="0.6" stop-color="#6ce08c"/>
+   <stop offset="0.8" stop-color="#5cb6ff"/>
+   <stop offset="1" stop-color="#a880ff"/>
+  </linearGradient>
+  <radialGradient id="crescent" cx="0.3" cy="0.65" r="0.8">
+   <stop offset="0" stop-color="#ffffff"/>
+   <stop offset="0.6" stop-color="#eceef6"/>
+   <stop offset="1" stop-color="#b9bccc"/>
+  </radialGradient>
   <radialGradient id="dayHalf" cx="0.7" cy="0.3" r="0.9">
    <stop offset="0" stop-color="#ffffff"/>
    <stop offset="1" stop-color="#c9ccdb"/>

@@ -36,6 +36,19 @@ DEFS = """<defs>
    <stop offset="0" stop-color="#2c3150"/>
    <stop offset="1" stop-color="#0e101c"/>
   </radialGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+   <stop offset="0" stop-color="#ff5c78"/>
+   <stop offset="0.2" stop-color="#ffa84c"/>
+   <stop offset="0.4" stop-color="#ffe666"/>
+   <stop offset="0.6" stop-color="#6ce08c"/>
+   <stop offset="0.8" stop-color="#5cb6ff"/>
+   <stop offset="1" stop-color="#a880ff"/>
+  </linearGradient>
+  <radialGradient id="crescent" cx="0.3" cy="0.65" r="0.8">
+   <stop offset="0" stop-color="#ffffff"/>
+   <stop offset="0.6" stop-color="#eceef6"/>
+   <stop offset="1" stop-color="#b9bccc"/>
+  </radialGradient>
   <radialGradient id="dayHalf" cx="0.7" cy="0.3" r="0.9">
    <stop offset="0" stop-color="#ffffff"/>
    <stop offset="1" stop-color="#c9ccdb"/>
@@ -67,6 +80,20 @@ def rainbow(cx, cy, radius, band, opacity):
         r = radius - i * band
         out.append(f'<circle cx="{cx}" cy="{cy}" r="{r:.1f}" fill="none" stroke="{color}" stroke-opacity="{opacity}" '
                    f'stroke-width="{band:.1f}"/>')
+    return "\n  ".join(out)
+
+
+def rainbow_arc(cx, cy, radius, band, opacity, bottom, right):
+    """A see-through rainbow as arcs that end at the bottom and the right edge of the tile by themselves,
+    because Qt's SVG renderer ignores clip paths."""
+    out = []
+    for i, color in enumerate(RAINBOW):
+        r = radius - i * band
+        # from the bottom edge, up and over to the right edge
+        x1 = cx - math.sqrt(max(0.0, r * r - (bottom - cy) ** 2))
+        y2 = cy - math.sqrt(max(0.0, r * r - (right - cx) ** 2))
+        out.append(f'<path d="M{x1:.1f} {bottom:.1f} A{r:.1f} {r:.1f} 0 0 1 {right:.1f} {y2:.1f}" fill="none" stroke="{color}" '
+                   f'stroke-opacity="{opacity}" stroke-width="{band:.1f}"/>')
     return "\n  ".join(out)
 
 
@@ -118,19 +145,75 @@ def moony(cx, cy, r, awake=False):
     return "\n  ".join(parts)
 
 
+def crescent(cx, cy, r, dx, dy, cut):
+    """A crescent as a plain path (Qt's SVG renderer has no masks): the circle (cx, cy, r) without the circle
+    (cx + dx, cy + dy, cut). Returns the path data and the two tips."""
+    x2, y2 = cx + dx, cy + dy
+    d = math.hypot(dx, dy)
+    a = (r * r - cut * cut + d * d) / (2 * d)
+    h = math.sqrt(r * r - a * a)
+    mx, my = cx + a * dx / d, cy + a * dy / d
+    p1 = (mx + h * dy / d, my - h * dx / d)
+    p2 = (mx - h * dy / d, my + h * dx / d)
+    path = (f"M{p1[0]:.2f} {p1[1]:.2f} A{r} {r} 0 1 0 {p2[0]:.2f} {p2[1]:.2f} "
+            f"A{cut} {cut} 0 0 1 {p1[0]:.2f} {p1[1]:.2f}Z")
+    return path, p1, p2
+
+
+def note(x, y, size, color, double=False):
+    """An eighth note (or two beamed ones) of the lullaby."""
+    s = size
+    head = f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{s * 0.55:.1f}" ry="{s * 0.4:.1f}" transform="rotate(-20 {x:.1f} {y:.1f})" fill="{color}"/>'
+    stem = f'<path d="M{x + s * 0.48:.1f} {y - s * 0.1:.1f} V{y - s * 2.1:.1f}" stroke="{color}" stroke-width="{s * 0.2:.1f}" stroke-linecap="round"/>'
+    if not double:
+        flag = (f'<path d="M{x + s * 0.48:.1f} {y - s * 2.1:.1f} q{s * 0.9:.1f} {s * 0.5:.1f} {s * 0.5:.1f} {s * 1.3:.1f}" fill="none" '
+                f'stroke="{color}" stroke-width="{s * 0.2:.1f}" stroke-linecap="round"/>')
+        return head + stem + flag
+    x2 = x + s * 1.5
+    y2 = y - s * 0.35
+    head2 = f'<ellipse cx="{x2:.1f}" cy="{y2:.1f}" rx="{s * 0.55:.1f}" ry="{s * 0.4:.1f}" transform="rotate(-20 {x2:.1f} {y2:.1f})" fill="{color}"/>'
+    stem2 = f'<path d="M{x2 + s * 0.48:.1f} {y2 - s * 0.1:.1f} V{y2 - s * 2.1:.1f}" stroke="{color}" stroke-width="{s * 0.2:.1f}" stroke-linecap="round"/>'
+    beam = (f'<path d="M{x + s * 0.48:.1f} {y - s * 2.1:.1f} L{x2 + s * 0.48:.1f} {y2 - s * 2.1:.1f}" stroke="{color}" '
+            f'stroke-width="{s * 0.38:.1f}" stroke-linecap="round"/>')
+    return head + stem + head2 + stem2 + beam
+
+
+def sleeping_moon(cx, cy, r):
+    """The Lullaby moon: a crescent that sleeps, with a closed eye, a smile and a rainbow blush."""
+    path, p1, p2 = crescent(cx, cy, r, r * 0.52, -r * 0.34, r * 0.86)
+    # the face sits in the thick middle of the crescent, on the side away from the cut
+    fx, fy = cx - r * 0.5, cy + r * 0.12
+    eye = (f'<path d="M{fx - r * 0.16:.1f} {fy - r * 0.08:.1f} Q{fx:.1f} {fy + r * 0.08:.1f} {fx + r * 0.16:.1f} {fy - r * 0.12:.1f}" '
+           f'fill="none" stroke="#2a2d40" stroke-width="{r * 0.055:.1f}" stroke-linecap="round"/>')
+    lash = (f'<path d="M{fx - r * 0.2:.1f} {fy - r * 0.02:.1f} l{-r * 0.06:.1f} {r * 0.05:.1f}" stroke="#2a2d40" '
+            f'stroke-width="{r * 0.04:.1f}" stroke-linecap="round"/>')
+    smile = (f'<path d="M{fx - r * 0.05:.1f} {fy + r * 0.3:.1f} Q{fx + r * 0.1:.1f} {fy + r * 0.42:.1f} {fx + r * 0.24:.1f} {fy + r * 0.26:.1f}" '
+             f'fill="none" stroke="#2a2d40" stroke-width="{r * 0.05:.1f}" stroke-linecap="round"/>')
+    blush = f'<ellipse cx="{fx - r * 0.12:.1f}" cy="{fy + r * 0.2:.1f}" rx="{r * 0.1:.1f}" ry="{r * 0.055:.1f}" fill="#ff96af" fill-opacity="0.6"/>'
+    craters = "".join(
+        f'<circle cx="{cx + ox * r:.1f}" cy="{cy + oy * r:.1f}" r="{cr * r:.1f}" fill="#9a9eb4" fill-opacity="0.35"/>'
+        for ox, oy, cr in ((-0.72, -0.25, 0.07), (-0.3, 0.62, 0.09), (-0.78, 0.35, 0.05)))
+    return (f'<circle cx="{cx}" cy="{cy}" r="{r * 1.45:.1f}" fill="url(#halo)"/>'
+            f'<path d="{path}" fill="url(#crescent)" stroke="#ffffff" stroke-opacity="0.6" stroke-width="{r * 0.02:.1f}"/>'
+            f'{craters}{eye}{lash}{smile}{blush}')
+
+
 def scene(size, rx):
-    """The app icon: night sky, a see-through rainbow, the big moon and sparkling stars."""
-    s = size / 256
-    return f"""<rect x="{8 * s}" y="{8 * s}" width="{240 * s}" height="{240 * s}" rx="{rx}" fill="url(#sky)" stroke="#ffffff" stroke-opacity="0.35" stroke-width="{3 * s}"/>
- <clipPath id="tile"><rect x="{8 * s}" y="{8 * s}" width="{240 * s}" height="{240 * s}" rx="{rx}"/></clipPath>
- <g clip-path="url(#tile)">
-  {stars(12 * s, 12 * s, 232 * s, 232 * s, 26, 7)}
-  {rainbow(100 * s, 300 * s, 190 * s, 9 * s, 0.38)}
-  {big_moon(150 * s, 104 * s, 62 * s)}
-  {sparkle(52 * s, 62 * s, 12 * s)}
-  {sparkle(206 * s, 196 * s, 9 * s, 0.85)}
-  {sparkle(78 * s, 160 * s, 6 * s, 0.7)}
- </g>"""
+    """The app icon: a sleeping crescent moon in the night sky, notes of a lullaby, a see-through rainbow and stars,
+    in a tile with a rainbow rim."""
+    k = size / 256
+    return f"""<rect x="{8 * k}" y="{8 * k}" width="{240 * k}" height="{240 * k}" rx="{rx}" fill="url(#sky)"/>
+ <g>
+  {stars(22 * k, 22 * k, 212 * k, 212 * k, 24, 11)}
+  {rainbow_arc(250 * k, 290 * k, 205 * k, 8 * k, 0.32, 240 * k, 238 * k)}
+  {sleeping_moon(112 * k, 128 * k, 78 * k)}
+  {note(176 * k, 128 * k, 15 * k, "#ffb3c8")}
+  {note(188 * k, 82 * k, 12 * k, "#b8dcff", double=True)}
+  {sparkle(204 * k, 186 * k, 9 * k, 0.9)}
+  {sparkle(176 * k, 44 * k, 7 * k, 0.8)}
+  {sparkle(40 * k, 218 * k, 6 * k, 0.7)}
+ </g>
+ <rect x="{8 * k}" y="{8 * k}" width="{240 * k}" height="{240 * k}" rx="{rx}" fill="none" stroke="url(#rim)" stroke-opacity="0.85" stroke-width="{4 * k}"/>"""
 
 
 def icon_svg():

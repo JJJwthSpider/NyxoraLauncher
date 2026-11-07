@@ -20,65 +20,64 @@
    <stop offset="0" stop-color="#2c3150"/>
    <stop offset="1" stop-color="#0e101c"/>
   </radialGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+   <stop offset="0" stop-color="#ff5c78"/>
+   <stop offset="0.2" stop-color="#ffa84c"/>
+   <stop offset="0.4" stop-color="#ffe666"/>
+   <stop offset="0.6" stop-color="#6ce08c"/>
+   <stop offset="0.8" stop-color="#5cb6ff"/>
+   <stop offset="1" stop-color="#a880ff"/>
+  </linearGradient>
+  <radialGradient id="crescent" cx="0.3" cy="0.65" r="0.8">
+   <stop offset="0" stop-color="#ffffff"/>
+   <stop offset="0.6" stop-color="#eceef6"/>
+   <stop offset="1" stop-color="#b9bccc"/>
+  </radialGradient>
   <radialGradient id="dayHalf" cx="0.7" cy="0.3" r="0.9">
    <stop offset="0" stop-color="#ffffff"/>
    <stop offset="1" stop-color="#c9ccdb"/>
   </radialGradient>
  </defs>
- <rect x="8.0" y="8.0" width="240.0" height="240.0" rx="56" fill="url(#sky)" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3.0"/>
- <clipPath id="tile"><rect x="8.0" y="8.0" width="240.0" height="240.0" rx="56"/></clipPath>
- <g clip-path="url(#tile)">
-  <circle cx="87.1" cy="47.0" r="0.9" fill="#ffffff" fill-opacity="0.39"/>
-  <circle cx="136.3" cy="96.8" r="0.9" fill="#ffffff" fill-opacity="0.90"/>
-  <circle cx="61.8" cy="31.9" r="1.8" fill="#ffffff" fill-opacity="0.39"/>
-  <circle cx="33.0" cy="110.5" r="0.9" fill="#ffffff" fill-opacity="0.92"/>
-  <circle cx="158.3" cy="147.3" r="0.9" fill="#ffffff" fill-opacity="0.70"/>
-  <circle cx="104.0" cy="238.5" r="0.9" fill="#ffffff" fill-opacity="0.68"/>
-  <circle cx="42.9" cy="109.2" r="0.9" fill="#ffffff" fill-opacity="0.69"/>
-  <circle cx="142.0" cy="170.2" r="0.9" fill="#ffffff" fill-opacity="0.70"/>
-  <circle cx="160.2" cy="98.4" r="0.9" fill="#ffffff" fill-opacity="0.69"/>
-  <circle cx="155.6" cy="127.2" r="1.8" fill="#ffffff" fill-opacity="0.82"/>
-  <circle cx="120.0" cy="226.2" r="1.4" fill="#ffffff" fill-opacity="0.53"/>
-  <circle cx="196.3" cy="174.2" r="1.1" fill="#ffffff" fill-opacity="0.40"/>
-  <circle cx="81.7" cy="126.9" r="1.4" fill="#ffffff" fill-opacity="0.79"/>
-  <circle cx="78.8" cy="239.4" r="0.9" fill="#ffffff" fill-opacity="0.66"/>
-  <circle cx="50.3" cy="91.4" r="1.8" fill="#ffffff" fill-opacity="0.60"/>
-  <circle cx="235.2" cy="30.0" r="1.4" fill="#ffffff" fill-opacity="0.55"/>
-  <circle cx="93.2" cy="127.2" r="1.8" fill="#ffffff" fill-opacity="0.39"/>
-  <circle cx="33.7" cy="74.6" r="0.9" fill="#ffffff" fill-opacity="0.39"/>
-  <circle cx="174.7" cy="162.1" r="1.8" fill="#ffffff" fill-opacity="0.52"/>
-  <circle cx="101.5" cy="167.1" r="0.9" fill="#ffffff" fill-opacity="0.91"/>
-  <circle cx="94.5" cy="153.7" r="1.8" fill="#ffffff" fill-opacity="0.39"/>
-  <circle cx="190.2" cy="42.0" r="1.1" fill="#ffffff" fill-opacity="0.59"/>
-  <circle cx="224.7" cy="127.2" r="1.1" fill="#ffffff" fill-opacity="0.62"/>
-  <circle cx="139.5" cy="216.9" r="1.8" fill="#ffffff" fill-opacity="0.87"/>
-  <circle cx="76.6" cy="108.3" r="1.4" fill="#ffffff" fill-opacity="0.76"/>
-  <circle cx="100.3" cy="65.5" r="0.9" fill="#ffffff" fill-opacity="0.46"/>
-  <circle cx="100.0" cy="300.0" r="190.0" fill="none" stroke="#ff5c78" stroke-opacity="0.38" stroke-width="9.0"/>
-  <circle cx="100.0" cy="300.0" r="181.0" fill="none" stroke="#ffa84c" stroke-opacity="0.38" stroke-width="9.0"/>
-  <circle cx="100.0" cy="300.0" r="172.0" fill="none" stroke="#ffe666" stroke-opacity="0.38" stroke-width="9.0"/>
-  <circle cx="100.0" cy="300.0" r="163.0" fill="none" stroke="#6ce08c" stroke-opacity="0.38" stroke-width="9.0"/>
-  <circle cx="100.0" cy="300.0" r="154.0" fill="none" stroke="#5cb6ff" stroke-opacity="0.38" stroke-width="9.0"/>
-  <circle cx="100.0" cy="300.0" r="145.0" fill="none" stroke="#a880ff" stroke-opacity="0.38" stroke-width="9.0"/>
-  <circle cx="150.0" cy="104.0" r="117.8" fill="url(#halo)"/>
-  <circle cx="150.0" cy="104.0" r="62.0" fill="url(#moonBody)"/>
-  <circle cx="128.3" cy="91.6" r="19.8" fill="#9ca0b4" fill-opacity="0.28"/>
-  <circle cx="165.5" cy="119.5" r="17.4" fill="#9ca0b4" fill-opacity="0.28"/>
-  <circle cx="168.6" cy="82.3" r="11.2" fill="#9ca0b4" fill-opacity="0.28"/>
-  <circle cx="119.0" cy="125.7" r="5.6" fill="#8e92a6" fill-opacity="0.45"/>
-  <circle cx="117.9" cy="124.6" r="3.9" fill="#ffffff" fill-opacity="0.35"/>
-  <circle cx="177.9" cy="100.9" r="4.3" fill="#8e92a6" fill-opacity="0.45"/>
-  <circle cx="177.0" cy="100.0" r="3.0" fill="#ffffff" fill-opacity="0.35"/>
-  <circle cx="140.7" cy="69.9" r="3.7" fill="#8e92a6" fill-opacity="0.45"/>
-  <circle cx="140.0" cy="69.2" r="2.6" fill="#ffffff" fill-opacity="0.35"/>
-  <circle cx="156.2" cy="141.2" r="5.0" fill="#8e92a6" fill-opacity="0.45"/>
-  <circle cx="155.2" cy="140.2" r="3.5" fill="#ffffff" fill-opacity="0.35"/>
-  <circle cx="112.8" cy="97.8" r="3.1" fill="#8e92a6" fill-opacity="0.45"/>
-  <circle cx="112.2" cy="97.2" r="2.2" fill="#ffffff" fill-opacity="0.35"/>
-  <path d="M52.0 50.0 Q52.0 62.0 64.0 62.0 Q52.0 62.0 52.0 74.0 Q52.0 62.0 40.0 62.0 Q52.0 62.0 52.0 50.0Z" fill="#ffffff" fill-opacity="1.0"/>
-  <path d="M206.0 187.0 Q206.0 196.0 215.0 196.0 Q206.0 196.0 206.0 205.0 Q206.0 196.0 197.0 196.0 Q206.0 196.0 206.0 187.0Z" fill="#ffffff" fill-opacity="0.85"/>
-  <path d="M78.0 154.0 Q78.0 160.0 84.0 160.0 Q78.0 160.0 78.0 166.0 Q78.0 160.0 72.0 160.0 Q78.0 160.0 78.0 154.0Z" fill="#ffffff" fill-opacity="0.7"/>
+ <rect x="8.0" y="8.0" width="240.0" height="240.0" rx="56" fill="url(#sky)"/>
+ <g>
+  <circle cx="117.9" cy="140.7" r="1.8" fill="#ffffff" fill-opacity="0.62"/>
+  <circle cx="203.3" cy="62.3" r="1.8" fill="#ffffff" fill-opacity="0.73"/>
+  <circle cx="190.1" cy="42.0" r="1.4" fill="#ffffff" fill-opacity="0.44"/>
+  <circle cx="136.2" cy="210.8" r="0.9" fill="#ffffff" fill-opacity="0.71"/>
+  <circle cx="106.0" cy="118.0" r="1.1" fill="#ffffff" fill-opacity="0.72"/>
+  <circle cx="198.3" cy="35.4" r="0.9" fill="#ffffff" fill-opacity="0.46"/>
+  <circle cx="73.3" cy="28.4" r="1.8" fill="#ffffff" fill-opacity="0.55"/>
+  <circle cx="147.3" cy="63.4" r="1.1" fill="#ffffff" fill-opacity="0.73"/>
+  <circle cx="128.0" cy="162.4" r="1.8" fill="#ffffff" fill-opacity="0.74"/>
+  <circle cx="108.2" cy="138.9" r="0.9" fill="#ffffff" fill-opacity="0.77"/>
+  <circle cx="88.8" cy="70.7" r="1.4" fill="#ffffff" fill-opacity="0.37"/>
+  <circle cx="141.4" cy="44.9" r="0.9" fill="#ffffff" fill-opacity="0.86"/>
+  <circle cx="103.9" cy="225.1" r="0.9" fill="#ffffff" fill-opacity="0.48"/>
+  <circle cx="218.5" cy="33.1" r="1.8" fill="#ffffff" fill-opacity="0.94"/>
+  <circle cx="106.3" cy="37.5" r="1.1" fill="#ffffff" fill-opacity="0.82"/>
+  <circle cx="79.2" cy="40.5" r="1.4" fill="#ffffff" fill-opacity="0.36"/>
+  <circle cx="108.9" cy="217.6" r="1.1" fill="#ffffff" fill-opacity="0.50"/>
+  <circle cx="43.4" cy="34.7" r="1.8" fill="#ffffff" fill-opacity="0.46"/>
+  <circle cx="140.6" cy="116.9" r="1.1" fill="#ffffff" fill-opacity="0.94"/>
+  <circle cx="185.1" cy="110.9" r="1.8" fill="#ffffff" fill-opacity="0.42"/>
+  <circle cx="111.2" cy="67.1" r="1.4" fill="#ffffff" fill-opacity="0.87"/>
+  <circle cx="228.7" cy="147.7" r="0.9" fill="#ffffff" fill-opacity="0.48"/>
+  <circle cx="105.6" cy="203.1" r="0.9" fill="#ffffff" fill-opacity="0.38"/>
+  <circle cx="53.0" cy="115.6" r="0.9" fill="#ffffff" fill-opacity="0.81"/>
+  <path d="M51.2 240.0 A205.0 205.0 0 0 1 238.0 85.4" fill="none" stroke="#ff5c78" stroke-opacity="0.32" stroke-width="8.0"/>
+  <path d="M59.5 240.0 A197.0 197.0 0 0 1 238.0 93.4" fill="none" stroke="#ffa84c" stroke-opacity="0.32" stroke-width="8.0"/>
+  <path d="M67.7 240.0 A189.0 189.0 0 0 1 238.0 101.4" fill="none" stroke="#ffe666" stroke-opacity="0.32" stroke-width="8.0"/>
+  <path d="M76.0 240.0 A181.0 181.0 0 0 1 238.0 109.4" fill="none" stroke="#6ce08c" stroke-opacity="0.32" stroke-width="8.0"/>
+  <path d="M84.4 240.0 A173.0 173.0 0 0 1 238.0 117.4" fill="none" stroke="#5cb6ff" stroke-opacity="0.32" stroke-width="8.0"/>
+  <path d="M92.8 240.0 A165.0 165.0 0 0 1 238.0 125.4" fill="none" stroke="#a880ff" stroke-opacity="0.32" stroke-width="8.0"/>
+  <circle cx="112.0" cy="128.0" r="113.1" fill="url(#halo)"/><path d="M109.51 50.04 A78.0 78.0 0 1 0 182.42 161.55 A67.08 67.08 0 0 1 109.51 50.04Z" fill="url(#crescent)" stroke="#ffffff" stroke-opacity="0.6" stroke-width="1.6"/><circle cx="55.8" cy="108.5" r="5.5" fill="#9a9eb4" fill-opacity="0.35"/><circle cx="88.6" cy="176.4" r="7.0" fill="#9a9eb4" fill-opacity="0.35"/><circle cx="51.2" cy="155.3" r="3.9" fill="#9a9eb4" fill-opacity="0.35"/><path d="M60.5 131.1 Q73.0 143.6 85.5 128.0" fill="none" stroke="#2a2d40" stroke-width="4.3" stroke-linecap="round"/><path d="M57.4 135.8 l-4.7 3.9" stroke="#2a2d40" stroke-width="3.1" stroke-linecap="round"/><path d="M69.1 160.8 Q80.8 170.1 91.7 157.6" fill="none" stroke="#2a2d40" stroke-width="3.9" stroke-linecap="round"/><ellipse cx="63.6" cy="153.0" rx="7.8" ry="4.3" fill="#ff96af" fill-opacity="0.6"/>
+  <ellipse cx="176.0" cy="128.0" rx="8.2" ry="6.0" transform="rotate(-20 176.0 128.0)" fill="#ffb3c8"/><path d="M183.2 126.5 V96.5" stroke="#ffb3c8" stroke-width="3.0" stroke-linecap="round"/><path d="M183.2 96.5 q13.5 7.5 7.5 19.5" fill="none" stroke="#ffb3c8" stroke-width="3.0" stroke-linecap="round"/>
+  <ellipse cx="188.0" cy="82.0" rx="6.6" ry="4.8" transform="rotate(-20 188.0 82.0)" fill="#b8dcff"/><path d="M193.8 80.8 V56.8" stroke="#b8dcff" stroke-width="2.4" stroke-linecap="round"/><ellipse cx="206.0" cy="77.8" rx="6.6" ry="4.8" transform="rotate(-20 206.0 77.8)" fill="#b8dcff"/><path d="M211.8 76.6 V52.6" stroke="#b8dcff" stroke-width="2.4" stroke-linecap="round"/><path d="M193.8 56.8 L211.8 52.6" stroke="#b8dcff" stroke-width="4.6" stroke-linecap="round"/>
+  <path d="M204.0 177.0 Q204.0 186.0 213.0 186.0 Q204.0 186.0 204.0 195.0 Q204.0 186.0 195.0 186.0 Q204.0 186.0 204.0 177.0Z" fill="#ffffff" fill-opacity="0.9"/>
+  <path d="M176.0 37.0 Q176.0 44.0 183.0 44.0 Q176.0 44.0 176.0 51.0 Q176.0 44.0 169.0 44.0 Q176.0 44.0 176.0 37.0Z" fill="#ffffff" fill-opacity="0.8"/>
+  <path d="M40.0 212.0 Q40.0 218.0 46.0 218.0 Q40.0 218.0 40.0 224.0 Q40.0 218.0 34.0 218.0 Q40.0 218.0 40.0 212.0Z" fill="#ffffff" fill-opacity="0.7"/>
  </g>
+ <rect x="8.0" y="8.0" width="240.0" height="240.0" rx="56" fill="none" stroke="url(#rim)" stroke-opacity="0.85" stroke-width="4.0"/>
  <text x="290" y="150" font-family="sans-serif" font-size="104" font-weight="bold" fill="#14151f">Lullaby</text>
  <text x="294" y="210" font-family="sans-serif" font-size="48" fill="#a880ff">Launcher</text>
 </svg>
