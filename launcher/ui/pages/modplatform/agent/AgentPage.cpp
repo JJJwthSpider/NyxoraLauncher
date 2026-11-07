@@ -102,6 +102,7 @@ QJsonObject modToJson(const ModpackAgent::AgentMod& mod)
         { "title", mod.title },
         { "description", mod.description },
         { "group", mod.group },
+        { "kind", mod.kind },
         { "versionNumber", mod.versionNumber },
         { "fileName", mod.fileName },
         { "url", mod.url },
@@ -127,6 +128,7 @@ ModpackAgent::AgentMod modFromJson(const QJsonObject& obj)
     mod.title = obj["title"].toString();
     mod.description = obj["description"].toString();
     mod.group = obj["group"].toString();
+    mod.kind = obj["kind"].toString("mod");
     mod.versionNumber = obj["versionNumber"].toString();
     mod.fileName = obj["fileName"].toString();
     mod.url = obj["url"].toString();

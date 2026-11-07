@@ -34,6 +34,7 @@ struct Theme {
 struct CuratedMod {
     QStringList alternatives;  // Modrinth slugs
     QString group;             // shown to the user (already translated)
+    QString kind = "mod";      // "mod", or "shader" for a shader pack (goes to shaderpacks/, needs Iris or Oculus)
 };
 
 /// Everything the agent needs to know to assemble a pack.

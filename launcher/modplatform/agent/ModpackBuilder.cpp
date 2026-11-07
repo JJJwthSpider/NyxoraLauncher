@@ -41,6 +41,7 @@ constexpr int s_searchLimit = 15;
 // CurseForge constants: https://docs.curseforge.com/rest-api/
 constexpr int s_cfMinecraftGameId = 432;
 constexpr int s_cfModsClassId = 6;
+constexpr int s_cfShadersClassId = 6552;
 constexpr int s_cfSortByPopularity = 2;
 constexpr int s_cfReleaseFile = 1;
 constexpr int s_cfRequiredDependency = 3;
@@ -408,28 +409,33 @@ void ModpackBuilder::resolveLoaderVersion()
 
 /* ---------------------------------------------------------------- lookups */
 
-void ModpackBuilder::findBySlug(const QString& slug, bool curseForge, CandidateCallback callback)
+void ModpackBuilder::findBySlug(const QString& slug, bool curseForge, CandidateCallback callback, const QString& kind)
 {
     if (!curseForge) {
-        get(BuildConfig.MODRINTH_PROD_URL + "/project/" + slug, {}, false, [callback](const QJsonDocument& doc, int status) {
+        get(BuildConfig.MODRINTH_PROD_URL + "/project/" + slug, {}, false, [callback, kind](const QJsonDocument& doc, int status) {
             const auto project = doc.object();
-            if (status != 200 || project["project_type"].toString() != "mod") {
+            if (status != 200 || project["project_type"].toString() != kind) {
                 callback({});
                 return;
             }
-            callback(modrinthCandidate(project));
+            auto candidate = modrinthCandidate(project);
+            candidate.kind = kind;
+            callback(candidate);
         });
         return;
     }
+    const int classId = kind == "shader" ? s_cfShadersClassId : s_cfModsClassId;
     get(BuildConfig.FLAME_BASE_URL + "/mods/search",
-        { { "gameId", QString::number(s_cfMinecraftGameId) }, { "classId", QString::number(s_cfModsClassId) }, { "slug", slug } }, true,
-        [callback](const QJsonDocument& doc, int status) {
+        { { "gameId", QString::number(s_cfMinecraftGameId) }, { "classId", QString::number(classId) }, { "slug", slug } }, true,
+        [callback, kind](const QJsonDocument& doc, int status) {
             const auto data = doc.object()["data"].toArray();
             if (status != 200 || data.isEmpty()) {
                 callback({});
                 return;
             }
-            callback(curseForgeCandidate(data.first().toObject()));
+            auto candidate = curseForgeCandidate(data.first().toObject());
+            candidate.kind = kind;
+            callback(candidate);
         });
 }
 
@@ -507,8 +513,10 @@ void ModpackBuilder::fetchFile(const Candidate& candidate, FileCallback callback
 
 void ModpackBuilder::fetchModrinthFile(const Candidate& candidate, FileCallback callback)
 {
+    // shader packs are made for Iris (or OptiFine), not for the mod loader
+    const QString loaders = candidate.kind == "shader" ? QString(R"(["iris","optifine"])") : modrinthLoaders();
     get(BuildConfig.MODRINTH_PROD_URL + "/project/" + rawId(candidate.id) + "/version",
-        { { "loaders", modrinthLoaders() }, { "game_versions", QString(R"(["%1"])").arg(m_plan.minecraftVersion) } }, false,
+        { { "loaders", loaders }, { "game_versions", QString(R"(["%1"])").arg(m_plan.minecraftVersion) } }, false,
         [callback](const QJsonDocument& doc, int status) {
             FileChoice choice;
             if (status != 200 || !doc.isArray() || doc.array().isEmpty()) {
@@ -566,9 +574,13 @@ void ModpackBuilder::fetchModrinthFile(const Candidate& candidate, FileCallback 
 
 void ModpackBuilder::fetchCurseForgeFile(const Candidate& candidate, FileCallback callback)
 {
-    get(BuildConfig.FLAME_BASE_URL + "/mods/" + rawId(candidate.id) + "/files",
-        { { "gameVersion", m_plan.minecraftVersion }, { "modLoaderType", QString::number(curseForgeLoaderType()) }, { "pageSize", "30" } },
-        true, [this, callback](const QJsonDocument& doc, int status) {
+    const bool shader = candidate.kind == "shader";
+    QList<std::pair<QString, QString>> query{ { "gameVersion", m_plan.minecraftVersion }, { "pageSize", "30" } };
+    if (!shader) {
+        query.append({ "modLoaderType", QString::number(curseForgeLoaderType()) });
+    }
+    get(BuildConfig.FLAME_BASE_URL + "/mods/" + rawId(candidate.id) + "/files", query,
+        true, [this, callback, shader](const QJsonDocument& doc, int status) {
             FileChoice choice;
             if (status != 200) {
                 callback(choice);
@@ -578,7 +590,7 @@ void ModpackBuilder::fetchCurseForgeFile(const Candidate& candidate, FileCallbac
             QJsonObject file;
             for (const auto& value : doc.object()["data"].toArray()) {
                 const auto candidateFile = value.toObject();
-                if (!curseForgeFileFitsLoader(candidateFile["gameVersions"].toArray())) {
+                if (!shader && !curseForgeFileFitsLoader(candidateFile["gameVersions"].toArray())) {
                     continue;
                 }
                 if (file.isEmpty()) {
@@ -704,6 +716,7 @@ bool ModpackBuilder::addMod(const Candidate& candidate, const FileChoice& file, 
     mod.title = candidate.title;
     mod.description = candidate.description;
     mod.group = group;
+    mod.kind = candidate.kind;
     mod.dependency = dependency;
     mod.versionNumber = file.versionNumber;
     mod.fileName = file.fileName;
@@ -854,7 +867,8 @@ void ModpackBuilder::tryCurated(const CuratedMod& curated, int alternative, bool
             tryCurated(curated, alternative + 1, !m_useModrinth);
         }
     };
-    findBySlug(curated.alternatives.at(alternative), curseForge, [this, curated, next](const Candidate& candidate) {
+    findBySlug(
+        curated.alternatives.at(alternative), curseForge, [this, curated, next](const Candidate& candidate) {
         if (candidate.id.isEmpty()) {
             next();
             return;
@@ -869,7 +883,7 @@ void ModpackBuilder::tryCurated(const CuratedMod& curated, int alternative, bool
             }
             addMod(candidate, file, curated.group, false);
         });
-    });
+        }, curated.kind);
 }
 
 void ModpackBuilder::searchThemes()
@@ -1336,7 +1350,7 @@ QByteArray ModpackBuilder::makeIndex() const
             hashes["sha512"] = mod.sha512;  // CurseForge only provides sha1
         }
         files.append(QJsonObject{
-            { "path", "mods/" + mod.fileName },
+            { "path", (mod.kind == "shader" ? "shaderpacks/" : "mods/") + mod.fileName },
             { "hashes", hashes },
             { "downloads", QJsonArray{ mod.url } },
             { "fileSize", mod.size },

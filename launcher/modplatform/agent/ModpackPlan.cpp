@@ -337,6 +337,8 @@ QList<CuratedMod> essentialMods(const QString& loader, bool wantsShaders, bool w
 
     if (wantsShaders) {
         mods << CuratedMod{ loader == "forge" ? QStringList{ "oculus" } : QStringList{ "iris", "oculus" }, tr("Shaders") };
+        // the shaders themselves: the most popular pack, or the other well-known ones if it has no version yet
+        mods << CuratedMod{ { "complementary-reimagined", "bsl-shaders", "makeup-ultra-fast-shaders" }, tr("Shaders"), "shader" };
     }
     if (wantsMap) {
         mods << CuratedMod{ { "xaeros-minimap", "journeymap" }, tr("Map") };

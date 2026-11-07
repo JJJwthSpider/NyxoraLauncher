@@ -28,10 +28,17 @@ final class Plan {
     static final class CuratedMod {
         final List<String> alternatives;
         final String group;
+        String kind = Mod.MOD;
 
         CuratedMod(String group, String... alternatives) {
             this.group = group;
             this.alternatives = Arrays.asList(alternatives);
+        }
+
+        /** a shader pack (goes to shaderpacks/ and needs Iris or Oculus), not a mod */
+        CuratedMod shader() {
+            kind = Mod.SHADER;
+            return this;
         }
     }
 
@@ -113,6 +120,8 @@ final class Plan {
             } else {
                 mods.add(new CuratedMod("Шейдеры", "iris", "oculus"));
             }
+            // the shaders themselves: the most popular pack, or the other well-known ones if it has no version yet
+            mods.add(new CuratedMod("Шейдеры", "complementary-reimagined", "bsl-shaders", "makeup-ultra-fast-shaders").shader());
         }
         if (wantsMap) {
             mods.add(new CuratedMod("Карта", "xaeros-minimap", "journeymap"));

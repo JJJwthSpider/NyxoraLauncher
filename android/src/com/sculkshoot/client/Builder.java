@@ -130,8 +130,13 @@ final class Builder {
     }
 
     private Candidate project(String idOrSlug) throws IOException, JSONException {
+        return project(idOrSlug, Mod.MOD);
+    }
+
+    /** a project of this kind ("mod" or "shader"); null if there is none */
+    private Candidate project(String idOrSlug, String kind) throws IOException, JSONException {
         JSONObject project = getObject(MODRINTH + "/project/" + Http.encode(idOrSlug));
-        if (project == null || !"mod".equals(project.optString("project_type"))) {
+        if (project == null || !kind.equals(project.optString("project_type"))) {
             return null;
         }
         return Candidate.from(project);
@@ -156,6 +161,10 @@ final class Builder {
 
     /** Adds a mod; false if it is already there, conflicts with another mod or the user asked to leave it out. */
     private synchronized boolean addMod(Candidate c, Modrinth.FileChoice file, String group, boolean dependency) {
+        return addMod(c, file, group, dependency, Mod.MOD);
+    }
+
+    private synchronized boolean addMod(Candidate c, Modrinth.FileChoice file, String group, boolean dependency, String kind) {
         if (findSame(c) != null || !file.valid) {
             return false;
         }
@@ -170,6 +179,7 @@ final class Builder {
             }
         }
         Mod mod = new Mod();
+        mod.kind = kind;
         mod.projectId = c.id;
         mod.slug = c.slug;
         mod.title = c.title;
@@ -321,16 +331,18 @@ final class Builder {
             jobs.add(pool.submit(new java.util.concurrent.Callable<Void>() {
                 public Void call() throws Exception {
                     for (String slug : curated.alternatives) {
-                        Candidate c = project(slug);
+                        Candidate c = project(slug, curated.kind);
                         if (c == null) {
                             continue;
                         }
                         if (findSame(c) != null) {
                             return null;
                         }
-                        Modrinth.FileChoice file = file(c);
+                        Modrinth.FileChoice file = Mod.SHADER.equals(curated.kind)
+                                                       ? Modrinth.bestFile(c.id, "[\"iris\",\"optifine\"]", plan.minecraftVersion)
+                                                       : file(c);
                         if (file.valid) {
-                            addMod(c, file, curated.group, false);
+                            addMod(c, file, curated.group, false, curated.kind);
                             return null;
                         }
                     }

@@ -52,6 +52,7 @@ struct AgentMod {
     bool requested = false;            // the user named this mod
     QStringList neededBy;              // titles of the mods that need this library
     bool enabled = true;               // the user can switch mods off before creating the instance
+    QString kind = "mod";              // "mod", or "shader" for a shader pack
     QStringList requiredProjects;      // prefixed ids
     QStringList incompatibleProjects;  // prefixed ids
 };
@@ -63,6 +64,7 @@ struct Candidate {
     QString slug;
     QString title;
     QString description;
+    QString kind = "mod";  // "mod" or "shader"
 };
 
 /// The file of a project that fits the Minecraft version and loader.
@@ -147,7 +149,7 @@ class ModpackBuilder : public QObject {
     void finish();
 
     // platform specific lookups; callbacks get an empty Candidate / invalid FileChoice when nothing fits
-    void findBySlug(const QString& slug, bool curseForge, CandidateCallback callback);
+    void findBySlug(const QString& slug, bool curseForge, CandidateCallback callback, const QString& kind = "mod");
     void findById(const QString& prefixedId, CandidateCallback callback);
     /// searches by name; the callback gets the project whose title or slug is exactly that name, else an empty Candidate
     void findByName(const QString& name, bool curseForge, CandidateCallback callback);
