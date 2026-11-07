@@ -427,8 +427,19 @@ public final class PojavEngine extends GameEngine {
 
         // the profile the engine starts
         LauncherProfiles.load();
-        String key = "lullaby-" + inst.id;
+        // the engine renames every profile whose key is not a UUID the next time it reads the file (and the game
+        // then cannot find "the current profile"), so the key is the installation's id, which is a UUID
+        String key = profileKey(inst);
         MinecraftProfile profile = LauncherProfiles.mainProfileJson.profiles.get(key);
+        if (profile == null) {
+            // an older Lullaby saved it under "lullaby-<id>", and the engine renamed that one to a random UUID
+            String ourDir = Tools.LAUNCHERPROFILES_RTPREFIX + "custom_instances/lullaby-" + inst.id;
+            for (java.util.Iterator<java.util.Map.Entry<String, MinecraftProfile>> it = LauncherProfiles.mainProfileJson.profiles.entrySet().iterator(); it.hasNext();) {
+                if (ourDir.equals(it.next().getValue().gameDir)) {
+                    it.remove();
+                }
+            }
+        }
         if (profile == null) {
             profile = new MinecraftProfile();
         }
@@ -440,6 +451,10 @@ public final class PojavEngine extends GameEngine {
         LauncherProfiles.mainProfileJson.profiles.put(key, profile);
         LauncherProfiles.write();
         LauncherPreferences.DEFAULT_PREF.edit().putString(LauncherPreferences.PREF_KEY_CURRENT_PROFILE, key).commit();
+        LauncherProfiles.load();  // read it back the way the engine and the game will
+        if (!LauncherProfiles.mainProfileJson.profiles.containsKey(key)) {
+            return "Не удалось сохранить профиль игры (ключ " + key + "). Попробуй ещё раз.";
+        }
 
         // the engine downloads Minecraft itself and starts it
         log.log("Скачиваю Minecraft " + inst.minecraftVersion + " (в первый раз это долго)...");
@@ -512,6 +527,15 @@ public final class PojavEngine extends GameEngine {
     private static void waitForVersionList() throws InterruptedException {
         for (int i = 0; i < 300 && ExtraCore.getValue(ExtraConstants.RELEASE_TABLE) == null; i++) {
             Thread.sleep(100);
+        }
+    }
+
+    /** the engine's profile key for an installation: a UUID, as the engine requires */
+    static String profileKey(Installation inst) {
+        try {
+            return java.util.UUID.fromString(inst.id).toString();
+        } catch (IllegalArgumentException e) {
+            return java.util.UUID.nameUUIDFromBytes(("lullaby:" + inst.id).getBytes()).toString();
         }
     }
 
