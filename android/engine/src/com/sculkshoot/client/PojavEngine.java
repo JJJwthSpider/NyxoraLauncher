@@ -484,6 +484,11 @@ public final class PojavEngine extends GameEngine {
         profile.controlFile = CONTROLS_FILE;
         profile.javaDir = Tools.LAUNCHERPROFILES_RTPREFIX + runtime;  // exactly the Java this version needs
         profile.pojavRendererName = rendererFor(activity, inst);
+        if (LTW.equals(profile.pojavRendererName)) {
+            // with LTW on Adreno the engine stops before the start to ask about the render distance (more than 7
+            // makes too many buffers there); Lullaby sets it beforehand, so nothing waits for an answer
+            limitRenderDistance(new File(Tools.DIR_GAME_HOME, "custom_instances/lullaby-" + inst.id), 7);
+        }
         log.log("Графика: " + (LTW.equals(profile.pojavRendererName) ? "LTW" : ZINK.equals(profile.pojavRendererName) ? "Zink" : "Holy GL4ES")
                 + ", Java " + java + ".");
         LauncherProfiles.mainProfileJson.profiles.put(key, profile);
@@ -566,6 +571,39 @@ public final class PojavEngine extends GameEngine {
         for (int i = 0; i < 300 && ExtraCore.getValue(ExtraConstants.RELEASE_TABLE) == null; i++) {
             Thread.sleep(100);
         }
+    }
+
+    /** options.txt of the game folder with renderDistance at most this (created if there is none yet) */
+    static void limitRenderDistance(File gameDir, int max) throws IOException {
+        File options = new File(gameDir, "options.txt");
+        List<String> lines = new ArrayList<String>();
+        boolean found = false;
+        if (options.isFile()) {
+            for (String line : Tools.read(options.getAbsolutePath()).split("\n")) {
+                if (line.startsWith("renderDistance:")) {
+                    found = true;
+                    int value;
+                    try {
+                        value = Integer.parseInt(line.substring("renderDistance:".length()).trim());
+                    } catch (NumberFormatException e) {
+                        value = 12;
+                    }
+                    line = "renderDistance:" + Math.min(value, max);
+                }
+                lines.add(line);
+            }
+        }
+        if (!found) {
+            lines.add("renderDistance:" + max);
+        }
+        gameDir.mkdirs();
+        StringBuilder out = new StringBuilder();
+        for (String line : lines) {
+            if (!line.isEmpty()) {
+                out.append(line).append('\n');
+            }
+        }
+        Tools.write(options.getAbsolutePath(), out.toString());
     }
 
     /** the engine's profile key for an installation: a UUID, as the engine requires */
