@@ -11,7 +11,7 @@ import android.provider.OpenableColumns;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-/** Gives other apps (Minecraft launchers, messengers, file managers) read access to the exported .mrpack files. */
+/** Gives other apps (Minecraft launchers, messengers, file managers) read access to the exported .mrpack files and control layouts. */
 public final class PackProvider extends ContentProvider {
     static final String AUTHORITY = "com.sculkshoot.client.packs";
 
@@ -64,7 +64,8 @@ public final class PackProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        return "application/x-modrinth-modpack+zip";
+        String name = uri.getLastPathSegment();
+        return name != null && name.endsWith(".json") ? "application/json" : "application/x-modrinth-modpack+zip";
     }
 
     @Override

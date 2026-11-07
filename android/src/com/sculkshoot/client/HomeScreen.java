@@ -38,6 +38,9 @@ final class HomeScreen {
     private final MainActivity activity;
     private final LinearLayout root;
     private final GridView grid;
+    private LinearLayout accountChip;
+    private ImageView head;
+    private TextView accountName;
     private final TextView empty;
     private final EditText search;
     private final LinearLayout actions;
@@ -80,6 +83,15 @@ final class HomeScreen {
             }
         });
         bar.addView(search, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button controlsButton = Ui.button(activity, "Управление", false);
+        controlsButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                HomeScreen.this.activity.openControls();
+            }
+        });
+        LinearLayout.LayoutParams first = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        first.leftMargin = dp(8);
+        bar.addView(controlsButton, first);
         Button chats = Ui.button(activity, "Чаты", false);
         chats.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -96,6 +108,24 @@ final class HomeScreen {
             }
         });
         bar.addView(more, new LinearLayout.LayoutParams(dp(44), ViewGroup.LayoutParams.WRAP_CONTENT));
+        // the signed-in player: head and name, like the account button of the desktop launcher
+        accountChip = new LinearLayout(activity);
+        accountChip.setGravity(Gravity.CENTER_VERTICAL);
+        accountChip.setPadding(dp(8), dp(4), dp(10), dp(4));
+        accountChip.setBackground(Ui.rounded(activity, Ui.GLASS, 18, Ui.LINE));
+        head = new ImageView(activity);
+        accountChip.addView(head, new LinearLayout.LayoutParams(dp(28), dp(28)));
+        accountName = Ui.label(activity, "", 13, Ui.TEXT, true);
+        accountName.setPadding(dp(8), 0, 0, 0);
+        accountChip.addView(accountName);
+        accountChip.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                HomeScreen.this.activity.showAccount();
+            }
+        });
+        LinearLayout.LayoutParams chipParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        chipParams.leftMargin = dp(8);
+        bar.addView(accountChip, chipParams);
         root.addView(bar);
 
         LinearLayout body = new LinearLayout(activity);
@@ -197,6 +227,18 @@ final class HomeScreen {
             }
         });
         return tile;
+    }
+
+    /** shows who is signed in */
+    void updateAccount() {
+        Account account = activity.account();
+        if (account == null || !account.signedIn()) {
+            accountChip.setVisibility(View.GONE);
+            return;
+        }
+        accountChip.setVisibility(View.VISIBLE);
+        accountName.setText(account.ownsJava ? account.name : "Без Java Edition");
+        Icons.loadHead(head, account.skinUrl, R.drawable.moony);
     }
 
     /* ------------------------------------------------------------ the list */

@@ -120,6 +120,13 @@ final class Installation {
             dir.mkdirs();
         }
 
+        /** downloaded CurseForge files (they travel inside the exported pack) */
+        File curseForgeCache() {
+            File cache = new File(dir.getParentFile(), "curseforge");
+            cache.mkdirs();
+            return cache;
+        }
+
         File sourcePack(String id) {
             return new File(dir, id + ".mrpack");
         }

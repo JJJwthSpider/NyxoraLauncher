@@ -692,7 +692,19 @@ final class Builder {
     }
 
     /** modrinth.index.json for the enabled mods; libraries only while an enabled mod needs them. */
-    static String makeIndex(Plan plan, String loaderVersion, List<Mod> mods) throws JSONException {
+    /** the files that go into the game: everything switched on, and the libraries those need */
+    static List<Mod> included(List<Mod> mods) {
+        Set<Integer> included = includedIndexes(mods);
+        List<Mod> out = new ArrayList<Mod>();
+        for (int i = 0; i < mods.size(); i++) {
+            if (included.contains(i)) {
+                out.add(mods.get(i));
+            }
+        }
+        return out;
+    }
+
+    private static Set<Integer> includedIndexes(List<Mod> mods) {
         Set<Integer> included = new HashSet<Integer>();
         List<Integer> queue = new ArrayList<Integer>();
         for (int i = 0; i < mods.size(); i++) {
@@ -712,12 +724,15 @@ final class Builder {
                 }
             }
         }
+        return included;
+    }
+
+    static String makeIndex(Plan plan, String loaderVersion, List<Mod> mods) throws JSONException {
         JSONArray files = new JSONArray();
-        for (int i = 0; i < mods.size(); i++) {
-            if (!included.contains(i)) {
-                continue;
+        for (Mod mod : included(mods)) {
+            if (CurseForge.isCurseForge(mod.projectId)) {
+                continue;  // .mrpack files may only link to Modrinth and GitHub: CurseForge files travel inside the pack (overrides)
             }
-            Mod mod = mods.get(i);
             JSONObject hashes = new JSONObject();
             if (!mod.sha1.isEmpty()) {
                 hashes.put("sha1", mod.sha1);

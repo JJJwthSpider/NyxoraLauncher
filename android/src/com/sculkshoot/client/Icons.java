@@ -73,7 +73,49 @@ final class Icons {
         });
     }
 
+    /** the face of a Minecraft skin (with the hat layer), big and pixel-sharp: the player's head next to the name */
+    static void loadHead(final ImageView view, final String skinUrl, int fallback) {
+        final String key = "head:" + skinUrl;
+        view.setTag(key);
+        Bitmap cached = skinUrl == null || skinUrl.isEmpty() ? null : CACHE.get(key);
+        if (cached != null) {
+            view.setImageBitmap(cached);
+            return;
+        }
+        view.setImageResource(fallback);
+        if (skinUrl == null || skinUrl.isEmpty()) {
+            return;
+        }
+        POOL.execute(new Runnable() {
+            public void run() {
+                Bitmap skin = fetchRaw(skinUrl);
+                if (skin == null || skin.getWidth() < 64 || skin.getHeight() < 32) {
+                    return;
+                }
+                final Bitmap head = Bitmap.createBitmap(64, 64, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(head);
+                Paint sharp = new Paint();
+                sharp.setFilterBitmap(false);
+                canvas.drawBitmap(skin, new android.graphics.Rect(8, 8, 16, 16), new android.graphics.Rect(0, 0, 64, 64), sharp);
+                canvas.drawBitmap(skin, new android.graphics.Rect(40, 8, 48, 16), new android.graphics.Rect(0, 0, 64, 64), sharp);
+                CACHE.put(key, head);
+                MAIN.post(new Runnable() {
+                    public void run() {
+                        if (key.equals(view.getTag())) {
+                            view.setImageBitmap(head);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
     private static Bitmap fetch(String url) {
+        Bitmap full = fetchRaw(url);
+        return full == null ? null : rounded(full);
+    }
+
+    private static Bitmap fetchRaw(String url) {
         try {
             HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
             c.setRequestProperty("User-Agent", Http.USER_AGENT);
@@ -82,11 +124,7 @@ final class Icons {
             try {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize = 1;
-                Bitmap full = BitmapFactory.decodeStream(c.getInputStream(), null, options);
-                if (full == null) {
-                    return null;
-                }
-                return rounded(full);
+                return BitmapFactory.decodeStream(c.getInputStream(), null, options);
             } finally {
                 c.disconnect();
             }

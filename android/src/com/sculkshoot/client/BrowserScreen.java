@@ -46,7 +46,11 @@ final class BrowserScreen {
     private final Button more;
     private final List<JSONObject> results = new ArrayList<JSONObject>();
     private int offset;
+    private boolean curseForge;  // where to search: Modrinth or CurseForge
+    private Button modrinthTab;
+    private Button curseForgeTab;
     private boolean loading;
+    private int generation;  // a new search makes the answers of older ones stale
 
     BrowserScreen(MainActivity activity, Installation inst, String kind) {
         this.activity = activity;
@@ -115,9 +119,34 @@ final class BrowserScreen {
         bar.addView(find);
         root.addView(bar);
 
+        LinearLayout info = new LinearLayout(activity);
+        info.setGravity(Gravity.CENTER_VERTICAL);
+        info.setPadding(dp(10), dp(6), dp(10), 0);
+        if (inst != null) {
+            // the same two sites as the desktop launcher
+            modrinthTab = Ui.button(activity, "Modrinth", true);
+            curseForgeTab = Ui.button(activity, "CurseForge", false);
+            modrinthTab.setTextSize(13);
+            curseForgeTab.setTextSize(13);
+            modrinthTab.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    setSource(false);
+                }
+            });
+            curseForgeTab.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    setSource(true);
+                }
+            });
+            LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            tp.rightMargin = dp(6);
+            info.addView(modrinthTab, tp);
+            info.addView(curseForgeTab, new LinearLayout.LayoutParams(tp));
+        }
         status = Ui.label(activity, "", 12, Ui.HINT, false);
-        status.setPadding(dp(14), dp(4), dp(14), 0);
-        root.addView(status);
+        status.setPadding(dp(8), 0, dp(8), 0);
+        info.addView(status);
+        root.addView(info);
         list = new ListView(activity);
         list.setDividerHeight(dp(6));
         list.setDivider(new android.graphics.drawable.ColorDrawable(0));
@@ -159,15 +188,28 @@ final class BrowserScreen {
         }
     }
 
-    private void search(final boolean fresh) {
-        if (loading) {
+    void setSource(boolean useCurseForge) {
+        if (curseForge == useCurseForge) {
             return;
         }
+        curseForge = useCurseForge;
+        Ui.styleButton(activity, modrinthTab, !curseForge);
+        Ui.styleButton(activity, curseForgeTab, curseForge);
+        search(true);
+    }
+
+    private void search(final boolean fresh) {
+        if (loading && !fresh) {
+            return;  // "show more" waits for the running search; a new search replaces it
+        }
         loading = true;
+        final int mine = ++generation;
         if (fresh) {
             offset = 0;
         }
-        status.setText("Ищу на Modrinth...");
+        final boolean cf = curseForge;
+        final String site = cf ? "CurseForge" : "Modrinth";
+        status.setText("Ищу на " + site + "...");
         final String text = query.getText().toString().trim();
         final String index = SORTS[Math.max(0, sort.getSelectedItemPosition())][0];
         final String facets = inst == null ? "[[\"project_type:modpack\"]]" : Installer.facetsFor(inst, kind);
@@ -176,13 +218,16 @@ final class BrowserScreen {
             public JSONArray run() throws Exception {
                 // Russian words are understood like Moony understands them: "зомби" searches "zombie"
                 String q = Parser.hasCyrillic(text) ? Util.join(Parser.keywords(text), " ") : text;
-                return Modrinth.search(q, facets, index, from, PAGE);
+                return cf ? CurseForge.search(q, inst, kind, index, from, PAGE) : Modrinth.search(q, facets, index, from, PAGE);
             }
 
             public void done(JSONArray hits, Exception error) {
+                if (mine != generation) {
+                    return;
+                }
                 loading = false;
                 if (error != null) {
-                    status.setText("Нет связи с Modrinth: " + error.getMessage());
+                    status.setText("Нет связи с " + site + ": " + error.getMessage());
                     return;
                 }
                 if (fresh) {
@@ -232,10 +277,12 @@ final class BrowserScreen {
             TextView desc = Ui.label(activity, hit.optString("description"), 12, Ui.HINT, false);
             desc.setMaxLines(2);
             text.addView(desc);
-            text.addView(Ui.label(activity, "автор: " + hit.optString("author") + " · скачиваний: " + Ui.downloads(hit.optLong("downloads")),
+            text.addView(Ui.label(activity, "автор: " + hit.optString("author") + " · скачиваний: " + Ui.downloads(hit.optLong("downloads"))
+                                  + (CurseForge.isCurseForge(hit.optString("project_id")) ? " · CurseForge" : ""),
                                   11, Ui.ACCENT_DARK, false));
             row.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-            final boolean installed = inst != null && inst.find(hit.optString("project_id")) != null;
+            final boolean installed = inst != null && (inst.find(hit.optString("project_id")) != null
+                                                       || (!hit.optString("slug").isEmpty() && Installer.findBySlug(inst, hit.optString("slug")) != null));
             Button install = Ui.button(activity, installed ? "Установлено" : "Установить", !installed);
             install.setEnabled(!installed);
             install.setOnClickListener(new View.OnClickListener() {
@@ -299,7 +346,7 @@ final class BrowserScreen {
     private void fail(String name, Exception error) {
         new AlertDialog.Builder(activity)
             .setTitle("Не удалось установить «" + name + "»")
-            .setMessage(error instanceof Installer.InstallException ? error.getMessage() : "Нет связи с Modrinth (" + error.getMessage() + ")")
+            .setMessage(error instanceof Installer.InstallException ? error.getMessage() : "Нет связи (" + error.getMessage() + ")")
             .setPositiveButton("OK", null)
             .show();
     }

@@ -75,6 +75,13 @@ final class Ui {
         return b;
     }
 
+    /** switches a button between the rainbow (chosen) and the plain look */
+    static void styleButton(Context context, Button b, boolean accent) {
+        b.setTextColor(accent ? BG : TEXT);
+        b.setBackground(accent ? rainbow(context, 10) : rounded(context, PANEL_LIGHT, 10, LINE));
+        b.setPadding(dp(context, 14), dp(context, 6), dp(context, 14), dp(context, 6));
+    }
+
     static TextView label(Context context, String text, float size, int color, boolean pixelFont) {
         TextView t = new TextView(context);
         t.setText(text);

@@ -113,7 +113,7 @@ final class EditorScreen {
     private void fillIcons() {
         boolean missing = false;
         for (Mod mod : inst.mods) {
-            missing |= mod.iconUrl.isEmpty() && !mod.projectId.isEmpty();
+            missing |= mod.iconUrl.isEmpty() && !mod.projectId.isEmpty() && !CurseForge.isCurseForge(mod.projectId);
         }
         if (!missing) {
             return;

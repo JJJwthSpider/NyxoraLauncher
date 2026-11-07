@@ -28,12 +28,51 @@ final class Http {
     }
 
     static Response get(String url) throws IOException {
+        return request("GET", url, null, null, (String[]) null);
+    }
+
+    /** a GET with extra headers: name, value, name, value... */
+    static Response get(String url, String... headers) throws IOException {
+        return request("GET", url, null, null, headers);
+    }
+
+    /** a POST of a form or JSON body (contentType says which), with extra headers */
+    static Response post(String url, String contentType, String body, String... headers) throws IOException {
+        return request("POST", url, contentType, body, headers);
+    }
+
+    /** an application/x-www-form-urlencoded body: name, value, name, value... */
+    static String form(String... pairs) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i + 1 < pairs.length; i += 2) {
+            out.append(out.length() == 0 ? "" : "&").append(encode(pairs[i])).append('=').append(encode(pairs[i + 1]));
+        }
+        return out.toString();
+    }
+
+    private static Response request(String method, String url, String contentType, String body, String[] headers) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        connection.setRequestMethod(method);
         connection.setRequestProperty("User-Agent", USER_AGENT);
         connection.setRequestProperty("Accept", "application/json");
+        for (int i = 0; headers != null && i + 1 < headers.length; i += 2) {
+            connection.setRequestProperty(headers[i], headers[i + 1]);
+        }
         connection.setConnectTimeout(20000);
         connection.setReadTimeout(30000);
         try {
+            if (body != null) {
+                byte[] bytes = body.getBytes("UTF-8");
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", contentType);
+                connection.setFixedLengthStreamingMode(bytes.length);
+                java.io.OutputStream out = connection.getOutputStream();
+                try {
+                    out.write(bytes);
+                } finally {
+                    out.close();
+                }
+            }
             int status = connection.getResponseCode();
             InputStream in = status >= 400 ? connection.getErrorStream() : connection.getInputStream();
             return new Response(status, in == null ? "" : read(in));

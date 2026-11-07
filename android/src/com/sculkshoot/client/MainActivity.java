@@ -97,6 +97,9 @@ public final class MainActivity extends Activity {
     private View chatRoot;
     private View current;
     private EditorScreen editor;
+    private Account account;
+    private LoginScreen login;
+    private ControlsScreen controls;
     private BrowserScreen browser;
     private Runnable afterPermission;
 
@@ -168,7 +171,93 @@ public final class MainActivity extends Activity {
         } else {
             newChat();
         }
+        // the menu opens only for a signed-in Microsoft account
+        account = Account.load(this);
+        if (account.signedIn()) {
+            showHome();
+            refreshAccount();
+        } else {
+            showLogin(null);
+        }
+    }
+
+    /* ------------------------------------------------------------ Microsoft account */
+
+    Account account() {
+        return account;
+    }
+
+    void showLogin(String why) {
+        login = new LoginScreen(this);
+        if (why != null) {
+            login.setMessage(why);
+        }
+        show(login.view());
+    }
+
+    /** the sign-in on the login screen worked */
+    void signedIn(Account signed) {
+        account = signed;
+        account.save(this);
+        login = null;
         showHome();
+        if (!account.ownsJava) {
+            new AlertDialog.Builder(this)
+                .setTitle("Вход выполнен")
+                .setMessage("На этом аккаунте Microsoft нет Minecraft: Java Edition. Собирать установки можно, а чтобы играть, "
+                            + "игру нужно купить на minecraft.net (или войти в другой аккаунт через меню ⋮).")
+                .setPositiveButton("OK", null)
+                .show();
+        } else {
+            Toast.makeText(this, "Привет, " + account.name + "!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** the start of the app: renews the sign-in quietly; only a sign-in Microsoft no longer accepts sends back to the login */
+    private void refreshAccount() {
+        background(new Job<Account>() {
+            public Account run() throws Exception {
+                Account fresh = Account.load(MainActivity.this);
+                fresh.refresh();
+                return fresh;
+            }
+
+            public void done(Account fresh, Exception error) {
+                if (error instanceof Account.LoginException) {
+                    Account.signOut(MainActivity.this);
+                    account = new Account();
+                    showLogin(error.getMessage());
+                    return;
+                }
+                if (fresh != null) {  // without internet the saved profile stays
+                    account = fresh;
+                    account.save(MainActivity.this);
+                    home.updateAccount();
+                }
+            }
+        });
+    }
+
+    void openControls() {
+        controls = new ControlsScreen(this);
+        show(controls.view());
+    }
+
+    void showAccount() {
+        String text = account.ownsJava ? "Ник: " + account.name + "\nMinecraft: Java Edition есть на аккаунте."
+                                       : "На этом аккаунте нет Minecraft: Java Edition.";
+        new AlertDialog.Builder(this)
+            .setTitle("Аккаунт Microsoft")
+            .setMessage(text)
+            .setPositiveButton("Выйти из аккаунта", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int which) {
+                    Account.signOut(MainActivity.this);
+                    account = new Account();
+                    showLogin("Ты вышел из аккаунта. Чтобы открыть меню, войди снова.");
+                }
+            })
+            .setNegativeButton("Закрыть", null)
+            .show();
     }
 
     /* ------------------------------------------------------------ screens */
@@ -215,7 +304,13 @@ public final class MainActivity extends Activity {
     }
 
     void showHome(String selectId) {
+        if (account != null && !account.signedIn()) {
+            showLogin(null);
+            return;
+        }
+        controls = null;
         home.refresh();
+        home.updateAccount();
         if (selectId != null) {
             home.select(selectId);
         }
@@ -257,9 +352,14 @@ public final class MainActivity extends Activity {
 
     void showAppMenu() {
         new AlertDialog.Builder(this)
-            .setItems(new String[] { "Код приглашения друга", "О приложении" }, new DialogInterface.OnClickListener() {
+            .setItems(new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении" },
+                      new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int which) {
                     if (which == 0) {
+                        openControls();
+                    } else if (which == 1) {
+                        showAccount();
+                    } else if (which == 2) {
                         showInviteCode();
                     } else {
                         showAbout();
@@ -271,7 +371,7 @@ public final class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (current == home.view()) {
+        if (current == home.view() || (login != null && current == login.view())) {
             super.onBackPressed();
         } else if (browser != null && current == browser.view()) {
             browser.goBack();
@@ -1440,7 +1540,7 @@ public final class MainActivity extends Activity {
     /* ------------------------------------------------------------ play on the phone */
 
     /** Saves the pack into Downloads/Lullaby, where every launcher's "import modpack" finds it; returns where it is, or null. */
-    private String saveToDownloads(File pack) {
+    String saveToDownloads(File pack) {
         try {
             if (android.os.Build.VERSION.SDK_INT >= 29) {
                 android.content.ContentValues values = new android.content.ContentValues();
@@ -1538,38 +1638,62 @@ public final class MainActivity extends Activity {
         return file;
     }
 
+    /** writes the .mrpack in the background (CurseForge files are downloaded into it), then does what is next */
+    private void withPackFile(final Installation inst, final String doing, final Job<File> next) {
+        final HomeScreen.Progress progress = new HomeScreen.Progress(this, doing);
+        progress.log("Готовлю файл сборки «" + inst.name + "»...");
+        background(new Job<File>() {
+            public File run() throws Exception {
+                return exportFile(inst);
+            }
+
+            public void done(File file, Exception error) {
+                progress.dismiss();
+                if (error != null) {
+                    Toast.makeText(MainActivity.this, "Не удалось создать файл: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                    return;
+                }
+                next.done(file, null);
+            }
+        });
+    }
+
     /** "Play" on the main screen or in the editor */
     void playInstallation(final Installation inst) {
-        File file;
-        try {
-            file = exportFile(inst);
-        } catch (Exception e) {
-            Toast.makeText(this, "Не удалось создать файл: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            return;
-        }
-        afterPermission = new Runnable() {
-            public void run() {
-                playInstallation(inst);
+        withPackFile(inst, "Готовлю «" + inst.name + "» к игре", new Job<File>() {
+            public File run() {
+                return null;
             }
-        };
-        playFile(file, inst.minecraftVersion, inst.loader);
+
+            public void done(File file, Exception error) {
+                afterPermission = new Runnable() {
+                    public void run() {
+                        playInstallation(inst);
+                    }
+                };
+                playFile(file, inst.minecraftVersion, inst.loader);
+            }
+        });
     }
 
     /** "Export" on the main screen: send or save the .mrpack */
-    void exportInstallation(Installation inst) {
-        try {
-            File file = exportFile(inst);
-            Uri uri = PackProvider.uriFor(file);
-            Intent send = new Intent(Intent.ACTION_SEND);
-            send.setType("application/x-modrinth-modpack+zip");
-            send.putExtra(Intent.EXTRA_STREAM, uri);
-            send.putExtra(Intent.EXTRA_SUBJECT, inst.name);
-            send.setClipData(ClipData.newRawUri(inst.name, uri));
-            send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(Intent.createChooser(send, "Отправить или сохранить сборку"));
-        } catch (Exception e) {
-            Toast.makeText(this, "Не удалось создать файл: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+    void exportInstallation(final Installation inst) {
+        withPackFile(inst, "Экспорт «" + inst.name + "»", new Job<File>() {
+            public File run() {
+                return null;
+            }
+
+            public void done(File file, Exception error) {
+                Uri uri = PackProvider.uriFor(file);
+                Intent send = new Intent(Intent.ACTION_SEND);
+                send.setType("application/x-modrinth-modpack+zip");
+                send.putExtra(Intent.EXTRA_STREAM, uri);
+                send.putExtra(Intent.EXTRA_SUBJECT, inst.name);
+                send.setClipData(ClipData.newRawUri(inst.name, uri));
+                send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(send, "Отправить или сохранить сборку"));
+            }
+        });
     }
 
     private void playFile(File file, String minecraftVersion, String loader) {
@@ -1588,6 +1712,8 @@ public final class MainActivity extends Activity {
                      + "Лаунчер сам скачает Minecraft " + Util.escape(minecraftVersion) + ", " + Plan.loaderName(loader)
                      + " и все моды.");
         steps.append("<br><br>3. Войди аккаунтом Microsoft, на котором куплена Minecraft: Java Edition, и нажми <b>Играть</b>.");
+        steps.append("<br><br>4. Удобные кнопки для игры (джойстик, ЛКМ, ПКМ, прыжок, инвентарь, камера, клавиатура): "
+                     + "<b>Управление → Отправить в лаунчер</b> на главном экране Lullaby.");
         if (launchers.isEmpty()) {
             steps.append("<br><br>На телефоне пока нет лаунчера Java Edition. Установи, например, PojavLauncher, Amethyst, "
                          + "Fold Craft Launcher или Zalith Launcher и нажми «Играть» ещё раз.");
