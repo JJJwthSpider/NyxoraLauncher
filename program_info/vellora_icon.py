@@ -18,7 +18,7 @@ from PIL import Image  # noqa: E402
 
 
 def main():
-    big = vellora_art.framed(vellora_art.ICON_BOX, 512)
+    big = vellora_art.framed(None, 512)  # the icon picture the user sent
     big.resize((256, 256), Image.LANCZOS).save(HERE / "org.prismlauncher.PrismLauncher_256.png")
     big.save(HERE / "vellora.ico", sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
     big.save(HERE / "vellora.icns")

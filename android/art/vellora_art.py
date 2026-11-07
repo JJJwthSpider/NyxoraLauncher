@@ -102,14 +102,24 @@ def tile(symbol):
 
 
 SOURCE = HERE / "vellora_icons_source.png"
+ICON = HERE / "vellora_icon_user.jpg"   # the icon exactly as the user sent it (object 1, close up)
 ICON_BOX = (205, 150, 790, 735)    # object 1 with its frame, in the source picture
 INNER_BOX = (232, 177, 763, 708)   # object 1 inside the frame line
 PACKS_BOX = (977, 150, 1564, 737)  # object 2 with its frame
 
 
+def icon_square():
+    """the user's icon picture, cut to a square around the cube"""
+    img = Image.open(ICON).convert("RGBA")
+    side = min(img.size)
+    left = (img.size[0] - side) // 2
+    return img.crop((left, 0, left + side, side))
+
+
 def framed(box, size):
-    """an object of the source with its frame, the outside of the rounded square see-through"""
-    img = Image.open(SOURCE).convert("RGBA").crop(box).resize((size, size), Image.LANCZOS)
+    """an object of the source with its frame (box None: the user's icon picture), the outside of the rounded square
+    see-through"""
+    img = (icon_square() if box is None else Image.open(SOURCE).convert("RGBA").crop(box)).resize((size, size), Image.LANCZOS)
     mask = Image.new("L", (size * 4, size * 4), 0)
     ImageDraw.Draw(mask).rounded_rectangle((6, 6, size * 4 - 7, size * 4 - 7), radius=int(size * 4 * 0.205), fill=255)
     img.putalpha(mask.resize((size, size), Image.LANCZOS))
@@ -119,8 +129,7 @@ def framed(box, size):
 def adaptive_layers(size):
     """the background: the dark crimson inside of the frame; the foreground: the cube with its orbit, feathered at the
     edges and small enough that every phone mask (circle, squircle) keeps it whole"""
-    src = Image.open(SOURCE).convert("RGB")
-    inner = src.crop(INNER_BOX)
+    inner = icon_square().convert("RGB")
     small = inner.resize((8, 8), Image.BOX)
     corner = small.getpixel((0, 7))
     bg = Image.new("RGB", (size, size), corner)
@@ -128,7 +137,7 @@ def adaptive_layers(size):
     ImageDraw.Draw(glow).ellipse((size * 0.18, size * 0.18, size * 0.82, size * 0.82), fill=(120, 14, 38, 110))
     bg = bg.convert("RGBA")
     bg.alpha_composite(glow.filter(ImageFilter.GaussianBlur(size * 0.08)))
-    part = int(size * 68 / 108)
+    part = int(size * 74 / 108)
     fg_img = inner.resize((part, part), Image.LANCZOS).convert("RGBA")
     feather = Image.new("L", (part, part), 0)
     ImageDraw.Draw(feather).ellipse((part * 0.03, part * 0.03, part * 0.97, part * 0.97), fill=255)
@@ -145,9 +154,9 @@ def main():
         bg, fg = adaptive_layers(size * 2)
         bg.resize((size, size), Image.LANCZOS).save(folder / "ic_launcher_background.png")
         fg.resize((size, size), Image.LANCZOS).save(folder / "ic_launcher_foreground.png")
-        framed(ICON_BOX, round(48 * k)).save(folder / "ic_launcher.png")
+        framed(None, round(48 * k)).save(folder / "ic_launcher.png")
     nodpi = RES / "drawable-nodpi"
-    framed(ICON_BOX, 384).save(nodpi / "install_default.png")
+    framed(None, 384).save(nodpi / "install_default.png")
     tile("plus").save(nodpi / "tile_new.png")
     framed(PACKS_BOX, 384).save(nodpi / "tile_packs.png")
     # the preview: the adaptive icon in a circle, the logo and the tiles
