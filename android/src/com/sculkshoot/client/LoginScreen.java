@@ -124,6 +124,7 @@ final class LoginScreen {
         holder.addView(card, center);
         scroll.addView(holder, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         root.addView(scroll, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        visible = this;
     }
 
     View view() {
@@ -160,6 +161,8 @@ final class LoginScreen {
                     return;
                 }
                 Account.savePending(activity, result);
+                errorShown = false;
+                copy.setText("Скопировать код");
                 showCode(result);
                 startPolling(activity.getApplicationContext(), result, true);
             }
@@ -190,14 +193,27 @@ final class LoginScreen {
                         + " (можно на компьютере) и введи код. Я подожду и сам открою меню.");
     }
 
-    /** shows the sign-in again after an error */
+    /** shows the sign-in again after an error, with a button to copy the details */
     void failed(String why) {
-        message.setText(why);
+        message.setText("Не получилось войти: " + why);
         codeRow.setVisibility(View.GONE);
         logo.setVisibility(View.VISIBLE);
         openPage.setVisibility(View.GONE);
-        copy.setVisibility(View.GONE);
+        copy.setText("Скопировать ошибку");
+        copy.setVisibility(View.VISIBLE);
+        errorShown = true;
         signIn.setText("Войти через Microsoft");
+    }
+
+    private boolean errorShown;
+
+    /** the screen on display, for the steps of the sign-in */
+    private static LoginScreen visible;
+
+    void step(String what) {
+        if (!errorShown) {
+            message.setText(what);
+        }
     }
 
     /**
@@ -211,6 +227,17 @@ final class LoginScreen {
         final int mine = ++attemptCounter;
         currentAttempt = mine;
         final android.os.Handler main = new android.os.Handler(android.os.Looper.getMainLooper());
+        Account.steps = new Account.Steps() {
+            public void step(final String what) {
+                main.post(new Runnable() {
+                    public void run() {
+                        if (visible != null && mine == currentAttempt) {
+                            visible.step(what);
+                        }
+                    }
+                });
+            }
+        };
         poller = new Thread(new Runnable() {
             public void run() {
                 String problem = null;
@@ -298,6 +325,12 @@ final class LoginScreen {
     }
 
     private void copyCode() {
+        if (errorShown) {
+            ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+            clipboard.setPrimaryClip(ClipData.newPlainText("ошибка входа", message.getText().toString()));
+            Toast.makeText(activity, "Текст ошибки скопирован — пришли его мне", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (device == null) {
             return;
         }

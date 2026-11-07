@@ -73,7 +73,18 @@ final class Http {
                     out.close();
                 }
             }
-            int status = connection.getResponseCode();
+            int status;
+            try {
+                status = connection.getResponseCode();
+            } catch (IOException e) {
+                // some Android versions throw on "401" without a WWW-Authenticate header (Xbox Live answers so);
+                // the status is known by then
+                if (e.getMessage() != null && e.getMessage().contains("authentication challenge")) {
+                    status = 401;
+                } else {
+                    throw e;
+                }
+            }
             InputStream in = status >= 400 ? connection.getErrorStream() : connection.getInputStream();
             return new Response(status, in == null ? "" : read(in));
         } finally {

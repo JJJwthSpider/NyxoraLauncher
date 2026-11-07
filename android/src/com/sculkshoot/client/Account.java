@@ -193,52 +193,92 @@ final class Account {
 
     /* ------------------------------------------------------------ Xbox Live and Minecraft */
 
-    /** step 3: Xbox Live, XSTS and Minecraft services; fills the profile */
+    /** shows which step of the sign-in is running (the login screen listens) */
+    interface Steps {
+        void step(String what);
+    }
+
+    static volatile Steps steps;
+
+    private static void step(String what) {
+        Steps listener = steps;
+        if (listener != null) {
+            listener.step(what);
+        }
+    }
+
+    /** what a server answered, short enough for the screen */
+    private static String answer(Http.Response r) {
+        String body = r.body == null ? "" : r.body.replaceAll("\\s+", " ").trim();
+        return "HTTP " + r.status + (body.isEmpty() ? "" : ": " + (body.length() > 240 ? body.substring(0, 240) + "…" : body));
+    }
+
+    /** step 3: Xbox Live, XSTS and Minecraft services; fills the profile (the same requests as Prism Launcher) */
     void finish(String microsoftToken) throws Exception {
-        JSONObject xblBody = new JSONObject()
-            .put("Properties", new JSONObject().put("AuthMethod", "RPS").put("SiteName", "user.auth.xboxlive.com").put("RpsTicket", "d=" + microsoftToken))
-            .put("RelyingParty", "http://auth.xboxlive.com")
-            .put("TokenType", "JWT");
-        Http.Response xbl = Http.post(XBOX_USER, "application/json", xblBody.toString(), "x-xbl-contract-version", "1");
-        if (!xbl.ok()) {
-            throw new LoginException("Xbox Live не принял вход (HTTP " + xbl.status + ")");
-        }
-        JSONObject xblJson = new JSONObject(xbl.body);
-        String xblToken = xblJson.getString("Token");
-
-        JSONObject xstsBody = new JSONObject()
-            .put("Properties", new JSONObject().put("SandboxId", "RETAIL").put("UserTokens", new JSONArray().put(xblToken)))
-            .put("RelyingParty", "rp://api.minecraftservices.com/")
-            .put("TokenType", "JWT");
-        Http.Response xsts = Http.post(XSTS, "application/json", xstsBody.toString(), "x-xbl-contract-version", "1");
-        if (xsts.status == 401) {
-            throw new LoginException(xstsError(new JSONObject(xsts.body.isEmpty() ? "{}" : xsts.body).optLong("XErr")));
-        }
-        if (!xsts.ok()) {
-            throw new LoginException("Xbox Live не пустил в Minecraft (HTTP " + xsts.status + ")");
-        }
-        JSONObject xstsJson = new JSONObject(xsts.body);
-        String uhs = xstsJson.getJSONObject("DisplayClaims").getJSONArray("xui").getJSONObject(0).getString("uhs");
-
-        // the Minecraft token, the way Prism Launcher gets it (LauncherLoginStep.cpp); the older login_with_xbox only if that fails
-        String xtoken = "XBL3.0 x=" + uhs + ";" + xstsJson.getString("Token");
-        Http.Response mc = Http.post(MINECRAFT + "/launcher/login", "application/json",
-                                     new JSONObject().put("xtoken", xtoken).put("platform", "PC_LAUNCHER").toString());
-        if (!mc.ok()) {
-            Http.Response old = Http.post(MINECRAFT + "/authentication/login_with_xbox", "application/json",
-                                          new JSONObject().put("identityToken", xtoken).toString());
-            if (old.ok()) {
-                mc = old;
+        String stage = "Xbox Live";
+        try {
+            step("Microsoft подтвердил вход. Вхожу в Xbox Live...");
+            JSONObject xblBody = new JSONObject()
+                .put("Properties", new JSONObject().put("AuthMethod", "RPS").put("SiteName", "user.auth.xboxlive.com").put("RpsTicket", "d=" + microsoftToken))
+                .put("RelyingParty", "http://auth.xboxlive.com")
+                .put("TokenType", "JWT");
+            Http.Response xbl = Http.post(XBOX_USER, "application/json", xblBody.toString(), "x-xbl-contract-version", "1");
+            if (!xbl.ok()) {
+                throw new LoginException("Xbox Live не принял вход (" + answer(xbl) + ")");
             }
+            String xblToken = new JSONObject(xbl.body).getString("Token");
+
+            stage = "Xbox Live → Minecraft (XSTS)";
+            step("Получаю доступ Xbox Live к Minecraft...");
+            JSONObject xstsBody = new JSONObject()
+                .put("Properties", new JSONObject().put("SandboxId", "RETAIL").put("UserTokens", new JSONArray().put(xblToken)))
+                .put("RelyingParty", "rp://api.minecraftservices.com/")
+                .put("TokenType", "JWT");
+            Http.Response xsts = Http.post(XSTS, "application/json", xstsBody.toString(), "x-xbl-contract-version", "1");
+            if (xsts.status == 401) {
+                long xerr = 0;
+                try {
+                    xerr = new JSONObject(xsts.body).optLong("XErr");
+                } catch (org.json.JSONException ignored) {
+                }
+                throw new LoginException(xerr != 0 ? xstsError(xerr) : "Xbox Live не пустил в Minecraft (" + answer(xsts) + ")");
+            }
+            if (!xsts.ok()) {
+                throw new LoginException("Xbox Live не пустил в Minecraft (" + answer(xsts) + ")");
+            }
+            JSONObject xstsJson = new JSONObject(xsts.body);
+            String uhs = xstsJson.getJSONObject("DisplayClaims").getJSONArray("xui").getJSONObject(0).getString("uhs");
+
+            stage = "Minecraft";
+            step("Вхожу в Minecraft...");
+            // the Minecraft token, the way Prism Launcher gets it (LauncherLoginStep.cpp); the older login_with_xbox only if that fails
+            String xtoken = "XBL3.0 x=" + uhs + ";" + xstsJson.getString("Token");
+            Http.Response mc = Http.post(MINECRAFT + "/launcher/login", "application/json",
+                                         new JSONObject().put("xtoken", xtoken).put("platform", "PC_LAUNCHER").toString());
+            if (!mc.ok()) {
+                Http.Response old = Http.post(MINECRAFT + "/authentication/login_with_xbox", "application/json",
+                                              new JSONObject().put("identityToken", xtoken).toString());
+                if (old.ok()) {
+                    mc = old;
+                }
+            }
+            if (!mc.ok()) {
+                throw new LoginException("Сервер Minecraft не принял вход (" + answer(mc) + ")");
+            }
+            JSONObject mcJson = new JSONObject(mc.body);
+            minecraftToken = mcJson.getString("access_token");
+            minecraftTokenExpires = System.currentTimeMillis() + mcJson.optLong("expires_in", 86400) * 1000L;
+
+            stage = "профиль Minecraft";
+            step("Загружаю ник и скин...");
+            loadProfile();
+        } catch (LoginException e) {
+            throw e;
+        } catch (java.io.IOException e) {
+            throw new LoginException("Нет связи на шаге «" + stage + "»: " + e.getMessage() + ". Проверь интернет и попробуй ещё раз.");
+        } catch (Exception e) {
+            throw new LoginException("Неожиданный ответ на шаге «" + stage + "»: " + e);
         }
-        if (!mc.ok()) {
-            throw new LoginException("Сервер Minecraft не принял вход (HTTP " + mc.status + ")"
-                                     + (mc.body.length() > 0 && mc.body.length() < 300 ? ": " + mc.body : ""));
-        }
-        JSONObject mcJson = new JSONObject(mc.body);
-        minecraftToken = mcJson.getString("access_token");
-        minecraftTokenExpires = System.currentTimeMillis() + mcJson.optLong("expires_in", 86400) * 1000L;
-        loadProfile();
     }
 
     /** the Minecraft: Java Edition profile; an account without the game has none */
@@ -252,7 +292,7 @@ final class Account {
             return;
         }
         if (!r.ok()) {
-            throw new java.io.IOException("профиль Minecraft: HTTP " + r.status);
+            throw new LoginException("Не удалось загрузить профиль Minecraft (" + answer(r) + ")");
         }
         JSONObject o = new JSONObject(r.body);
         ownsJava = true;
