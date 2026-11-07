@@ -45,6 +45,18 @@ abstract class GameEngine {
         return Plan.compareVersions(minecraftVersion, "1.17") >= 0 ? 17 : 8;
     }
 
+    /** the graphics this phone can use: { id, name } ("auto" first) */
+    abstract java.util.List<String[]> graphicsChoices(Activity activity);
+
+    /** the chosen graphics ("auto" unless the player picked one) */
+    static String chosenGraphics(Activity activity) {
+        return activity.getSharedPreferences("graphics", Activity.MODE_PRIVATE).getString("renderer", "auto");
+    }
+
+    static void chooseGraphics(Activity activity, String id) {
+        activity.getSharedPreferences("graphics", Activity.MODE_PRIVATE).edit().putString("renderer", id).apply();
+    }
+
     /** the log of the last game start (and the crash report, if there was one), or null */
     abstract java.io.File gameLog();
 

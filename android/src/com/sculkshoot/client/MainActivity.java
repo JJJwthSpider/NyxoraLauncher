@@ -400,7 +400,7 @@ public final class MainActivity extends Activity {
 
     void showAppMenu() {
         new AlertDialog.Builder(this)
-            .setItems(GameEngine.get() != null ? new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении", "Java для игры", "Журнал игры" }
+            .setItems(GameEngine.get() != null ? new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении", "Java для игры", "Журнал игры", "Графика" }
                                                : new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении" },
                       new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int which) {
@@ -414,6 +414,8 @@ public final class MainActivity extends Activity {
                         showJavaDialog(0, null);
                     } else if (which == 5) {
                         showGameLog();
+                    } else if (which == 6) {
+                        showGraphics();
                     } else {
                         showAbout();
                     }
@@ -1761,6 +1763,31 @@ public final class MainActivity extends Activity {
                 }
             }
         });
+    }
+
+    /** which graphics the game uses (the engine's renderers, the ones this phone supports) */
+    void showGraphics() {
+        final java.util.List<String[]> choices = GameEngine.get().graphicsChoices(this);
+        String current = GameEngine.chosenGraphics(this);
+        String[] names = new String[choices.size()];
+        int checked = 0;
+        for (int i = 0; i < choices.size(); i++) {
+            names[i] = choices.get(i)[1];
+            if (choices.get(i)[0].equals(current)) {
+                checked = i;
+            }
+        }
+        new AlertDialog.Builder(this)
+            .setTitle("Графика в игре")
+            .setSingleChoiceItems(names, checked, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int which) {
+                    GameEngine.chooseGraphics(MainActivity.this, choices.get(which)[0]);
+                    Toast.makeText(MainActivity.this, "Будет при следующем «Играть»", Toast.LENGTH_SHORT).show();
+                    d.dismiss();
+                }
+            })
+            .setNegativeButton("Отмена", null)
+            .show();
     }
 
     /** the end of the last game start's log: what to send when the game does not start */

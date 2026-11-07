@@ -85,6 +85,41 @@ public final class PojavEngine extends GameEngine {
         ContextExecutor.clearActivity();
     }
 
+    private static final String GL4ES = "opengles2", LTW = "opengles3_ltw", ZINK = "vulkan_zink";
+
+    @Override
+    List<String[]> graphicsChoices(Activity activity) {
+        List<String[]> out = new ArrayList<String[]>();
+        out.add(new String[] { "auto", "Авто — Lullaby выберет сам (рекомендуется)" });
+        for (String id : Tools.getCompatibleRenderers(activity).rendererIds) {
+            if (LTW.equals(id)) {
+                out.add(new String[] { id, "LTW (OpenGL ES 3) — для 1.17 и новее, лучше всего на новых телефонах" });
+            } else if (GL4ES.equals(id)) {
+                out.add(new String[] { id, "Holy GL4ES — быстро, любые версии" });
+            } else if (ZINK.equals(id)) {
+                out.add(new String[] { id, "Zink (Vulkan) — самый полный OpenGL, медленнее" });
+            }
+        }
+        return out;
+    }
+
+    /**
+     * The graphics for this start. "Auto": LTW for 1.17+ (Minecraft needs OpenGL 3.2 there, and the newest Adreno
+     * chips show only a black screen with GL4ES), GL4ES for older versions or phones without OpenGL ES 3.
+     */
+    static String rendererFor(Activity activity, Installation inst) {
+        List<String> compatible = Tools.getCompatibleRenderers(activity).rendererIds;
+        String chosen = chosenGraphics(activity);
+        if (!"auto".equals(chosen) && compatible.contains(chosen)) {
+            return chosen;
+        }
+        boolean modern = Plan.compareVersions(inst.minecraftVersion, "1.17") >= 0 || !inst.minecraftVersion.startsWith("1.");
+        if (modern && compatible.contains(LTW)) {
+            return LTW;
+        }
+        return compatible.contains(GL4ES) || compatible.isEmpty() ? GL4ES : compatible.get(0);
+    }
+
     @Override
     java.io.File gameLog() {
         return Tools.DIR_GAME_HOME == null ? null : new File(Tools.DIR_GAME_HOME, "latestlog.txt");
@@ -448,6 +483,9 @@ public final class PojavEngine extends GameEngine {
         profile.gameDir = Tools.LAUNCHERPROFILES_RTPREFIX + "custom_instances/lullaby-" + inst.id;
         profile.controlFile = CONTROLS_FILE;
         profile.javaDir = Tools.LAUNCHERPROFILES_RTPREFIX + runtime;  // exactly the Java this version needs
+        profile.pojavRendererName = rendererFor(activity, inst);
+        log.log("Графика: " + (LTW.equals(profile.pojavRendererName) ? "LTW" : ZINK.equals(profile.pojavRendererName) ? "Zink" : "Holy GL4ES")
+                + ", Java " + java + ".");
         LauncherProfiles.mainProfileJson.profiles.put(key, profile);
         LauncherProfiles.write();
         LauncherPreferences.DEFAULT_PREF.edit().putString(LauncherPreferences.PREF_KEY_CURRENT_PROFILE, key).commit();
