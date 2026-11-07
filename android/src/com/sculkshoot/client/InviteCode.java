@@ -5,7 +5,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Locale;
 
-/** Invite codes of the desktop launcher's "My server" ("SC-XXXX-XXXX-..."): decodes them into an address and a port. */
+/** Invite codes of the desktop launcher's "My server" ("LL-XXXX-XXXX-...", older ones "SC-..."): decodes them into an address and a port. */
 final class InviteCode {
     private InviteCode() {}
 
@@ -59,7 +59,7 @@ final class InviteCode {
     /** The address in an invite code, or null if the code is not valid. */
     static Address decode(String code) {
         String text = code.trim().toUpperCase(Locale.ROOT);
-        if (text.startsWith("SC-") || text.startsWith("SC ")) {
+        if (text.startsWith("LL-") || text.startsWith("LL ") || text.startsWith("SC-") || text.startsWith("SC ")) {
             text = text.substring(3);
         }
         text = text.replace("-", "").replace(" ", "");

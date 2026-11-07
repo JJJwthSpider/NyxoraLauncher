@@ -580,6 +580,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     {
         bool migrated = false;
 
+        // Lullaby Launcher was called SculkShoot Client before: bring its instances, accounts and chats along
+        migrated = handleDataMigration(
+            dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../SculkShootClient"),
+            "SculkShoot Client", "sculkshoot.cfg");
         if (!migrated)
             migrated = handleDataMigration(
                 dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../PolyMC"), "PolyMC",
@@ -799,6 +803,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // The cat
         m_settings->registerSetting("TheCat", false);
         m_settings->registerSetting("SculkBackgroundAnimation", true);
+        m_settings->registerSetting("LullabyDesignApplied", false);
         m_settings->registerSetting("CatOpacity", 100);
         m_settings->registerSetting("CatFit", "fit");
 
@@ -1225,6 +1230,15 @@ bool Application::createSetupWizard()
                    !settings()->get("AutomaticJavaSwitch").toBool() && !settings()->get("UserAskedAboutAutomaticJavaDownload").toBool();
     bool languageRequired = settings()->get("Language").toString().isEmpty();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
+    // the launcher became Lullaby Launcher: who used the old sculk look gets the new lunar one once
+    if (!settings()->get("LullabyDesignApplied").toBool()) {
+        settings()->set("LullabyDesignApplied", true);
+        if (settings()->get("ApplicationTheme").toString().startsWith("sculk")) {
+            settings()->set("ApplicationTheme", QString("lunar"));
+            settings()->set("IconTheme", QString("lunar"));
+            m_themeManager->applyCurrentlySelectedTheme();
+        }
+    }
     bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
     bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
     bool login = !m_accounts->anyAccountIsValid() && capabilities() & Application::SupportsMSA;
@@ -1233,10 +1247,10 @@ bool Application::createSetupWizard()
     if (wizardRequired) {
         // set default theme after going into theme wizard
         if (!validIcons)
-            settings()->set("IconTheme", QString("sculk"));
+            settings()->set("IconTheme", QString("lunar"));
         if (!validWidgets) {
-            // the dark sculk theme is the default look of the launcher
-            const QString style = QStringLiteral("sculk");
+            // the lunar Lullaby theme is the default look of the launcher
+            const QString style = QStringLiteral("lunar");
             settings()->set("ApplicationTheme", style);
         }
 

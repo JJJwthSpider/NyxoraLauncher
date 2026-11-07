@@ -139,6 +139,7 @@ void ThemeManager::initializeWidgets()
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>(m_defaultStyle, m_defaultPalette, true));
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SculkTheme>(SculkTheme::Variant::Lunar));
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SculkTheme>(SculkTheme::Variant::Default));
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SculkTheme>(SculkTheme::Variant::Light));
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SculkTheme>(SculkTheme::Variant::Dark));
@@ -262,14 +263,16 @@ void ThemeManager::applyThemeFont(const QString& themeId)
         m_systemFont = QApplication::font();
         m_systemFontSaved = true;
     }
-    // SculkShoot Client: the sculk themes use Tiny5, a pixel font that looks like the one in Minecraft (SIL OFL)
+    // Lullaby Launcher: the lunar and sculk themes use Tiny5, a pixel font that looks like the one in Minecraft (SIL OFL)
     static const QString pixelFamily = [] {
         const int id = QFontDatabase::addApplicationFont(":/sculk_theme/fonts/Tiny5-Regular.ttf");
         const auto families = QFontDatabase::applicationFontFamilies(id);
         return families.isEmpty() ? QString() : families.first();
     }();
-    SculkTheme::setActive(themeId.startsWith("sculk"));
-    if (themeId.startsWith("sculk") && !pixelFamily.isEmpty()) {
+    const bool ours = themeId.startsWith("sculk") || themeId == "lunar";
+    SculkTheme::setActive(ours);
+    SculkTheme::setLunar(themeId == "lunar");
+    if (ours && !pixelFamily.isEmpty()) {
         QFont font(pixelFamily);
         font.setPointSize(12);  // 16 px at 96 DPI: every pixel of the font is two screen pixels
         font.setStyleStrategy(QFont::PreferAntialias);
@@ -292,10 +295,12 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
 
         m_logColors = theme->logColorScheme();
 
-        // SculkShoot Client: the cyan sculk icons are hard to see on the light variant, so the icon set follows the theme
+        // Lullaby Launcher: each of our themes has its own icon set (moon white, cyan, or dark cyan on the light variant),
+        // so the icons follow the theme
         const QString icons = QIcon::themeName();
-        const QString pairedIcons = name == "sculk_light" ? "sculk_light" : "sculk";
-        if ((icons == "sculk" || icons == "sculk_light") && icons != pairedIcons && name.startsWith("sculk")) {
+        const QString pairedIcons = name == "lunar" ? "lunar" : name == "sculk_light" ? "sculk_light" : "sculk";
+        const bool ourIcons = icons == "sculk" || icons == "sculk_light" || icons == "lunar";
+        if (ourIcons && icons != pairedIcons && (name.startsWith("sculk") || name == "lunar")) {
             setIconTheme(pairedIcons);
             APPLICATION->settings()->set("IconTheme", pairedIcons);
         }

@@ -84,20 +84,8 @@
         <translation>Начать заново</translation>
     </message>
     <message>
-        <source>The Warden is working</source>
-        <translation>Варден работает</translation>
-    </message>
-    <message>
-        <source>Warden, the pack builder</source>
-        <translation>Варден-сборщик</translation>
-    </message>
-    <message>
         <source>Tell me what the pack should be about, and the loader and version. I will find the mods, add optimization and everything they need.</source>
         <translation>Расскажи, о чём сборка, и на каком загрузчике и версии. Я найду моды, добавлю оптимизацию и всё, что им нужно.</translation>
-    </message>
-    <message>
-        <source>Write to the Warden, e.g.: a zombie apocalypse pack with cities, zombies and weapons</source>
-        <translation>Напиши Вардену, например: сборка про зомби-апокалипсис, должны быть города, зомби и оружие</translation>
     </message>
     <message>
         <source>Send</source>
@@ -106,10 +94,6 @@
     <message>
         <source>Show the work log</source>
         <translation>Показать журнал работы</translation>
-    </message>
-    <message>
-        <source>Hi! I&apos;m the Warden and I build mod packs. &lt;b&gt;What should your pack be about?&lt;/b&gt; Tell me the theme and what must be in it, for example: &lt;i&gt;a zombie apocalypse with cities, zombies and weapons&lt;/i&gt;.</source>
-        <translation>Привет! Я Варден, собираю сборки модов. &lt;b&gt;Про что будет твоя сборка?&lt;/b&gt; Расскажи тему и что в ней должно быть, например: &lt;i&gt;зомби-апокалипсис, должны быть города, зомби и оружие&lt;/i&gt;.</translation>
     </message>
     <message>
         <source>I&apos;m still assembling the pack, give me a moment.</source>
@@ -252,10 +236,6 @@
         <translation>Удалить чат</translation>
     </message>
     <message>
-        <source>Your conversations with the Warden. Click one to continue it, double click to rename.</source>
-        <translation>Твои разговоры с Варденом. Нажми, чтобы продолжить, двойной щелчок — переименовать.</translation>
-    </message>
-    <message>
         <source>Not built yet</source>
         <translation>Ещё не собрана</translation>
     </message>
@@ -275,13 +255,29 @@
         <source>Delete the chat &quot;%1&quot;? The instances you created stay.</source>
         <translation>Удалить чат «%1»? Созданные установки останутся.</translation>
     </message>
+    <message>
+        <source>Moony is working</source>
+        <translation>Лунни работает</translation>
+    </message>
+    <message>
+        <source>Moony, the pack builder</source>
+        <translation>Лунни-сборщик</translation>
+    </message>
+    <message>
+        <source>Write to Moony, e.g.: a zombie apocalypse pack with cities, zombies and weapons</source>
+        <translation>Напиши Лунни, например: сборка про зомби-апокалипсис, должны быть города, зомби и оружие</translation>
+    </message>
+    <message>
+        <source>Your conversations with Moony. Click one to continue it, double click to rename.</source>
+        <translation>Твои разговоры с Лунни. Нажми, чтобы продолжить, двойной щелчок — переименовать.</translation>
+    </message>
+    <message>
+        <source>Hi! I&apos;m Moony and I build mod packs. &lt;b&gt;What should your pack be about?&lt;/b&gt; Tell me the theme and what must be in it, for example: &lt;i&gt;a zombie apocalypse with cities, zombies and weapons&lt;/i&gt;.</source>
+        <translation>Привет! Я Лунни, собираю сборки модов. &lt;b&gt;Про что будет твоя сборка?&lt;/b&gt; Расскажи тему и что в ней должно быть, например: &lt;i&gt;зомби-апокалипсис, должны быть города, зомби и оружие&lt;/i&gt;.</translation>
+    </message>
 </context>
 <context>
     <name>AppearanceWidget</name>
-    <message>
-        <source>Animated sculk background (glowing veins and particles)</source>
-        <translation>Живой фон скалка (светящиеся прожилки и частицы)</translation>
-    </message>
     <message>
         <source>[ERROR] OOoooOOOoooo! A spooky error!</source>
         <translation type="unfinished"></translation>
@@ -304,6 +300,94 @@
     </message>
     <message>
         <source>[FATAL] A terrifying fatal error!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Animated background (stars and comets, or sculk veins)</source>
+        <translation>Живой фон (звёзды и кометы или прожилки скалка)</translation>
+    </message>
+</context>
+<context>
+    <name>Application</name>
+    <message>
+        <source>Cannot display this log since the log length surpassed %1 lines.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This installation has a update lock file present at: %1
+
+Timestamp: %2
+Updating from version %3 to %4
+Target install path: %5
+Data Path: %6
+This likely means that a update attempt failed. Please ensure your installation is in working order before proceeding.
+Check the Prism Launcher updater log at: 
+%7
+for details on the last update attempt.
+
+To delete this lock and proceed select &quot;Ignore&quot; below.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Update In Progress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>An update attempt failed
+
+Please ensure your installation is in working order before proceeding.
+Check the Prism Launcher updater log at: 
+%1
+for details on the last update attempt.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Update Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Update succeeded
+
+You are now running %1 .
+Check the Prism Launcher updater log at: 
+%2
+for details.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Update Succeeded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Your /tmp directory is currently mounted with the &apos;noexec&apos; flag enabled.
+Some versions of Minecraft may not launch.
+
+You may solve this issue by remounting /tmp as &apos;exec&apos; or setting the java.io.tmpdir JVM argument to a writeable directory in a filesystem where the &apos;exec&apos; flag is set (e.g., /home/user/.local/tmp)
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Incompatible system configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Old data from %1 was found, but you already have existing data for %2. Sadly you will need to migrate yourself. Do you want to be reminded of the pending data migration next time you start %2?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>It looks like you used %1 before. Do you want to migrate your data to the new location of %2?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>It looks like you used %1 on %2 before. Do you want to migrate your data to the new location of %3?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Migration failed! Reason: %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -545,10 +629,6 @@
         <translation>Сборка по вашему описанию</translation>
     </message>
     <message>
-        <source>Describe a pack in your own words and the Warden assembles it with mods from Modrinth and CurseForge</source>
-        <translation>Опишите сборку своими словами — Варден соберёт её из модов с Modrinth и CurseForge</translation>
-    </message>
-    <message>
         <source>Ready packs</source>
         <translation>Готовые сборки</translation>
     </message>
@@ -579,6 +659,10 @@
     <message>
         <source>Sign in</source>
         <translation>Войти</translation>
+    </message>
+    <message>
+        <source>Describe a pack in your own words and Moony assembles it with mods from Modrinth and CurseForge</source>
+        <translation>Опишите сборку своими словами — Лунни соберёт её из модов с Modrinth и CurseForge</translation>
     </message>
 </context>
 <context>
@@ -734,14 +818,6 @@
         <translation>&lt;b&gt;Лобби открыто!&lt;/b&gt; Отправь адрес друзьям. Они заходят через &lt;i&gt;Лобби → Присоединиться к другу&lt;/i&gt; или в самом Minecraft: &lt;i&gt;Сетевая игра → Прямое подключение&lt;/i&gt;.</translation>
     </message>
     <message>
-        <source>Join me in Minecraft %1!
-Address: %2
-In SculkShoot Client: Lobby → Join a friend, paste the address. In Minecraft: Multiplayer → Direct Connection.</source>
-        <translation>Заходи ко мне в Minecraft %1!
-Адрес: %2
-В SculkShoot Client: Лобби → Присоединиться к другу, вставь адрес. В Minecraft: Сетевая игра → Прямое подключение.</translation>
-    </message>
-    <message>
         <source>Join a friend&apos;s world</source>
         <translation>Зайти в мир друга</translation>
     </message>
@@ -770,16 +846,24 @@ In SculkShoot Client: Lobby → Join a friend, paste the address. In Minecraft: 
         <translation>Введи код приглашения или адрес, который прислал друг, и выбери установку с той же сборкой. Игра запустится и сразу подключится.</translation>
     </message>
     <message>
-        <source>Invite code like SC-8N4Q-2ZKD-1X, or an address like brave-creeper.e4mc.link</source>
-        <translation>Код приглашения вида SC-8N4Q-2ZKD-1X или адрес вида brave-creeper.e4mc.link</translation>
-    </message>
-    <message>
         <source>Invite code accepted. Server: &lt;b&gt;%1&lt;/b&gt;, port: &lt;b&gt;%2&lt;/b&gt;</source>
         <translation>Код приглашения принят. Сервер: &lt;b&gt;%1&lt;/b&gt;, порт: &lt;b&gt;%2&lt;/b&gt;</translation>
     </message>
     <message>
         <source>This invite code is not complete or has a typo.</source>
         <translation>Код приглашения неполный или в нём опечатка.</translation>
+    </message>
+    <message>
+        <source>Join me in Minecraft %1!
+Address: %2
+In Lullaby Launcher: Lobby → Join a friend, paste the address. In Minecraft: Multiplayer → Direct Connection.</source>
+        <translation>Заходи ко мне в Minecraft %1!
+Адрес: %2
+В Lullaby Launcher: Лобби → Присоединиться к другу, вставь адрес. В Minecraft: Сетевая игра → Прямое подключение.</translation>
+    </message>
+    <message>
+        <source>Invite code like LL-8N4Q-2ZKD-1X, or an address like brave-creeper.e4mc.link</source>
+        <translation>Код приглашения вида LL-8N4Q-2ZKD-1X или адрес вида brave-creeper.e4mc.link</translation>
     </message>
 </context>
 <context>
@@ -1602,6 +1686,14 @@ Are you sure?</source>
         <source>Modern theme in the colors of Minecraft sculk</source>
         <translation>Современная тема в цветах скалка из Minecraft</translation>
     </message>
+    <message>
+        <source>Lullaby (Moon)</source>
+        <translation>Lullaby (Луна)</translation>
+    </message>
+    <message>
+        <source>Night black and moon white with stars and a see-through rainbow</source>
+        <translation>Ночная чёрная и лунная белая, со звёздами и прозрачной радугой</translation>
+    </message>
 </context>
 <context>
     <name>QuickPage</name>
@@ -2042,16 +2134,8 @@ The author likely blocked third-party launchers.</source>
         <translation>Копирую моды установки...</translation>
     </message>
     <message>
-        <source>[SculkShoot] Mods on the server: %1. Client-only, left out: %2.</source>
-        <translation>[SculkShoot] Моды на сервере: %1. Только для клиента, не перенесены: %2.</translation>
-    </message>
-    <message>
         <source>none</source>
         <translation>нет</translation>
-    </message>
-    <message>
-        <source>SculkShoot server</source>
-        <translation>Сервер SculkShoot</translation>
     </message>
     <message>
         <source>The server files are missing.</source>
@@ -2084,6 +2168,14 @@ The author likely blocked third-party launchers.</source>
     <message>
         <source>Stopping the server and saving the world...</source>
         <translation>Останавливаю сервер и сохраняю мир...</translation>
+    </message>
+    <message>
+        <source>[Lullaby] Mods on the server: %1. Client-only, left out: %2.</source>
+        <translation>[Lullaby] Моды на сервере: %1. Только для клиента, не перенесены: %2.</translation>
+    </message>
+    <message>
+        <source>Lullaby server</source>
+        <translation>Сервер Lullaby</translation>
     </message>
 </context>
 <context>
@@ -2163,10 +2255,6 @@ The author likely blocked third-party launchers.</source>
     <message>
         <source>Server memory:</source>
         <translation>Память сервера:</translation>
-    </message>
-    <message>
-        <source>SculkShoot server</source>
-        <translation>Сервер SculkShoot</translation>
     </message>
     <message>
         <source>Description:</source>
@@ -2281,14 +2369,6 @@ The author likely blocked third-party launchers.</source>
         <translation>В той же сети: &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
     <message>
-        <source>Join my Minecraft server!
-Invite code: %1
-In SculkShoot Client: Lobby → Join a friend, enter the code. Or in Minecraft: Multiplayer → Direct Connection → %2</source>
-        <translation>Заходи на мой сервер Minecraft!
-Код приглашения: %1
-В SculkShoot Client: Лобби → Присоединиться к другу, введи код. Или в Minecraft: Сетевая игра → Прямое подключение → %2</translation>
-    </message>
-    <message>
         <source>PvP between players</source>
         <translation>PvP между игроками</translation>
     </message>
@@ -2311,6 +2391,18 @@ In SculkShoot Client: Lobby → Join a friend, enter the code. Or in Minecraft: 
     <message>
         <source>Through the free bore.pub tunnel: no port forwarding and no account needed</source>
         <translation>Через бесплатный туннель bore.pub: без проброса портов и без регистрации</translation>
+    </message>
+    <message>
+        <source>Lullaby server</source>
+        <translation>Сервер Lullaby</translation>
+    </message>
+    <message>
+        <source>Join my Minecraft server!
+Invite code: %1
+In Lullaby Launcher: Lobby → Join a friend, enter the code. Or in Minecraft: Multiplayer → Direct Connection → %2</source>
+        <translation>Заходи на мой сервер Minecraft!
+Код приглашения: %1
+В Lullaby Launcher: Лобби → Присоединиться к другу, введи код. Или в Minecraft: Сетевая игра → Прямое подключение → %2</translation>
     </message>
 </context>
 <context>

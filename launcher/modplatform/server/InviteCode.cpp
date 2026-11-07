@@ -108,13 +108,14 @@ QString encode(const QString& host, quint16 port)
     for (int i = 0; i < body.size(); i += 4) {
         groups << body.mid(i, 4);
     }
-    return "SC-" + groups.join('-');
+    return "LL-" + groups.join('-');
 }
 
 bool decode(const QString& code, QString& host, quint16& port)
 {
     QString text = code.trimmed().toUpper();
-    if (text.startsWith("SC-") || text.startsWith("SC ")) {
+    // "LL-" for Lullaby Launcher, "SC-" from the time it was called SculkShoot Client
+    if (text.startsWith("LL-") || text.startsWith("LL ") || text.startsWith("SC-") || text.startsWith("SC ")) {
         text = text.mid(3);
     }
     text.remove('-').remove(' ');

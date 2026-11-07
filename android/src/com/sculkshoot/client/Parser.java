@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 /**
  * Understands requests like "сборка с зомби, добавь Create, без JEI, neoforge 1.21.1" without any AI service.
- * The same rules as the desktop Warden (launcher/modplatform/agent/ModpackPlan.cpp).
+ * The same rules as the desktop Moony (launcher/modplatform/agent/ModpackPlan.cpp).
  */
 final class Parser {
     private Parser() {}

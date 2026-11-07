@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds SculkShoot Client for Android (SculkShootClient.apk) without Gradle or the Google SDK download:
+# Builds Lullaby Launcher for Android (LullabyLauncher.apk) without Gradle or the Google SDK download:
 # only the Ubuntu/Debian packages aapt, android-sdk-platform-23, dalvik-exchange (dx), zipalign and apksigner.
 #   sudo apt install aapt android-sdk-platform-23 dalvik-exchange zipalign apksigner openjdk-17-jdk-headless
 # The app is signed with android/release.jks if it exists (KEYSTORE_PASS must hold its password),
@@ -30,8 +30,8 @@ else
     KEY=$OUT/debug.jks
     PASS=android
     [ -f "$KEY" ] || keytool -genkeypair -keystore "$KEY" -storepass "$PASS" -keypass "$PASS" -alias sculkshoot \
-        -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=SculkShoot Client" >/dev/null 2>&1
+        -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Lullaby Launcher" >/dev/null 2>&1
 fi
-apksigner sign --v4-signing-enabled false --ks "$KEY" --ks-pass "pass:$PASS" --out SculkShootClient.apk "$OUT/apk/aligned.apk"
-apksigner verify SculkShootClient.apk
-echo "Built $(pwd)/SculkShootClient.apk ($(du -h SculkShootClient.apk | cut -f1))"
+apksigner sign --v4-signing-enabled false --ks "$KEY" --ks-pass "pass:$PASS" --out LullabyLauncher.apk "$OUT/apk/aligned.apk"
+apksigner verify LullabyLauncher.apk
+echo "Built $(pwd)/LullabyLauncher.apk ($(du -h LullabyLauncher.apk | cut -f1))"

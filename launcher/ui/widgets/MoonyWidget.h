@@ -17,27 +17,29 @@
 #pragma once
 
 #include <QElapsedTimer>
-#include <QList>
-#include <QPointF>
 #include <QTimer>
 #include <QWidget>
 
 class QPainter;
 
-/// The face of the mod pack agent: an animated pixel art Warden head.
-/// Its sculk horns sway and glow, the halo beats like the Warden's heart and soul particles drift up.
-/// When "excited" (mouse over the tile) the heart beats faster and the glow gets brighter.
-class WardenWidget : public QWidget {
+/// The face of the mod pack agent: Moony, a little moon whose one half is night dark and the other
+/// half moon white. It floats gently, its glow breathes, stars twinkle around it; it opens its sleepy
+/// eyes when the mouse comes near and talks while the agent is working.
+class MoonyWidget : public QWidget {
     Q_OBJECT
    public:
-    explicit WardenWidget(QWidget* parent = nullptr);
+    explicit MoonyWidget(QWidget* parent = nullptr);
 
+    /// the mouse is over the tile: Moony wakes up and glows brighter
     void setExcited(bool excited);
-    /// a speech bubble next to the head: the agent is a chat
+    /// a speech bubble next to the moon: the agent is a chat
     void setBubbleVisible(bool visible);
-    /// the dots in the bubble jump while the agent is thinking or answering
+    /// the dots in the bubble jump and the mouth moves while the agent is thinking or answering
     void setTalking(bool talking);
     QSize sizeHint() const override { return { 96, 96 }; }
+
+    /// paints Moony into a square (also used for the static agent icon)
+    static void paintMoon(QPainter& painter, const QRectF& square, double time, double wake, double talk);
 
    protected:
     void paintEvent(QPaintEvent* event) override;
@@ -45,24 +47,16 @@ class WardenWidget : public QWidget {
     void hideEvent(QHideEvent* event) override;
 
    private:
-    struct Particle {
-        QPointF pos;  // in head pixels
-        double speed;
-        double born;
-        double life;
-    };
-
     void tick();
-    void paintBubble(QPainter& painter);
-    double heartbeat(double t) const;
+    void paintBubble(QPainter& painter, const QRectF& box);
 
     QTimer m_timer;
     QElapsedTimer m_clock;
     double m_time = 0;
-    double m_beatPhase = 0;
     double m_lastFrame = 0;
+    double m_wake = 0;  // 0 asleep .. 1 eyes open, eases towards the target
+    double m_talk = 0;
     bool m_excited = false;
     bool m_bubble = false;
     bool m_talking = false;
-    QList<Particle> m_particles;
 };

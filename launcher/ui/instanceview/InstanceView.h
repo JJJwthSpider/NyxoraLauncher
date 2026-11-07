@@ -150,6 +150,7 @@ class InstanceView : public QAbstractItemView {
     mutable QCache<int, QRect> m_geometryCache;
     CatPainter* m_cat = nullptr;
     SculkAmbience* m_ambience = nullptr;
+    QPixmap m_moonScene;  // the lunar background, made again when the size changes
     QString m_emptyText;
 
     // point where the currently active mouse action started in geometry coordinates

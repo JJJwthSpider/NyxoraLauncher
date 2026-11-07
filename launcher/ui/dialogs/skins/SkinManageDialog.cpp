@@ -113,7 +113,7 @@ SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
 
     // paint your own skins and capes
     auto* createRow = new QHBoxLayout;
-    auto* createSkin = new QPushButton(QIcon::fromTheme("new"), tr("Create skin..."), this);
+    auto* createSkin = new QPushButton(tr("Create skin..."), this);
     createSkin->setObjectName("primaryAction");
     createSkin->setToolTip(tr("Paint a new skin or start from a ready-made look"));
     auto* editSkin = new QPushButton(tr("Edit skin..."), this);

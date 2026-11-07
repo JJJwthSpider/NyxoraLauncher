@@ -20,12 +20,13 @@
 
 #include "FusionTheme.h"
 
-/// @brief Modern, very dark theme in the colors of Minecraft's sculk blocks:
-/// deep blue-black backgrounds with glowing cyan accents.
+/// @brief Modern themes of the launcher: the sculk variants in the colors of Minecraft's sculk blocks
+/// (deep blue-black backgrounds with glowing cyan accents), and the lunar Lullaby theme: night black and
+/// moon white, a starry sky behind everything and a see-through rainbow on selections and main buttons.
 class SculkTheme : public FusionTheme {
    public:
     /// the same sculk hues at three brightness levels; Default is the lighter, everyday look
-    enum class Variant { Default, Dark, Light };
+    enum class Variant { Default, Dark, Light, Lunar };
 
     explicit SculkTheme(Variant variant = Variant::Default);
     virtual ~SculkTheme() {}
@@ -43,6 +44,11 @@ class SculkTheme : public FusionTheme {
     /// true while one of the sculk themes is the application theme (set by the ThemeManager)
     static bool isActive();
     static void setActive(bool active);
+    /// true while the lunar Lullaby theme is the application theme: textures become a starry night sky
+    static bool isLunar();
+    static void setLunar(bool lunar);
+    /// a seamless tile of night sky with stars of different sizes
+    static QPixmap starTexture(const QColor& background, int size = 256);
     /// a seamless pixel texture of a sculk block in the given colors: a 32x32 grid of patches with glowing veins
     static QPixmap texture(const QColor& background, const QColor& glow, int pixelSize = 4);
     /// only the veins of the texture, on a transparent background: drawn on top to make them pulse

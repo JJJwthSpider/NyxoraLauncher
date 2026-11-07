@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-/** Everything the Warden needs to know to assemble a pack. */
+/** Everything Moony needs to know to assemble a pack. */
 final class Plan {
     static final String DEFAULT_VERSION = "1.21.1";
 

@@ -1,43 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1024" height="256" version="1.1" viewBox="0 0 1024 256" xmlns="http://www.w3.org/2000/svg">
- <title>SculkShoot Client</title>
+ <title>Lullaby Launcher</title>
  <defs>
-  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-   <stop offset="0" stop-color="#123842"/>
-   <stop offset="1" stop-color="#050f12"/>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0" stop-color="#05060d"/>
+   <stop offset="0.65" stop-color="#0d1020"/>
+   <stop offset="1" stop-color="#1a1d36"/>
   </linearGradient>
+  <radialGradient id="moonBody" cx="0.38" cy="0.36" r="0.75">
+   <stop offset="0" stop-color="#ffffff"/>
+   <stop offset="0.7" stop-color="#e6e8f1"/>
+   <stop offset="1" stop-color="#b9bccc"/>
+  </radialGradient>
   <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
-   <stop offset="0" stop-color="#29dfeb" stop-opacity="0.35"/>
-   <stop offset="1" stop-color="#29dfeb" stop-opacity="0"/>
+   <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.28"/>
+   <stop offset="1" stop-color="#dce4ff" stop-opacity="0"/>
   </radialGradient>
-  <radialGradient id="earGlow" cx="0.5" cy="0.5" r="0.5">
-   <stop offset="0" stop-color="#8ff6fb" stop-opacity="0.9"/>
-   <stop offset="1" stop-color="#29dfeb" stop-opacity="0"/>
+  <radialGradient id="nightHalf" cx="0.3" cy="0.3" r="0.9">
+   <stop offset="0" stop-color="#2c3150"/>
+   <stop offset="1" stop-color="#0e101c"/>
   </radialGradient>
-  <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
-   <stop offset="0" stop-color="#3ff0f8" stop-opacity="0.75"/>
-   <stop offset="1" stop-color="#3ff0f8" stop-opacity="0"/>
-  </linearGradient>
-  <radialGradient id="soulGlow" cx="0.5" cy="0.5" r="0.5">
-   <stop offset="0" stop-color="#29dfeb" stop-opacity="0.55"/>
-   <stop offset="1" stop-color="#29dfeb" stop-opacity="0"/>
+  <radialGradient id="dayHalf" cx="0.7" cy="0.3" r="0.9">
+   <stop offset="0" stop-color="#ffffff"/>
+   <stop offset="1" stop-color="#c9ccdb"/>
   </radialGradient>
  </defs>
- <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)" stroke="#29dfeb" stroke-opacity="0.55" stroke-width="4"/>
- <circle cx="128" cy="131.5" r="102.6" fill="url(#halo)"/>
-  <path d="M107.1 171.4 L95.7 15.6 L160.3 15.6 L148.9 171.4 Z" fill="url(#beam)"/>
-  <ellipse cx="128" cy="135.3" rx="28.5" ry="8.55" fill="none" stroke="#3ff0f8" stroke-width="6.65" stroke-opacity="1"/><ellipse cx="128" cy="135.3" rx="28.5" ry="8.55" fill="none" stroke="#e6feff" stroke-width="2.3275" stroke-opacity="1"/>
-  <ellipse cx="128" cy="93.5" rx="43.7" ry="12.35" fill="none" stroke="#3ff0f8" stroke-width="6.65" stroke-opacity="0.9"/><ellipse cx="128" cy="93.5" rx="43.7" ry="12.35" fill="none" stroke="#e6feff" stroke-width="2.3275" stroke-opacity="0.9"/>
-  <ellipse cx="128" cy="47.9" rx="60.8" ry="17.1" fill="none" stroke="#3ff0f8" stroke-width="5.7" stroke-opacity="0.7"/><ellipse cx="128" cy="47.9" rx="60.8" ry="17.1" fill="none" stroke="#e6feff" stroke-width="1.995" stroke-opacity="0.7"/>
-  <rect x="67.2" y="180.9" width="121.6" height="38" rx="5.7" fill="#0d3b45" stroke="#0e8f99" stroke-width="2.85"/>
-  <rect x="80.5" y="192.3" width="9.5" height="9.5" fill="#29dfeb"/>
-  <rect x="160.3" y="201.8" width="9.5" height="7.6" fill="#29dfeb" fill-opacity="0.8"/>
-  <rect x="120.4" y="205.6" width="7.6" height="7.6" fill="#1a8c96"/>
-  <ellipse cx="128" cy="180.9" rx="38" ry="12.35" fill="#03161b" stroke="#29dfeb" stroke-width="2.85"/>
-  <ellipse cx="128" cy="180.9" rx="24.7" ry="6.65" fill="url(#soulGlow)"/>
-  <path d="M99.5 196.1 C61.5 192.3 40.6 169.5 46.3 139.1 L61.5 150.5 C61.5 171.4 78.6 180.9 103.3 180.9 Z" fill="#efe6d2" stroke="#9c8f74" stroke-width="2.85" stroke-linejoin="round"/><path d="M46.3 139.1 L34.9 125.8 L55.8 142.9 Z" fill="#efe6d2" stroke="#9c8f74" stroke-width="1.9"/>
-  <path d="M156.5 196.1 C194.5 192.3 215.4 169.5 209.7 139.1 L194.5 150.5 C194.5 171.4 177.4 180.9 152.7 180.9 Z" fill="#efe6d2" stroke="#9c8f74" stroke-width="2.85" stroke-linejoin="round"/><path d="M209.7 139.1 L221.1 125.8 L200.2 142.9 Z" fill="#efe6d2" stroke="#9c8f74" stroke-width="1.9"/>
-  <rect x="69.1" y="84" width="6.65" height="6.65" fill="#8ff6fb" fill-opacity="0.9"/><rect x="179.3" y="55.5" width="5.7" height="5.7" fill="#8ff6fb" fill-opacity="0.8"/><rect x="86.2" y="34.6" width="4.75" height="4.75" fill="#8ff6fb" fill-opacity="0.6"/><rect x="194.5" y="110.6" width="4.75" height="4.75" fill="#8ff6fb" fill-opacity="0.7"/><rect x="52" y="127.7" width="3.8" height="3.8" fill="#8ff6fb" fill-opacity="0.5"/><rect x="162.2" y="23.2" width="3.8" height="3.8" fill="#8ff6fb" fill-opacity="0.5"/>
- <text x="290" y="150" font-family="sans-serif" font-size="104" font-weight="bold" fill="#14191e">SculkShoot</text>
- <text x="294" y="210" font-family="sans-serif" font-size="48" fill="#29dfeb">Client</text>
+ <rect x="8.0" y="8.0" width="240.0" height="240.0" rx="56" fill="url(#sky)" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3.0"/>
+ <clipPath id="tile"><rect x="8.0" y="8.0" width="240.0" height="240.0" rx="56"/></clipPath>
+ <g clip-path="url(#tile)">
+  <circle cx="87.1" cy="47.0" r="0.9" fill="#ffffff" fill-opacity="0.39"/>
+  <circle cx="136.3" cy="96.8" r="0.9" fill="#ffffff" fill-opacity="0.90"/>
+  <circle cx="61.8" cy="31.9" r="1.8" fill="#ffffff" fill-opacity="0.39"/>
+  <circle cx="33.0" cy="110.5" r="0.9" fill="#ffffff" fill-opacity="0.92"/>
+  <circle cx="158.3" cy="147.3" r="0.9" fill="#ffffff" fill-opacity="0.70"/>
+  <circle cx="104.0" cy="238.5" r="0.9" fill="#ffffff" fill-opacity="0.68"/>
+  <circle cx="42.9" cy="109.2" r="0.9" fill="#ffffff" fill-opacity="0.69"/>
+  <circle cx="142.0" cy="170.2" r="0.9" fill="#ffffff" fill-opacity="0.70"/>
+  <circle cx="160.2" cy="98.4" r="0.9" fill="#ffffff" fill-opacity="0.69"/>
+  <circle cx="155.6" cy="127.2" r="1.8" fill="#ffffff" fill-opacity="0.82"/>
+  <circle cx="120.0" cy="226.2" r="1.4" fill="#ffffff" fill-opacity="0.53"/>
+  <circle cx="196.3" cy="174.2" r="1.1" fill="#ffffff" fill-opacity="0.40"/>
+  <circle cx="81.7" cy="126.9" r="1.4" fill="#ffffff" fill-opacity="0.79"/>
+  <circle cx="78.8" cy="239.4" r="0.9" fill="#ffffff" fill-opacity="0.66"/>
+  <circle cx="50.3" cy="91.4" r="1.8" fill="#ffffff" fill-opacity="0.60"/>
+  <circle cx="235.2" cy="30.0" r="1.4" fill="#ffffff" fill-opacity="0.55"/>
+  <circle cx="93.2" cy="127.2" r="1.8" fill="#ffffff" fill-opacity="0.39"/>
+  <circle cx="33.7" cy="74.6" r="0.9" fill="#ffffff" fill-opacity="0.39"/>
+  <circle cx="174.7" cy="162.1" r="1.8" fill="#ffffff" fill-opacity="0.52"/>
+  <circle cx="101.5" cy="167.1" r="0.9" fill="#ffffff" fill-opacity="0.91"/>
+  <circle cx="94.5" cy="153.7" r="1.8" fill="#ffffff" fill-opacity="0.39"/>
+  <circle cx="190.2" cy="42.0" r="1.1" fill="#ffffff" fill-opacity="0.59"/>
+  <circle cx="224.7" cy="127.2" r="1.1" fill="#ffffff" fill-opacity="0.62"/>
+  <circle cx="139.5" cy="216.9" r="1.8" fill="#ffffff" fill-opacity="0.87"/>
+  <circle cx="76.6" cy="108.3" r="1.4" fill="#ffffff" fill-opacity="0.76"/>
+  <circle cx="100.3" cy="65.5" r="0.9" fill="#ffffff" fill-opacity="0.46"/>
+  <circle cx="100.0" cy="300.0" r="190.0" fill="none" stroke="#ff5c78" stroke-opacity="0.38" stroke-width="9.0"/>
+  <circle cx="100.0" cy="300.0" r="181.0" fill="none" stroke="#ffa84c" stroke-opacity="0.38" stroke-width="9.0"/>
+  <circle cx="100.0" cy="300.0" r="172.0" fill="none" stroke="#ffe666" stroke-opacity="0.38" stroke-width="9.0"/>
+  <circle cx="100.0" cy="300.0" r="163.0" fill="none" stroke="#6ce08c" stroke-opacity="0.38" stroke-width="9.0"/>
+  <circle cx="100.0" cy="300.0" r="154.0" fill="none" stroke="#5cb6ff" stroke-opacity="0.38" stroke-width="9.0"/>
+  <circle cx="100.0" cy="300.0" r="145.0" fill="none" stroke="#a880ff" stroke-opacity="0.38" stroke-width="9.0"/>
+  <circle cx="150.0" cy="104.0" r="117.8" fill="url(#halo)"/>
+  <circle cx="150.0" cy="104.0" r="62.0" fill="url(#moonBody)"/>
+  <circle cx="128.3" cy="91.6" r="19.8" fill="#9ca0b4" fill-opacity="0.28"/>
+  <circle cx="165.5" cy="119.5" r="17.4" fill="#9ca0b4" fill-opacity="0.28"/>
+  <circle cx="168.6" cy="82.3" r="11.2" fill="#9ca0b4" fill-opacity="0.28"/>
+  <circle cx="119.0" cy="125.7" r="5.6" fill="#8e92a6" fill-opacity="0.45"/>
+  <circle cx="117.9" cy="124.6" r="3.9" fill="#ffffff" fill-opacity="0.35"/>
+  <circle cx="177.9" cy="100.9" r="4.3" fill="#8e92a6" fill-opacity="0.45"/>
+  <circle cx="177.0" cy="100.0" r="3.0" fill="#ffffff" fill-opacity="0.35"/>
+  <circle cx="140.7" cy="69.9" r="3.7" fill="#8e92a6" fill-opacity="0.45"/>
+  <circle cx="140.0" cy="69.2" r="2.6" fill="#ffffff" fill-opacity="0.35"/>
+  <circle cx="156.2" cy="141.2" r="5.0" fill="#8e92a6" fill-opacity="0.45"/>
+  <circle cx="155.2" cy="140.2" r="3.5" fill="#ffffff" fill-opacity="0.35"/>
+  <circle cx="112.8" cy="97.8" r="3.1" fill="#8e92a6" fill-opacity="0.45"/>
+  <circle cx="112.2" cy="97.2" r="2.2" fill="#ffffff" fill-opacity="0.35"/>
+  <path d="M52.0 50.0 Q52.0 62.0 64.0 62.0 Q52.0 62.0 52.0 74.0 Q52.0 62.0 40.0 62.0 Q52.0 62.0 52.0 50.0Z" fill="#ffffff" fill-opacity="1.0"/>
+  <path d="M206.0 187.0 Q206.0 196.0 215.0 196.0 Q206.0 196.0 206.0 205.0 Q206.0 196.0 197.0 196.0 Q206.0 196.0 206.0 187.0Z" fill="#ffffff" fill-opacity="0.85"/>
+  <path d="M78.0 154.0 Q78.0 160.0 84.0 160.0 Q78.0 160.0 78.0 166.0 Q78.0 160.0 72.0 160.0 Q78.0 160.0 78.0 154.0Z" fill="#ffffff" fill-opacity="0.7"/>
+ </g>
+ <text x="290" y="150" font-family="sans-serif" font-size="104" font-weight="bold" fill="#14151f">Lullaby</text>
+ <text x="294" y="210" font-family="sans-serif" font-size="48" fill="#a880ff">Launcher</text>
 </svg>

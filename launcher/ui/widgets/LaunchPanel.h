@@ -24,7 +24,7 @@
 #include <QWidget>
 
 class QPainter;
-class WardenWidget;
+class MoonyWidget;
 class SculkAmbience;
 
 /// A big button in the sculk frame that all launch tiles share:
@@ -37,7 +37,7 @@ class LaunchTile : public QAbstractButton {
     void setSubtitle(const QString& subtitle);
     /// a static picture, e.g. the crossed wrenches
     void setPicture(const QIcon& icon);
-    /// an animated picture (the Warden); the tile owns and places it
+    /// an animated picture (Moony); the tile owns and places it
     void setPictureWidget(QWidget* widget);
 
     QSize sizeHint() const override { return { 184, 176 }; }
@@ -88,7 +88,7 @@ class ProfileButton : public QAbstractButton {
     QPixmap m_face;
 };
 
-/// The column on the left of the main window: the mod pack agent (animated Warden),
+/// The column on the left of the main window: the mod pack agent (animated Moony),
 /// ready-made packs from the internet (crossed wrenches) and a new instance (white plus).
 class LaunchPanel : public QWidget {
     Q_OBJECT
@@ -108,12 +108,15 @@ class LaunchPanel : public QWidget {
 
    protected:
     void paintEvent(QPaintEvent* event) override;
+    /// the tile pictures follow the theme (moon white or sculk cyan)
+    void changeEvent(QEvent* event) override;
 
    private:
+    void updatePictures();
     LaunchTile* m_agentTile = nullptr;
     LaunchTile* m_packsTile = nullptr;
     LaunchTile* m_newTile = nullptr;
-    WardenWidget* m_warden = nullptr;
+    MoonyWidget* m_moony = nullptr;
     ProfileButton* m_profile = nullptr;
     QString m_profileName;
     QPixmap m_profileFace;

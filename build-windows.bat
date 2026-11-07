@@ -1,31 +1,31 @@
 @echo off
 chcp 65001 >nul
 setlocal EnableExtensions EnableDelayedExpansion
-title Сборка SculkShoot Client
+title Сборка Lullaby Launcher
 
 rem ======================================================================
-rem  SculkShoot Client: сборка для Windows одним файлом.
+rem  Lullaby Launcher: сборка для Windows одним файлом.
 rem  Ставит недостающие программы (winget), скачивает Qt и библиотеки,
 rem  собирает лаунчер и кладёт ярлык на рабочий стол.
 rem ======================================================================
 
 set "SRC=%~dp0"
 if "%SRC:~-1%"=="\" set "SRC=%SRC:~0,-1%"
-set "WORK=C:\SculkShoot"
+set "WORK=C:\Lullaby"
 set "QT_VERSION=6.8.3"
 set "QTDIR=%WORK%\Qt\%QT_VERSION%\msvc2022_64"
-set "OUT=%WORK%\SculkShoot Client"
+set "OUT=%WORK%\Lullaby Launcher"
 set "LOG=%WORK%\build-log.txt"
 
 echo.
 echo  ================================================================
-echo    SculkShoot Client - сборка для Windows
+echo    Lullaby Launcher - сборка для Windows
 echo  ================================================================
 echo   Скрипт сам скачает всё нужное и соберёт лаунчер.
 echo   Нужно около 10 ГБ свободного места на диске C: и интернет.
 echo   Первый раз это займёт 30-90 минут, потом - несколько минут.
 echo   Готовый лаунчер появится в папке:  %OUT%
-echo   и ярлык "SculkShoot Client" на рабочем столе.
+echo   и ярлык "Lullaby Launcher" на рабочем столе.
 echo.
 pause
 
@@ -135,12 +135,12 @@ if errorlevel 1 (
     powershell -NoProfile -Command "Get-Content -Tail 60 '%LOG%'"
     goto :fail
 )
-powershell -NoProfile -Command "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop')+'\SculkShoot Client.lnk'); $s.TargetPath='%OUT%\sculkshoot.exe'; $s.WorkingDirectory='%OUT%'; $s.Save()"
+powershell -NoProfile -Command "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop')+'\Lullaby Launcher.lnk'); $s.TargetPath='%OUT%\lullaby.exe'; $s.WorkingDirectory='%OUT%'; $s.Save()"
 
 echo.
 echo  ================================================================
-echo   ГОТОВО! Лаунчер собран:  %OUT%\sculkshoot.exe
-echo   На рабочем столе есть ярлык "SculkShoot Client".
+echo   ГОТОВО! Лаунчер собран:  %OUT%\lullaby.exe
+echo   На рабочем столе есть ярлык "Lullaby Launcher".
 echo  ================================================================
 explorer "%OUT%"
 pause

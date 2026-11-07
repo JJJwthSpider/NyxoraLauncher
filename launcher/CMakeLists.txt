@@ -1154,8 +1154,8 @@ SET(LAUNCHER_SOURCES
     ui/Animations.h
     ui/widgets/LaunchPanel.cpp
     ui/widgets/LaunchPanel.h
-    ui/widgets/WardenWidget.cpp
-    ui/widgets/WardenWidget.h
+    ui/widgets/MoonyWidget.cpp
+    ui/widgets/MoonyWidget.h
     ui/widgets/LabeledToolButton.h
     ui/widgets/LanguageSelectionWidget.cpp
     ui/widgets/LanguageSelectionWidget.h
@@ -1341,6 +1341,7 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/flat/flat.qrc
     resources/flat_white/flat_white.qrc
     resources/sculk/sculk.qrc
+    resources/lunar/lunar.qrc
     resources/sculk_light/sculk_light.qrc
     resources/sculk_theme/sculk_theme.qrc
     resources/translations/translations.qrc
@@ -1607,7 +1608,7 @@ if (UNIX AND APPLE AND Launcher_ENABLE_UPDATER)
 endif()
 
 # Set basic compiler warning/error flags for all targets
-# SculkShoot Client: warnings as errors can be switched off, e.g. for a first build with another compiler
+# Lullaby Launcher: warnings as errors can be switched off, e.g. for a first build with another compiler
 option(Launcher_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 get_property(Launcher_TARGETS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
 foreach(target ${Launcher_TARGETS})

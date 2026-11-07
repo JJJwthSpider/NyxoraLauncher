@@ -384,7 +384,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
             [](const QString& groupName) -> bool { return APPLICATION->instances()->isGroupCollapsed(groupName); });
         connect(view, &InstanceView::groupStateChanged, APPLICATION->instances(), &InstanceList::on_GroupStateChanged);
 
-        // SculkShoot Client: search and sorting right above the list, so a pack is found in a second
+        // Lullaby Launcher: search and sorting right above the list, so a pack is found in a second
         auto* listArea = new QWidget(ui->centralWidget);
         auto* listLayout = new QVBoxLayout(listArea);
         listLayout->setContentsMargins(0, 0, 0, 0);

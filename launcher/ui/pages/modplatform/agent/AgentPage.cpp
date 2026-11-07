@@ -55,7 +55,7 @@
 #include "settings/SettingsObject.h"
 #include "ui/Animations.h"
 #include "ui/dialogs/NewInstanceDialog.h"
-#include "ui/widgets/WardenWidget.h"
+#include "ui/widgets/MoonyWidget.h"
 
 namespace {
 constexpr int s_modIndexRole = Qt::UserRole + 1;
@@ -180,12 +180,12 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
 
-    // header: the Warden himself, who he is, where he takes mods from
+    // header: Moony itself, who it is, where it takes mods from
     auto* header = new QHBoxLayout;
-    m_warden = new WardenWidget(this);
-    m_warden->setFixedSize(100, 70);
-    m_warden->setBubbleVisible(true);
-    header->addWidget(m_warden);
+    m_moony = new MoonyWidget(this);
+    m_moony->setFixedSize(100, 70);
+    m_moony->setBubbleVisible(true);
+    header->addWidget(m_moony);
     auto* titles = new QVBoxLayout;
     m_title = new QLabel(this);
     auto titleFont = m_title->font();
@@ -255,7 +255,6 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
     chatsLayout->addWidget(m_chatsTitle);
     m_newChatButton = new QPushButton(m_chatsPanel);
     m_newChatButton->setObjectName("accentButton");
-    m_newChatButton->setIcon(QIcon::fromTheme("new"));
     chatsLayout->addWidget(m_newChatButton);
     m_chatList = new QListWidget(m_chatsPanel);
     m_chatList->setTextElideMode(Qt::ElideRight);
@@ -411,7 +410,7 @@ AgentPage::AgentPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
         if (m_typingLabel) {
             m_typingLabel->setText(
                 QString("<b>%1</b>%2<br>%3")
-                    .arg(tr("The Warden is working"), QString(".").repeated(m_typingDots), m_typingStatus.toHtmlEscaped()));
+                    .arg(tr("Moony is working"), QString(".").repeated(m_typingDots), m_typingStatus.toHtmlEscaped()));
         }
     });
 
@@ -452,7 +451,7 @@ AgentPage::~AgentPage() = default;
 
 void AgentPage::retranslate()
 {
-    m_title->setText(tr("Warden, the pack builder"));
+    m_title->setText(tr("Moony, the pack builder"));
     m_subtitle->setText(
         tr("Tell me what the pack should be about, and the loader and version. "
            "I will find the mods, add optimization and everything they need."));
@@ -465,7 +464,7 @@ void AgentPage::retranslate()
            "<a href=\"https://console.anthropic.com/\">console.anthropic.com</a>. The key is stored in the launcher "
            "settings on this computer."));
     m_apiKey->setPlaceholderText(tr("Anthropic API key (sk-ant-...)"));
-    m_input->setPlaceholderText(tr("Write to the Warden, e.g.: a zombie apocalypse pack with cities, zombies and weapons"));
+    m_input->setPlaceholderText(tr("Write to Moony, e.g.: a zombie apocalypse pack with cities, zombies and weapons"));
     m_sendButton->setText(tr("Send"));
     m_modTree->setHeaderLabels({ tr("Mod"), tr("Source"), tr("What it does") });
     m_logButton->setText(tr("Show the work log"));
@@ -473,7 +472,7 @@ void AgentPage::retranslate()
     m_newChatButton->setText(tr("New chat"));
     m_newChatButton->setToolTip(tr("Start a conversation about another pack; this one stays saved"));
     m_deleteChatButton->setText(tr("Delete chat"));
-    m_chatList->setToolTip(tr("Your conversations with the Warden. Click one to continue it, double click to rename."));
+    m_chatList->setToolTip(tr("Your conversations with Moony. Click one to continue it, double click to rename."));
 }
 
 void AgentPage::openedImpl()
@@ -622,7 +621,7 @@ void AgentPage::showTyping(const QString& status)
     m_typingLabel = new QLabel(bubble);
     m_typingLabel->setWordWrap(true);
     m_typingLabel->setTextFormat(Qt::RichText);
-    m_typingLabel->setText(QString("<b>%1</b><br>%2").arg(tr("The Warden is working"), status.toHtmlEscaped()));
+    m_typingLabel->setText(QString("<b>%1</b><br>%2").arg(tr("Moony is working"), status.toHtmlEscaped()));
     bubbleLayout->addWidget(m_typingLabel);
     m_typingProgress = new QProgressBar(bubble);
     m_typingProgress->setTextVisible(false);
@@ -631,13 +630,13 @@ void AgentPage::showTyping(const QString& status)
     bubbleLayout->addWidget(m_typingProgress);
     m_typingRow = addRow(bubble, true);
     m_typingTimer.start();
-    m_warden->setTalking(true);
+    m_moony->setTalking(true);
 }
 
 void AgentPage::hideTyping()
 {
     m_typingTimer.stop();
-    m_warden->setTalking(false);
+    m_moony->setTalking(false);
     if (m_typingRow) {
         m_chatLayout->removeWidget(m_typingRow);
         m_typingRow->deleteLater();
@@ -683,7 +682,7 @@ void AgentPage::reset()
     m_resultPanel->setVisible(false);
     m_modTree->clear();
     m_log->clear();
-    agentSay(tr("Hi! I'm the Warden and I build mod packs. <b>What should your pack be about?</b> "
+    agentSay(tr("Hi! I'm Moony and I build mod packs. <b>What should your pack be about?</b> "
                 "Tell me the theme and what must be in it, for example: <i>a zombie apocalypse with cities, zombies and weapons</i>."),
              translated(s_topicReplies, std::size(s_topicReplies), true));
     suggestCurrent();
@@ -1070,6 +1069,7 @@ void AgentPage::saveChat()
     }
     QJsonArray messages;
     for (const auto& [fromAgent, text] : m_messages) {
+        // "warden" is the name the agent had before; saved chats keep using it
         messages.append(QJsonObject{ { "from", fromAgent ? "warden" : "user" }, { "text", text } });
     }
     QJsonObject obj{

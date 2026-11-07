@@ -34,6 +34,7 @@ SculkTheme::SculkTheme(Variant variant) : m_variant(variant) {}
 
 namespace {
 bool s_active = false;
+bool s_lunar = false;
 
 // a small integer hash, so the texture is random looking but the same on every start
 quint32 cellHash(int x, int y, int salt)
@@ -58,6 +59,16 @@ bool SculkTheme::isActive()
 void SculkTheme::setActive(bool active)
 {
     s_active = active;
+}
+
+bool SculkTheme::isLunar()
+{
+    return s_lunar;
+}
+
+void SculkTheme::setLunar(bool lunar)
+{
+    s_lunar = lunar;
 }
 
 namespace {
@@ -121,8 +132,65 @@ QPixmap enlarge(const QImage& image, int pixelSize)
 }
 }  // namespace
 
+QPixmap SculkTheme::starTexture(const QColor& background, int size)
+{
+    static QHash<QString, QPixmap> cache;
+    const QString key = background.name() + QString::number(size);
+    if (auto it = cache.constFind(key); it != cache.constEnd()) {
+        return *it;
+    }
+    // the night sky: many faint stars, some brighter ones and a few that sparkle with four rays,
+    // a few of them a touch of the rainbow's colors. The tile wraps around, so it tiles without seams.
+    QImage image(size, size, QImage::Format_RGB32);
+    image.fill(background);
+    QPainter p(&image);
+    p.setRenderHint(QPainter::Antialiasing, true);
+    const QColor tints[] = { QColor(255, 255, 255), QColor(255, 236, 240), QColor(236, 244, 255), QColor(255, 248, 228), QColor(240, 236, 255) };
+    const int count = size * size / 900;
+    for (int i = 0; i < count; i++) {
+        const double x = cellHash(i, 1, 41) % (size * 10) / 10.0;
+        const double y = cellHash(i, 2, 41) % (size * 10) / 10.0;
+        const int kind = int(cellHash(i, 3, 41) % 100);
+        QColor c = tints[cellHash(i, 4, 41) % 5];
+        double radius = 0.55;
+        if (kind < 70) {
+            c.setAlphaF(0.25 + (cellHash(i, 5, 41) % 40) / 100.0);
+        } else if (kind < 94) {
+            c.setAlphaF(0.65 + (cellHash(i, 5, 41) % 30) / 100.0);
+            radius = 0.9;
+        } else {
+            radius = 1.2;
+            // a sparkling star: a soft glow and four thin rays
+            QColor ray = c;
+            ray.setAlphaF(0.45);
+            p.setPen(QPen(ray, 0.7));
+            for (int dx = -size; dx <= size; dx += size) {
+                for (int dy = -size; dy <= size; dy += size) {
+                    p.drawLine(QPointF(x + dx - 4, y + dy), QPointF(x + dx + 4, y + dy));
+                    p.drawLine(QPointF(x + dx, y + dy - 4), QPointF(x + dx, y + dy + 4));
+                }
+            }
+        }
+        p.setPen(Qt::NoPen);
+        p.setBrush(c);
+        for (int dx = -size; dx <= size; dx += size) {
+            for (int dy = -size; dy <= size; dy += size) {
+                p.drawEllipse(QPointF(x + dx, y + dy), radius, radius);
+            }
+        }
+    }
+    p.end();
+    const QPixmap pixmap = QPixmap::fromImage(image);
+    cache.insert(key, pixmap);
+    return pixmap;
+}
+
 QPixmap SculkTheme::texture(const QColor& background, const QColor& glow, int pixelSize)
 {
+    if (s_lunar) {
+        // the lunar theme has no sculk: everything lies on the night sky
+        return starTexture(background, 64 * pixelSize);
+    }
     static QHash<QString, QPixmap> cache;
     const QString key = background.name() + glow.name() + QString::number(pixelSize);
     if (auto it = cache.constFind(key); it != cache.constEnd()) {
@@ -177,7 +245,8 @@ QPixmap SculkTheme::veinTexture(const QColor& glow, int pixelSize)
 QString SculkTheme::textureFile(const QColor& background, const QColor& glow)
 {
     // style sheets can only load images from files, so the generated texture is written to the temp folder once
-    const QString path = QDir::temp().filePath(QString("sculkshoot-texture-v3-%1-%2.png").arg(background.name().mid(1), glow.name().mid(1)));
+    const QString path = QDir::temp().filePath(
+        QString("lullaby-texture-v4-%1-%2-%3.png").arg(s_lunar ? "stars" : "sculk", background.name().mid(1), glow.name().mid(1)));
     if (!QFileInfo::exists(path)) {
         texture(background, glow).save(path, "PNG");
     }
@@ -199,11 +268,18 @@ const SculkTheme::Colors& SculkTheme::colors() const
         "#0c2a31", "#8eacb1", "#e9f6f7", "#9fd0d5", "#d8eef0", "#dbf0f2", "#c6e7ea", "#0aa5b0", "#0e8f99",
         "#ffffff", "#e0f2f4", "#a9c4c8", "#0b7680", "#ffffff", "#4f7379", "#d4eef1", "#10a6b1", "#0b7680",
     };
+    // night black and moon white; the rainbow is added on top by the style sheet
+    static const Colors s_lunar{
+        "#f4f5fb", "#5d6276", "#0a0b12", "#3a3e52", "#1b1d29", "#0d0e16", "#272a3a", "#ffffff", "#e9eaf2",
+        "#0a0b12", "#14151f", "#6e7387", "#b9bccf", "#06070c", "#a3a7bb", "#20222f", "#ffffff", "#ffffff",
+    };
     switch (m_variant) {
         case Variant::Dark:
             return s_dark;
         case Variant::Light:
             return s_light;
+        case Variant::Lunar:
+            return s_lunar;
         default:
             return s_default;
     }
@@ -216,6 +292,8 @@ QString SculkTheme::id()
             return "sculk_dark";
         case Variant::Light:
             return "sculk_light";
+        case Variant::Lunar:
+            return "lunar";
         default:
             return "sculk";
     }
@@ -228,6 +306,8 @@ QString SculkTheme::name()
             return QObject::tr("Sculk (Dark)");
         case Variant::Light:
             return QObject::tr("Sculk (Light)");
+        case Variant::Lunar:
+            return QObject::tr("Lullaby (Moon)");
         default:
             return QObject::tr("Sculk");
     }
@@ -235,6 +315,9 @@ QString SculkTheme::name()
 
 QString SculkTheme::tooltip()
 {
+    if (m_variant == Variant::Lunar) {
+        return QObject::tr("Night black and moon white with stars and a see-through rainbow");
+    }
     return QObject::tr("Modern theme in the colors of Minecraft sculk");
 }
 
@@ -967,8 +1050,61 @@ QDialogButtonBox QPushButton {
     min-width: 80px;
 }
 )QSS");
+    if (m_variant == Variant::Lunar) {
+        // a see-through rainbow over the night: selections, the main buttons and progress
+        qss += QStringLiteral(R"QSS(
+QAbstractItemView::item:selected, QMenu::item:selected, QMenuBar::item:selected {
+    background-color: @rainbowSoft@;
+    color: #ffffff;
+}
+QAbstractItemView::item:selected:!active {
+    background-color: @rainbowFaint@;
+}
+QToolBar#instanceToolBar QToolButton#primaryAction, QPushButton#primaryAction, QPushButton#accentButton, QPushButton:default {
+    background-color: @rainbowLight@;
+    color: #0a0b12;
+    border: 1px solid #ffffff;
+}
+QToolBar#instanceToolBar QToolButton#primaryAction:hover, QPushButton#primaryAction:hover, QPushButton#accentButton:hover,
+QPushButton:default:hover {
+    background-color: #ffffff;
+    color: #0a0b12;
+}
+QPushButton:pressed, QPushButton:checked, QToolButton:pressed, QToolButton:checked, QPushButton#quickChip:pressed,
+QToolBar QToolButton:pressed, QToolBar QToolButton:checked, QPushButton#loaderCard:checked {
+    background-color: @rainbowSoft@;
+    color: #ffffff;
+    border-color: #ffffff;
+}
+QProgressBar::chunk {
+    background-color: @rainbowStrong@;
+}
+QTabBar::tab:selected {
+    border-bottom: 2px solid @rainbowStrong@;
+}
+QSlider::sub-page:horizontal {
+    background: @rainbowStrong@;
+}
+)QSS");
+    }
     const auto& c = colors();
+    // the rainbow at different strengths: over dark backgrounds the soft one looks like light through glass
+    auto rainbow = [](int alpha, bool pastel) {
+        const QColor bands[] = { QColor(255, 92, 120), QColor(255, 168, 76), QColor(255, 230, 102), QColor(108, 224, 140),
+                                 QColor(92, 182, 255), QColor(168, 128, 255) };
+        QStringList stops;
+        for (int i = 0; i < 6; i++) {
+            QColor b = pastel ? QColor((bands[i].red() + 255 * 2) / 3, (bands[i].green() + 255 * 2) / 3, (bands[i].blue() + 255 * 2) / 3)
+                              : bands[i];
+            stops << QString("stop:%1 rgba(%2, %3, %4, %5)").arg(i / 5.0).arg(b.red()).arg(b.green()).arg(b.blue()).arg(alpha);
+        }
+        return QString("qlineargradient(x1:0, y1:0, x2:1, y2:0, %1)").arg(stops.join(", "));
+    };
     const std::pair<const char*, QString> values[] = {
+        { "@rainbowSoft@", rainbow(110, false) },
+        { "@rainbowFaint@", rainbow(60, false) },
+        { "@rainbowStrong@", rainbow(220, false) },
+        { "@rainbowLight@", rainbow(255, true) },
         { "@text@", c.text },         { "@disabled@", c.disabled },         { "@window@", c.window },
         { "@border@", c.border },     { "@surface@", c.surface },           { "@bar@", c.bar },
         { "@hover@", c.hover },       { "@glow@", c.glow },                 { "@accent@", c.accent },
@@ -977,8 +1113,8 @@ QDialogButtonBox QPushButton {
         { "@itemHover@", c.itemHover }, { "@accentHover@", c.accentHover }, { "@chipText@", c.chipText },
         { "@windowTexture@", textureFile(QColor(c.window), QColor(c.glow)) },
         // bars and side panels are tinted glass over the sculk of the window, so the whole window is one surface
-        { "@barGlass@", glass(c.bar, m_variant == Variant::Light ? 0.86 : 0.80) },
-        { "@panelGlass@", glass(c.panel, m_variant == Variant::Light ? 0.84 : 0.74) },
+        { "@barGlass@", glass(c.bar, m_variant == Variant::Light ? 0.86 : m_variant == Variant::Lunar ? 0.72 : 0.80) },
+        { "@panelGlass@", glass(c.panel, m_variant == Variant::Light ? 0.84 : m_variant == Variant::Lunar ? 0.66 : 0.74) },
         { "@arrows@", m_variant == Variant::Light ? QStringLiteral(":/sculk_theme/dark-") : QStringLiteral(":/sculk_theme/") },
     };
     for (const auto& [token, value] : values) {

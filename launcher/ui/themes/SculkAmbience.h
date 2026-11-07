@@ -39,8 +39,12 @@ class SculkAmbience : public QObject {
     /// true when a sculk theme is active and the "SculkBackgroundAnimation" setting is on
     static bool enabled();
 
-    /// draws the pulse of the veins (aligned with the texture through textureOffset) and the particles
+    /// draws the pulse of the veins (aligned with the texture through textureOffset) and the particles;
+    /// in the lunar theme: twinkling stars and now and then a glowing comet
     void paint(QPainter* painter, const QRect& rect, const QPoint& textureOffset, const QColor& glow, int pixelSize = 4);
+
+    /// the still part of the lunar background: the night sky, a big moon and a see-through rainbow
+    static QPixmap moonScene(const QSize& size, qreal devicePixelRatio);
 
    private:
     struct Particle {
@@ -50,7 +54,16 @@ class SculkAmbience : public QObject {
         double sway;   // phase of the side to side motion
         int size;      // in screen pixels
     };
+    struct Comet {
+        QPointF start;     // 0..1 of the rect
+        QPointF velocity;  // rect sizes per second
+        double born;       // seconds
+        double life;
+    };
     void tick();
+    void tickLunar(double t);
+    void paintLunar(QPainter* painter, double t);
+    QRectF cometRect(const Comet& comet, double t) const;
     Particle spawn(bool anywhere);
     static double pulse(double t);
     QRectF particleRect(const Particle& p, double t) const;
@@ -63,4 +76,6 @@ class SculkAmbience : public QObject {
     QRect m_lastRect;  // where paint() drew last time, to repaint only around the particles
     double m_lastPulse = -1;
     quint32 m_seed = 1;
+    QList<Comet> m_comets;
+    double m_nextComet = 2.5;
 };

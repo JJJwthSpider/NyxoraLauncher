@@ -58,7 +58,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
- * SculkShoot Client for Android: a chat with the Warden, who assembles a mod pack from Modrinth exactly like the
+ * Lullaby Launcher for Android: a chat with Moony, who assembles a mod pack from Modrinth exactly like the
  * desktop launcher, keeps every chat, and exports the pack as .mrpack for any Android Minecraft launcher.
  * Also decodes invite codes of the desktop launcher's "My server".
  */
@@ -67,8 +67,10 @@ public final class MainActivity extends Activity {
     private static final int REQUEST_SAVE = 1;
 
     // sculk colors of the desktop theme
-    private static final int BG = 0xFF071A1F, PANEL = 0xFF0E2A31, PANEL_LIGHT = 0xFF14404A, ACCENT = 0xFF29DFEB, ACCENT_DARK = 0xFF0F7F8C,
-                             TEXT = 0xFFE6FBFF, HINT = 0xFF8FB8C0, USER_BUBBLE = 0xFF0F8F9C;
+    // night black and moon white; main buttons wear a see-through rainbow
+    private static final int BG = 0xFF0A0B12, PANEL = 0xFF14151F, PANEL_LIGHT = 0xFF1F2130, ACCENT = 0xFFFFFFFF, ACCENT_DARK = 0xFF5D6276,
+                             TEXT = 0xFFF4F5FB, HINT = 0xFFA3A7BB, USER_BUBBLE = 0xFF2C2F45, LINE = 0xFF3A3E52;
+    private static final int[] RAINBOW_PASTEL = { 0xFFFFC4D0, 0xFFFFE0C0, 0xFFFFF4C2, 0xFFCDF3D6, 0xFFC4E4FF, 0xFFDCCFFF };
 
     private static final String[] TOPIC_REPLIES = { "Зомби-апокалипсис: города, зомби и оружие", "Магия и приключения с подземельями",
                                                     "Технологии и космос", "Только оптимизация для слабого ПК" };
@@ -170,7 +172,14 @@ public final class MainActivity extends Activity {
         b.setTypeface(pixel);
         b.setTextSize(15);
         b.setTextColor(accent ? BG : TEXT);
-        b.setBackground(rounded(accent ? ACCENT : PANEL_LIGHT, 10, accent ? 0 : 0xFF2A6B77));
+        if (accent) {
+            GradientDrawable rainbow = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, RAINBOW_PASTEL);
+            rainbow.setCornerRadius(dp(10));
+            rainbow.setStroke(dp(1), Color.WHITE);
+            b.setBackground(rainbow);
+        } else {
+            b.setBackground(rounded(PANEL_LIGHT, 10, LINE));
+        }
         b.setPadding(dp(14), dp(6), dp(14), dp(6));
         b.setMinHeight(dp(40));
         b.setMinimumHeight(dp(40));
@@ -180,28 +189,27 @@ public final class MainActivity extends Activity {
     private View buildLayout() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        GradientDrawable background = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[] { 0xFF0B2830, BG, 0xFF04100F });
-        root.setBackground(background);
+        root.setBackground(new MoonSkyDrawable(getResources().getDisplayMetrics().density));
 
-        // top bar: the Warden, the name, chats and the invite code
+        // top bar: Moony, the name, chats and the invite code
         LinearLayout bar = new LinearLayout(this);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(12), dp(8), dp(8), dp(8));
-        bar.setBackgroundColor(0xFF0A2228);
+        bar.setBackgroundColor(0xCC0D0E16);
         ImageView warden = new ImageView(this);
-        warden.setImageResource(R.drawable.warden);
+        warden.setImageResource(R.drawable.moony);
         bar.addView(warden, new LinearLayout.LayoutParams(dp(40), dp(40)));
         LinearLayout titles = new LinearLayout(this);
         titles.setOrientation(LinearLayout.VERTICAL);
         titles.setPadding(dp(10), 0, 0, 0);
         TextView title = new TextView(this);
-        title.setText("Варден-сборщик");
+        title.setText("Лунни-сборщик");
         title.setTypeface(pixel);
         title.setTextSize(18);
         title.setTextColor(ACCENT);
         titles.addView(title);
         TextView subtitle = new TextView(this);
-        subtitle.setText("SculkShoot Client · моды с Modrinth");
+        subtitle.setText("Lullaby Launcher · моды с Modrinth");
         subtitle.setTextSize(11);
         subtitle.setTextColor(HINT);
         titles.addView(subtitle);
@@ -237,7 +245,7 @@ public final class MainActivity extends Activity {
         packBar = new LinearLayout(this);
         packBar.setOrientation(LinearLayout.VERTICAL);
         packBar.setPadding(dp(12), dp(8), dp(12), dp(8));
-        packBar.setBackground(rounded(PANEL, 12, 0xFF1F5A66));
+        packBar.setBackground(rounded(0xE614151F, 12, LINE));
         packTitle = new TextView(this);
         packTitle.setTextColor(TEXT);
         packTitle.setTextSize(13);
@@ -286,11 +294,11 @@ public final class MainActivity extends Activity {
         inputRow.setGravity(Gravity.CENTER_VERTICAL);
         inputRow.setPadding(dp(8), dp(4), dp(8), dp(10));
         input = new EditText(this);
-        input.setHint("Напиши Вардену...");
+        input.setHint("Напиши Лунни...");
         input.setHintTextColor(HINT);
         input.setTextColor(TEXT);
         input.setTextSize(15);
-        input.setBackground(rounded(PANEL, 20, 0xFF2A6B77));
+        input.setBackground(rounded(0xE614151F, 20, LINE));
         input.setPadding(dp(14), dp(10), dp(14), dp(10));
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         input.setImeOptions(EditorInfo.IME_ACTION_SEND);
@@ -324,15 +332,15 @@ public final class MainActivity extends Activity {
         });
     }
 
-    private View addRow(View bubble, boolean fromWarden) {
+    private View addRow(View bubble, boolean fromMoony) {
         LinearLayout row = new LinearLayout(this);
-        row.setGravity(fromWarden ? Gravity.START : Gravity.END);
+        row.setGravity(fromMoony ? Gravity.START : Gravity.END);
         LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         rowParams.bottomMargin = dp(8);
         int maxWidth = (int) (getResources().getDisplayMetrics().widthPixels * 0.82f);
-        if (fromWarden) {
+        if (fromMoony) {
             ImageView avatar = new ImageView(this);
-            avatar.setImageResource(R.drawable.warden);
+            avatar.setImageResource(R.drawable.moony);
             LinearLayout.LayoutParams avatarParams = new LinearLayout.LayoutParams(dp(30), dp(30));
             avatarParams.rightMargin = dp(6);
             row.addView(avatar, avatarParams);
@@ -353,7 +361,7 @@ public final class MainActivity extends Activity {
     }
 
     @SuppressWarnings("deprecation")
-    private void showWardenBubble(String html) {
+    private void showMoonyBubble(String html) {
         TextView bubble = new TextView(this);
         bubble.setText(Html.fromHtml(html));
         bubble.setTextColor(TEXT);
@@ -361,7 +369,7 @@ public final class MainActivity extends Activity {
         bubble.setLineSpacing(0, 1.1f);
         bubble.setTextIsSelectable(true);
         bubble.setMovementMethod(LinkMovementMethod.getInstance());
-        bubble.setBackground(rounded(PANEL_LIGHT, 14, 0xFF2A6B77));
+        bubble.setBackground(rounded(0xF01F2130, 14, LINE));
         bubble.setPadding(dp(12), dp(9), dp(12), dp(9));
         addRow(bubble, true);
     }
@@ -378,14 +386,14 @@ public final class MainActivity extends Activity {
     }
 
     private void say(String html, String... replies) {
-        showWardenBubble(html);
+        showMoonyBubble(html);
         messages.add(new String[] { "warden", html });
         setReplies(Arrays.asList(replies));
         saveChat();
     }
 
     private void sayWithReplies(String html, List<String> replies) {
-        showWardenBubble(html);
+        showMoonyBubble(html);
         messages.add(new String[] { "warden", html });
         setReplies(replies);
         saveChat();
@@ -424,10 +432,10 @@ public final class MainActivity extends Activity {
         hideTyping();
         LinearLayout bubble = new LinearLayout(this);
         bubble.setOrientation(LinearLayout.VERTICAL);
-        bubble.setBackground(rounded(PANEL_LIGHT, 14, 0xFF2A6B77));
+        bubble.setBackground(rounded(0xF01F2130, 14, LINE));
         bubble.setPadding(dp(12), dp(9), dp(12), dp(9));
         TextView head = new TextView(this);
-        head.setText("Варден работает...");
+        head.setText("Лунни работает...");
         head.setTypeface(pixel);
         head.setTextColor(ACCENT);
         bubble.addView(head);
@@ -745,7 +753,7 @@ public final class MainActivity extends Activity {
         packLoaderVersion = "";
         workLog.setLength(0);
         updatePackBar();
-        say("Привет! Я Варден, собираю сборки модов. <b>Про что будет твоя сборка?</b> Расскажи тему и что в ней должно быть, например: "
+        say("Привет! Я Лунни, собираю сборки модов. <b>Про что будет твоя сборка?</b> Расскажи тему и что в ней должно быть, например: "
                 + "<i>зомби-апокалипсис, должны быть города, зомби и оружие</i>.",
             TOPIC_REPLIES);
     }
@@ -829,7 +837,7 @@ public final class MainActivity extends Activity {
             String from = message.optString("from");
             String text = message.optString("text");
             if ("warden".equals(from)) {
-                showWardenBubble(text);
+                showMoonyBubble(text);
             } else {
                 showUserBubble(text);
             }
@@ -873,7 +881,7 @@ public final class MainActivity extends Activity {
     private void showChats() {
         final List<JSONObject> chats = store.list();
         if (chats.isEmpty()) {
-            Toast.makeText(this, "Сохранённых чатов пока нет. Напиши Вардену, про что будет сборка.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Сохранённых чатов пока нет. Напиши Лунни, про что будет сборка.", Toast.LENGTH_LONG).show();
             return;
         }
         final List<String> rows = new ArrayList<String>();
@@ -1008,15 +1016,16 @@ public final class MainActivity extends Activity {
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(20), dp(8), dp(20), 0);
         TextView hint = new TextView(this);
-        hint.setText("Вставь код, который прислал друг из SculkShoot Client на компьютере («Мой сервер»). Я покажу адрес сервера.");
+        hint.setText("Вставь код, который прислал друг из Lullaby Launcher на компьютере («Мой сервер»). Я покажу адрес сервера.");
         box.addView(hint);
         final EditText code = new EditText(this);
-        code.setHint("SC-XXXX-XXXX-...");
+        code.setHint("LL-XXXX-XXXX-...");
         code.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboard != null && clipboard.hasPrimaryClip() && clipboard.getPrimaryClip().getItemCount() > 0) {
             CharSequence clip = clipboard.getPrimaryClip().getItemAt(0).getText();
-            if (clip != null && clip.toString().trim().toUpperCase(Locale.ROOT).startsWith("SC-")) {
+            String clipText = clip == null ? "" : clip.toString().trim().toUpperCase(Locale.ROOT);
+            if (clipText.startsWith("LL-") || clipText.startsWith("SC-")) {
                 code.setText(clip.toString().trim());
             }
         }
@@ -1036,7 +1045,7 @@ public final class MainActivity extends Activity {
     private void showAddress(String code) {
         InviteCode.Address address = InviteCode.decode(code);
         if (address == null) {
-            new AlertDialog.Builder(this).setMessage("Это не похоже на код приглашения SculkShoot. Проверь, что код скопирован целиком.")
+            new AlertDialog.Builder(this).setMessage("Это не похоже на код приглашения Lullaby. Проверь, что код скопирован целиком.")
                 .setPositiveButton("OK", null).show();
             return;
         }
@@ -1058,7 +1067,7 @@ public final class MainActivity extends Activity {
 
     private void showLog() {
         TextView text = new TextView(this);
-        text.setText(workLog.length() == 0 ? "Журнал пуст: Варден ещё ничего не собирал в этом чате." : workLog.toString());
+        text.setText(workLog.length() == 0 ? "Журнал пуст: Лунни ещё ничего не собирал в этом чате." : workLog.toString());
         text.setTextSize(12);
         text.setTextIsSelectable(true);
         text.setPadding(dp(20), dp(10), dp(20), dp(10));
@@ -1069,8 +1078,8 @@ public final class MainActivity extends Activity {
 
     private void showAbout() {
         new AlertDialog.Builder(this)
-            .setTitle("SculkShoot Client для Android")
-            .setMessage("Варден собирает сборки модов с Modrinth: понимает тему, названия модов, «убери» и «побольше», "
+            .setTitle("Lullaby Launcher для Android")
+            .setMessage("Лунни собирает сборки модов с Modrinth: понимает тему, названия модов, «убери» и «побольше», "
                         + "сам добавляет оптимизацию и все нужные библиотеки.\n\n"
                         + "Сама Minecraft: Java Edition на телефоне запускается в лаунчере для Android, который умеет ставить сборки "
                         + "Modrinth (.mrpack). Кнопка «В лаунчер» открывает сборку в нём, «Файл» — сохраняет или отправляет .mrpack.\n\n"
@@ -1150,7 +1159,7 @@ public final class MainActivity extends Activity {
     private File writePack() throws Exception {
         String safe = packPlan.name.replace('—', '-').replaceAll("[^\\p{L}\\p{N} ._-]", "").replaceAll("\\s+", " ").trim();
         if (safe.isEmpty()) {
-            safe = "SculkShoot pack";
+            safe = "Lullaby pack";
         }
         File file = new File(PackProvider.exportDir(this), safe + ".mrpack");
         ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(file));

@@ -18,7 +18,7 @@
 
 #include <QString>
 
-/// Invite codes for SculkShoot servers, like "SC-8N4Q-2ZKD-1X". The code carries the address and the port itself,
+/// Invite codes for Lullaby servers, like "LL-8N4Q-2ZKD-1X" (codes of the older SculkShoot Client start with "SC-"). The code carries the address and the port itself,
 /// so no service is needed to look it up: the friend types it into the launcher and gets the IP and the port back.
 ///
 /// Inside: a type byte (IPv4, the bore.pub tunnel or any host name), the address, the port and a check byte so that

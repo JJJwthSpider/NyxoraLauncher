@@ -235,7 +235,7 @@ set(Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT ON)
 # Although we recommend enabling this, we cannot guarantee binary compatibility on
 # differing Linux/BSD/etc distributions. Downstream packagers should be explicitly opt-ing into this
 # feature if they know it will work with their distribution.
-# SculkShoot Client: the Java downloader is on everywhere, so every Minecraft version gets the Java it needs
+# Lullaby Launcher: the Java downloader is on everywhere, so every Minecraft version gets the Java it needs
 
 # Java downloader
 option(Launcher_ENABLE_JAVA_DOWNLOADER "Build the java downloader feature" ${Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT})
@@ -346,7 +346,7 @@ include(ECMQtDeclareLoggingCategory)
 
 ####################################### Program Info #######################################
 
-set(Launcher_APP_BINARY_NAME "sculkshoot" CACHE STRING "Name of the Launcher binary")
+set(Launcher_APP_BINARY_NAME "lullaby" CACHE STRING "Name of the Launcher binary")
 add_subdirectory(program_info)
 
 ####################################### Install layout #######################################

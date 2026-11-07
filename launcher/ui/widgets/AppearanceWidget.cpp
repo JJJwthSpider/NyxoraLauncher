@@ -54,8 +54,8 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
 
     m_ui->catPreview->setGraphicsEffect(new QGraphicsOpacityEffect(this));
 
-    // SculkShoot Client: the living background of the sculk themes can be switched off on weak computers
-    auto* animation = new QCheckBox(tr("Animated sculk background (glowing veins and particles)"), m_ui->themingBox);
+    // Lullaby Launcher: the living background of our themes can be switched off on weak computers
+    auto* animation = new QCheckBox(tr("Animated background (stars and comets, or sculk veins)"), m_ui->themingBox);
     animation->setChecked(APPLICATION->settings()->get("SculkBackgroundAnimation").toBool());
     m_ui->verticalLayout_2->addWidget(animation);
     connect(animation, &QCheckBox::toggled, this, [](bool on) { APPLICATION->settings()->set("SculkBackgroundAnimation", on); });

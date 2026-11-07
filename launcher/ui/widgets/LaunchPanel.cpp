@@ -21,7 +21,7 @@
 #include <QVBoxLayout>
 #include <cmath>
 
-#include "WardenWidget.h"
+#include "MoonyWidget.h"
 #include "ui/themes/SculkAmbience.h"
 #include "ui/themes/SculkTheme.h"
 
@@ -108,7 +108,7 @@ QRect LaunchTile::pictureRect() const
 
 QRect LaunchTile::widgetRect() const
 {
-    // an animated picture (the Warden with its speech bubble) gets the whole width between the corner brackets
+    // an animated picture (Moony with its speech bubble) gets the whole width between the corner brackets
     const auto picture = pictureRect();
     return { 16, picture.top(), width() - 32, picture.height() };
 }
@@ -140,7 +140,7 @@ void LaunchTile::leaveEvent(QEvent* event)
 void LaunchTile::paintEvent(QPaintEvent*)
 {
     // the frame, the texture, the picture and the caption only change with the hover state, the palette or the size;
-    // they are rendered into two layers once, so the animations (Warden, gem, pulsing veins) only blit pixmaps
+    // they are rendered into two layers once, so the animations (Moony, gem, the animated background) only blit pixmaps
     const auto& pal = palette();
     const qreal dpr = devicePixelRatioF();
     const QString key = QString("%1x%2@%3|%4|%5%6%7%8|%9|")
@@ -360,23 +360,22 @@ LaunchPanel::LaunchPanel(QWidget* parent) : QWidget(parent)
     layout->setSpacing(10);
 
     m_agentTile = new LaunchTile(this);
-    m_warden = new WardenWidget;
-    m_agentTile->setPictureWidget(m_warden);
-    m_warden->setBubbleVisible(true);
-    connect(m_agentTile, &LaunchTile::hoverChanged, m_warden, &WardenWidget::setExcited);
-    connect(m_agentTile, &LaunchTile::hoverChanged, m_warden, &WardenWidget::setTalking);
+    m_moony = new MoonyWidget;
+    m_agentTile->setPictureWidget(m_moony);
+    m_moony->setBubbleVisible(true);
+    connect(m_agentTile, &LaunchTile::hoverChanged, m_moony, &MoonyWidget::setExcited);
+    connect(m_agentTile, &LaunchTile::hoverChanged, m_moony, &MoonyWidget::setTalking);
     connect(m_agentTile, &QAbstractButton::clicked, this, &LaunchPanel::agentRequested);
     layout->addWidget(m_agentTile, 1);
 
     m_packsTile = new LaunchTile(this);
-    m_packsTile->setPicture(QIcon(":/sculk_theme/tile-wrenches.svg"));
     connect(m_packsTile, &QAbstractButton::clicked, this, &LaunchPanel::packsRequested);
     layout->addWidget(m_packsTile, 1);
 
     m_newTile = new LaunchTile(this);
-    m_newTile->setPicture(QIcon(":/sculk_theme/tile-plus.svg"));
     connect(m_newTile, &QAbstractButton::clicked, this, &LaunchPanel::newInstanceRequested);
     layout->addWidget(m_newTile, 1);
+    updatePictures();
 
     m_profile = new ProfileButton(this);
     connect(m_profile, &QAbstractButton::clicked, this, &LaunchPanel::profileRequested);
@@ -389,7 +388,7 @@ void LaunchPanel::retranslate()
 {
     m_agentTile->setText(tr("AI agent"));
     m_agentTile->setSubtitle(tr("A pack from your description"));
-    m_agentTile->setToolTip(tr("Describe a pack in your own words and the Warden assembles it with mods from Modrinth and CurseForge"));
+    m_agentTile->setToolTip(tr("Describe a pack in your own words and Moony assembles it with mods from Modrinth and CurseForge"));
     m_packsTile->setText(tr("Ready packs"));
     m_packsTile->setSubtitle(tr("From Modrinth and CurseForge"));
     m_packsTile->setToolTip(tr("Install a ready-made mod pack from the internet"));
@@ -405,6 +404,21 @@ void LaunchPanel::setProfile(const QString& name, const QPixmap& face)
     m_profileName = name;
     m_profileFace = face;
     m_profile->setProfile(name.isEmpty() ? tr("Sign in") : name, face);
+}
+
+void LaunchPanel::updatePictures()
+{
+    const bool lunar = SculkTheme::isLunar();
+    m_packsTile->setPicture(QIcon(lunar ? ":/sculk_theme/tile-wrenches-lunar.svg" : ":/sculk_theme/tile-wrenches.svg"));
+    m_newTile->setPicture(QIcon(lunar ? ":/sculk_theme/tile-plus-lunar.svg" : ":/sculk_theme/tile-plus.svg"));
+}
+
+void LaunchPanel::changeEvent(QEvent* event)
+{
+    QWidget::changeEvent(event);
+    if (event->type() == QEvent::PaletteChange || event->type() == QEvent::StyleChange) {
+        updatePictures();
+    }
 }
 
 void LaunchPanel::paintEvent(QPaintEvent*)

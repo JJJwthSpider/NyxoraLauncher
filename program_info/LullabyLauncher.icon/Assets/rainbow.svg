@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0" stop-color="#05060d"/>
+   <stop offset="0.65" stop-color="#0d1020"/>
+   <stop offset="1" stop-color="#1a1d36"/>
+  </linearGradient>
+  <radialGradient id="moonBody" cx="0.38" cy="0.36" r="0.75">
+   <stop offset="0" stop-color="#ffffff"/>
+   <stop offset="0.7" stop-color="#e6e8f1"/>
+   <stop offset="1" stop-color="#b9bccc"/>
+  </radialGradient>
+  <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+   <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.28"/>
+   <stop offset="1" stop-color="#dce4ff" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="nightHalf" cx="0.3" cy="0.3" r="0.9">
+   <stop offset="0" stop-color="#2c3150"/>
+   <stop offset="1" stop-color="#0e101c"/>
+  </radialGradient>
+  <radialGradient id="dayHalf" cx="0.7" cy="0.3" r="0.9">
+   <stop offset="0" stop-color="#ffffff"/>
+   <stop offset="1" stop-color="#c9ccdb"/>
+  </radialGradient>
+ </defs>
+ <circle cx="128" cy="250" r="120.0" fill="none" stroke="#ff5c78" stroke-opacity="0.4" stroke-width="7.0"/>
+  <circle cx="128" cy="250" r="113.0" fill="none" stroke="#ffa84c" stroke-opacity="0.4" stroke-width="7.0"/>
+  <circle cx="128" cy="250" r="106.0" fill="none" stroke="#ffe666" stroke-opacity="0.4" stroke-width="7.0"/>
+  <circle cx="128" cy="250" r="99.0" fill="none" stroke="#6ce08c" stroke-opacity="0.4" stroke-width="7.0"/>
+  <circle cx="128" cy="250" r="92.0" fill="none" stroke="#5cb6ff" stroke-opacity="0.4" stroke-width="7.0"/>
+  <circle cx="128" cy="250" r="85.0" fill="none" stroke="#a880ff" stroke-opacity="0.4" stroke-width="7.0"/>
+ <circle cx="128" cy="120" r="159.6" fill="url(#halo)"/>
+  <circle cx="128" cy="120" r="84" fill="url(#moonBody)"/>
+  <circle cx="98.6" cy="103.2" r="26.9" fill="#9ca0b4" fill-opacity="0.28"/>
+  <circle cx="149.0" cy="141.0" r="23.5" fill="#9ca0b4" fill-opacity="0.28"/>
+  <circle cx="153.2" cy="90.6" r="15.1" fill="#9ca0b4" fill-opacity="0.28"/>
+  <circle cx="86.0" cy="149.4" r="7.6" fill="#8e92a6" fill-opacity="0.45"/>
+  <circle cx="84.5" cy="147.9" r="5.3" fill="#ffffff" fill-opacity="0.35"/>
+  <circle cx="165.8" cy="115.8" r="5.9" fill="#8e92a6" fill-opacity="0.45"/>
+  <circle cx="164.6" cy="114.6" r="4.1" fill="#ffffff" fill-opacity="0.35"/>
+  <circle cx="115.4" cy="73.8" r="5.0" fill="#8e92a6" fill-opacity="0.45"/>
+  <circle cx="114.4" cy="72.8" r="3.5" fill="#ffffff" fill-opacity="0.35"/>
+  <circle cx="136.4" cy="170.4" r="6.7" fill="#8e92a6" fill-opacity="0.45"/>
+  <circle cx="135.1" cy="169.1" r="4.7" fill="#ffffff" fill-opacity="0.35"/>
+  <circle cx="77.6" cy="111.6" r="4.2" fill="#8e92a6" fill-opacity="0.45"/>
+  <circle cx="76.8" cy="110.8" r="2.9" fill="#ffffff" fill-opacity="0.35"/>
+</svg>

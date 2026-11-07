@@ -41,10 +41,10 @@ class QToolButton;
 class QTreeWidget;
 class QTreeWidgetItem;
 class QVBoxLayout;
-class WardenWidget;
+class MoonyWidget;
 
-/// "AI pack" page of the new instance dialog: a chat with the Warden.
-/// The Warden asks what the pack should be about, then for the loader and the Minecraft version,
+/// "AI pack" page of the new instance dialog: a chat with Moony.
+/// Moony asks what the pack should be about, then for the loader and the Minecraft version,
 /// finds fitting mods (plus performance mods and every library they need) on Modrinth and CurseForge
 /// and prepares the instance. Afterwards the pack can be changed by just writing ("add magic").
 class AgentPage : public QWidget, public BasePage {
@@ -122,7 +122,7 @@ class AgentPage : public QWidget, public BasePage {
     QString m_chatId;
     QString m_chatTitle;
     bool m_chatTitleEdited = false;           // the user renamed the chat, the pack name no longer replaces it
-    QList<std::pair<bool, QString>> m_messages;  // (from the Warden, html or plain text)
+    QList<std::pair<bool, QString>> m_messages;  // (from Moony, html or plain text)
     QStringList m_currentReplies;
     bool m_replaying = false;  // a saved chat is being shown: no animations, nothing is saved again
     bool m_fillingChatList = false;
@@ -132,7 +132,7 @@ class AgentPage : public QWidget, public BasePage {
     QPushButton* m_newChatButton = nullptr;
     QToolButton* m_deleteChatButton = nullptr;
 
-    WardenWidget* m_warden = nullptr;
+    MoonyWidget* m_moony = nullptr;
     QLabel* m_title = nullptr;
     QLabel* m_subtitle = nullptr;
     QLabel* m_sourcesLabel = nullptr;

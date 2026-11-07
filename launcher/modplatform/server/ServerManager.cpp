@@ -539,7 +539,7 @@ void ServerManager::syncMods()
         if (manifest.open(QIODevice::WriteOnly)) {
             manifest.write(copied.join('\n').toUtf8());
         }
-        emit logLine(tr("[SculkShoot] Mods on the server: %1. Client-only, left out: %2.")
+        emit logLine(tr("[Lullaby] Mods on the server: %1. Client-only, left out: %2.")
                          .arg(copied.isEmpty() ? tr("none") : copied.join(", "), skipped.isEmpty() ? tr("none") : skipped.join(", ")));
 
         // the configs of the instance, without overwriting what the server already has
@@ -573,7 +573,7 @@ void ServerManager::writeConfig()
 
     QFile eula(FS::PathCombine(m_dir, "eula.txt"));
     if (eula.open(QIODevice::WriteOnly)) {
-        eula.write("# accepted in SculkShoot Client: https://aka.ms/MinecraftEULA\neula=true\n");
+        eula.write("# accepted in Lullaby Launcher: https://aka.ms/MinecraftEULA\neula=true\n");
     }
 
     const QList<std::pair<QString, QString>> values = {
@@ -587,7 +587,7 @@ void ServerManager::writeConfig()
         { "allow-flight", m_settings.allowFlight ? "true" : "false" },
         { "enable-command-block", m_settings.commandBlocks ? "true" : "false" },
         { "view-distance", QString::number(m_settings.viewDistance) },
-        { "motd", escapeProperty(m_settings.motd.isEmpty() ? tr("SculkShoot server") : m_settings.motd) },
+        { "motd", escapeProperty(m_settings.motd.isEmpty() ? tr("Lullaby server") : m_settings.motd) },
         { "level-seed", escapeProperty(m_settings.seed) },
         { "white-list", m_settings.whitelist ? "true" : "false" },
         { "enforce-whitelist", m_settings.whitelist ? "true" : "false" },

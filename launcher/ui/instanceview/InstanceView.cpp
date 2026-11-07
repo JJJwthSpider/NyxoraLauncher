@@ -578,8 +578,17 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
     if (SculkTheme::isActive()) {
         const auto& pal = viewport()->palette();
         const QPoint textureOffset(0, verticalOffset() % 192);
-        painter.drawTiledPixmap(viewport()->rect(), SculkTheme::texture(pal.color(QPalette::Base), pal.color(QPalette::Highlight)),
-                                textureOffset);
+        if (SculkTheme::isLunar()) {
+            // the instances float in the night sky in front of a big moon and a see-through rainbow
+            const qreal dpr = viewport()->devicePixelRatioF();
+            if (m_moonScene.size() != viewport()->size() * dpr) {
+                m_moonScene = SculkAmbience::moonScene(viewport()->size(), dpr);
+            }
+            painter.drawPixmap(0, 0, m_moonScene);
+        } else {
+            painter.drawTiledPixmap(viewport()->rect(), SculkTheme::texture(pal.color(QPalette::Base), pal.color(QPalette::Highlight)),
+                                    textureOffset);
+        }
         m_ambience->paint(&painter, viewport()->rect(), textureOffset, pal.color(QPalette::Highlight));
 
         // the floor gets darker towards the edges, like a cave lit from the middle

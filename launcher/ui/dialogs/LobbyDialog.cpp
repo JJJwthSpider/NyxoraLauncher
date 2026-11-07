@@ -364,7 +364,7 @@ QString LobbyDialog::invitation() const
         const auto info = Lobby::describe(instance);
         version = info.loader.isEmpty() ? info.minecraftVersion : info.minecraftVersion + " " + info.loaderName;
     }
-    return tr("Join me in Minecraft %1!\nAddress: %2\nIn SculkShoot Client: Lobby → Join a friend, paste the address. "
+    return tr("Join me in Minecraft %1!\nAddress: %2\nIn Lullaby Launcher: Lobby → Join a friend, paste the address. "
               "In Minecraft: Multiplayer → Direct Connection.")
         .arg(version, m_internetAddress.isEmpty() ? m_lanAddress : m_internetAddress);
 }
@@ -381,7 +381,7 @@ QWidget* LobbyDialog::buildJoinTab(BaseInstance* preselected)
                                 page));
 
     m_joinAddress = new QLineEdit(page);
-    m_joinAddress->setPlaceholderText(tr("Invite code like SC-8N4Q-2ZKD-1X, or an address like brave-creeper.e4mc.link"));
+    m_joinAddress->setPlaceholderText(tr("Invite code like LL-8N4Q-2ZKD-1X, or an address like brave-creeper.e4mc.link"));
     m_joinAddress->setClearButtonEnabled(true);
     layout->addWidget(m_joinAddress);
     m_joinInfo = paragraph(QString(), page);
@@ -430,7 +430,7 @@ QString LobbyDialog::targetAddress(QString* explanation) const
     QString host;
     quint16 port = 0;
     // an invite code, maybe inside a pasted invitation
-    static const QRegularExpression code(R"(SC-[0-9A-Za-z]{1,4}(?:-[0-9A-Za-z]{1,4})+)", QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression code(R"((?:LL|SC)-[0-9A-Za-z]{1,4}(?:-[0-9A-Za-z]{1,4})+)", QRegularExpression::CaseInsensitiveOption);
     const auto codeMatch = code.match(text);
     if (InviteCode::decode(codeMatch.hasMatch() ? codeMatch.captured(0) : text, host, port)) {
         if (explanation) {
@@ -438,7 +438,7 @@ QString LobbyDialog::targetAddress(QString* explanation) const
         }
         return QString("%1:%2").arg(host).arg(port);
     }
-    if (text.startsWith("SC-", Qt::CaseInsensitive)) {
+    if (text.startsWith("LL-", Qt::CaseInsensitive) || text.startsWith("SC-", Qt::CaseInsensitive)) {
         if (explanation) {
             *explanation = tr("This invite code is not complete or has a typo.");
         }

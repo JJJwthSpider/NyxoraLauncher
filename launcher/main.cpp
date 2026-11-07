@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
             Q_INIT_RESOURCE(multimc);
             Q_INIT_RESOURCE(backgrounds);
             Q_INIT_RESOURCE(documents);
-            Q_INIT_RESOURCE(sculkshoot);
+            Q_INIT_RESOURCE(lullaby);
 
             Q_INIT_RESOURCE(pe_dark);
             Q_INIT_RESOURCE(pe_light);
@@ -70,6 +70,7 @@ int main(int argc, char* argv[])
             Q_INIT_RESOURCE(flat_white);
             Q_INIT_RESOURCE(sculk);
             Q_INIT_RESOURCE(sculk_light);
+            Q_INIT_RESOURCE(lunar);
             Q_INIT_RESOURCE(sculk_theme);
             Q_INIT_RESOURCE(translations);
 
