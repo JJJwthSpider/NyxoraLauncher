@@ -15,65 +15,55 @@ HERE = pathlib.Path(__file__).resolve().parent
 OUT = HERE.parent / "res" / "drawable-nodpi"
 N = 64
 SCALE = 8
-HAND = (47.5 / N, 20.5 / N)   # the middle of the tesseract
+HAND = (53.0 / N, 16.0 / N)   # the middle of the tesseract: it floats by the right shoulder
+SIZE = 30                     # the size of the tesseract in grid pixels
 
-HOOD_DARK, HOOD, HOOD_LIGHT = (58, 10, 22), (110, 22, 38), (150, 38, 56)
-ROBE_DARK, ROBE, ROBE_LIGHT = (50, 8, 18), (96, 18, 32), (128, 30, 46)
-SHADOW = (14, 3, 7)
-GOLD, GOLD_DARK = (226, 172, 74), (160, 108, 40)
-EYE = (255, 70, 84)
-SKIN, SKIN_DARK = (232, 190, 160), (196, 146, 118)
+# dark burgundy: the wizard is mostly shadow, lit a little by the red tesseract
+HOOD_DARK, HOOD, HOOD_LIGHT = (22, 3, 8), (44, 7, 15), (68, 12, 24)
+ROBE_DARK, ROBE, ROBE_LIGHT = (18, 2, 6), (36, 5, 12), (56, 9, 19)
+SHADOW = (6, 1, 3)
+GOLD, GOLD_DARK = (150, 104, 44), (96, 62, 26)
+EYE = (255, 54, 70)
+OUTLINE = (4, 0, 2)
 
 
 def body():
+    """only the head in a big hood and the shoulders, like a portrait"""
     img = Image.new("RGBA", (N, N), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    # the robe: a wide cone to the ground
-    d.polygon([(22, 28), (38, 28), (47, 62), (13, 62)], fill=ROBE)
-    d.polygon([(22, 28), (27, 28), (20, 62), (13, 62)], fill=ROBE_DARK)
-    d.polygon([(35, 28), (38, 28), (47, 62), (42, 62)], fill=ROBE_LIGHT)
-    # gold trim down the middle and on the hem
-    d.line([(30, 30), (30, 61)], fill=GOLD)
-    d.line([(31, 30), (31, 61)], fill=GOLD_DARK)
-    d.line([(14, 61), (46, 61)], fill=GOLD)
-    d.line([(14, 62), (46, 62)], fill=GOLD_DARK)
-    # a belt
-    d.rectangle((23, 40, 38, 41), fill=SHADOW)
-    d.rectangle((29, 39, 32, 42), fill=GOLD)
-    # the hood: a pointed cap falling back to the left, wide around the face
-    d.polygon([(30, 4), (22, 2), (14, 6), (20, 12), (17, 30), (43, 30), (40, 12)], fill=HOOD)
-    d.polygon([(30, 4), (22, 2), (14, 6), (20, 12), (17, 30), (24, 30), (24, 12)], fill=HOOD_DARK)
-    d.polygon([(37, 10), (40, 12), (43, 30), (39, 30)], fill=HOOD_LIGHT)
-    d.point([(14, 6), (15, 6)], fill=GOLD)  # a gold tip
-    # the dark opening and the glowing eyes
-    d.polygon([(25, 12), (35, 12), (37, 18), (36, 27), (24, 27), (23, 18)], fill=SHADOW)
-    for x in (27, 28, 32, 33):
-        d.point((x, 19), fill=EYE)
-    d.point([(27, 18), (33, 18)], fill=(255, 150, 160))
-    # the left arm hanging down (dark side)
-    d.polygon([(19, 30), (23, 30), (22, 46), (17, 46)], fill=ROBE_DARK)
-    d.rectangle((17, 46, 21, 48), fill=SKIN_DARK)
-    # the right arm reaching out and up to hold the tesseract
-    d.polygon([(36, 30), (40, 29), (47, 33), (45, 37), (37, 35)], fill=ROBE_LIGHT)
-    d.polygon([(44, 32), (48, 30), (50, 34), (46, 36)], fill=HOOD)  # the wide sleeve end
-    d.line([(44, 32), (48, 30)], fill=GOLD)
-    # the open hand, palm up
-    d.rectangle((45, 31, 49, 32), fill=SKIN)
-    d.point([(45, 30), (47, 30), (49, 30)], fill=SKIN)
-    d.point([(46, 32), (48, 32)], fill=SKIN_DARK)
-    # a dark pixel outline around the whole figure, so it stands out on any background
+    # the shoulders and the top of the robe, cut by the bottom of the picture
+    d.polygon([(4, 64), (8, 50), (18, 43), (46, 43), (56, 50), (60, 64)], fill=ROBE)
+    d.polygon([(4, 64), (8, 50), (18, 43), (24, 43), (20, 64)], fill=ROBE_DARK)
+    d.polygon([(42, 43), (46, 43), (56, 50), (60, 64), (50, 64)], fill=ROBE_LIGHT)
+    # the collar with a gold edge
+    d.polygon([(22, 42), (32, 54), (42, 42)], fill=HOOD_DARK)
+    d.line([(22, 42), (32, 54), (42, 42)], fill=GOLD)
+    d.point([(32, 55), (31, 54), (33, 54)], fill=GOLD_DARK)
+    # the big hood with a pointed top falling back to the left
+    d.polygon([(33, 3), (24, 2), (15, 7), (20, 13), (15, 30), (13, 44), (51, 44), (49, 30), (44, 12)], fill=HOOD)
+    d.polygon([(33, 3), (24, 2), (15, 7), (20, 13), (15, 30), (13, 44), (22, 44), (24, 26), (26, 12)], fill=HOOD_DARK)
+    d.polygon([(41, 10), (44, 12), (49, 30), (51, 44), (46, 44), (45, 28)], fill=HOOD_LIGHT)
+    d.point([(15, 7), (16, 7)], fill=GOLD)
+    # the dark face with two glowing red eyes
+    d.polygon([(25, 14), (39, 14), (42, 22), (41, 34), (36, 39), (28, 39), (23, 34), (22, 22)], fill=SHADOW)
+    for x in (27, 28, 29, 35, 36, 37):
+        d.point((x, 25), fill=EYE)
+    d.point([(28, 24), (36, 24)], fill=(255, 140, 150))
+    d.point([(28, 26), (36, 26)], fill=(150, 20, 34))
+    # the outline around the whole figure
     alpha = img.getchannel("A")
     grown = alpha.filter(ImageFilter.MaxFilter(3))
     px, a, g = img.load(), alpha.load(), grown.load()
     for y in range(N):
         for x in range(N):
             if g[x, y] and not a[x, y]:
-                px[x, y] = (12, 2, 5, 255)
-    # a soft red rim light on the right edges (the light of the tesseract)
+                px[x, y] = OUTLINE + (255,)
+    # a faint red light from the tesseract on the right edges of the hood and the shoulder
     for y in range(N):
         for x in range(N - 1, 0, -1):
-            if a[x, y] and not a[min(N - 1, x + 1), y] and y < 40:
-                px[x, y] = (196, 60, 78, 255)
+            if a[x, y] and not a[min(N - 1, x + 1), y]:
+                if 8 <= y <= 56:
+                    px[x, y] = (120, 24, 38, 255)
                 break
     return img
 
@@ -101,11 +91,11 @@ def with_tesseract(base, t=0.6):
     glow = Image.new("RGBA", big.size, (0, 0, 0, 0))
     gd = ImageDraw.Draw(glow)
     cx, cy = HAND[0] * big.size[0], HAND[1] * big.size[1]
-    r = 12 * SCALE
+    r = 10 * SCALE
     gd.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(255, 40, 60, 90))
     big.alpha_composite(glow.filter(ImageFilter.GaussianBlur(6 * SCALE)))
     d = ImageDraw.Draw(big)
-    pts, edges = tesseract_points(t, 38 * SCALE)
+    pts, edges = tesseract_points(t, SIZE * SCALE)
     for a, b in edges:
         d.line([(cx + pts[a][0], cy + pts[a][1]), (cx + pts[b][0], cy + pts[b][1])], fill=(255, 70, 84, 255), width=SCALE // 2 + 1)
     for p in pts:

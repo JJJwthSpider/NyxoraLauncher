@@ -26,7 +26,7 @@
 namespace {
 // Arkan, the wizard of Vellora Client: the picture is pixel art (resources/sculk_theme/wizard_body.png, drawn by
 // android/art/wizard.py), the tesseract above his hand is drawn every frame. HAND and SIZE are in parts of the picture.
-constexpr double s_handX = 47.5 / 64, s_handY = 20.5 / 64, s_tesseractSize = 38.0 / 64, s_glowSize = 12.0 / 64;
+constexpr double s_handX = 53.0 / 64, s_handY = 16.0 / 64, s_tesseractSize = 30.0 / 64, s_glowSize = 10.0 / 64;
 const QColor s_crimson(255, 70, 84);
 const QColor s_corner(255, 200, 205);
 

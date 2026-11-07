@@ -13,12 +13,12 @@ import android.os.SystemClock;
 import android.view.View;
 
 /**
- * Arkan, Vellora's AI pack builder: the burgundy wizard in a hood (res/drawable-nodpi/wizard_body.png, drawn by
- * art/wizard.py) with a red tesseract turning in four dimensions above his hand. The tesseract is projected
+ * Arkan, Vellora's AI pack builder: the burgundy wizard in a hood, only his head and shoulders (res/drawable-nodpi/wizard_body.png, drawn by
+ * art/wizard.py) with a red tesseract turning in four dimensions by his shoulder. The tesseract is projected
  * 4D -> 3D -> 2D every frame with the same numbers as art/wizard.py; it pulses faster while Arkan is working.
  */
 final class WizardView extends View {
-    private static final float HAND_X = 47.5f / 64, HAND_Y = 20.5f / 64, SIZE = 38f / 64, GLOW = 12f / 64;
+    private static final float HAND_X = 53f / 64, HAND_Y = 16f / 64, SIZE = 30f / 64, GLOW = 10f / 64;
     private static Bitmap body;
 
     private final Paint pixels = new Paint();
