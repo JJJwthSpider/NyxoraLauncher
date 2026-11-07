@@ -438,6 +438,17 @@ public final class PojavEngine extends GameEngine {
         }, "LullabyPlay").start();
     }
 
+    /**
+     * The extra Java arguments of every start. Sodium 0.5 and newer stop the game when LWJGL is not exactly the version
+     * of that Minecraft ("Installed version: 3.3.3-snapshot, Required version: 3.3.1"); the engine brings its own
+     * LWJGL 3.3.3 for every version, which works, so this check is switched off with Sodium's own setting.
+     */
+    static String javaArgs() {
+        String own = "-Dsodium.checks.issue2561=false";
+        String player = LauncherPreferences.PREF_CUSTOM_JAVA_ARGS;
+        return player == null || player.trim().isEmpty() ? own : player.trim() + " " + own;
+    }
+
     /** everything before the engine takes over; returns a message for the user when the game cannot start yet */
     private String prepare(final MainActivity activity, Installation inst, Account account, final Builder.Listener log, final Done done) throws Exception {
         if (!account.ownsJava) {
@@ -525,6 +536,7 @@ public final class PojavEngine extends GameEngine {
         profile.controlFile = CONTROLS_FILE;
         profile.javaDir = Tools.LAUNCHERPROFILES_RTPREFIX + runtime;  // exactly the Java this version needs
         profile.pojavRendererName = rendererFor(activity, inst);
+        profile.javaArgs = javaArgs();
         // the Java heap for this start (the engine's default is 2 GB whatever the pack; big packs need more)
         int memory = memoryFor(activity, inst);
         LauncherPreferences.PREF_RAM_ALLOCATION = memory;
