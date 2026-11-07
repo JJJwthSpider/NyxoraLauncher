@@ -37,6 +37,28 @@
 с радугой занимает весь значок, спящий месяц с нотами крупно поверх; телефон сам задаёт её форму.
 Картинки иконки — `art/*.svg`, их пишет `program_info/moon_icon.py`.
 
+## Полная сборка: игра прямо в Lullaby
+
+`build-full-apk.sh` собирает **LullabyLauncher-full.apk**: меню Lullaby на игровом движке
+[PojavLauncher](https://github.com/PojavLauncherTeam/PojavLauncher) (LGPL-3.0). В нём есть всё, что нужно
+Java Edition на Android: запуск Java, LWJGL, перевод OpenGL для телефона (GL4ES, Zink/Mesa), касания и клавиатура.
+Скрипт берёт PojavLauncher на зафиксированном коммите (`engine/pojav.commit`), добавляет код и картинки Lullaby
+(`engine/prepare.py`), и «Играть» запускает Minecraft сразу в приложении:
+
+1. скачивает включённые моды, ресурспаки и шейдеры (с Modrinth и CurseForge) в папку установки,
+   файлы готовой сборки распаковываются один раз;
+2. ставит загрузчик: Fabric и Quilt сразу, Forge и NeoForge — своим установщиком (`--installClient`), один раз;
+3. создаёт профиль с этой папкой и схемой «Управление» (джойстик и кнопки);
+4. передаёт игре вход Microsoft из Lullaby (токен обновляется перед запуском);
+5. движок скачивает Minecraft, библиотеки и звуки и открывает игру.
+
+**Java для Android** в APK не входит: PojavLauncher получает её из артефактов своей CI, а их можно скачать
+только с входом в GitHub. Когда «Играть» нужна Java, Lullaby предлагает взять её из установленного
+PojavLauncher / Amethyst (из их APK: `assets/components/jre*`) или из файла: APK PojavLauncher или архив Java `.tar.xz`.
+Java 8 нужна старым версиям, 17 — 1.17–1.20.4, 21 — 1.20.5 и новее.
+
+Полный APK подписан тем же ключом, что и обычный, поэтому ставится поверх него с сохранением установок и чатов.
+
 ## Сборка APK
 
 Нужны только пакеты Ubuntu/Debian (без Gradle и без Android SDK от Google):

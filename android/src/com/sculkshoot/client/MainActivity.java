@@ -181,6 +181,22 @@ public final class MainActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (GameEngine.get() != null) {
+            GameEngine.get().attach(this);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (GameEngine.get() != null) {
+            GameEngine.get().detach(this);
+        }
+    }
+
     /* ------------------------------------------------------------ Microsoft account */
 
     Account account() {
@@ -352,7 +368,8 @@ public final class MainActivity extends Activity {
 
     void showAppMenu() {
         new AlertDialog.Builder(this)
-            .setItems(new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении" },
+            .setItems(GameEngine.get() != null ? new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении", "Java для игры" }
+                                               : new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении" },
                       new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int which) {
                     if (which == 0) {
@@ -361,6 +378,8 @@ public final class MainActivity extends Activity {
                         showAccount();
                     } else if (which == 2) {
                         showInviteCode();
+                    } else if (which == 4) {
+                        showJavaDialog(0, null);
                     } else {
                         showAbout();
                     }
@@ -1616,6 +1635,15 @@ public final class MainActivity extends Activity {
         if (packPlan == null) {
             return;
         }
+        if (GameEngine.get() != null && chatId != null) {
+            // the full build: the pack of this chat is an installation, and it starts right here
+            syncInstallationFromChat();
+            Installation inst = installations.forChat(chatId);
+            if (inst != null) {
+                playInstallation(inst);
+                return;
+            }
+        }
         File file;
         try {
             file = writePack();
@@ -1660,6 +1688,10 @@ public final class MainActivity extends Activity {
 
     /** "Play" on the main screen or in the editor */
     void playInstallation(final Installation inst) {
+        if (GameEngine.get() != null) {
+            playHere(inst);
+            return;
+        }
         withPackFile(inst, "Готовлю «" + inst.name + "» к игре", new Job<File>() {
             public File run() {
                 return null;
@@ -1672,6 +1704,90 @@ public final class MainActivity extends Activity {
                     }
                 };
                 playFile(file, inst.minecraftVersion, inst.loader);
+            }
+        });
+    }
+
+    /** the full build: Minecraft starts inside Lullaby on the built-in engine */
+    private void playHere(final Installation inst) {
+        final GameEngine engine = GameEngine.get();
+        final HomeScreen.Progress progress = new HomeScreen.Progress(this, "Запускаю «" + inst.name + "»");
+        progress.log("Готовлю " + inst.describe() + "...");
+        engine.play(this, inst, account, progress, new GameEngine.Done() {
+            public void finished(boolean started, String problem) {
+                if (started) {
+                    // the engine downloads Minecraft and opens the game; its progress keeps showing here
+                    return;
+                }
+                progress.dismiss();
+                if (problem != null && problem.startsWith(GameEngine.NEED_JAVA)) {
+                    showJavaDialog(Integer.parseInt(problem.substring(GameEngine.NEED_JAVA.length())), inst);
+                } else if (problem != null) {
+                    new AlertDialog.Builder(MainActivity.this).setTitle(inst.name).setMessage(problem).setPositiveButton("OK", null).show();
+                }
+            }
+        });
+    }
+
+    private Installation javaWaiting;  // played again once Java is there
+
+    /** Java for Android is not inside Lullaby (it is big): taken from PojavLauncher on the phone or from a file */
+    void showJavaDialog(final int major, final Installation inst) {
+        final GameEngine engine = GameEngine.get();
+        javaWaiting = inst;
+        final List<String> sources = engine.javaSources(this);
+        String installed = engine.installedJava();
+        StringBuilder text = new StringBuilder();
+        text.append(major > 0 ? "Для Minecraft " + (inst != null ? inst.minecraftVersion : "") + " нужна Java " + major + " для Android. "
+                              : "Java для Android, на которой работает игра. ");
+        text.append(installed.isEmpty() ? "Сейчас Java не установлена." : "Сейчас есть: " + installed + ".");
+        text.append("\n\nЕё можно взять из PojavLauncher (или Amethyst), если он стоит на телефоне, или выбрать файл: "
+                    + "APK PojavLauncher или архив Java (.tar.xz).");
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this).setTitle("Java для игры").setMessage(text.toString());
+        if (!sources.isEmpty()) {
+            dialog.setPositiveButton("Взять из " + sources.get(0), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int which) {
+                    importJava(sources.get(0), null);
+                }
+            });
+        }
+        dialog.setNeutralButton("Выбрать файл", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface d, int which) {
+                Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                pick.addCategory(Intent.CATEGORY_OPENABLE);
+                pick.setType("*/*");
+                try {
+                    startActivityForResult(pick, GameEngine.REQUEST_JAVA_FILE);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(MainActivity.this, "Нет приложения для выбора файлов", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        dialog.setNegativeButton("Отмена", null).show();
+    }
+
+    private void importJava(final String appName, final Intent picked) {
+        final GameEngine engine = GameEngine.get();
+        final HomeScreen.Progress progress = new HomeScreen.Progress(this, "Устанавливаю Java");
+        progress.log(appName != null ? "Беру Java из " + appName + "..." : "Распаковываю Java из файла...");
+        background(new Job<String>() {
+            public String run() throws Exception {
+                return appName != null ? engine.importJavaFromApp(MainActivity.this, appName) : engine.importJavaFromFile(MainActivity.this, picked);
+            }
+
+            public void done(String result, Exception error) {
+                progress.dismiss();
+                if (error != null) {
+                    new AlertDialog.Builder(MainActivity.this).setTitle("Java не установилась").setMessage(error.getMessage())
+                        .setPositiveButton("OK", null).show();
+                    return;
+                }
+                Toast.makeText(MainActivity.this, "Установлено: " + result, Toast.LENGTH_LONG).show();
+                if (javaWaiting != null) {
+                    Installation again = javaWaiting;
+                    javaWaiting = null;
+                    playInstallation(again);
+                }
             }
         });
     }
@@ -1779,6 +1895,12 @@ public final class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == GameEngine.REQUEST_JAVA_FILE) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                importJava(null, data);
+            }
+            return;
+        }
         if (requestCode != REQUEST_SAVE || resultCode != RESULT_OK || data == null || data.getData() == null || pendingExport == null) {
             return;
         }

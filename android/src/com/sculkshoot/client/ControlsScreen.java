@@ -113,6 +113,13 @@ final class ControlsScreen {
             }
         }));
 
+        if (GameEngine.get() != null) {
+            // the full build: the game starts inside Lullaby with these buttons, nothing to send
+            TextView built = Ui.label(activity, "Эти кнопки сами появятся в игре, когда нажмёшь «Играть».", 13, Ui.ACCENT, false);
+            built.setPadding(0, dp(12), 0, 0);
+            side.addView(built);
+            return;
+        }
         Button send = Ui.button(activity, "Отправить в лаунчер", true);
         send.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
