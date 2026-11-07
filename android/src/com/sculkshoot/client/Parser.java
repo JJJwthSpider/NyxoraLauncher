@@ -39,6 +39,14 @@ final class Parser {
     private static final Pattern JOINERS = Pattern.compile("\\s+(?:and|&|\\+|with|или|и)\\s+", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     private static final Pattern CAPITALIZED = Pattern.compile("(?<![\\p{L}\\p{N}_'])[A-Z0-9][\\p{L}\\p{N}_'’&+:.\\-]*(?:[ \\t]+(?:of|the|n|'n')?[ \\t]*[A-Z0-9][\\p{L}\\p{N}_'’&+:.\\-]*)*");
 
+    private static final Pattern LOW_END = Pattern.compile(
+        "слаб\\p{L}*\\s+(?:телефон|смартфон|пк|комп|ноут|устройств|желез|видеокарт)|для\\s+слаб|картошк|потато|low[ -]?end|weak\\s+(?:pc|phone|laptop)|potato",
+        Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    private static final Pattern MULTIPLAYER = Pattern.compile(
+        "(?<![\\p{L}])(?:с\\s+друз|с\\s+друг(?:ом|ой)|друзьями|мультиплеер|кооп|по\\s+сети|вдво[её]м|втро[её]м|multiplayer|co-?op|with\\s+friends)",
+        Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    private static final Pattern MOD_COUNT = Pattern.compile("(?<![\\d.])(\\d{1,3})\\s*(?:мод|mods?\\b)", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+
     private static final Set<String> FILLERS = new HashSet<String>(Arrays.asList(Rules.FILLERS));
     private static final List<String> SETUP_WORDS = Arrays.asList("neoforge", "forge", "fabric", "quilt", "neo", "minecraft", "mc", "mod", "mods",
                                                                   "modpack", "pack", "the", "a", "an", "and", "with", "add", "plus", "please",
@@ -76,7 +84,43 @@ final class Parser {
                 bestLength = stem.length();
             }
         }
+        if (best == null && word.length() >= 5) {
+            // a typo ("зомьби", "драконнов"): the stem that differs from the word's beginning by one letter
+            int bestDistance = 2;
+            for (String[] entry : Rules.DICTIONARY) {
+                String stem = entry[0];
+                if (stem.length() < 4 || !word.startsWith(stem.substring(0, 2))) {
+                    continue;  // a typo keeps the first two letters right
+                }
+                int distance = Math.min(distance(stem, word.substring(0, Math.min(word.length(), stem.length()))),
+                                        distance(stem, word.substring(0, Math.min(word.length(), stem.length() + 1))));
+                if (distance < bestDistance) {
+                    best = entry[1];
+                    bestDistance = distance;
+                }
+            }
+        }
         return best != null ? best : word;
+    }
+
+    /** the number of letters to change, add or remove to turn a into b */
+    static int distance(String a, String b) {
+        int[] previous = new int[b.length() + 1];
+        int[] current = new int[b.length() + 1];
+        for (int j = 0; j <= b.length(); j++) {
+            previous[j] = j;
+        }
+        for (int i = 1; i <= a.length(); i++) {
+            current[0] = i;
+            for (int j = 1; j <= b.length(); j++) {
+                int change = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
+                current[j] = Math.min(Math.min(current[j - 1] + 1, previous[j] + 1), previous[j - 1] + change);
+            }
+            int[] swap = previous;
+            previous = current;
+            current = swap;
+        }
+        return previous[b.length()];
     }
 
     /** English keywords of a request: Russian words translated, filler words removed. */
@@ -366,10 +410,69 @@ final class Parser {
             plan.themes.add(new Plan.Theme(word, Arrays.asList(word), boosted.contains(word) ? 4 : 2, new ArrayList<String>()));
         }
 
-        String wishes = positiveText(request);
-        plan.curated = Plan.essentialMods(plan.loader, wantsShaders(wishes), wantsMap(wishes));
-        plan.describe();
+        finish(plan, request);
         return plan;
+    }
+
+    /**
+     * What goes beyond the themes: the hand-picked mods, a weak phone or PC, playing with friends, the number of mods,
+     * OptiFine (not on Modrinth and it fights Sodium); then the name and summary.
+     */
+    static void finish(Plan plan, String request) {
+        String lower = request.toLowerCase(Locale.ROOT);
+        String wishes = positiveText(request);
+        boolean shaders = wantsShaders(wishes);
+        plan.notes.clear();
+        plan.lowEnd = LOW_END.matcher(lower).find();
+        plan.multiplayer = MULTIPLAYER.matcher(positiveText(lower)).find();
+        for (int i = plan.requestedMods.size() - 1; i >= 0; i--) {
+            if (normalized(plan.requestedMods.get(i)).startsWith("optifine")) {
+                plan.requestedMods.remove(i);
+                shaders = true;
+                plan.notes.add("вместо OptiFine — Sodium и Iris: они быстрее, работают с другими модами и тоже показывают шейдеры");
+            }
+        }
+        if (plan.lowEnd) {
+            if (shaders) {
+                plan.notes.add("шейдеры не добавил: на слабом устройстве они сильно тормозят (их можно включить потом)");
+            } else {
+                plan.notes.add("для слабого устройства: только лёгкие моды и вся оптимизация");
+            }
+            shaders = false;
+            List<Plan.Theme> light = new ArrayList<Plan.Theme>();
+            for (Plan.Theme theme : plan.themes) {
+                light.add(new Plan.Theme(theme.title, theme.queries, Math.min(theme.count, 2), theme.matchWords));
+            }
+            plan.themes = light;
+        }
+        plan.curated = Plan.essentialMods(plan.loader, shaders, wantsMap(wishes));
+        if (plan.multiplayer) {
+            plan.curated.add(new Plan.CuratedMod("Игра с друзьями", "simple-voice-chat", "plasmo-voice"));
+            plan.notes.add("для игры с друзьями добавил голосовой чат Simple Voice Chat");
+        }
+        Matcher count = MOD_COUNT.matcher(lower);
+        plan.targetMods = 0;
+        if (count.find()) {
+            int wanted = Integer.parseInt(count.group(1));
+            if (wanted >= 5 && wanted <= 300) {
+                plan.targetMods = wanted;
+                int themed = 0;
+                for (Plan.Theme theme : plan.themes) {
+                    themed += theme.count;
+                }
+                int room = wanted - plan.curated.size() - plan.requestedMods.size();
+                if (themed > 0 && room > 0) {
+                    List<Plan.Theme> scaled = new ArrayList<Plan.Theme>();
+                    for (Plan.Theme theme : plan.themes) {
+                        int n = Math.max(1, Math.min(15, Math.round(theme.count * (float) room / themed)));
+                        scaled.add(new Plan.Theme(theme.title, theme.queries, n, theme.matchWords));
+                    }
+                    plan.themes = scaled;
+                }
+                plan.notes.add("около " + wanted + " модов, как просили");
+            }
+        }
+        plan.describe();
     }
 
     /** The plan for a topic gathered in a chat, with the loader and version chosen separately (null: from the topic). */
@@ -383,9 +486,7 @@ final class Parser {
             plan.loader = loader;
             plan.loaderGiven = true;
         }
-        String wishes = positiveText(topic);
-        plan.curated = Plan.essentialMods(plan.loader, wantsShaders(wishes), wantsMap(wishes));
-        plan.describe();
+        finish(plan, topic);
         return plan;
     }
 }

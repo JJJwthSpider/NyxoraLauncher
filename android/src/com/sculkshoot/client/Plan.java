@@ -53,6 +53,10 @@ final class Plan {
     List<String> unknownWords = new ArrayList<String>();
     boolean versionGiven;
     boolean loaderGiven;
+    boolean lowEnd;          // "для слабого телефона": light mods only, no shaders
+    boolean multiplayer;     // "с друзьями": a voice chat
+    int targetMods;          // "сборка на 30 модов": about this many mods (0: as many as the themes give)
+    List<String> notes = new ArrayList<String>();  // what was understood beyond the themes, said to the player
 
     static String defaultLoader(String minecraftVersion) {
         // NeoForge exists from 1.20.2, older versions use Forge
@@ -146,6 +150,9 @@ final class Plan {
             String first = titles.get(0);
             name = Character.toUpperCase(first.charAt(0)) + first.substring(1) + " — сборка " + minecraftVersion;
             summary = "Моды про: " + Util.join(titles, ", ") + ". А ещё оптимизация и удобство.";
+        }
+        for (String note : notes) {
+            summary += " " + Character.toUpperCase(note.charAt(0)) + note.substring(1) + ".";
         }
     }
 

@@ -34,6 +34,20 @@ final class BrowserScreen {
     private static final String[][] SORTS = { { "downloads", "Популярные" }, { "relevance", "Подходящие" }, { "updated", "Обновлённые" },
                                               { "newest", "Новые" } };
     private static final int PAGE = 20;
+    /** "Для чего": Modrinth categories as quick filters, like the catalog of Millida Launcher */
+    private static final String[][] PACK_GOALS = { { "", "Все" }, { "lightweight", "Для слабого телефона" }, { "multiplayer", "С друзьями" },
+                                                   { "adventure", "Приключения" }, { "technology", "Технологии" }, { "magic", "Магия" },
+                                                   { "quests", "Квесты" }, { "challenging", "Хардкор" }, { "optimization", "Оптимизация" } };
+    private static final String[][] MOD_GOALS = { { "", "Все" }, { "optimization", "Оптимизация" }, { "adventure", "Приключения" },
+                                                  { "technology", "Технологии" }, { "magic", "Магия" }, { "mobs", "Мобы" },
+                                                  { "worldgen", "Мир" }, { "decoration", "Декор" }, { "food", "Еда" }, { "storage", "Хранение" },
+                                                  { "utility", "Удобство" } };
+    private static final String[][] SHADER_GOALS = { { "", "Все" }, { "potato", "Очень лёгкие" }, { "low", "Лёгкие" }, { "medium", "Средние" },
+                                                     { "realistic", "Реалистичные" }, { "fantasy", "Фэнтези" }, { "cartoon", "Мультяшные" } };
+    private static final String[][] PACK_STYLE_GOALS = { { "", "Все" }, { "16x", "16x" }, { "32x", "32x" }, { "realistic", "Реалистичные" },
+                                                         { "simplistic", "Простые" }, { "cartoon", "Мультяшные" } };
+    private String goal = "";  // the chosen category ("" = all)
+    private final List<Button> goalButtons = new ArrayList<Button>();
 
     private final MainActivity activity;
     private final Installation inst;  // null for modpacks
@@ -58,12 +72,12 @@ final class BrowserScreen {
         this.kind = kind;
         root = new LinearLayout(activity);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackground(new MoonSkyDrawable(activity.getResources().getDisplayMetrics().density));
+        root.setBackground(new RainDrawable(activity.getResources().getDisplayMetrics().density));
 
         LinearLayout bar = new LinearLayout(activity);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(8), dp(6), dp(8), dp(6));
-        bar.setBackgroundColor(0xCC0D0E16);
+        bar.setBackgroundColor(0xCC140509);
         Button back = Ui.button(activity, "← Назад", false);
         back.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -154,10 +168,53 @@ final class BrowserScreen {
                 info.addView(fromFile, new LinearLayout.LayoutParams(tp));
             }
         }
+        if (inst == null) {
+            // like Millida's "Собрать с ИИ": the words of the search go to Arkan, who assembles such a pack
+            Button wizard = Ui.button(activity, "Собрать с ИИ", false);
+            wizard.setTextSize(13);
+            wizard.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    BrowserScreen.this.activity.askWizard(query.getText().toString());
+                }
+            });
+            info.addView(wizard, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        }
         status = Ui.label(activity, "", 12, Ui.HINT, false);
         status.setPadding(dp(8), 0, dp(8), 0);
         info.addView(status);
         root.addView(info);
+
+        // "Для чего": quick filters by category (Modrinth)
+        android.widget.HorizontalScrollView goalsScroll = new android.widget.HorizontalScrollView(activity);
+        goalsScroll.setHorizontalScrollBarEnabled(false);
+        LinearLayout goals = new LinearLayout(activity);
+        goals.setPadding(dp(10), dp(6), dp(10), 0);
+        String[][] choices = inst == null ? PACK_GOALS : Mod.SHADER.equals(kind) ? SHADER_GOALS : Mod.RESOURCE_PACK.equals(kind) ? PACK_STYLE_GOALS : MOD_GOALS;
+        for (final String[] choice : choices) {
+            final Button chip = Ui.button(activity, choice[1], choice[0].isEmpty());
+            chip.setTextSize(12);
+            chip.setMinHeight(dp(32));
+            chip.setMinimumHeight(dp(32));
+            chip.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    goal = choice[0];
+                    for (Button other : goalButtons) {
+                        Ui.styleButton(BrowserScreen.this.activity, other, other == chip);
+                    }
+                    if (curseForge && !goal.isEmpty()) {
+                        setSource(false);  // the categories are Modrinth's
+                    } else {
+                        search(true);
+                    }
+                }
+            });
+            goalButtons.add(chip);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            cp.rightMargin = dp(6);
+            goals.addView(chip, cp);
+        }
+        goalsScroll.addView(goals);
+        root.addView(goalsScroll);
         list = new ListView(activity);
         list.setDividerHeight(dp(6));
         list.setDivider(new android.graphics.drawable.ColorDrawable(0));
@@ -223,7 +280,11 @@ final class BrowserScreen {
         status.setText("Ищу на " + site + "...");
         final String text = query.getText().toString().trim();
         final String index = SORTS[Math.max(0, sort.getSelectedItemPosition())][0];
-        final String facets = inst == null ? "[[\"project_type:modpack\"]]" : Installer.facetsFor(inst, kind);
+        String baseFacets = inst == null ? "[[\"project_type:modpack\"]]" : Installer.facetsFor(inst, kind);
+        if (!goal.isEmpty() && baseFacets.endsWith("]]")) {
+            baseFacets = baseFacets.substring(0, baseFacets.length() - 1) + ",[\"categories:" + goal + "\"]]";
+        }
+        final String facets = baseFacets;
         final int from = offset;
         activity.background(new MainActivity.Job<JSONArray>() {
             public JSONArray run() throws Exception {

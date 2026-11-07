@@ -47,22 +47,26 @@ final class HomeScreen {
     private final List<Installation> all = new ArrayList<Installation>();
     private final List<Installation> shown = new ArrayList<Installation>();
     private String selectedId;
+    private LinearLayout playBar;  // "Сегодня играем": the chosen installation and a big Play button, like Millida's lobby
+    private ImageView playIcon;
+    private TextView playName;
+    private TextView playInfo;
 
     HomeScreen(MainActivity activity) {
         this.activity = activity;
         root = new LinearLayout(activity);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackground(new MoonSkyDrawable(activity.getResources().getDisplayMetrics().density));
+        root.setBackground(new RainDrawable(activity.getResources().getDisplayMetrics().density));
 
         // top bar: name, search, menu
         LinearLayout bar = new LinearLayout(activity);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(12), dp(6), dp(8), dp(6));
-        bar.setBackgroundColor(0xCC0D0E16);
+        bar.setBackgroundColor(0xCC140509);
         ImageView logo = new ImageView(activity);
         logo.setImageResource(R.drawable.install_default);
         bar.addView(logo, new LinearLayout.LayoutParams(dp(34), dp(34)));
-        TextView title = Ui.label(activity, "Lullaby Launcher", 18, Ui.ACCENT, true);
+        TextView title = Ui.label(activity, "Vellora Client", 18, Ui.ACCENT, true);
         title.setPadding(dp(10), 0, dp(16), 0);
         bar.addView(title);
         search = new EditText(activity);
@@ -135,7 +139,7 @@ final class HomeScreen {
         LinearLayout tiles = new LinearLayout(activity);
         tiles.setOrientation(LinearLayout.VERTICAL);
         tiles.setPadding(dp(10), dp(10), dp(4), dp(10));
-        tiles.addView(tile(R.drawable.moony, "ИИ-агент Лунни", "Сборка по описанию", new Runnable() {
+        tiles.addView(tile(R.drawable.wizard, "ИИ-маг Аркан", "Сборка по описанию", new Runnable() {
             public void run() {
                 HomeScreen.this.activity.openChat(null);
             }
@@ -170,7 +174,7 @@ final class HomeScreen {
                 select(shown.get(position).id);
             }
         });
-        empty = Ui.label(activity, "Привет! Чтобы начать играть, нажми «Новая установка», выбери «Готовые сборки» или попроси Лунни собрать сборку.",
+        empty = Ui.label(activity, "Привет! Чтобы начать играть, нажми «Новая установка», выбери «Готовые сборки» или попроси Аркана собрать сборку.",
                          16, Ui.TEXT, true);
         empty.setGravity(Gravity.CENTER);
         empty.setPadding(dp(18), dp(14), dp(18), dp(14));
@@ -187,8 +191,57 @@ final class HomeScreen {
         actions.setOrientation(LinearLayout.VERTICAL);
         actions.setPadding(dp(10), dp(10), dp(10), dp(10));
         side.addView(actions);
-        side.setBackgroundColor(0x990D0E16);
+        side.setBackgroundColor(0x99140509);
         body.addView(side, new LinearLayout.LayoutParams(dp(210), ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // bottom: what we play today
+        playBar = new LinearLayout(activity);
+        playBar.setGravity(Gravity.CENTER_VERTICAL);
+        playBar.setPadding(dp(12), dp(8), dp(12), dp(8));
+        playBar.setBackground(Ui.rounded(activity, 0xE61C080D, 14, 0xFF8A3442));
+        playIcon = new ImageView(activity);
+        playBar.addView(playIcon, new LinearLayout.LayoutParams(dp(46), dp(46)));
+        LinearLayout texts = new LinearLayout(activity);
+        texts.setOrientation(LinearLayout.VERTICAL);
+        texts.setPadding(dp(12), 0, dp(12), 0);
+        texts.addView(Ui.label(activity, "СЕГОДНЯ ИГРАЕМ", 11, 0xFFFF8090, true));
+        playName = Ui.label(activity, "", 18, Ui.TEXT, true);
+        playName.setSingleLine(true);
+        playName.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        texts.addView(playName);
+        playInfo = Ui.label(activity, "", 12, Ui.HINT, false);
+        texts.addView(playInfo);
+        playBar.addView(texts, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button play = Ui.button(activity, "▶  Играть", true);
+        play.setTextSize(20);
+        play.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Installation inst = selected();
+                if (inst != null) {
+                    HomeScreen.this.activity.playInstallation(inst);
+                }
+            }
+        });
+        playBar.addView(play, new LinearLayout.LayoutParams(dp(180), dp(52)));
+        LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        barParams.setMargins(dp(8), 0, dp(8), dp(8));
+        middle.addView(playBar, barParams);  // under the installations: the tiles and the side panel keep their height
+        playBar.setVisibility(View.GONE);
+    }
+
+    private void updatePlayBar() {
+        Installation inst = selected();
+        if (playBar == null) {
+            return;
+        }
+        if (inst == null) {
+            playBar.setVisibility(View.GONE);
+            return;
+        }
+        playBar.setVisibility(View.VISIBLE);
+        playName.setText(inst.name);
+        playInfo.setText(inst.minecraftVersion + " · " + ("vanilla".equals(inst.loader) || inst.loader.isEmpty() ? "без модов" : Plan.loaderName(inst.loader)));
+        Icons.load(playIcon, inst.iconUrl, inst.chatId.isEmpty() ? R.drawable.install_default : R.drawable.wizard);
     }
 
     View view() {
@@ -210,10 +263,12 @@ final class HomeScreen {
         tile.setOrientation(LinearLayout.VERTICAL);
         tile.setGravity(Gravity.CENTER);
         tile.setPadding(dp(6), dp(6), dp(6), dp(6));
-        tile.setBackground(Ui.rounded(activity, Ui.GLASS, 12, 0xCCFFFFFF));
+        tile.setBackground(Ui.rounded(activity, Ui.GLASS, 12, 0xCCFF5A6E));
         ImageView image = new ImageView(activity);
         image.setImageResource(picture);
-        tile.addView(image, new LinearLayout.LayoutParams(dp(54), dp(54)));
+        image.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        image.setAdjustViewBounds(true);
+        tile.addView(image, new LinearLayout.LayoutParams(dp(54), 0, 1));  // shrinks on short screens, the words stay
         TextView t = Ui.label(activity, title, 14, Ui.TEXT, true);
         t.setGravity(Gravity.CENTER);
         tile.addView(t);
@@ -238,7 +293,7 @@ final class HomeScreen {
         }
         accountChip.setVisibility(View.VISIBLE);
         accountName.setText(account.ownsJava ? account.name : "Без Java Edition");
-        Icons.loadHead(head, account.skinUrl, R.drawable.moony);
+        Icons.loadHead(head, account.skinUrl, R.drawable.wizard);
     }
 
     /* ------------------------------------------------------------ the list */
@@ -302,7 +357,7 @@ final class HomeScreen {
             boolean selected = inst.id.equals(selectedId);
             card.setBackground(selected ? Ui.rainbowFrame(activity, 12) : Ui.rounded(activity, Ui.GLASS, 12, Ui.LINE));
             ImageView icon = new ImageView(activity);
-            Icons.load(icon, inst.iconUrl, inst.chatId.isEmpty() ? R.drawable.install_default : R.drawable.moony);
+            Icons.load(icon, inst.iconUrl, inst.chatId.isEmpty() ? R.drawable.install_default : R.drawable.wizard);
             card.addView(icon, new LinearLayout.LayoutParams(dp(56), dp(56)));
             TextView name = Ui.label(activity, inst.name, 14, Ui.TEXT, true);
             name.setGravity(Gravity.CENTER);
@@ -321,6 +376,7 @@ final class HomeScreen {
     /* ------------------------------------------------------------ actions on the right */
 
     private void updateActions() {
+        updatePlayBar();
         actions.removeAllViews();
         final Installation inst = selected();
         if (inst == null) {
@@ -352,7 +408,7 @@ final class HomeScreen {
             }
         }), actionParams());
         if (!inst.chatId.isEmpty()) {
-            actions.addView(action("Чат с Лунни", new Runnable() {
+            actions.addView(action("Чат с Арканом", new Runnable() {
                 public void run() {
                     activity.openChat(inst.chatId);
                 }
@@ -451,7 +507,7 @@ final class HomeScreen {
 
     private void delete(final Installation inst) {
         new AlertDialog.Builder(activity)
-            .setMessage("Удалить установку «" + inst.name + "»? Чат с Лунни, если он есть, останется.")
+            .setMessage("Удалить установку «" + inst.name + "»? Чат с Арканом, если он есть, останется.")
             .setPositiveButton("Удалить", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int which) {
                     activity.store().delete(inst.id);

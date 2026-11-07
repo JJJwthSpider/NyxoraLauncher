@@ -13,11 +13,11 @@ import android.widget.TextView;
 final class Ui {
     private Ui() {}
 
-    static final int BG = 0xFF0A0B12, PANEL = 0xFF14151F, PANEL_LIGHT = 0xFF1F2130, ACCENT = 0xFFFFFFFF, ACCENT_DARK = 0xFF5D6276,
-                     TEXT = 0xFFF4F5FB, HINT = 0xFFA3A7BB, USER_BUBBLE = 0xFF2C2F45, LINE = 0xFF3A3E52, GLASS = 0xE614151F,
+    static final int BG = 0xFF0E0407, PANEL = 0xFF1C080D, PANEL_LIGHT = 0xFF2B0E15, ACCENT = 0xFFFFFFFF, ACCENT_DARK = 0xFF8A3442,
+                     TEXT = 0xFFFBEFF1, HINT = 0xFFD1A3AA, USER_BUBBLE = 0xFF4A1420, LINE = 0xFF5A1E2A, GLASS = 0xE61C080D,
                      DANGER = 0xFFE5534B;
-    static final int[] RAINBOW_PASTEL = { 0xFFFFC4D0, 0xFFFFE0C0, 0xFFFFF4C2, 0xFFCDF3D6, 0xFFC4E4FF, 0xFFDCCFFF };
-    static final int[] RAINBOW = { 0xFFFF5C78, 0xFFFFA84C, 0xFFFFE666, 0xFF6CE08C, 0xFF5CB6FF, 0xFFA880FF };
+    static final int[] RAINBOW_PASTEL = { 0xFFFF5A6E, 0xFFE8364F, 0xFFC81F3A, 0xFFA8162E, 0xFFC81F3A, 0xFFFF8090 };
+    static final int[] RAINBOW = { 0xFFFF3B4F, 0xFFE8364F, 0xFFFF6B7D, 0xFFC0213A, 0xFFA3182F, 0xFF7A1426 };
 
     static Typeface pixel;
 
@@ -49,15 +49,15 @@ final class Ui {
     static GradientDrawable rainbow(Context context, float radius) {
         GradientDrawable d = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, RAINBOW_PASTEL);
         d.setCornerRadius(dp(context, radius));
-        d.setStroke(dp(context, 1), Color.WHITE);
+        d.setStroke(dp(context, 1), 0xFFFF8A98);
         return d;
     }
 
     /** a frame with a rainbow edge: the selected card */
     static GradientDrawable rainbowFrame(Context context, float radius) {
-        GradientDrawable d = new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[] { 0x33FF5C78, 0x33FFE666, 0x335CB6FF, 0x33A880FF });
+        GradientDrawable d = new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[] { 0x33FF3B4F, 0x33FF6B7D, 0x33A3182F, 0x337A1426 });
         d.setCornerRadius(dp(context, radius));
-        d.setStroke(dp(context, 2), Color.WHITE);
+        d.setStroke(dp(context, 2), 0xFFFF5A6E);
         return d;
     }
 
@@ -67,7 +67,7 @@ final class Ui {
         b.setAllCaps(false);
         b.setTypeface(pixel(context));
         b.setTextSize(15);
-        b.setTextColor(accent ? BG : TEXT);
+        b.setTextColor(accent ? Color.WHITE : TEXT);
         b.setBackground(accent ? rainbow(context, 10) : rounded(context, PANEL_LIGHT, 10, LINE));
         b.setPadding(dp(context, 14), dp(context, 6), dp(context, 14), dp(context, 6));
         b.setMinHeight(dp(context, 40));
@@ -77,7 +77,7 @@ final class Ui {
 
     /** switches a button between the rainbow (chosen) and the plain look */
     static void styleButton(Context context, Button b, boolean accent) {
-        b.setTextColor(accent ? BG : TEXT);
+        b.setTextColor(accent ? Color.WHITE : TEXT);
         b.setBackground(accent ? rainbow(context, 10) : rounded(context, PANEL_LIGHT, 10, LINE));
         b.setPadding(dp(context, 14), dp(context, 6), dp(context, 14), dp(context, 6));
     }

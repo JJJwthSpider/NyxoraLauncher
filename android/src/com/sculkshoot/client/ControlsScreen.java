@@ -39,7 +39,7 @@ final class ControlsScreen {
         { "Amethyst", "org.angelauramc.amethyst" },
         { "Zalith Launcher", "com.movtery.zalithlauncher" },
     };
-    static final String FILE_NAME = "Lullaby_controls.json";
+    static final String FILE_NAME = "Vellora_controls.json";
 
     private final MainActivity activity;
     private final LinearLayout root;
@@ -54,12 +54,12 @@ final class ControlsScreen {
         controls = Controls.load(activity);
         root = new LinearLayout(activity);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackground(new MoonSkyDrawable(activity.getResources().getDisplayMetrics().density));
+        root.setBackground(new RainDrawable(activity.getResources().getDisplayMetrics().density));
 
         LinearLayout bar = new LinearLayout(activity);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(8), dp(6), dp(8), dp(6));
-        bar.setBackgroundColor(0xCC0D0E16);
+        bar.setBackgroundColor(0xCC140509);
         Button back = Ui.button(activity, "← Назад", false);
         back.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -80,7 +80,7 @@ final class ControlsScreen {
         body.addView(preview, pp);
 
         ScrollView sideScroll = new ScrollView(activity);
-        sideScroll.setBackgroundColor(0x990D0E16);
+        sideScroll.setBackgroundColor(0x99140509);
         LinearLayout side = new LinearLayout(activity);
         side.setOrientation(LinearLayout.VERTICAL);
         side.setPadding(dp(12), dp(10), dp(12), dp(10));
@@ -421,7 +421,7 @@ final class ControlsScreen {
             open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             if (open.resolveActivity(activity.getPackageManager()) != null) {
                 activity.startActivity(open);
-                Toast.makeText(activity, launcher[0] + ": нажми «Импорт», затем в настройках управления выбери «Lullaby_controls»",
+                Toast.makeText(activity, launcher[0] + ": нажми «Импорт», затем в настройках управления выбери «Vellora_controls»",
                                Toast.LENGTH_LONG).show();
                 return;
             }
@@ -444,7 +444,7 @@ final class ControlsScreen {
             .setTitle("Как включить управление")
             .setMessage(Html.fromHtml(where + "<br><br>В PojavLauncher (или Amethyst): открой файл через «Файлы» → «Открыть с помощью» "
                                       + "→ лаунчер и нажми «Импорт». Потом в лаунчере: <b>Настройки → Управление</b> и выбери "
-                                      + "<b>Lullaby_controls</b>.<br><br>Fold Craft Launcher читает только свои схемы управления — "
+                                      + "<b>Vellora_controls</b>.<br><br>Fold Craft Launcher читает только свои схемы управления — "
                                       + "в нём кнопки настраиваются в его собственном редакторе."))
             .setPositiveButton("OK", null)
             .show();

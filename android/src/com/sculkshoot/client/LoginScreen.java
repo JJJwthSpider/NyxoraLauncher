@@ -35,18 +35,18 @@ final class LoginScreen {
     LoginScreen(MainActivity activity) {
         this.activity = activity;
         root = new FrameLayout(activity);
-        root.setBackground(new MoonSkyDrawable(activity.getResources().getDisplayMetrics().density));
+        root.setBackground(new RainDrawable(activity.getResources().getDisplayMetrics().density));
 
         LinearLayout card = new LinearLayout(activity);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setGravity(Gravity.CENTER_HORIZONTAL);
         card.setPadding(dp(28), dp(20), dp(28), dp(20));
-        card.setBackground(Ui.rounded(activity, 0xE00D0E16, 18, Ui.LINE));
+        card.setBackground(Ui.rounded(activity, 0xE0140509, 18, Ui.LINE));
 
         logo = new ImageView(activity);
         logo.setImageResource(R.drawable.install_default);
         card.addView(logo, new LinearLayout.LayoutParams(dp(64), dp(64)));
-        TextView title = Ui.label(activity, "Lullaby Launcher", 22, Ui.ACCENT, true);
+        TextView title = Ui.label(activity, "Vellora Client", 22, Ui.ACCENT, true);
         title.setGravity(Gravity.CENTER);
         title.setPadding(0, dp(8), 0, dp(4));
         card.addView(title);

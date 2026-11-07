@@ -77,9 +77,9 @@ public final class MainActivity extends Activity {
 
     // sculk colors of the desktop theme
     // night black and moon white; main buttons wear a see-through rainbow
-    private static final int BG = 0xFF0A0B12, PANEL = 0xFF14151F, PANEL_LIGHT = 0xFF1F2130, ACCENT = 0xFFFFFFFF, ACCENT_DARK = 0xFF5D6276,
-                             TEXT = 0xFFF4F5FB, HINT = 0xFFA3A7BB, USER_BUBBLE = 0xFF2C2F45, LINE = 0xFF3A3E52;
-    private static final int[] RAINBOW_PASTEL = { 0xFFFFC4D0, 0xFFFFE0C0, 0xFFFFF4C2, 0xFFCDF3D6, 0xFFC4E4FF, 0xFFDCCFFF };
+    private static final int BG = 0xFF0E0407, PANEL = 0xFF1C080D, PANEL_LIGHT = 0xFF2B0E15, ACCENT = 0xFFFFFFFF, ACCENT_DARK = 0xFF8A3442,
+                             TEXT = 0xFFFBEFF1, HINT = 0xFFD1A3AA, USER_BUBBLE = 0xFF4A1420, LINE = 0xFF5A1E2A;
+    private static final int[] RAINBOW_PASTEL = { 0xFFFF5A6E, 0xFFE8364F, 0xFFC81F3A, 0xFFA8162E, 0xFFC81F3A, 0xFFFF8090 };
 
     private static final String[] TOPIC_REPLIES = { "Зомби-апокалипсис: города, зомби и оружие", "Магия и приключения с подземельями",
                                                     "Технологии и космос", "Только оптимизация для слабого ПК" };
@@ -90,6 +90,7 @@ public final class MainActivity extends Activity {
 
     private final Handler main = new Handler(Looper.getMainLooper());
     private ChatStore store;
+    private WizardView wizard;  // Arkan in the chat's top bar
     private Installation.Store installations;
 
     // screens: home (like the main window of the desktop launcher), the chat with Moony, an installation, Modrinth
@@ -375,6 +376,16 @@ public final class MainActivity extends Activity {
         scrollDown();
     }
 
+    /** "Собрать с ИИ" in the catalog: a new chat with Arkan that starts from these words */
+    void askWizard(String text) {
+        newChat();
+        show(chatRoot);
+        if (text != null && !text.trim().isEmpty()) {
+            userSaid(text.trim());
+        }
+        scrollDown();
+    }
+
     void openEditor(Installation inst) {
         editor = new EditorScreen(this, inst);
         browser = null;
@@ -511,11 +522,11 @@ public final class MainActivity extends Activity {
         b.setAllCaps(false);
         b.setTypeface(pixel);
         b.setTextSize(15);
-        b.setTextColor(accent ? BG : TEXT);
+        b.setTextColor(accent ? Color.WHITE : TEXT);
         if (accent) {
             GradientDrawable rainbow = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, RAINBOW_PASTEL);
             rainbow.setCornerRadius(dp(10));
-            rainbow.setStroke(dp(1), Color.WHITE);
+            rainbow.setStroke(dp(1), 0xFFFF8A98);
             b.setBackground(rainbow);
         } else {
             b.setBackground(rounded(PANEL_LIGHT, 10, LINE));
@@ -529,27 +540,26 @@ public final class MainActivity extends Activity {
     private View buildLayout() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackground(new MoonSkyDrawable(getResources().getDisplayMetrics().density));
+        root.setBackground(new RainDrawable(getResources().getDisplayMetrics().density));
 
         // top bar: Moony, the name, chats and the invite code
         LinearLayout bar = new LinearLayout(this);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(12), dp(8), dp(8), dp(8));
-        bar.setBackgroundColor(0xCC0D0E16);
-        ImageView warden = new ImageView(this);
-        warden.setImageResource(R.drawable.moony);
-        bar.addView(warden, new LinearLayout.LayoutParams(dp(40), dp(40)));
+        bar.setBackgroundColor(0xCC140509);
+        wizard = new WizardView(this);
+        bar.addView(wizard, new LinearLayout.LayoutParams(dp(48), dp(48)));
         LinearLayout titles = new LinearLayout(this);
         titles.setOrientation(LinearLayout.VERTICAL);
         titles.setPadding(dp(10), 0, 0, 0);
         TextView title = new TextView(this);
-        title.setText("Лунни-сборщик");
+        title.setText("Маг Аркан");
         title.setTypeface(pixel);
         title.setTextSize(18);
         title.setTextColor(ACCENT);
         titles.addView(title);
         TextView subtitle = new TextView(this);
-        subtitle.setText("Lullaby Launcher · моды с Modrinth");
+        subtitle.setText("Vellora Client · моды с Modrinth");
         subtitle.setTextSize(11);
         subtitle.setTextColor(HINT);
         titles.addView(subtitle);
@@ -598,7 +608,7 @@ public final class MainActivity extends Activity {
         packBar = new LinearLayout(this);
         packBar.setOrientation(LinearLayout.VERTICAL);
         packBar.setPadding(dp(12), dp(8), dp(12), dp(8));
-        packBar.setBackground(rounded(0xE614151F, 12, LINE));
+        packBar.setBackground(rounded(0xE61C080D, 12, LINE));
         packTitle = new TextView(this);
         packTitle.setTextColor(TEXT);
         packTitle.setTextSize(13);
@@ -657,11 +667,11 @@ public final class MainActivity extends Activity {
         inputRow.setGravity(Gravity.CENTER_VERTICAL);
         inputRow.setPadding(dp(8), dp(4), dp(8), dp(10));
         input = new EditText(this);
-        input.setHint("Напиши Лунни...");
+        input.setHint("Напиши Аркану...");
         input.setHintTextColor(HINT);
         input.setTextColor(TEXT);
         input.setTextSize(15);
-        input.setBackground(rounded(0xE614151F, 20, LINE));
+        input.setBackground(rounded(0xE61C080D, 20, LINE));
         input.setPadding(dp(14), dp(10), dp(14), dp(10));
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         input.setImeOptions(EditorInfo.IME_ACTION_SEND);
@@ -704,7 +714,7 @@ public final class MainActivity extends Activity {
         int maxWidth = Math.min((int) (getResources().getDisplayMetrics().widthPixels * 0.82f), dp(560));
         if (fromMoony) {
             ImageView avatar = new ImageView(this);
-            avatar.setImageResource(R.drawable.moony);
+            avatar.setImageResource(R.drawable.wizard);
             LinearLayout.LayoutParams avatarParams = new LinearLayout.LayoutParams(dp(30), dp(30));
             avatarParams.rightMargin = dp(6);
             row.addView(avatar, avatarParams);
@@ -733,7 +743,7 @@ public final class MainActivity extends Activity {
         bubble.setLineSpacing(0, 1.1f);
         bubble.setTextIsSelectable(true);
         bubble.setMovementMethod(LinkMovementMethod.getInstance());
-        bubble.setBackground(rounded(0xF01F2130, 14, LINE));
+        bubble.setBackground(rounded(0xF02B0E15, 14, LINE));
         bubble.setPadding(dp(12), dp(9), dp(12), dp(9));
         addRow(bubble, true);
     }
@@ -796,10 +806,10 @@ public final class MainActivity extends Activity {
         hideTyping();
         LinearLayout bubble = new LinearLayout(this);
         bubble.setOrientation(LinearLayout.VERTICAL);
-        bubble.setBackground(rounded(0xF01F2130, 14, LINE));
+        bubble.setBackground(rounded(0xF02B0E15, 14, LINE));
         bubble.setPadding(dp(12), dp(9), dp(12), dp(9));
         TextView head = new TextView(this);
-        head.setText("Лунни работает...");
+        head.setText("Аркан работает...");
         head.setTypeface(pixel);
         head.setTextColor(ACCENT);
         bubble.addView(head);
@@ -813,9 +823,15 @@ public final class MainActivity extends Activity {
         progress.setIndeterminate(true);
         bubble.addView(progress, new LinearLayout.LayoutParams(dp(220), dp(10)));
         typingRow = addRow(bubble, true);
+        if (wizard != null) {
+            wizard.setBusy(true);
+        }
     }
 
     private void hideTyping() {
+        if (wizard != null) {
+            wizard.setBusy(false);
+        }
         if (typingRow != null) {
             chatColumn.removeView(typingRow);
             typingRow = null;
@@ -1117,7 +1133,7 @@ public final class MainActivity extends Activity {
         packLoaderVersion = "";
         workLog.setLength(0);
         updatePackBar();
-        say("Привет! Я Лунни, собираю сборки модов. <b>Про что будет твоя сборка?</b> Расскажи тему и что в ней должно быть, например: "
+        say("Привет! Я Аркан, маг-сборщик, собираю сборки модов. <b>Про что будет твоя сборка?</b> Расскажи тему и что в ней должно быть, например: "
                 + "<i>зомби-апокалипсис, должны быть города, зомби и оружие</i>.",
             TOPIC_REPLIES);
     }
@@ -1248,7 +1264,7 @@ public final class MainActivity extends Activity {
     private void showChats() {
         final List<JSONObject> chats = store.list();
         if (chats.isEmpty()) {
-            Toast.makeText(this, "Сохранённых чатов пока нет. Напиши Лунни, про что будет сборка.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Сохранённых чатов пока нет. Напиши Аркану, про что будет сборка.", Toast.LENGTH_LONG).show();
             return;
         }
         final List<String> rows = new ArrayList<String>();
@@ -1383,7 +1399,7 @@ public final class MainActivity extends Activity {
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(20), dp(8), dp(20), 0);
         TextView hint = new TextView(this);
-        hint.setText("Вставь код, который прислал друг из Lullaby Launcher на компьютере («Мой сервер»). Я покажу адрес сервера.");
+        hint.setText("Вставь код, который прислал друг из Vellora Client на компьютере («Мой сервер»). Я покажу адрес сервера.");
         box.addView(hint);
         final EditText code = new EditText(this);
         code.setHint("LL-XXXX-XXXX-...");
@@ -1412,7 +1428,7 @@ public final class MainActivity extends Activity {
     private void showAddress(String code) {
         InviteCode.Address address = InviteCode.decode(code);
         if (address == null) {
-            new AlertDialog.Builder(this).setMessage("Это не похоже на код приглашения Lullaby. Проверь, что код скопирован целиком.")
+            new AlertDialog.Builder(this).setMessage("Это не похоже на код приглашения Vellora. Проверь, что код скопирован целиком.")
                 .setPositiveButton("OK", null).show();
             return;
         }
@@ -1434,7 +1450,7 @@ public final class MainActivity extends Activity {
 
     private void showLog() {
         TextView text = new TextView(this);
-        text.setText(workLog.length() == 0 ? "Журнал пуст: Лунни ещё ничего не собирал в этом чате." : workLog.toString());
+        text.setText(workLog.length() == 0 ? "Журнал пуст: Аркан ещё ничего не собирал в этом чате." : workLog.toString());
         text.setTextSize(12);
         text.setTextIsSelectable(true);
         text.setPadding(dp(20), dp(10), dp(20), dp(10));
@@ -1445,11 +1461,11 @@ public final class MainActivity extends Activity {
 
     private void showAbout() {
         new AlertDialog.Builder(this)
-            .setTitle("Lullaby Launcher для Android")
-            .setMessage("Лунни собирает сборки модов с Modrinth: понимает тему, названия модов, «убери» и «побольше», "
+            .setTitle("Vellora Client для Android")
+            .setMessage("Аркан собирает сборки модов с Modrinth: понимает тему, названия модов, «убери» и «побольше», "
                         + "сам добавляет оптимизацию и все нужные библиотеки.\n\n"
                         + "Сама Minecraft: Java Edition на телефоне запускается в лаунчере для Android, который умеет ставить сборки "
-                        + "Modrinth (.mrpack). Кнопка «Играть» сохраняет сборку в «Загрузки/Lullaby» и открывает такой лаунчер, «Файл» — отправляет .mrpack.\n\n"
+                        + "Modrinth (.mrpack). Кнопка «Играть» сохраняет сборку в «Загрузки/Vellora» и открывает такой лаунчер, «Файл» — отправляет .mrpack.\n\n"
                         + "Шрифт Tiny5 — SIL Open Font License.")
             .setPositiveButton("OK", null)
             .show();
@@ -1526,7 +1542,7 @@ public final class MainActivity extends Activity {
     private File writePack() throws Exception {
         String safe = packPlan.name.replace('—', '-').replaceAll("[^\\p{L}\\p{N} ._-]", "").replaceAll("\\s+", " ").trim();
         if (safe.isEmpty()) {
-            safe = "Lullaby pack";
+            safe = "Vellora pack";
         }
         File file = new File(PackProvider.exportDir(this), safe + ".mrpack");
         ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(file));
@@ -1603,23 +1619,23 @@ public final class MainActivity extends Activity {
                 android.content.ContentValues values = new android.content.ContentValues();
                 values.put("_display_name", pack.getName());
                 values.put("mime_type", "application/octet-stream");  // keeps the .mrpack extension
-                values.put("relative_path", "Download/Lullaby");
+                values.put("relative_path", "Download/Vellora");
                 Uri target = getContentResolver().insert(Uri.parse("content://media/external/downloads"), values);
                 if (target == null) {
                     return null;
                 }
                 copy(pack, getContentResolver().openOutputStream(target));
-                return "Загрузки/Lullaby/" + pack.getName();
+                return "Загрузки/Vellora/" + pack.getName();
             }
             if (!hasStoragePermission()) {
                 requestPermissions(new String[] { android.Manifest.permission.WRITE_EXTERNAL_STORAGE }, REQUEST_STORAGE);
                 return null;
             }
-            File dir = new File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "Lullaby");
+            File dir = new File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "Vellora");
             dir.mkdirs();
             File target = new File(dir, pack.getName());
             copy(pack, new FileOutputStream(target));
-            return "Загрузки/Lullaby/" + pack.getName();
+            return "Загрузки/Vellora/" + pack.getName();
         } catch (Exception e) {
             return null;
         }
@@ -1699,7 +1715,7 @@ public final class MainActivity extends Activity {
 
     private File exportFile(Installation inst) throws Exception {
         String safe = inst.name.replace('—', '-').replaceAll("[^\\p{L}\\p{N} ._-]", "").replaceAll("\\s+", " ").trim();
-        File file = new File(PackProvider.exportDir(this), (safe.isEmpty() ? "Lullaby pack" : safe) + ".mrpack");
+        File file = new File(PackProvider.exportDir(this), (safe.isEmpty() ? "Vellora pack" : safe) + ".mrpack");
         Installer.writeMrpack(inst, installations, file);
         return file;
     }
@@ -1942,8 +1958,8 @@ public final class MainActivity extends Activity {
         text.append(major > 0 ? "Для Minecraft " + (inst != null ? inst.minecraftVersion : "") + " нужна Java " + major + " для Android. "
                               : "Java для Android, на которой работает игра. ");
         text.append(installed.isEmpty() ? "Сейчас Java не установлена." : "Сейчас есть: " + installed + ".");
-        text.append(major > 0 ? "\n\nОбычно Lullaby скачивает Java сам при «Играть», но сейчас не получилось (нет интернета?). "
-                              : "\n\nLullaby сам скачивает нужную Java при «Играть» (8, 17, 21 или 25 — по версии Minecraft). ");
+        text.append(major > 0 ? "\n\nОбычно Vellora скачивает Java сам при «Играть», но сейчас не получилось (нет интернета?). "
+                              : "\n\nVellora сам скачивает нужную Java при «Играть» (8, 17, 21 или 25 — по версии Minecraft). ");
         text.append("Её можно также взять из PojavLauncher (или Amethyst), если он стоит на телефоне, или выбрать файл: "
                     + "APK PojavLauncher или архив Java (.tar.xz).");
         AlertDialog.Builder dialog = new AlertDialog.Builder(this).setTitle("Java для игры").setMessage(text.toString());
@@ -2091,7 +2107,7 @@ public final class MainActivity extends Activity {
                      + " и все моды.");
         steps.append("<br><br>3. Войди аккаунтом Microsoft, на котором куплена Minecraft: Java Edition, и нажми <b>Играть</b>.");
         steps.append("<br><br>4. Удобные кнопки для игры (джойстик, ЛКМ, ПКМ, прыжок, инвентарь, камера, клавиатура): "
-                     + "<b>Управление → Отправить в лаунчер</b> на главном экране Lullaby.");
+                     + "<b>Управление → Отправить в лаунчер</b> на главном экране Vellora.");
         if (launchers.isEmpty()) {
             steps.append("<br><br>На телефоне пока нет лаунчера Java Edition. Установи, например, PojavLauncher, Amethyst, "
                          + "Fold Craft Launcher или Zalith Launcher и нажми «Играть» ещё раз.");

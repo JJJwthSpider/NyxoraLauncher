@@ -41,5 +41,5 @@ curl -fsSL -o app_pojavlauncher/libs/ltw-release.aar https://github.com/PojavLau
 
 ./gradlew --no-daemon -Porg.gradle.java.installations.paths="$JDK8" -Porg.gradle.java.installations.auto-detect=false \
     :app_pojavlauncher:assembleDebug -x lint
-cp app_pojavlauncher/build/outputs/apk/debug/app_pojavlauncher-debug.apk "$HERE/LullabyLauncher-full.apk"
-echo "Built $HERE/LullabyLauncher-full.apk ($(du -h "$HERE/LullabyLauncher-full.apk" | cut -f1))"
+cp app_pojavlauncher/build/outputs/apk/debug/app_pojavlauncher-debug.apk "$HERE/VelloraClient-full.apk"
+echo "Built $HERE/VelloraClient-full.apk ($(du -h "$HERE/VelloraClient-full.apk" | cut -f1))"

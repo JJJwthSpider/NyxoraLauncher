@@ -64,7 +64,7 @@ public final class PojavEngine extends GameEngine {
         { "assets/components/jre-new", "Internal-17" },
         { "assets/components/jre-21", "Internal-21" },
     };
-    static final String CONTROLS_FILE = "Lullaby_controls.json";
+    static final String CONTROLS_FILE = "Vellora_controls.json";
 
     @Override
     void attach(Activity activity) {
@@ -91,7 +91,7 @@ public final class PojavEngine extends GameEngine {
     @Override
     List<String[]> graphicsChoices(Activity activity) {
         List<String[]> out = new ArrayList<String[]>();
-        out.add(new String[] { "auto", "Авто — Lullaby выберет сам (рекомендуется)" });
+        out.add(new String[] { "auto", "Авто — Vellora выберет сам (рекомендуется)" });
         for (String id : Tools.getCompatibleRenderers(activity).rendererIds) {
             if (LTW.equals(id)) {
                 out.add(new String[] { id, "LTW (OpenGL ES 3) — для 1.17 и новее, лучше всего на новых телефонах" });
@@ -245,7 +245,7 @@ public final class PojavEngine extends GameEngine {
                 return importFromApk(copy);
             }
             // a single runtime archive (.tar.xz), like PojavLauncher's "import runtime"
-            String name = "Lullaby-" + System.currentTimeMillis() / 1000;
+            String name = "Vellora-" + System.currentTimeMillis() / 1000;
             FileInputStream archive = new FileInputStream(copy);
             MultiRTUtils.installRuntimeNamed(Tools.NATIVE_LIB_DIR, archive, name);
             MultiRTUtils.postPrepare(name);
@@ -325,7 +325,7 @@ public final class PojavEngine extends GameEngine {
     private static String exactJava(int major) {
         String found = null;
         for (Runtime r : MultiRTUtils.getRuntimes()) {
-            if (r.javaVersion == major && (found == null || r.name.startsWith("Lullaby-"))) {
+            if (r.javaVersion == major && (found == null || r.name.startsWith("Vellora-"))) {
                 found = r.name;
             }
         }
@@ -358,7 +358,7 @@ public final class PojavEngine extends GameEngine {
             throw last;
         }
         log.log("Распаковываю Java " + major + "...");
-        String name = "Lullaby-Java-" + major;
+        String name = "Vellora-Java-" + major;
         FileInputStream universalIn = new FileInputStream(universal);
         FileInputStream binIn = new FileInputStream(bin);
         try {
@@ -435,7 +435,7 @@ public final class PojavEngine extends GameEngine {
             } catch (Throwable e) {
                 activity.runOnUiThread(() -> done.finished(false, "Не получилось подготовить игру: " + e.getMessage()));
             }
-        }, "LullabyPlay").start();
+        }, "VelloraPlay").start();
     }
 
     /**
@@ -601,7 +601,7 @@ public final class PojavEngine extends GameEngine {
 
             public void onDownloadFailed(Throwable error) {
                 finished[0] = true;
-                android.util.Log.e("Lullaby", "Minecraft download failed", error);
+                android.util.Log.e("Vellora", "Minecraft download failed", error);
                 final String why = describe(error);
                 activity.runOnUiThread(() -> done.finished(false, "Не удалось скачать Minecraft " + inst.minecraftVersion + ":\n" + why
                                                                        + "\n\nПроверь интернет и нажми «Играть» ещё раз — уже скачанное не скачивается заново."));
@@ -628,7 +628,7 @@ public final class PojavEngine extends GameEngine {
                     log.log("Скачивание стоит уже " + quiet / 1000 + " с. Если так и останется — проверь интернет и запусти ещё раз.");
                 }
             }
-        }, "LullabyDownloadWatch").start();
+        }, "VelloraDownloadWatch").start();
         return null;
     }
 
@@ -745,7 +745,7 @@ public final class PojavEngine extends GameEngine {
         final Intent intent = new Intent(activity, JavaGUILauncherActivity.class);
         intent.putExtra("javaArgs", "-jar " + installer.getAbsolutePath() + " --installClient " + Tools.DIR_GAME_NEW);
         activity.runOnUiThread(() -> activity.startActivity(intent));
-        return "Ставлю " + Plan.loaderName(inst.loader) + " " + inst.loaderVersion + ". Когда установка закончится, вернись в Lullaby и нажми «Играть» ещё раз.";
+        return "Ставлю " + Plan.loaderName(inst.loader) + " " + inst.loaderVersion + ". Когда установка закончится, вернись в Vellora и нажми «Играть» ещё раз.";
     }
 
     /* ------------------------------------------------------------ files of the installation */

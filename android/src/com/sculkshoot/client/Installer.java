@@ -834,7 +834,7 @@ final class Installer {
     static void writeMrpack(Installation inst, Installation.Store store, File out) throws IOException, JSONException {
         Plan plan = new Plan();
         plan.name = inst.name;
-        plan.summary = "Lullaby Launcher: " + inst.describe();
+        plan.summary = "Vellora Client: " + inst.describe();
         plan.minecraftVersion = inst.minecraftVersion;
         plan.loader = inst.loader;
         ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(out));
