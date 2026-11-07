@@ -85,6 +85,11 @@ public final class PojavEngine extends GameEngine {
         ContextExecutor.clearActivity();
     }
 
+    @Override
+    java.io.File gameLog() {
+        return Tools.DIR_GAME_HOME == null ? null : new File(Tools.DIR_GAME_HOME, "latestlog.txt");
+    }
+
     /* ------------------------------------------------------------ Java */
 
     @Override

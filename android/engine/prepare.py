@@ -137,6 +137,21 @@ edit(os.path.join(MAIN, "AndroidManifest.xml"),
 
     <application'''))
 
+# --- every other way back to PojavLauncher's own menu opens Lullaby (the crash screen's "Restart", notifications)
+java_root = os.path.join(MAIN, "java", "net", "kdt", "pojavlaunch")
+pattern = re.compile(r"new Intent\(([^,()]+), LauncherActivity\.class\)")
+for folder, _, names in os.walk(java_root):
+    for name in names:
+        if not name.endswith(".java") or name == "TestStorageActivity.java":
+            continue
+        path = os.path.join(folder, name)
+        with open(path, encoding="utf-8") as f:
+            code = f.read()
+        changed = pattern.sub(lambda m: f'new Intent().setClassName({m.group(1)}, "{PACKAGE}.MainActivity")', code)
+        if changed != code:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(changed)
+
 # --- the start screen opens Lullaby ------------------------------------------------------------------------
 edit(os.path.join(MAIN, "java", "net", "kdt", "pojavlaunch", "TestStorageActivity.java"),
      ("Intent intent =  new Intent(this, LauncherActivity.class);",

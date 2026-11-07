@@ -33,6 +33,12 @@ git clean -q -fdx -e local.properties -e .gradle
 echo "sdk.dir=$ANDROID_HOME" > local.properties
 python3 "$HERE/engine/prepare.py" "$SRC" "$HERE" "$KEY"
 
+# LTW (LGPL-3.0, github.com/PojavLauncherTeam/LTW): OpenGL 3 on OpenGL ES 3 for Minecraft 1.17+, which
+# PojavLauncher's own CI adds the same way
+mkdir -p app_pojavlauncher/libs
+curl -fsSL -o app_pojavlauncher/libs/ltw-release.aar https://github.com/PojavLauncherTeam/LTW/releases/latest/download/ltw-release.aar \
+    || echo "warning: LTW not downloaded; the game uses GL4ES or Zink"
+
 ./gradlew --no-daemon -Porg.gradle.java.installations.paths="$JDK8" -Porg.gradle.java.installations.auto-detect=false \
     :app_pojavlauncher:assembleDebug -x lint
 cp app_pojavlauncher/build/outputs/apk/debug/app_pojavlauncher-debug.apk "$HERE/LullabyLauncher-full.apk"

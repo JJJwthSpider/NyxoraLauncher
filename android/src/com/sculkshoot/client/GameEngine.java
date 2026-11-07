@@ -45,6 +45,9 @@ abstract class GameEngine {
         return Plan.compareVersions(minecraftVersion, "1.17") >= 0 ? 17 : 8;
     }
 
+    /** the log of the last game start (and the crash report, if there was one), or null */
+    abstract java.io.File gameLog();
+
     /** whether Java of at least this version is installed in the app */
     abstract boolean hasJava(int major);
 

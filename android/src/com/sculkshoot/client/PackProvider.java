@@ -65,6 +65,9 @@ public final class PackProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         String name = uri.getLastPathSegment();
+        if (name != null && name.endsWith(".txt")) {
+            return "text/plain";
+        }
         return name != null && name.endsWith(".json") ? "application/json" : "application/x-modrinth-modpack+zip";
     }
 

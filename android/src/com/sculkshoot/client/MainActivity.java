@@ -400,7 +400,7 @@ public final class MainActivity extends Activity {
 
     void showAppMenu() {
         new AlertDialog.Builder(this)
-            .setItems(GameEngine.get() != null ? new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении", "Java для игры" }
+            .setItems(GameEngine.get() != null ? new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении", "Java для игры", "Журнал игры" }
                                                : new String[] { "Управление в игре", "Аккаунт Microsoft", "Код приглашения друга", "О приложении" },
                       new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int which) {
@@ -412,6 +412,8 @@ public final class MainActivity extends Activity {
                         showInviteCode();
                     } else if (which == 4) {
                         showJavaDialog(0, null);
+                    } else if (which == 5) {
+                        showGameLog();
                     } else {
                         showAbout();
                     }
@@ -1759,6 +1761,61 @@ public final class MainActivity extends Activity {
                 }
             }
         });
+    }
+
+    /** the end of the last game start's log: what to send when the game does not start */
+    void showGameLog() {
+        final File log = GameEngine.get().gameLog();
+        String text;
+        try {
+            String all = log == null ? "" : Http.read(new java.io.FileInputStream(log));
+            String[] lines = all.split("\n");
+            StringBuilder tail = new StringBuilder();
+            for (int i = Math.max(0, lines.length - 60); i < lines.length; i++) {
+                tail.append(lines[i]).append('\n');
+            }
+            text = tail.length() == 0 ? "Журнал пуст." : tail.toString();
+        } catch (Exception e) {
+            text = "Журнала ещё нет: игра не запускалась.";
+        }
+        final String shown = text;
+        TextView view = new TextView(this);
+        view.setText(shown);
+        view.setTextSize(11);
+        view.setTextIsSelectable(true);
+        view.setTypeface(Typeface.MONOSPACE);
+        view.setPadding(Ui.dp(this, 14), Ui.dp(this, 8), Ui.dp(this, 14), Ui.dp(this, 8));
+        android.widget.ScrollView scroll = new android.widget.ScrollView(this);
+        scroll.addView(view);
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this).setTitle("Журнал игры (конец)").setView(scroll)
+            .setPositiveButton("Скопировать", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int which) {
+                    android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    clipboard.setPrimaryClip(ClipData.newPlainText("журнал игры", shown));
+                    Toast.makeText(MainActivity.this, "Скопировано — пришли мне", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton("Закрыть", null);
+        if (log != null && log.isFile()) {
+            dialog.setNeutralButton("Поделиться файлом", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int which) {
+                    try {
+                        File copy = new File(PackProvider.exportDir(MainActivity.this), "latestlog.txt");
+                        copy(log, new java.io.FileOutputStream(copy));
+                        Uri uri = PackProvider.uriFor(copy);
+                        Intent send = new Intent(Intent.ACTION_SEND);
+                        send.setType("text/plain");
+                        send.putExtra(Intent.EXTRA_STREAM, uri);
+                        send.setClipData(ClipData.newRawUri("latestlog.txt", uri));
+                        send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        startActivity(Intent.createChooser(send, "Отправить журнал игры"));
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "Не удалось: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
+        dialog.show();
     }
 
     private Installation javaWaiting;  // played again once Java is there
