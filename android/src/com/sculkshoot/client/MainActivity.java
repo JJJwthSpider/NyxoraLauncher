@@ -90,6 +90,22 @@ public final class MainActivity extends Activity {
 
     private final Handler main = new Handler(Looper.getMainLooper());
     private ChatStore store;
+    private Installation.Store installations;
+
+    // screens: home (like the main window of the desktop launcher), the chat with Moony, an installation, Modrinth
+    private HomeScreen home;
+    private View chatRoot;
+    private View current;
+    private EditorScreen editor;
+    private BrowserScreen browser;
+    private Runnable afterPermission;
+
+    /** work for a background thread whose result comes back on the main thread */
+    interface Job<T> {
+        T run() throws Exception;
+
+        void done(T result, Exception error);
+    }
     private Typeface pixel;
 
     // conversation
@@ -141,16 +157,174 @@ public final class MainActivity extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         getWindow().setStatusBarColor(BG);
         getWindow().setNavigationBarColor(BG);
-        setContentView(buildLayout());
+        installations = new Installation.Store(getFilesDir());
+        chatRoot = buildLayout();
+        home = new HomeScreen(this);
 
-        // continue the most recent chat, like a messenger
+        // the chat continues the most recent conversation, like a messenger
         List<JSONObject> chats = store.list();
         if (!chats.isEmpty()) {
             loadChat(chats.get(0).optString("id"));
         } else {
             newChat();
         }
+        showHome();
     }
+
+    /* ------------------------------------------------------------ screens */
+
+    Installation.Store store() {
+        return installations;
+    }
+
+    <T> void background(final Job<T> job) {
+        new Thread(new Runnable() {
+            public void run() {
+                T result = null;
+                Exception error = null;
+                try {
+                    result = job.run();
+                } catch (Exception e) {
+                    error = e;
+                }
+                final T r = result;
+                final Exception e = error;
+                main.post(new Runnable() {
+                    public void run() {
+                        if (!isFinishing()) {
+                            job.done(r, e);
+                        }
+                    }
+                });
+            }
+        }, "lullaby-job").start();
+    }
+
+    private void show(View view) {
+        if (current == view) {
+            return;
+        }
+        current = view;
+        setContentView(view);
+        view.setAlpha(0f);
+        view.animate().alpha(1f).setDuration(180).start();
+    }
+
+    void showHome() {
+        showHome(null);
+    }
+
+    void showHome(String selectId) {
+        home.refresh();
+        if (selectId != null) {
+            home.select(selectId);
+        }
+        editor = null;
+        browser = null;
+        show(home.view());
+    }
+
+    void openChat(String id) {
+        if (id != null && !id.equals(chatId)) {
+            loadChat(id);
+        }
+        show(chatRoot);
+        scrollDown();
+    }
+
+    void openEditor(Installation inst) {
+        editor = new EditorScreen(this, inst);
+        browser = null;
+        show(editor.view());
+    }
+
+    void openBrowser(Installation inst, String kind) {
+        browser = new BrowserScreen(this, inst, kind);
+        show(browser.view());
+    }
+
+    void saveInstallation(Installation inst) {
+        try {
+            installations.save(inst);
+        } catch (Exception e) {
+            Toast.makeText(this, "Не удалось сохранить: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    void showChatList() {
+        showChats();
+    }
+
+    void showAppMenu() {
+        new AlertDialog.Builder(this)
+            .setItems(new String[] { "Код приглашения друга", "О приложении" }, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int which) {
+                    if (which == 0) {
+                        showInviteCode();
+                    } else {
+                        showAbout();
+                    }
+                }
+            })
+            .show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (current == home.view()) {
+            super.onBackPressed();
+        } else if (browser != null && current == browser.view()) {
+            browser.goBack();
+        } else {
+            showHome();
+        }
+    }
+
+    /** the pack Moony built in this chat is also an installation, so it can be changed and played from the main screen */
+    private void syncInstallationFromChat() {
+        if (packPlan == null || chatId == null) {
+            return;
+        }
+        Installation inst = installations.forChat(chatId);
+        if (inst == null) {
+            inst = new Installation();
+            inst.chatId = chatId;
+            inst.name = packPlan.name;
+        }
+        inst.minecraftVersion = packPlan.minecraftVersion;
+        inst.loader = packPlan.loader;
+        inst.loaderVersion = packLoaderVersion;
+        // what was added by hand in the editor stays (resource packs, shaders, mods without a theme group),
+        // with the libraries they need; Moony's own mods are replaced by the new build
+        List<Mod> old = inst.mods;
+        inst.mods = new ArrayList<Mod>(packMods);
+        for (Mod mod : old) {
+            boolean byHand = !Mod.MOD.equals(mod.kind) || (mod.group.isEmpty() && !mod.dependency);
+            if (byHand && inst.find(mod.projectId) == null) {
+                inst.mods.add(mod);
+            }
+        }
+        boolean added = true;
+        while (added) {
+            added = false;
+            for (Mod mod : new ArrayList<Mod>(inst.mods)) {
+                for (String required : mod.required) {
+                    String id = required.startsWith("mr:") ? required.substring(3) : "";
+                    if (id.isEmpty() || inst.find(id) != null) {
+                        continue;
+                    }
+                    for (Mod library : old) {
+                        if (id.equals(library.projectId)) {
+                            inst.mods.add(library);
+                            added = true;
+                        }
+                    }
+                }
+            }
+        }
+        saveInstallation(inst);
+    }
+
 
     @Override
     protected void onDestroy() {
@@ -223,6 +397,16 @@ public final class MainActivity extends Activity {
         subtitle.setTextColor(HINT);
         titles.addView(subtitle);
         bar.addView(titles, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button homeButton = button("⌂", false);
+        homeButton.setTextSize(18);
+        homeButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                showHome();
+            }
+        });
+        LinearLayout.LayoutParams homeParams = new LinearLayout.LayoutParams(dp(48), ViewGroup.LayoutParams.WRAP_CONTENT);
+        homeParams.rightMargin = dp(6);
+        bar.addView(homeButton, homeParams);
         Button chats = button("Чаты", false);
         chats.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -826,6 +1010,9 @@ public final class MainActivity extends Activity {
                 chat.put("pack", pack);
             }
             store.save(chatId, chat);
+            if (stage == STAGE_READY && packPlan != null) {
+                syncInstallationFromChat();
+            }
         } catch (Exception e) {
             Toast.makeText(this, "Не удалось сохранить чат: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -1304,8 +1491,9 @@ public final class MainActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(requestCode, permissions, results);
-        if (requestCode == REQUEST_STORAGE && results.length > 0 && results[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            play();
+        if (requestCode == REQUEST_STORAGE && results.length > 0 && results[0] == android.content.pm.PackageManager.PERMISSION_GRANTED
+            && afterPermission != null) {
+            afterPermission.run();
         }
     }
 
@@ -1335,8 +1523,58 @@ public final class MainActivity extends Activity {
             Toast.makeText(this, "Не удалось создать файл: " + e.getMessage(), Toast.LENGTH_LONG).show();
             return;
         }
+        afterPermission = new Runnable() {
+            public void run() {
+                play();
+            }
+        };
+        playFile(file, packPlan.minecraftVersion, packPlan.loader);
+    }
+
+    private File exportFile(Installation inst) throws Exception {
+        String safe = inst.name.replace('—', '-').replaceAll("[^\\p{L}\\p{N} ._-]", "").replaceAll("\\s+", " ").trim();
+        File file = new File(PackProvider.exportDir(this), (safe.isEmpty() ? "Lullaby pack" : safe) + ".mrpack");
+        Installer.writeMrpack(inst, installations, file);
+        return file;
+    }
+
+    /** "Play" on the main screen or in the editor */
+    void playInstallation(final Installation inst) {
+        File file;
+        try {
+            file = exportFile(inst);
+        } catch (Exception e) {
+            Toast.makeText(this, "Не удалось создать файл: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            return;
+        }
+        afterPermission = new Runnable() {
+            public void run() {
+                playInstallation(inst);
+            }
+        };
+        playFile(file, inst.minecraftVersion, inst.loader);
+    }
+
+    /** "Export" on the main screen: send or save the .mrpack */
+    void exportInstallation(Installation inst) {
+        try {
+            File file = exportFile(inst);
+            Uri uri = PackProvider.uriFor(file);
+            Intent send = new Intent(Intent.ACTION_SEND);
+            send.setType("application/x-modrinth-modpack+zip");
+            send.putExtra(Intent.EXTRA_STREAM, uri);
+            send.putExtra(Intent.EXTRA_SUBJECT, inst.name);
+            send.setClipData(ClipData.newRawUri(inst.name, uri));
+            send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(send, "Отправить или сохранить сборку"));
+        } catch (Exception e) {
+            Toast.makeText(this, "Не удалось создать файл: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void playFile(File file, String minecraftVersion, String loader) {
         if (android.os.Build.VERSION.SDK_INT < 29 && !hasStoragePermission()) {
-            // asks for the permission; play() runs again once it is granted
+            // asks for the permission; afterPermission runs once it is granted
             saveToDownloads(file);
             return;
         }
@@ -1347,7 +1585,7 @@ public final class MainActivity extends Activity {
         steps.append(saved != null ? "1. Сборка сохранена: <b>" + Util.escape(saved) + "</b>"
                                    : "1. Сохрани сборку кнопкой <b>Файл → Сохранить в файлы</b>");
         steps.append("<br><br>2. В лаунчере Minecraft открой <b>импорт сборки</b> (Modpack / .mrpack) и выбери этот файл. "
-                     + "Лаунчер сам скачает Minecraft " + Util.escape(packPlan.minecraftVersion) + ", " + Plan.loaderName(packPlan.loader)
+                     + "Лаунчер сам скачает Minecraft " + Util.escape(minecraftVersion) + ", " + Plan.loaderName(loader)
                      + " и все моды.");
         steps.append("<br><br>3. Войди аккаунтом Microsoft, на котором куплена Minecraft: Java Edition, и нажми <b>Играть</b>.");
         if (launchers.isEmpty()) {

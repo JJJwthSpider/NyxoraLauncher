@@ -7,8 +7,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/** One mod file of the pack (Modrinth). */
+/** One file of a pack: a mod, a resource pack, a shader pack or (from an imported modpack) any other file. */
 final class Mod {
+    static final String MOD = "mod", RESOURCE_PACK = "resourcepack", SHADER = "shader", FILE = "file";
+
+    String kind = MOD;
+    String path = "";  // inside the game folder; empty: mods/<fileName>
+    String iconUrl = "";
     String projectId = "";
     String slug = "";
     String title = "";
@@ -29,6 +34,9 @@ final class Mod {
 
     JSONObject toJson() throws JSONException {
         JSONObject o = new JSONObject();
+        o.put("kind", kind);
+        o.put("path", path);
+        o.put("iconUrl", iconUrl);
         o.put("projectId", projectId);
         o.put("slug", slug);
         o.put("title", title);
@@ -51,6 +59,9 @@ final class Mod {
 
     static Mod fromJson(JSONObject o) {
         Mod m = new Mod();
+        m.kind = o.optString("kind", MOD);
+        m.path = o.optString("path");
+        m.iconUrl = o.optString("iconUrl");
         m.projectId = o.optString("projectId");
         m.slug = o.optString("slug");
         m.title = o.optString("title");
@@ -69,6 +80,20 @@ final class Mod {
         m.incompatible = strings(o.optJSONArray("incompatible"));
         m.neededBy = strings(o.optJSONArray("neededBy"));
         return m;
+    }
+
+    /** where the file goes in the game folder */
+    String targetPath() {
+        if (!path.isEmpty()) {
+            return path;
+        }
+        if (RESOURCE_PACK.equals(kind)) {
+            return "resourcepacks/" + fileName;
+        }
+        if (SHADER.equals(kind)) {
+            return "shaderpacks/" + fileName;
+        }
+        return "mods/" + fileName;
     }
 
     static List<String> strings(JSONArray array) {

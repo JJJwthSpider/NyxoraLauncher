@@ -42,6 +42,33 @@ final class Http {
         }
     }
 
+    /** downloads a file (a modpack) */
+    static void download(String url, java.io.File target) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        connection.setRequestProperty("User-Agent", USER_AGENT);
+        connection.setConnectTimeout(20000);
+        connection.setReadTimeout(60000);
+        try {
+            if (connection.getResponseCode() != 200) {
+                throw new IOException("HTTP " + connection.getResponseCode());
+            }
+            InputStream in = connection.getInputStream();
+            java.io.FileOutputStream out = new java.io.FileOutputStream(target);
+            try {
+                byte[] buffer = new byte[65536];
+                int n;
+                while ((n = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, n);
+                }
+            } finally {
+                in.close();
+                out.close();
+            }
+        } finally {
+            connection.disconnect();
+        }
+    }
+
     static String read(InputStream in) throws IOException {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
