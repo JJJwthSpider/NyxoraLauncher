@@ -72,4 +72,5 @@ class WardrobeDialog : public QDialog {
     std::function<bool(const QImage&, bool)> m_wearSkin;
     qint64 m_seed = 0;
     int m_count = 0;
+    int columnCount() const;
 };

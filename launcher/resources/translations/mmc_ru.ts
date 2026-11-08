@@ -5568,7 +5568,7 @@ Please make sure that the maximum memory value is lower.</source>
     <message>
         <location filename="src/launcher/ui/instanceview/InstanceView.cpp" line="461"/>
         <source>Click &quot;Add Instance&quot; to get started.</source>
-        <translation>Чтобы начать играть, нажми кнопку «Добавить установку».</translation>
+        <translation>Чтобы начать играть, нажми "+ Новая сборка" вверху или выбери готовую сборку слева.</translation>
     </message>
 </context>
 <context>

@@ -869,6 +869,42 @@ In Vellora Client: Lobby → Join a friend, paste the address. In Minecraft: Mul
 <context>
     <name>MainWindow</name>
     <message>
+        <source>‹ Lobby</source>
+        <translation>‹ Лобби</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Импорт</translation>
+    </message>
+    <message>
+        <source>+ New pack</source>
+        <translation>+ Новая сборка</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Настройки</translation>
+    </message>
+    <message>
+        <source>Folders, help, updates</source>
+        <translation>Папки, справка, обновления</translation>
+    </message>
+    <message>
+        <source>Modpacks, mods, shaders and maps from Modrinth and CurseForge</source>
+        <translation>Сборки, моды, шейдеры и карты с Modrinth и CurseForge</translation>
+    </message>
+    <message>
+        <source>An instance or a modpack from a file, a link or another launcher</source>
+        <translation>Сборка из файла, по ссылке или из другого лаунчера</translation>
+    </message>
+    <message>
+        <source>Pack ▾</source>
+        <translation>Сборка ▾</translation>
+    </message>
+    <message>
+        <source>Edit, mods, folder, export, copy or delete the chosen instance (also a right click on its card)</source>
+        <translation>Настройки, моды, папка, экспорт, копия или удаление выбранной сборки (или правый клик по её карточке)</translation>
+    </message>
+    <message>
         <source>Skin Upload</source>
         <translation>Загрузка скина</translation>
     </message>
@@ -3085,6 +3121,34 @@ Are you sure?</source>
 <context>
     <name>VelloraLobby</name>
     <message>
+        <source>Friends</source>
+        <translation>Друзья</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Настройки</translation>
+    </message>
+    <message>
+        <source>Folders, help, updates</source>
+        <translation>Папки, справка, обновления</translation>
+    </message>
+    <message>
+        <source>Change the pack ›</source>
+        <translation>Сменить сборку ›</translation>
+    </message>
+    <message>
+        <source>Choose a pack ›</source>
+        <translation>Выбрать сборку ›</translation>
+    </message>
+    <message>
+        <source>%1 h played</source>
+        <translation>наиграно %1 ч</translation>
+    </message>
+    <message>
+        <source>%1 min played</source>
+        <translation>наиграно %1 мин</translation>
+    </message>
+    <message>
         <source>Music</source>
         <translation>Музыка</translation>
     </message>
@@ -3338,6 +3402,18 @@ Are you sure?</source>
 </context>
 <context>
     <name>WardrobeDialog</name>
+    <message>
+        <source>‹ Lobby</source>
+        <translation>‹ Лобби</translation>
+    </message>
+    <message>
+        <source>Upload a skin</source>
+        <translation>Загрузить скин</translation>
+    </message>
+    <message>
+        <source>Your skins and the real Minecraft capes of your account: everyone sees them in the game</source>
+        <translation>Твои скины и настоящие плащи Minecraft аккаунта: их видно в игре всем</translation>
+    </message>
     <message>
         <source>Describe a cape or build it with the buttons: Arkan draws at once</source>
         <translation>Опиши плащ или собери его кнопками — Аркан рисует сразу</translation>

@@ -245,6 +245,12 @@ class MainWindow : public QMainWindow {
     class VelloraLobby* m_lobby = nullptr;
     class QHBoxLayout* m_libraryLayout = nullptr;
     class QPushButton* m_lobbyTab = nullptr;
+    class QFrame* m_header = nullptr;
+    class QMenu* m_moreMenu = nullptr;
+    class QPushButton* m_packMenuButton = nullptr;
+    /// "⋯": folders, help, updates, accounts, settings (what the tool bar had)
+    class QMenu* moreMenu();
+    void showSelectedInstanceMenu(const QPoint& globalPos);
     class QPushButton* m_libraryTab = nullptr;
     class QPushButton* m_createTab = nullptr;
     // search and sorting above the instance list

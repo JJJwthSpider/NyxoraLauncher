@@ -200,7 +200,35 @@ WardrobeDialog::WardrobeDialog(const QImage& skin,
     m_capeGen.seed = m_seed + 7;
     setWindowTitle(tr("Wardrobe"));
     resize(1060, 640);
-    auto* layout = new QHBoxLayout(this);
+    // like Millida's wardrobe: a screen over the whole window, not a small window of its own
+    if (parent && parent->window()) {
+        setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
+        setGeometry(parent->window()->geometry());
+    }
+    auto* root = new QVBoxLayout(this);
+    root->setContentsMargins(0, 0, 0, 0);
+    root->setSpacing(0);
+    // the header: "‹ Лобби" on the left, "Снять всё" and "Загрузить скин" on the right
+    auto* header = new QFrame(this);
+    header->setObjectName("wardrobeHeader");
+    header->setStyleSheet("QFrame#wardrobeHeader { background-color: rgba(8, 2, 4, 235); border-bottom: 2px solid #3a0d16; }");
+    auto* headerLayout = new QHBoxLayout(header);
+    headerLayout->setContentsMargins(12, 8, 12, 8);
+    auto* back = new QPushButton(tr("‹ Lobby"), header);
+    back->setObjectName("accentButton");
+    back->setMinimumHeight(38);
+    connect(back, &QPushButton::clicked, this, &QDialog::accept);
+    headerLayout->addWidget(back);
+    auto* title = new QLabel(tr("Wardrobe"), header);
+    title->setStyleSheet("font-size: 14pt; font-weight: bold; color: #fbeff1;");
+    headerLayout->addSpacing(12);
+    headerLayout->addWidget(title);
+    headerLayout->addStretch(1);
+    root->addWidget(header);
+    auto* body = new QWidget(this);
+    root->addWidget(body, 1);
+    auto* layout = new QHBoxLayout(body);
+    layout->setContentsMargins(12, 10, 12, 12);
 
     auto* left = new QVBoxLayout;
     m_character = new VelloraCharacter(this);
@@ -212,11 +240,8 @@ WardrobeDialog::WardrobeDialog(const QImage& skin,
     auto* hint = new QLabel(tr("Drag to turn · click for an animation"), this);
     hint->setAlignment(Qt::AlignCenter);
     left->addWidget(hint);
-    auto* skins = new QPushButton(tr("Skins and capes..."), this);
-    skins->setToolTip(tr("The real Minecraft capes of your account: everyone sees them in the game"));
-    connect(skins, &QPushButton::clicked, this, [openSkins] { openSkins(); });
-    left->addWidget(skins);
-    auto* undress = new QPushButton(tr("Take everything off"), this);
+    auto* undress = new QPushButton(tr("Take everything off"), header);
+    undress->setMinimumHeight(38);
     connect(undress, &QPushButton::clicked, this, [this] {
         for (const auto& slot : { Cosmetics::Head, Cosmetics::Body, Cosmetics::Back, Cosmetics::Pet, Cosmetics::Hand, Cosmetics::Effect }) {
             Cosmetics::wear(slot, QString());
@@ -224,7 +249,13 @@ WardrobeDialog::WardrobeDialog(const QImage& skin,
         VelloraSound::play("close");
         showTab(m_tab);
     });
-    left->addWidget(undress);
+    headerLayout->addWidget(undress);
+    auto* skins = new QPushButton(tr("Upload a skin"), header);
+    skins->setObjectName("accentButton");
+    skins->setMinimumHeight(38);
+    skins->setToolTip(tr("Your skins and the real Minecraft capes of your account: everyone sees them in the game"));
+    connect(skins, &QPushButton::clicked, this, [openSkins] { openSkins(); });
+    headerLayout->addWidget(skins);
     layout->addLayout(left, 4);
 
     auto* right = new QVBoxLayout;
@@ -259,6 +290,13 @@ WardrobeDialog::WardrobeDialog(const QImage& skin,
     showTab(m_tab);
 }
 
+int WardrobeDialog::columnCount() const
+{
+    // as many tiles in a row as the screen holds (a tile is 136 wide), like Millida's grid
+    const int room = width() * 6 / 10 - 40;
+    return std::clamp(room / 142, 3, 7);
+}
+
 void WardrobeDialog::addTile(const QString& title, const QString& rarity, bool worn, const QStringList& look, std::function<void()> action)
 {
     auto* tile = new ItemTile(this);
@@ -273,7 +311,8 @@ void WardrobeDialog::addTile(const QString& title, const QString& rarity, bool w
     tile->effect = look.value(5);
     tile->hand = look.value(6);
     connect(tile, &QAbstractButton::clicked, this, [action] { action(); });
-    m_grid->addWidget(tile, m_count / 4, m_count % 4);
+    const int columns = columnCount();
+    m_grid->addWidget(tile, m_count / columns, m_count % columns);
     m_count++;
 }
 
@@ -316,7 +355,7 @@ void WardrobeDialog::showTab(const QString& tab)
     m_character->setBack(tab == Cosmetics::Back || tab == "capes");
     if (tab == "skins" || tab == "capes") {
         m_section->setText(tab == "skins" ? tr("Arkan's AI skin generator") : tr("Arkan's AI cape generator"));
-        m_grid->addWidget(generator(tab == "capes"), 0, 0, 1, 4);
+        m_grid->addWidget(generator(tab == "capes"), 0, 0, 1, columnCount());
         return;
     }
     if (tab == "outfits") {

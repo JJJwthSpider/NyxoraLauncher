@@ -27,6 +27,7 @@
 #include <QResizeEvent>
 #include <QVBoxLayout>
 #include <algorithm>
+#include <QMenu>
 
 #include "LaunchPanel.h"
 #include "MoonyWidget.h"
@@ -95,6 +96,50 @@ QIcon noteIcon(bool on)
     return QIcon(pixmap);
 }
 }  // namespace
+
+namespace {
+QIcon pixelIcon(const QStringList& rows, const QColor& color)
+{
+    const int u = 2;
+    int w = 0;
+    for (const QString& r : rows) {
+        w = std::max(w, int(r.size()));
+    }
+    QPixmap pixmap(w * u, int(rows.size()) * u);
+    pixmap.fill(Qt::transparent);
+    QPainter p(&pixmap);
+    for (int j = 0; j < rows.size(); j++) {
+        for (int i = 0; i < rows.at(j).size(); i++) {
+            if (rows.at(j).at(i) == '#') {
+                p.fillRect(i * u, j * u, u, u, color);
+            }
+        }
+    }
+    p.end();
+    return QIcon(pixmap);
+}
+}  // namespace
+
+QIcon VelloraLobby::gearIcon()
+{
+    return pixelIcon({ "....##....", ".#.####.#.", "..######..", ".###..###.", "###....###", "###....###", ".###..###.", "..######..",
+                       ".#.####.#.", "....##...." },
+                     QColor(0xfb, 0xef, 0xf1));
+}
+
+QIcon VelloraLobby::dotsIcon()
+{
+    return pixelIcon({ "..........", "..........", "..........", "..........", "##..##..##", "##..##..##", "..........", "..........",
+                       "..........", ".........." },
+                     QColor(0xfb, 0xef, 0xf1));
+}
+
+QIcon VelloraLobby::peopleIcon()
+{
+    return pixelIcon({ "...##.......", "..####..##..", "..####.####.", "...##..####.", "..####..##..", ".######.###.", ".######.####",
+                       ".######.####", "............", "............" },
+                     QColor(0xfb, 0xef, 0xf1));
+}
 
 QImage VelloraLobby::silhouette()
 {
@@ -375,7 +420,8 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
         VelloraSound::play("toggle");
     });
     chips->addWidget(music);
-    auto* friendsChip = new QPushButton(tr("👥 Friends"), this);
+    auto* friendsChip = new QPushButton(peopleIcon(), tr("Friends"), this);
+    friendsChip->setIconSize(QSize(24, 20));
     friendsChip->setMinimumHeight(44);
     friendsChip->setToolTip(tr("Play with friends: a lobby, a server, an invite code"));
     connect(friendsChip, &QPushButton::clicked, this, &VelloraLobby::friendsRequested);
@@ -385,6 +431,20 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     m_accountChip->setIconSize(QSize(28, 28));
     connect(m_accountChip, &QPushButton::clicked, this, &VelloraLobby::skinRequested);
     chips->addWidget(m_accountChip);
+    // the settings and "⋯" (folders, help, updates), like the gear in the corner of Millida's lobby
+    auto* settings = new QPushButton(this);
+    settings->setMinimumSize(44, 44);
+    settings->setIconSize(QSize(20, 20));
+    settings->setIcon(gearIcon());
+    settings->setToolTip(tr("Settings"));
+    connect(settings, &QPushButton::clicked, this, &VelloraLobby::settingsRequested);
+    chips->addWidget(settings);
+    m_more = new QPushButton(this);
+    m_more->setMinimumSize(44, 44);
+    m_more->setIconSize(QSize(20, 20));
+    m_more->setIcon(dotsIcon());
+    m_more->setToolTip(tr("Folders, help, updates"));
+    chips->addWidget(m_more);
     right->addLayout(chips);
     right->addStretch(1);
     auto* banner = new VelloraBanner(this);
@@ -439,6 +499,10 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     m_todayInfo = new QLabel(today);
     m_todayInfo->setStyleSheet("color: #d1a3aa; background: transparent; border: none;");
     texts->addWidget(m_todayInfo);
+    // like Millida's card: it says it opens the packs
+    m_change = new QLabel(tr("Change the pack ›"), today);
+    m_change->setStyleSheet("color: #ff8090; background: transparent; border: none; font-weight: bold;");
+    texts->addWidget(m_change);
     todayLayout->addLayout(texts, 1);
     today->setMinimumWidth(420);
     bottom->addWidget(today, 3);
@@ -447,6 +511,16 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     m_play->setMinimumSize(240, 84);
     m_play->setStyleSheet("font-size: 22pt;");
     connect(m_play, &QPushButton::clicked, this, &VelloraLobby::playRequested);
+    // the hours played, small at the bottom of the button
+    auto* playLayout = new QVBoxLayout(m_play);
+    playLayout->setContentsMargins(0, 0, 0, 6);
+    playLayout->addStretch(1);
+    m_playHours = new QLabel(m_play);
+    m_playHours->setAlignment(Qt::AlignCenter);
+    m_playHours->setAttribute(Qt::WA_TransparentForMouseEvents);
+    m_playHours->setStyleSheet("color: rgba(255, 255, 255, 200); font-size: 9pt; font-weight: bold; background: transparent;");
+    m_playHours->hide();
+    playLayout->addWidget(m_playHours);
     bottom->addWidget(m_play, 1);
     bottom->addStretch(1);
     outer->addLayout(bottom);
@@ -497,17 +571,53 @@ void VelloraLobby::refreshCharacter()
 
 void VelloraLobby::setToday(const QString& name, const QString& info, const QIcon& icon, bool running)
 {
+    m_hasToday = !name.isEmpty();
+    m_running = running;
     if (name.isEmpty()) {
         m_todayName->setText(tr("Nothing yet"));
         m_todayInfo->setText(tr("Create an instance or pick a ready-made pack"));
         m_todayIcon->setPixmap(QIcon(":/sculk_theme/tile-plus-lunar.svg").pixmap(48, 48));
+        m_change->setText(tr("Choose a pack ›"));
+    } else {
+        m_todayName->setText(name);
+        m_todayInfo->setText(info);
+        m_todayIcon->setPixmap(icon.pixmap(48, 48));
+        m_change->setText(tr("Change the pack ›"));
+    }
+    updatePlayButton();
+}
+
+void VelloraLobby::setPlayed(qint64 seconds)
+{
+    m_played = seconds;
+    updatePlayButton();
+}
+
+void VelloraLobby::setMoreMenu(QMenu* menu)
+{
+    connect(m_more, &QPushButton::clicked, this, [this, menu] {
+        // under the button, its right edge on the button's: it is in the corner of the window
+        menu->exec(m_more->mapToGlobal(QPoint(m_more->width() - menu->sizeHint().width(), m_more->height())));
+    });
+}
+
+void VelloraLobby::updatePlayButton()
+{
+    m_playHours->hide();
+    if (!m_hasToday) {
         m_play->setText(tr("+  New"));
         return;
     }
-    m_todayName->setText(name);
-    m_todayInfo->setText(info);
-    m_todayIcon->setPixmap(icon.pixmap(48, 48));
-    m_play->setText(running ? tr("■  Playing") : tr("▶  Play"));
+    if (m_running) {
+        m_play->setText(tr("■  Playing"));
+        return;
+    }
+    // the hours played under "Play", like Millida's button: a reason to come back
+    const qint64 hours = m_played / 3600, minutes = (m_played % 3600) / 60;
+    const QString played = m_played <= 0 ? QString() : hours > 0 ? tr("%1 h played").arg(hours) : tr("%1 min played").arg(std::max<qint64>(1, minutes));
+    m_play->setText(tr("▶  Play"));
+    m_playHours->setText(played);
+    m_playHours->setVisible(!played.isEmpty());
 }
 
 void VelloraLobby::paintEvent(QPaintEvent*)

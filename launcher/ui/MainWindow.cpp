@@ -219,28 +219,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(friendsAction, &QAction::triggered, this, [this] { openLobby(m_selectedInstance); });
         ui->instanceToolBar->insertActionBefore(ui->actionKillInstance, friendsAction);
 
-        // the tabs of Millida Launcher: Лобби / Библиотека / Каталог, first in the main tool bar
-        auto* tabs = new QWidget(ui->mainToolBar);
-        auto* tabsLayout = new QHBoxLayout(tabs);
-        tabsLayout->setContentsMargins(4, 2, 12, 2);
-        tabsLayout->setSpacing(6);
-        m_lobbyTab = new QPushButton(tr("Lobby"), tabs);
-        m_libraryTab = new QPushButton(tr("Library"), tabs);
-        auto* catalogTab = new QPushButton(tr("Catalog"), tabs);
-        m_createTab = new QPushButton(tr("✚ Create"), tabs);
-        for (auto* tab : { m_lobbyTab, m_libraryTab, m_createTab }) {
-            tab->setCheckable(true);
-            tab->setAutoExclusive(true);
-        }
-        connect(m_lobbyTab, &QPushButton::clicked, this, [this] { showPage(0); });
-        connect(m_libraryTab, &QPushButton::clicked, this, [this] { showPage(1); });
-        connect(catalogTab, &QPushButton::clicked, this, [this] { addInstance(QString(), {}, "modrinth"); });
-        connect(m_createTab, &QPushButton::clicked, this, [this] { showPage(2); });
-        tabsLayout->addWidget(m_lobbyTab);
-        tabsLayout->addWidget(m_libraryTab);
-        tabsLayout->addWidget(catalogTab);
-        tabsLayout->addWidget(m_createTab);
-        ui->mainToolBar->insertWidget(ui->mainToolBar->actions().value(0), tabs);
+        // Millida's menu: no tool bar; the lobby has its chips in the corner, the other screens a header with
+        // "‹ Лобби", "Библиотека | Каталог", "Импорт" and "+ Новая сборка" (made with the pages below)
 
         auto* lobbyAction = new QAction(QIcon::fromTheme("accounts"), tr("Play with friends"), this);
         lobbyAction->setToolTip(tr("Play with friends: create a lobby or join one"));
@@ -405,7 +385,66 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
             addInstance(QString(), extra, "agent");
         });
         connect(createPage, &VelloraCreatePage::catalogRequested, this, [this] { addInstance(QString(), {}, "modrinth"); });
-        ui->horizontalLayout->addWidget(m_pages, 1);
+
+        // the header of the screens other than the lobby, like Millida's library and catalog
+        auto* holder = new QWidget(ui->centralWidget);
+        auto* holderLayout = new QVBoxLayout(holder);
+        holderLayout->setContentsMargins(0, 0, 0, 0);
+        holderLayout->setSpacing(0);
+        m_header = new QFrame(holder);
+        m_header->setObjectName("pageHeader");
+        m_header->setStyleSheet("QFrame#pageHeader { background-color: rgba(8, 2, 4, 235); border-bottom: 2px solid #3a0d16; }");
+        auto* headerLayout = new QHBoxLayout(m_header);
+        headerLayout->setContentsMargins(12, 8, 12, 8);
+        headerLayout->setSpacing(8);
+        m_lobbyTab = new QPushButton(tr("‹ Lobby"), m_header);
+        m_lobbyTab->setObjectName("accentButton");
+        m_lobbyTab->setMinimumHeight(38);
+        connect(m_lobbyTab, &QPushButton::clicked, this, [this] { showPage(0); });
+        headerLayout->addWidget(m_lobbyTab);
+        headerLayout->addStretch(1);
+        m_libraryTab = new QPushButton(tr("Library"), m_header);
+        m_libraryTab->setCheckable(true);
+        m_libraryTab->setMinimumSize(150, 38);
+        connect(m_libraryTab, &QPushButton::clicked, this, [this] { showPage(1); });
+        headerLayout->addWidget(m_libraryTab);
+        auto* catalogTab = new QPushButton(tr("Catalog"), m_header);
+        catalogTab->setMinimumSize(150, 38);
+        catalogTab->setToolTip(tr("Modpacks, mods, shaders and maps from Modrinth and CurseForge"));
+        connect(catalogTab, &QPushButton::clicked, this, [this] { addInstance(QString(), {}, "modrinth"); });
+        headerLayout->addWidget(catalogTab);
+        headerLayout->addStretch(1);
+        auto* importButton = new QPushButton(tr("Import"), m_header);
+        importButton->setMinimumHeight(38);
+        importButton->setToolTip(tr("An instance or a modpack from a file, a link or another launcher"));
+        connect(importButton, &QPushButton::clicked, this, [this] { addInstance(QString(), {}, "import"); });
+        headerLayout->addWidget(importButton);
+        m_createTab = new QPushButton(tr("+ New pack"), m_header);
+        m_createTab->setObjectName("accentButton");
+        m_createTab->setCheckable(true);
+        m_createTab->setMinimumHeight(38);
+        connect(m_createTab, &QPushButton::clicked, this, [this] { showPage(2); });
+        headerLayout->addWidget(m_createTab);
+        auto* headerSettings = new QPushButton(VelloraLobby::gearIcon(), QString(), m_header);
+        headerSettings->setIconSize(QSize(20, 20));
+        headerSettings->setMinimumSize(38, 38);
+        headerSettings->setToolTip(tr("Settings"));
+        connect(headerSettings, &QPushButton::clicked, this, [this] { APPLICATION->ShowGlobalSettings(this); });
+        headerLayout->addWidget(headerSettings);
+        auto* headerMore = new QPushButton(VelloraLobby::dotsIcon(), QString(), m_header);
+        headerMore->setIconSize(QSize(20, 20));
+        headerMore->setMinimumSize(38, 38);
+        headerMore->setToolTip(tr("Folders, help, updates"));
+        connect(headerMore, &QPushButton::clicked, this, [this, headerMore] {
+            QMenu* menu = moreMenu();
+            menu->exec(headerMore->mapToGlobal(QPoint(headerMore->width() - menu->sizeHint().width(), headerMore->height())));
+        });
+        headerLayout->addWidget(headerMore);
+        holderLayout->addWidget(m_header);
+        holderLayout->addWidget(m_pages, 1);
+        ui->horizontalLayout->addWidget(holder, 1);
+        m_lobby->setMoreMenu(moreMenu());
+        connect(m_lobby, &VelloraLobby::settingsRequested, this, [this] { APPLICATION->ShowGlobalSettings(this); });
         connect(m_lobby, &VelloraLobby::playRequested, this, [this] {
             BaseInstance* instance = lobbyInstance();
             if (!instance) {
@@ -547,6 +586,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         m_instanceCount = new QLabel(searchBar);
         m_instanceCount->setObjectName("instanceCount");
         barLayout->addWidget(m_instanceCount);
+        // what the side tool bar did: settings, mods, folder, export, copy, delete of the chosen instance
+        m_packMenuButton = new QPushButton(tr("Pack ▾"), searchBar);
+        m_packMenuButton->setToolTip(tr("Edit, mods, folder, export, copy or delete the chosen instance (also a right click on its card)"));
+        m_packMenuButton->setEnabled(false);
+        connect(m_packMenuButton, &QPushButton::clicked, this,
+                [this] { showSelectedInstanceMenu(m_packMenuButton->mapToGlobal(QPoint(0, m_packMenuButton->height()))); });
+        barLayout->addWidget(m_packMenuButton);
 
         listLayout->addWidget(searchBar);
         listLayout->addWidget(view, 1);
@@ -695,6 +741,19 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // Vellora opens on the lobby, like Millida Launcher
     showLobbyPage(true);
+    // like Millida: no status bar (the hours played are on the Play button), no tool bars; the shortcuts of their
+    // actions still work from the window
+    statusBar()->hide();
+    ui->mainToolBar->hide();
+    ui->instanceToolBar->hide();
+    for (QAction* action : { ui->actionAddInstance, ui->actionSettings, ui->actionUndoTrashInstance, ui->actionCloseWindow }) {
+        addAction(action);
+    }
+    for (QAction* action : { ui->actionDeleteInstance, ui->actionRenameInstance, ui->actionLaunchInstance }) {
+        action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+        view->addAction(action);
+    }
+    updateStatusCenter();
 }
 
 // macOS always has a native menu bar, so these fixes are not applicable
@@ -857,7 +916,45 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
 void MainWindow::updateMainToolBar()
 {
     ui->menuBar->setVisible(APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
-    ui->mainToolBar->setVisible(ui->menuBar->isNativeMenuBar() || !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
+    // Vellora, like Millida: no tool bar; its actions are in the lobby's chips, the headers and "⋯"
+    ui->mainToolBar->setVisible(false);
+}
+
+QMenu* MainWindow::moreMenu()
+{
+    if (m_moreMenu) {
+        return m_moreMenu;
+    }
+    m_moreMenu = new QMenu(this);
+    m_moreMenu->addAction(ui->actionAddInstance);
+    m_moreMenu->addAction(QIcon::fromTheme("accounts"), tr("Play with friends"), this, [this] { openLobby(lobbyInstance()); });
+    m_moreMenu->addAction(QIcon::fromTheme("proxy"), tr("My server"), this, [this] { openServer(lobbyInstance()); });
+    m_moreMenu->addSeparator();
+    m_moreMenu->addMenu(ui->foldersMenu);
+    m_moreMenu->addMenu(ui->helpMenu);
+    m_moreMenu->addSeparator();
+    m_moreMenu->addAction(QIcon::fromTheme("accounts"), tr("Accounts..."), this, [this] { APPLICATION->ShowGlobalSettings(this, "accounts"); });
+    m_moreMenu->addAction(ui->actionSettings);
+    return m_moreMenu;
+}
+
+void MainWindow::showSelectedInstanceMenu(const QPoint& globalPos)
+{
+    if (!m_selectedInstance) {
+        return;
+    }
+    // the same actions as the right-click menu of an instance card
+    QList<QAction*> actions = ui->fileMenu->actions();
+    actions.removeFirst();
+    actions.removeLast();
+    actions.removeLast();
+    actions.prepend(ui->actionChangeInstIcon);
+    actions.prepend(ui->actionRenameInstance);
+    QMenu menu(this);
+    menu.addAction(ui->actionLaunchInstance);
+    menu.addSeparator();
+    menu.addActions(actions);
+    menu.exec(globalPos);
 }
 
 void MainWindow::updateLaunchButton()
@@ -1359,10 +1456,10 @@ void MainWindow::showPage(int index)
     } else {
         m_pages->setCurrentIndex(index);
     }
-    m_lobbyTab->setChecked(index == 0);
     m_libraryTab->setChecked(index == 1);
     m_createTab->setChecked(index == 2);
-    ui->instanceToolBar->setVisible(index == 1);
+    m_header->setVisible(index != 0);  // the lobby has its own chips, like Millida's
+    ui->instanceToolBar->setVisible(false);  // the instance actions are in "Pack ▾" and the right-click menu
     if (lobby) {
         updateLobby();
     }
@@ -2170,6 +2267,9 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
     m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
     if (m_selectedInstance) {
         ui->instanceToolBar->setEnabled(true);
+        if (m_packMenuButton) {
+            m_packMenuButton->setEnabled(true);
+        }
         setInstanceActionsEnabled(true);
         ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
 
@@ -2216,6 +2316,9 @@ void MainWindow::selectionBad()
 
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
+    if (m_packMenuButton) {
+        m_packMenuButton->setEnabled(false);
+    }
     setInstanceActionsEnabled(false);
     updateLaunchButton();
     renameButton->setText(tr("Rename Instance"));
@@ -2263,6 +2366,9 @@ void MainWindow::updateStatusCenter()
     m_statusCenter->setVisible(APPLICATION->settings()->get("ShowGlobalGameTime").toBool());
 
     int timePlayed = APPLICATION->instances()->getTotalPlayTime();
+    if (m_lobby) {
+        m_lobby->setPlayed(APPLICATION->settings()->get("ShowGlobalGameTime").toBool() ? timePlayed : 0);
+    }
     if (timePlayed > 0) {
         m_statusCenter->setText(
             tr("Total playtime: %1")

@@ -21,6 +21,7 @@
 #include <QWidget>
 
 class QLabel;
+class QMenu;
 class QPushButton;
 class LaunchTile;
 class MoonyWidget;
@@ -40,6 +41,15 @@ class VelloraLobby : public QWidget {
     void refreshCharacter();
     /// the installation the Play button starts (empty name: none yet)
     void setToday(const QString& name, const QString& info, const QIcon& icon, bool running);
+    /// the time played in all installations, shown on the Play button like Millida's ("наиграно 12 ч")
+    void setPlayed(qint64 seconds);
+    /// the "⋯" button in the corner: folders, help, updates (the menu stays the main window's)
+    void setMoreMenu(QMenu* menu);
+
+    /// small pixel icons for the chips: a gear, three dots, two people
+    static QIcon gearIcon();
+    static QIcon dotsIcon();
+    static QIcon peopleIcon();
 
     /// the front of a Minecraft skin as a 16x32 figure (head, body, arms, legs with their outer layers)
     static QImage renderBody(const QImage& skin);
@@ -55,6 +65,7 @@ class VelloraLobby : public QWidget {
     void newInstanceRequested();
     void friendsRequested();
     void skinRequested();
+    void settingsRequested();
 
    protected:
     void paintEvent(QPaintEvent* event) override;
@@ -70,6 +81,12 @@ class VelloraLobby : public QWidget {
     QLabel* m_todayInfo = nullptr;
     QPushButton* m_play = nullptr;
     QPushButton* m_accountChip = nullptr;
+    QPushButton* m_more = nullptr;
+    QLabel* m_change = nullptr;
+    QLabel* m_playHours = nullptr;
+    qint64 m_played = 0;
+    bool m_hasToday = false, m_running = false;
+    void updatePlayButton();
     class VelloraHubTile* m_skinTile = nullptr;
     QWidget* m_today = nullptr;
     QImage m_skin;
