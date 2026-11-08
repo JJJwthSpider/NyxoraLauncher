@@ -20,6 +20,8 @@
 #include <QStringList>
 #include <functional>
 
+#include "ui/widgets/VelloraSkinGen.h"
+
 class QGridLayout;
 class QLabel;
 class QPushButton;
@@ -44,6 +46,17 @@ class WardrobeDialog : public QDialog {
 
    private:
     QWidget* generator(bool capes);
+    /// what was chosen and made in the generator, kept while the wardrobe is open
+    struct GenState {
+        SkinGen::Options options;
+        QString prompt;
+        QList<SkinGen::Skin> skins;
+        QList<QImage> capes;
+        int selected = 0;
+        qint64 seed = 0;
+        bool made = false;
+    };
+    GenState m_skinGen, m_capeGen;
     void showTab(const QString& tab);
     /// look: head, body, back, pet, emote, effect
     void addTile(const QString& title, const QString& rarity, bool worn, const QStringList& look, std::function<void()> action);

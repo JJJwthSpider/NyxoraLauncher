@@ -408,7 +408,9 @@ QRgb pick(const QRgb (&a)[N], int i)
     return a[size_t(i) % N];
 }
 
-Look look(const QString& prompt, QRandomGenerator& rnd, int variant)
+void applyOptions(Look& l, const Options& o, int variant);
+
+Look look(const QString& prompt, QRandomGenerator& rnd, int variant, const Options& o)
 {
     const QStringList w = words(prompt);
     Look l;
@@ -417,6 +419,9 @@ Look look(const QString& prompt, QRandomGenerator& rnd, int variant)
         girl << QString::fromUtf8(g);
     }
     l.girl = has(w, girl) || has(w, L({ "принцесс", "princess", "ведьм", "witch", "фея", "fairy", "королев", "queen" }));
+    if (o.gender != 0) {
+        l.girl = o.gender == 2;
+    }
     for (const auto& t : THEMES) {
         if (has(w, { QString::fromUtf8(t.first) })) {
             l.theme = t.second;
@@ -707,7 +712,62 @@ Look look(const QString& prompt, QRandomGenerator& rnd, int variant)
     if (has(w, L({ "светящ", "glow" }))) {
         l.glowEyes = true;
     }
+    applyOptions(l, o, variant);
     return l;
+}
+
+/// the buttons win over the words
+void applyOptions(Look& l, const Options& o, int variant)
+{
+    if (o.gender == 2 && l.theme != "princess" && (l.hairStyle == "bald" || l.hairStyle == "mohawk" || l.hairStyle == "spiky")) {
+        l.hairStyle = variant % 2 == 0 ? "long" : "bun";
+    }
+    if (o.gender == 1) {
+        if (l.theme == "princess") {
+            l.outfit = "robe";
+            l.head = "crown";
+            l.title = QString::fromUtf8("Принц");
+        }
+        if (l.title == QString::fromUtf8("Девушка")) {
+            l.title = QString::fromUtf8("Игрок");
+        }
+    } else if (o.gender == 2 && l.title == QString::fromUtf8("Игрок")) {
+        l.title = QString::fromUtf8("Девушка");
+    }
+    if (o.clothes) {
+        const QRgb c = o.clothes;
+        if (l.outfit == "armor") {
+            l.metal = c;
+        } else if (l.theme == "cyber" || l.theme == "vampire" || l.theme == "demon" || l.theme == "ninja") {
+            l.accent = c;  // dark looks keep their dark clothes; the colour lights them up
+            if (l.theme == "cyber") {
+                l.eyes = c;
+            }
+        } else {
+            l.top = variant == 0 ? c : mix(c, hueShift(c, variant * 12.f - 18), 0.35f);
+        }
+    }
+    if (o.hair) {
+        l.hair = o.hair;
+    }
+    if (o.eyes) {
+        l.eyes = o.eyes;
+    }
+    if (o.skin) {
+        l.skin = o.skin;
+    }
+    if (o.emblem) {
+        l.emblem = *o.emblem;
+    }
+    if (o.hairStyle) {
+        l.hairStyle = *o.hairStyle;
+    }
+}
+}  // namespace
+
+QStringList emblemIds()
+{
+    return { "heart", "star", "bolt", "moon", "flame", "diamond", "crown", "skull", "creeper", "v" };
 }
 
 QStringList emblemRows(const QString& id)
@@ -724,6 +784,8 @@ QStringList emblemRows(const QString& id)
     if (id == "v") return { "#...#", "#...#", ".#.#.", ".#.#.", "..#.." };
     return {};
 }
+
+namespace {
 
 void paintHead(Tex& t, const Look& l)
 {
@@ -1137,18 +1199,18 @@ QImage cape(QRgb main, QRgb second, const QString& style, const QString& emblem,
 }
 }  // namespace
 
-QList<Skin> skins(const QString& prompt, int count, qint64 seed)
+QList<Skin> skins(const QString& prompt, int count, qint64 seed, const Options& options)
 {
     QList<Skin> out;
     for (int i = 0; i < count; i++) {
         QRandomGenerator rnd(quint32(seed * 31 + i * 7919 + qHash(prompt)));
-        const Look l = look(prompt, rnd, i);
+        const Look l = look(prompt, rnd, i, options);
         out.append({ paint(l, rnd), l.girl, QString("%1 #%2").arg(l.title).arg(i + 1) });
     }
     return out;
 }
 
-QList<QImage> capes(const QString& prompt, int count, qint64 seed)
+QList<QImage> capes(const QString& prompt, int count, qint64 seed, const Options& o)
 {
     const QStringList w = words(prompt);
     const QList<QRgb> said = clothesColors(w);
@@ -1183,11 +1245,61 @@ QList<QImage> capes(const QString& prompt, int count, qint64 seed)
         if (i > 0 && said.isEmpty()) {
             main = HUE[(rnd.bounded(10) + i) % 10];
         }
-        const QRgb second = said.size() > 1 ? said[1] : i % 2 == 0 ? shade(main, 0.55f) : mix(main, 0xFFFFFFFF, 0.35f);
-        const QString s = !style.isEmpty() ? style : QString(styles[(i * 3 + rnd.bounded(8)) % 8]);
-        const QString mark = !emblem.isEmpty() ? emblem : (s == "emblem" || s == "border") ? QString(EMBLEM_CHOICES[rnd.bounded(7)]) : QString();
+        if (o.clothes) {
+            main = o.clothes;
+        }
+        QRgb second = said.size() > 1 ? said[1] : i % 2 == 0 ? shade(main, 0.55f) : mix(main, 0xFFFFFFFF, 0.35f);
+        if (o.second) {
+            second = o.second;
+        }
+        QString s = !style.isEmpty() ? style : QString(styles[(i * 3 + rnd.bounded(8)) % 8]);
+        if (o.pattern) {
+            s = *o.pattern;
+        }
+        QString mark = !emblem.isEmpty() ? emblem : (s == "emblem" || s == "border") ? QString(EMBLEM_CHOICES[rnd.bounded(7)]) : QString();
+        if (o.emblem) {
+            mark = *o.emblem;
+        } else if (o.pattern && emblem.isEmpty()) {
+            // one pattern for all four: they differ by the picture on them
+            mark = i == 0 ? QString() : QString(EMBLEM_CHOICES[(i * 2 + rnd.bounded(3)) % 7]);
+        }
         out.append(cape(main, second, s, mark, rnd));
     }
     return out;
+}
+
+QString surprise(bool cape)
+{
+    auto* rnd = QRandomGenerator::global();
+    auto any = [rnd](const QStringList& list) { return list.at(int(rnd->bounded(quint32(list.size())))); };
+    QString text;
+    if (cape) {
+        const QString what = any(L({ "галактика", "огненный плащ", "ледяной плащ", "плащ в полоску", "плащ в клетку", "радужный плащ", "лесной плащ",
+                                     "плащ с рамкой", "плащ" }));
+        const QString color = any(L({ "красный", "бордовый", "синий", "зелёный", "фиолетовый", "золотой", "чёрный", "белый", "розовый", "оранжевый",
+                                      "бирюзовый", "голубой" }));
+        const bool own = what.startsWith(QString::fromUtf8("галактика")) || what.startsWith(QString::fromUtf8("радужн")) ||
+                         what.startsWith(QString::fromUtf8("огнен")) || what.startsWith(QString::fromUtf8("ледян")) || what.startsWith(QString::fromUtf8("лесн"));
+        text = own ? what : color + ' ' + what;
+        const QString mark = any(L({ "со звездой", "с сердцем", "с молнией", "с короной", "с луной", "с черепом", "с крипером", "с алмазом", "с пламенем", "", "" }));
+        if (!mark.isEmpty()) {
+            text += ' ' + mark;
+        }
+    } else {
+        text = any(L({ "рыцарь", "ниндзя", "маг", "пират", "принцесса", "космонавт", "демон", "кибер", "зомби", "скелет", "эльф", "викинг", "вампир", "ангел",
+                       "король", "солдат", "хакер в худи", "агент в костюме", "повар", "доктор", "футболист", "ведьма", "девушка-маг", "девушка-эльф",
+                       "девушка в худи" }));
+        const QString color = any(L({ "в красном", "в бордовом", "в синем", "в зелёном", "в фиолетовом", "в золотом", "в чёрном", "в белом", "в розовом",
+                                      "в оранжевом", "в бирюзовом", "в голубом", "" }));
+        if (!color.isEmpty()) {
+            text += ' ' + color;
+        }
+        const QString detail = any(L({ "с короной", "с бородой", "со светящимися глазами", "с черепом", "со звездой", "с молнией", "с длинными волосами",
+                                       "с ирокезом", "в капюшоне", "в шлеме", "с сердцем", "рыжий", "блондин", "", "" }));
+        if (!detail.isEmpty()) {
+            text += ' ' + detail;
+        }
+    }
+    return text.left(1).toUpper() + text.mid(1);
 }
 }  // namespace SkinGen

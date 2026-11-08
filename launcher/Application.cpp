@@ -647,6 +647,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Theming
         m_settings->registerSetting("IconTheme", QString());
         m_settings->registerSetting("ApplicationTheme", QString());
+        // Vellora: the "add a Microsoft account" page is shown once; after that the lobby's "Sign in" is enough
+        m_settings->registerSetting("VelloraLoginAsked", false);
         m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
         // Remembered state
@@ -1249,7 +1251,7 @@ bool Application::createSetupWizard()
     }
     bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
     bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
-    bool login = !m_accounts->anyAccountIsValid() && capabilities() & Application::SupportsMSA;
+    bool login = !m_accounts->anyAccountIsValid() && capabilities() & Application::SupportsMSA && !settings()->get("VelloraLoginAsked").toBool();
     bool themeInterventionRequired = !validWidgets || !validIcons;
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {
@@ -1285,6 +1287,7 @@ bool Application::createSetupWizard()
 
         if (login) {
             m_setupWizard->addPage(new LoginWizardPage(m_setupWizard));
+            settings()->set("VelloraLoginAsked", true);
         }
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();

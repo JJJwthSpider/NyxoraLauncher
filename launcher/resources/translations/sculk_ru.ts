@@ -3339,6 +3339,176 @@ Are you sure?</source>
 <context>
     <name>WardrobeDialog</name>
     <message>
+        <source>Describe a cape or build it with the buttons: Arkan draws at once</source>
+        <translation>Опиши плащ или собери его кнопками — Аркан рисует сразу</translation>
+    </message>
+    <message>
+        <source>Describe a character or build it with the buttons: Arkan draws at once</source>
+        <translation>Опиши персонажа или собери его кнопками — Аркан рисует сразу</translation>
+    </message>
+    <message>
+        <source>Surprise me</source>
+        <translation>Удиви меня</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation>Сбросить</translation>
+    </message>
+    <message>
+        <source>Colours and details ▴</source>
+        <translation>Цвета и детали ▴</translation>
+    </message>
+    <message>
+        <source>Colours and details ▾</source>
+        <translation>Цвета и детали ▾</translation>
+    </message>
+    <message>
+        <source>More
+variants</source>
+        <translation>Ещё
+варианты</translation>
+    </message>
+    <message>
+        <source>Auto</source>
+        <translation>Авто</translation>
+    </message>
+    <message>
+        <source>Auto: as the words say</source>
+        <translation>Авто: как сказано словами</translation>
+    </message>
+    <message>
+        <source>No emblem</source>
+        <translation>Без эмблемы</translation>
+    </message>
+    <message>
+        <source>Colour</source>
+        <translation>Цвет</translation>
+    </message>
+    <message>
+        <source>Second</source>
+        <translation>Второй</translation>
+    </message>
+    <message>
+        <source>Pattern</source>
+        <translation>Узор</translation>
+    </message>
+    <message>
+        <source>Gradient</source>
+        <translation>Градиент</translation>
+    </message>
+    <message>
+        <source>Stripes</source>
+        <translation>Полосы</translation>
+    </message>
+    <message>
+        <source>Checker</source>
+        <translation>Клетка</translation>
+    </message>
+    <message>
+        <source>Diagonal</source>
+        <translation>Диагональ</translation>
+    </message>
+    <message>
+        <source>Border</source>
+        <translation>Рамка</translation>
+    </message>
+    <message>
+        <source>Galaxy</source>
+        <translation>Галактика</translation>
+    </message>
+    <message>
+        <source>Flames</source>
+        <translation>Пламя</translation>
+    </message>
+    <message>
+        <source>Leaves</source>
+        <translation>Листва</translation>
+    </message>
+    <message>
+        <source>Who</source>
+        <translation>Кто</translation>
+    </message>
+    <message>
+        <source>Boy</source>
+        <translation>Парень</translation>
+    </message>
+    <message>
+        <source>Girl</source>
+        <translation>Девушка</translation>
+    </message>
+    <message>
+        <source>Clothes</source>
+        <translation>Одежда</translation>
+    </message>
+    <message>
+        <source>Hair</source>
+        <translation>Волосы</translation>
+    </message>
+    <message>
+        <source>Hair style</source>
+        <translation>Причёска</translation>
+    </message>
+    <message>
+        <source>Short</source>
+        <translation>Короткая</translation>
+    </message>
+    <message>
+        <source>Long</source>
+        <translation>Длинная</translation>
+    </message>
+    <message>
+        <source>Spiky</source>
+        <translation>Ёжик</translation>
+    </message>
+    <message>
+        <source>Bun</source>
+        <translation>Пучок</translation>
+    </message>
+    <message>
+        <source>Mohawk</source>
+        <translation>Ирокез</translation>
+    </message>
+    <message>
+        <source>Bald</source>
+        <translation>Лысый</translation>
+    </message>
+    <message>
+        <source>Eyes</source>
+        <translation>Глаза</translation>
+    </message>
+    <message>
+        <source>Skin</source>
+        <translation>Кожа</translation>
+    </message>
+    <message>
+        <source>Emblem</source>
+        <translation>Эмблема</translation>
+    </message>
+    <message>
+        <source>You asked for it before</source>
+        <translation>Ты уже просил это</translation>
+    </message>
+    <message>
+        <source>Recent:</source>
+        <translation>Недавние:</translation>
+    </message>
+    <message>
+        <source>Ideas:</source>
+        <translation>Идеи:</translation>
+    </message>
+    <message>
+        <source>Write who to draw, click an idea or the die: the variants appear here</source>
+        <translation>Напиши, кого нарисовать, нажми идею или кубик — варианты появятся здесь</translation>
+    </message>
+    <message>
+        <source>Arkan&apos;s AI skin generator</source>
+        <translation>ИИ-генератор скинов Аркана</translation>
+    </message>
+    <message>
+        <source>Arkan&apos;s AI cape generator</source>
+        <translation>ИИ-генератор плащей Аркана</translation>
+    </message>
+    <message>
         <source>In hand</source>
         <translation>В руке</translation>
     </message>
