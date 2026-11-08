@@ -440,7 +440,72 @@ public final class MainActivity extends Activity {
 
     /** the wardrobe: outfits, capes and accessories on the player (like Millida Launcher's) */
     void openWardrobe() {
-        show(new WardrobeScreen(this).view());
+        openWardrobe(WardrobeScreen.SETS);
+    }
+
+    /** the wardrobe on this tab ("Мой скин" opens the skins) */
+    void openWardrobe(String tab) {
+        wardrobe = new WardrobeScreen(this);
+        wardrobe.showTab(tab);
+        show(wardrobe.view());
+    }
+
+    /** the "Создать" tab: a new installation and the ready packs */
+    void showCreate() {
+        showHome();
+        if (home != null) {
+            home.showPage(HomeScreen.CREATE);
+        }
+    }
+
+    private WardrobeScreen wardrobe;
+    private static final int REQUEST_SKIN = 43;
+
+    /** "Загрузить скин" in the wardrobe: a PNG from the phone */
+    void pickSkinFile(WardrobeScreen from) {
+        wardrobe = from;
+        Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        pick.addCategory(Intent.CATEGORY_OPENABLE);
+        pick.setType("image/*");
+        try {
+            startActivityForResult(pick, REQUEST_SKIN);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "Нет приложения для выбора файлов", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /** the skin or the name changed: the lobby shows the new one */
+    void accountChanged() {
+        if (home != null) {
+            home.updateAccount();
+        }
+    }
+
+    /** installs a modpack (Modrinth, or CurseForge with the "cf:" prefix) as a new installation and opens it */
+    void installModpack(final String projectId, final String name) {
+        final HomeScreen.Progress progress = new HomeScreen.Progress(this, "Устанавливаю «" + name + "»");
+        background(new Job<Installation>() {
+            public Installation run() throws Exception {
+                Installation pack = Installer.importModpack(projectId, installations, progress);
+                installations.save(pack);
+                return pack;
+            }
+
+            public void done(Installation pack, Exception error) {
+                progress.dismiss();
+                if (error != null) {
+                    new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Не удалось установить «" + name + "»")
+                        .setMessage(error instanceof Installer.InstallException ? error.getMessage() : "Нет связи (" + error.getMessage() + ")")
+                        .setPositiveButton("OK", null)
+                        .show();
+                    return;
+                }
+                Toast.makeText(MainActivity.this, "Сборка «" + pack.name + "» установлена: " + pack.describe() + BrowserScreen.disabledNote(pack),
+                               Toast.LENGTH_LONG).show();
+                showHome(pack.id);
+            }
+        });
     }
 
     /** the modpack catalog with this pack already found */
@@ -2294,6 +2359,12 @@ public final class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_SKIN) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null && wardrobe != null) {
+                wardrobe.changeSkin(data.getData());
+            }
+            return;
+        }
         if (requestCode == REQUEST_IMPORT_PACK) {
             if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                 importPackFile(data.getData());

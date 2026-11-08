@@ -262,6 +262,33 @@ final class Cosmetics {
         }
     }
 
+    /** {left, top, right, bottom} of the layers seen from this side, in skin pixels; null if there are none */
+    static float[] bounds(Item item, boolean behind) {
+        float[] box = null;
+        for (Layer layer : item.layers) {
+            if (!"both".equals(layer.view) && !(behind ? "back" : "front").equals(layer.view)) {
+                continue;
+            }
+            int width = 0;
+            for (String row : layer.rows) {
+                width = Math.max(width, row.length());
+            }
+            float r = layer.x + width, b = layer.y + layer.rows.length;
+            if (box == null) {
+                box = new float[] { layer.x, layer.y, r, b };
+            } else {
+                box[0] = Math.min(box[0], layer.x);
+                box[1] = Math.min(box[1], layer.y);
+                box[2] = Math.max(box[2], r);
+                box[3] = Math.max(box[3], b);
+            }
+        }
+        if (box != null && "hop".equals(item.layers.get(0).anim)) {
+            box[1] -= 2;  // room for the jump
+        }
+        return box;
+    }
+
     private static float hash(int a, int b) {
         int h = a * 374761393 + b * 668265263 + 0x2545F491;
         h = (h ^ (h >>> 13)) * 1274126177;

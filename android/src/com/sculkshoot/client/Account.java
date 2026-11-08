@@ -308,6 +308,56 @@ final class Account {
         }
     }
 
+    /**
+     * Puts a new skin on the account (a 64x64 or 64x32 PNG): Minecraft services take it as multipart/form-data, like
+     * the "Загрузить скин" of Millida Launcher. Everyone sees it in the game.
+     */
+    void uploadSkin(byte[] png, boolean slim) throws Exception {
+        String boundary = "vellora" + Long.toHexString(System.nanoTime());
+        java.io.ByteArrayOutputStream body = new java.io.ByteArrayOutputStream();
+        String head = "--" + boundary + "\r\nContent-Disposition: form-data; name=\"variant\"\r\n\r\n" + (slim ? "slim" : "classic") + "\r\n"
+                      + "--" + boundary + "\r\nContent-Disposition: form-data; name=\"file\"; filename=\"skin.png\"\r\nContent-Type: image/png\r\n\r\n";
+        body.write(head.getBytes("UTF-8"));
+        body.write(png);
+        body.write(("\r\n--" + boundary + "--\r\n").getBytes("UTF-8"));
+        byte[] bytes = body.toByteArray();
+        java.net.HttpURLConnection c = (java.net.HttpURLConnection) new java.net.URL(MINECRAFT + "/minecraft/profile/skins").openConnection();
+        try {
+            c.setRequestMethod("POST");
+            c.setRequestProperty("Authorization", "Bearer " + minecraftToken);
+            c.setRequestProperty("User-Agent", Http.USER_AGENT);
+            c.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+            c.setConnectTimeout(20000);
+            c.setReadTimeout(30000);
+            c.setDoOutput(true);
+            c.setFixedLengthStreamingMode(bytes.length);
+            java.io.OutputStream out = c.getOutputStream();
+            try {
+                out.write(bytes);
+            } finally {
+                out.close();
+            }
+            int status = c.getResponseCode();
+            java.io.InputStream in = status >= 400 ? c.getErrorStream() : c.getInputStream();
+            String answer = in == null ? "" : Http.read(in);
+            if (status != 200) {
+                throw new LoginException("Minecraft не принял скин (" + answer(new Http.Response(status, answer)) + ")");
+            }
+        } finally {
+            c.disconnect();
+        }
+        loadProfile();
+    }
+
+    /** back to the standard skin (Steve or Alex) */
+    void resetSkin() throws Exception {
+        Http.Response r = Http.delete(MINECRAFT + "/minecraft/profile/skins/active", "Authorization", "Bearer " + minecraftToken);
+        if (!r.ok()) {
+            throw new LoginException("Не удалось сбросить скин (" + answer(r) + ")");
+        }
+        loadProfile();
+    }
+
     /** a real Minecraft cape of the account (seen in the game by everyone) */
     static final class Cape {
         final String id, alias, url;

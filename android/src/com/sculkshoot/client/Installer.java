@@ -402,6 +402,11 @@ final class Installer {
         inst.name = name;
         inst.minecraftVersion = minecraftVersion;
         inst.loader = loader;
+        if ("vanilla".equals(loader)) {
+            // plain Minecraft, like Millida's "Vanilla": no loader and no mods
+            inst.loaderVersion = "";
+            return inst;
+        }
         if (essentials) {
             Plan plan = new Plan();
             plan.name = name;

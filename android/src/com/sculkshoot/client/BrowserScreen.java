@@ -80,7 +80,7 @@ final class BrowserScreen {
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(10), dp(6), dp(10), dp(6));
         bar.setBackgroundColor(0xF0080204);
-        Button back = Ui.button(activity, inst == null ? "‹ Лобби" : "‹ Назад", false);
+        Button back = Ui.button(activity, inst == null ? "‹ Лобби" : "‹ Назад", true);
         back.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 goBack();
@@ -102,12 +102,20 @@ final class BrowserScreen {
             LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             cp.leftMargin = dp(4);
             bar.addView(catalog, cp);
+            Button create = Ui.button(activity, "✚ Создать", false);
+            create.setTextSize(14);
+            create.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    BrowserScreen.this.activity.showCreate();
+                }
+            });
+            bar.addView(create, new LinearLayout.LayoutParams(cp));
         } else {
             bar.addView(Ui.label(activity, title(), 16, Ui.TEXT, true));
         }
         bar.addView(new View(activity), new LinearLayout.LayoutParams(0, 1, 1));
         if (inst == null) {
-            Button fromFile = Ui.button(activity, "⭳ Импорт", false);
+            Button fromFile = Ui.button(activity, "⬇ Импорт", false);
             fromFile.setTextSize(13);
             fromFile.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -520,27 +528,11 @@ final class BrowserScreen {
     private void install(final JSONObject hit) {
         final String projectId = hit.optString("project_id");
         final String name = hit.optString("title");
-        final HomeScreen.Progress progress = new HomeScreen.Progress(activity, "Устанавливаю «" + name + "»");
         if (inst == null) {
-            activity.background(new MainActivity.Job<Installation>() {
-                public Installation run() throws Exception {
-                    Installation pack = Installer.importModpack(projectId, activity.store(), progress);
-                    activity.store().save(pack);
-                    return pack;
-                }
-
-                public void done(Installation pack, Exception error) {
-                    progress.dismiss();
-                    if (error != null) {
-                        fail(name, error);
-                        return;
-                    }
-                    Toast.makeText(activity, "Сборка «" + pack.name + "» установлена: " + pack.describe() + disabledNote(pack), Toast.LENGTH_LONG).show();
-                    activity.showHome(pack.id);
-                }
-            });
+            activity.installModpack(projectId, name);
             return;
         }
+        final HomeScreen.Progress progress = new HomeScreen.Progress(activity, "Устанавливаю «" + name + "»");
         progress.log("Ищу файл для " + inst.describe() + " и нужные библиотеки...");
         activity.background(new MainActivity.Job<List<String>>() {
             public List<String> run() throws Exception {

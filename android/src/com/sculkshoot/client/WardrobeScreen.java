@@ -3,13 +3,18 @@ package com.sculkshoot.client;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
+import android.net.Uri;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.GridLayout;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -20,44 +25,49 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The wardrobe, like Millida Launcher's: the player big on the left (a tap turns it around), the tabs on the right
- * (outfits, capes, head, body, back, pets, emotes) and the items as tiles. A tap puts an item on or takes it off; the
- * capes are the real Minecraft capes of the account and are seen in the game.
+ * The wardrobe, laid out like Millida Launcher's: "‹ Лобби" and "Загрузить скин" on top, the player big on a lit stage
+ * on the left (a tap turns it around), square tabs with pictures on the right (outfits, skins, capes, head, body, back,
+ * pets, effects, emotes) and the items as tiles. Outfits are cards of four pieces with "2/4", like Millida's sets.
+ * Every item is open. The skin and the capes are the real ones of the Minecraft account and are seen in the game; the
+ * other items show in the launcher.
  */
 final class WardrobeScreen {
-    private static final String[][] TABS = { { "sets", "Образы" }, { "capes", "Плащи" }, { Cosmetics.HEAD, "Голова" }, { Cosmetics.BODY, "Тело" },
-                                             { Cosmetics.BACK, "Спина" }, { Cosmetics.PET, "Питомцы" }, { Cosmetics.EFFECT, "Эффекты" },
-                                             { Cosmetics.EMOTE, "Эмоции" } };
+    static final String SETS = "sets", SKINS = "skins", CAPES = "capes";
+    private static final String[][] TABS = { { SETS, "Образы" }, { SKINS, "Скины" }, { CAPES, "Плащи" }, { Cosmetics.HEAD, "Голова" },
+                                             { Cosmetics.BODY, "Тело" }, { Cosmetics.BACK, "Спина" }, { Cosmetics.PET, "Питомцы" },
+                                             { Cosmetics.EFFECT, "Эффекты" }, { Cosmetics.EMOTE, "Эмоции" } };
 
     private final MainActivity activity;
     private final LinearLayout root;
     private final CharacterView character;
-    private final GridLayout grid;
+    private final FlowLayout grid;
+    private final ScrollView scroll;
     private final TextView section;
-    private final List<Button> tabButtons = new ArrayList<Button>();
-    private String tab = "sets";
+    private final List<View> tabViews = new ArrayList<View>();
+    private String tab = SETS;
+    private boolean slim;  // the skin to upload: thin arms (Alex) or classic (Steve)
 
     WardrobeScreen(MainActivity activity) {
         this.activity = activity;
+        float density = activity.getResources().getDisplayMetrics().density;
         root = new LinearLayout(activity);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackground(new RainDrawable(activity.getResources().getDisplayMetrics().density));
+        root.setBackgroundColor(0xFF0B0305);
 
         LinearLayout bar = new LinearLayout(activity);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(10), dp(6), dp(10), dp(6));
-        bar.setBackgroundColor(0xE60B0305);
-        Button back = Ui.button(activity, "← Лобби", false);
+        bar.setBackgroundColor(0xF0080204);
+        Button back = Ui.button(activity, "‹ Лобби", true);
         back.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                WardrobeScreen.this.activity.showHome();
+                WardrobeScreen.this.activity.showLobby();
             }
         });
         bar.addView(back);
-        TextView title = Ui.label(activity, "Гардероб", 18, Ui.TEXT, true);
-        title.setPadding(dp(14), 0, 0, 0);
-        bar.addView(title, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        bar.addView(new View(activity), new LinearLayout.LayoutParams(0, 1, 1));
         Button undress = Ui.button(activity, "Снять всё", false);
+        undress.setTextSize(13);
         undress.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 for (String slot : Cosmetics.WEARABLE) {
@@ -68,26 +78,34 @@ final class WardrobeScreen {
             }
         });
         bar.addView(undress);
+        Button upload = Ui.button(activity, "⬆ Загрузить скин", true);
+        upload.setTextSize(13);
+        upload.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                showTab(SKINS);
+                pickSkin();
+            }
+        });
+        LinearLayout.LayoutParams up = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        up.leftMargin = dp(6);
+        bar.addView(upload, up);
         root.addView(bar);
 
         LinearLayout body = new LinearLayout(activity);
-        body.setPadding(dp(10), dp(10), dp(10), dp(10));
+        body.setPadding(dp(10), dp(10), dp(6), dp(10));
         root.addView(body, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
 
-        // left: the player on a crimson-lit stage
-        LinearLayout stage = new LinearLayout(activity);
-        stage.setOrientation(LinearLayout.VERTICAL);
-        stage.setGravity(Gravity.CENTER_HORIZONTAL);
-        stage.setBackground(Ui.rounded(activity, 0xE6140509, 0, 0xFF5A1E2A));
-        stage.setPadding(dp(8), dp(8), dp(8), dp(10));
+        // left: the player on a stage lit from the middle, with rays, like Millida's wardrobe
+        FrameLayout stage = new FrameLayout(activity);
+        stage.setBackground(new StageDrawable(density));
         character = new CharacterView(activity);
-        stage.addView(character, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
-        TextView hint = Ui.label(activity, "Нажми на персонажа, чтобы повернуть", 11, Ui.HINT, false);
+        stage.addView(character, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        TextView hint = Ui.label(activity, "Нажми на персонажа, чтобы повернуть", 10, 0xB3FFD6DC, false);
         hint.setGravity(Gravity.CENTER);
-        stage.addView(hint);
+        stage.addView(hint, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
         body.addView(stage, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 4));
 
-        // right: the tabs and the items
+        // right: the square tabs with pictures and the items
         LinearLayout right = new LinearLayout(activity);
         right.setOrientation(LinearLayout.VERTICAL);
         right.setPadding(dp(10), 0, 0, 0);
@@ -95,30 +113,28 @@ final class WardrobeScreen {
         tabsScroll.setHorizontalScrollBarEnabled(false);
         LinearLayout tabs = new LinearLayout(activity);
         for (final String[] t : TABS) {
-            Button b = Ui.button(activity, t[1], t[0].equals(tab));
-            b.setTextSize(13);
+            View b = tabButton(t[0], t[1]);
             b.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     showTab(t[0]);
                 }
             });
-            b.setTag(t[0]);
-            tabButtons.add(b);
-            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            p.rightMargin = dp(6);
+            tabViews.add(b);
+            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(dp(66), dp(62));
+            p.rightMargin = dp(5);
             tabs.addView(b, p);
         }
         tabsScroll.addView(tabs);
         right.addView(tabsScroll);
-        section = Ui.label(activity, "", 16, Ui.TEXT, true);
-        section.setPadding(dp(2), dp(10), 0, dp(6));
+        section = Ui.label(activity, "", 15, Ui.TEXT, true);
+        section.setPadding(dp(2), dp(8), 0, dp(6));
         right.addView(section);
-        ScrollView scroll = new ScrollView(activity);
-        grid = new GridLayout(activity);
-        grid.setColumnCount(4);
+        scroll = new ScrollView(activity);
+        grid = new FlowLayout(activity, dp(8));
+        grid.setPadding(0, 0, 0, dp(10));
         scroll.addView(grid);
         right.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
-        body.addView(right, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 6));
+        body.addView(right, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 7));
 
         loadSkinAndCape(activity, character);
         showTab(tab);
@@ -130,6 +146,54 @@ final class WardrobeScreen {
 
     private int dp(float v) {
         return Ui.dp(activity, v);
+    }
+
+    /** a square tab like Millida's: a picture above the name */
+    private View tabButton(String id, String name) {
+        LinearLayout b = new LinearLayout(activity);
+        b.setOrientation(LinearLayout.VERTICAL);
+        b.setGravity(Gravity.CENTER_HORIZONTAL);
+        b.setPadding(0, dp(5), 0, dp(4));
+        View icon = tabIcon(id);
+        b.addView(icon, new LinearLayout.LayoutParams(dp(30), dp(28)));
+        TextView label = Ui.label(activity, name, 10, Ui.TEXT, true);
+        label.setGravity(Gravity.CENTER);
+        b.addView(label);
+        b.setTag(id);
+        b.setClickable(true);
+        b.setContentDescription(name);
+        return b;
+    }
+
+    private View tabIcon(String id) {
+        if (Cosmetics.HEAD.equals(id)) {
+            return new ItemIcon(activity, Cosmetics.find(activity, "top_hat"));
+        }
+        if (Cosmetics.BODY.equals(id)) {
+            return new ItemIcon(activity, Cosmetics.find(activity, "heart_necklace"));
+        }
+        if (Cosmetics.BACK.equals(id)) {
+            return new ItemIcon(activity, Cosmetics.find(activity, "bat_wings"));
+        }
+        if (Cosmetics.PET.equals(id)) {
+            return new ItemIcon(activity, Cosmetics.find(activity, "cat_pet"));
+        }
+        if (Cosmetics.EFFECT.equals(id)) {
+            return new ItemIcon(activity, Cosmetics.find(activity, "sparkles"));
+        }
+        if (SKINS.equals(id)) {
+            return new PixelIcon(activity, new String[] { "..wwww..", "..wwww..", "..wwww..", "........", "wwwwwwww", "w.wwww.w", "w.wwww.w", "..wwww..",
+                                                          "..w..w..", "..w..w.." });
+        }
+        if (CAPES.equals(id)) {
+            return new PixelIcon(activity, new String[] { "wwwwwwww", ".wwwwww.", ".wwwwww.", ".wwwwww.", ".wwwwww.", "wwwwwwww", "wwwwwwww", "ww.ww.ww" });
+        }
+        if (Cosmetics.EMOTE.equals(id)) {
+            return new PixelIcon(activity, new String[] { "..wwwww..", ".w.....w.", "w..w.w..w", "w.......w", "w.w...w.w", "w..www..w", ".w.....w.", "..wwwww.." });
+        }
+        // the outfits: a hanger
+        return new PixelIcon(activity, new String[] { ".....ww.....", "....w..w....", ".......w....", "......w.....", ".....ww.....", "...ww..ww...",
+                                                      ".ww......ww.", "wwwwwwwwwwww" });
     }
 
     /** the account's skin and active cape on a character */
@@ -165,29 +229,25 @@ final class WardrobeScreen {
         });
     }
 
-    private void showTab(String id) {
+    void showTab(String id) {
+        boolean changed = !id.equals(tab);
         tab = id;
-        for (Button b : tabButtons) {
-            Ui.styleButton(activity, b, id.equals(b.getTag()));
+        float density = activity.getResources().getDisplayMetrics().density;
+        for (View b : tabViews) {
+            boolean on = id.equals(b.getTag());
+            b.setBackground(on ? PixelDrawable.accent(density) : PixelDrawable.plain(density));
         }
         grid.removeAllViews();
-        character.setBack(Cosmetics.BACK.equals(id) || "capes".equals(id));
-        if ("sets".equals(id)) {
-            section.setText("Образы — все открыты");
+        character.setBack(Cosmetics.BACK.equals(id) || CAPES.equals(id));
+        if (SETS.equals(id)) {
+            section.setText("Наборы — все открыты");
             for (final Cosmetics.Outfit outfit : Cosmetics.outfits(activity)) {
-                boolean on = outfit.head.equals(Cosmetics.worn(activity, Cosmetics.HEAD)) && outfit.back.equals(Cosmetics.worn(activity, Cosmetics.BACK))
-                             && outfit.body.equals(Cosmetics.worn(activity, Cosmetics.BODY));
-                ItemPicture picture = new ItemPicture(activity, outfit.head, outfit.body, outfit.back, outfit.pet);
-                picture.effect = outfit.effect;
-                addTile(picture, outfit.title, "legendary", on, new Runnable() {
-                    public void run() {
-                        Cosmetics.wearOutfit(activity, outfit);
-                        character.setBack(false);
-                        showTab("sets");
-                    }
-                });
+                addOutfit(outfit);
             }
-        } else if ("capes".equals(id)) {
+        } else if (SKINS.equals(id)) {
+            section.setText("Скин аккаунта — его видно в игре всем");
+            showSkins();
+        } else if (CAPES.equals(id)) {
             section.setText("Плащи Minecraft — их видно в игре");
             showCapes();
         } else {
@@ -196,10 +256,14 @@ final class WardrobeScreen {
             section.setText(id.equals(Cosmetics.EMOTE) ? "Эмоции — нажми, чтобы персонаж сыграл" : titleOf(id) + " · " + list.size());
             for (final Cosmetics.Item item : list) {
                 boolean on = item.id.equals(Cosmetics.worn(activity, slot));
-                ItemPicture picture = new ItemPicture(activity, slot.equals(Cosmetics.HEAD) ? item.id : "", slot.equals(Cosmetics.BODY) ? item.id : "",
-                                                      slot.equals(Cosmetics.BACK) ? item.id : "", slot.equals(Cosmetics.PET) ? item.id : "");
-                picture.effect = slot.equals(Cosmetics.EFFECT) ? item.id : "";
-                picture.emote = slot.equals(Cosmetics.EMOTE) ? item.id : "";
+                View picture;
+                if (slot.equals(Cosmetics.EMOTE)) {
+                    ItemPicture figure = new ItemPicture(activity, "", "", "", "");
+                    figure.emote = item.id;
+                    picture = figure;
+                } else {
+                    picture = new ItemIcon(activity, item);
+                }
                 addTile(picture, item.title, item.rarity, on && !slot.equals(Cosmetics.EMOTE), new Runnable() {
                     public void run() {
                         if (slot.equals(Cosmetics.EMOTE)) {
@@ -209,18 +273,22 @@ final class WardrobeScreen {
                         }
                         boolean wearing = item.id.equals(Cosmetics.worn(activity, slot));
                         Cosmetics.wear(activity, slot, wearing ? "" : item.id);
+                        character.preview(null, null);
                         character.invalidate();
                         showTab(slot);
                     }
                 });
             }
         }
-        // the tiles come in one after another, like Millida's
-        for (int i = 0; i < grid.getChildCount(); i++) {
-            View tile = grid.getChildAt(i);
-            tile.setAlpha(0f);
-            tile.setTranslationY(dp(10));
-            tile.animate().alpha(1f).translationY(0).setStartDelay(i * 18L).setDuration(180).start();
+        if (changed) {
+            scroll.scrollTo(0, 0);
+            // the tiles come in one after another, like Millida's
+            for (int i = 0; i < grid.getChildCount(); i++) {
+                View tile = grid.getChildAt(i);
+                tile.setAlpha(0f);
+                tile.setTranslationY(dp(10));
+                tile.animate().alpha(1f).translationY(0).setStartDelay(i * 18L).setDuration(180).start();
+            }
         }
     }
 
@@ -233,18 +301,84 @@ final class WardrobeScreen {
         return slot;
     }
 
+    /** the cell colour of a rarity, darkened, like the tinted cells of Millida's sets */
+    private static int cellColor(String rarity) {
+        int c = Cosmetics.rarityColor(rarity);
+        int r = ((c >> 16) & 0xFF) / 5, g = ((c >> 8) & 0xFF) / 5, b = (c & 0xFF) / 5;
+        return 0xFF000000 | ((r + 0x16) << 16) | ((g + 0x06) << 8) | (b + 0x0A);
+    }
+
+    /** an outfit as a card of its pieces (two by two), the name and how many are worn, like Millida's sets */
+    private void addOutfit(final Cosmetics.Outfit outfit) {
+        float density = activity.getResources().getDisplayMetrics().density;
+        String[][] pieces = { { Cosmetics.HEAD, outfit.head }, { Cosmetics.BACK, outfit.back }, { Cosmetics.BODY, outfit.body },
+                              { Cosmetics.PET, outfit.pet }, { Cosmetics.EFFECT, outfit.effect } };
+        List<Cosmetics.Item> items = new ArrayList<Cosmetics.Item>();
+        int worn = 0;
+        for (String[] piece : pieces) {
+            Cosmetics.Item item = Cosmetics.find(activity, piece[1]);
+            if (item != null) {
+                items.add(item);
+                worn += piece[1].equals(Cosmetics.worn(activity, piece[0])) ? 1 : 0;
+            }
+        }
+        boolean all = worn == items.size() && !items.isEmpty();
+        LinearLayout card = new LinearLayout(activity);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setGravity(Gravity.CENTER_HORIZONTAL);
+        card.setPadding(dp(6), dp(6), dp(6), dp(8));
+        card.setBackground(PixelDrawable.panel(all ? 0xFF4A1420 : 0xFF1C080D, all ? 0xFFFF5A6E : 0xFF3A121B, density));
+        LinearLayout rows = new LinearLayout(activity);
+        rows.setOrientation(LinearLayout.VERTICAL);
+        for (int row = 0; row < 2; row++) {
+            LinearLayout line = new LinearLayout(activity);
+            for (int col = 0; col < 2; col++) {
+                int i = row * 2 + col;
+                View cell = i < items.size() ? new ItemIcon(activity, items.get(i)) : new View(activity);
+                cell.setBackground(PixelDrawable.panel(i < items.size() ? cellColor(items.get(i).rarity) : 0xFF14060A, 0xFF0B0305, density));
+                cell.setPadding(dp(4), dp(4), dp(4), dp(4));
+                LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(dp(56), dp(50));
+                p.setMargins(dp(2), dp(2), dp(2), dp(2));
+                line.addView(cell, p);
+            }
+            rows.addView(line);
+        }
+        card.addView(rows);
+        TextView name = Ui.label(activity, outfit.title, 11, Ui.TEXT, true);
+        name.setGravity(Gravity.CENTER);
+        name.setMaxWidth(dp(120));
+        name.setPadding(0, dp(4), 0, 0);
+        card.addView(name);
+        TextView count = Ui.label(activity, (all ? "Весь " : "") + worn + "/" + items.size(), 10, all ? 0xFFFF8090 : Ui.HINT, false);
+        count.setGravity(Gravity.CENTER);
+        card.addView(count);
+        card.setClickable(true);
+        card.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Cosmetics.wearOutfit(activity, outfit);
+                character.setBack(false);
+                character.invalidate();
+                showTab(SETS);
+            }
+        });
+        grid.addView(card, new ViewGroup.LayoutParams(dp(132), ViewGroup.LayoutParams.WRAP_CONTENT));
+    }
+
     private void addTile(View picture, String name, String rarity, boolean on, final Runnable action) {
+        float density = activity.getResources().getDisplayMetrics().density;
         LinearLayout tile = new LinearLayout(activity);
         tile.setOrientation(LinearLayout.VERTICAL);
         tile.setGravity(Gravity.CENTER_HORIZONTAL);
-        tile.setPadding(dp(4), dp(4), dp(4), dp(8));
+        tile.setPadding(dp(4), dp(4), dp(4), dp(7));
         // the frame shows the rarity, like Millida's; a worn item glows crimson
-        tile.setBackground(PixelDrawable.panel(on ? 0xFF4A1420 : 0xFF1C080D, on ? 0xFFFF5A6E : Cosmetics.rarityColor(rarity),
-                                               activity.getResources().getDisplayMetrics().density));
-        tile.addView(picture, new LinearLayout.LayoutParams(dp(96), dp(84)));
+        tile.setBackground(PixelDrawable.panel(on ? 0xFF4A1420 : 0xFF1C080D, on ? 0xFFFF5A6E : Cosmetics.rarityColor(rarity), density));
+        picture.setBackground(PixelDrawable.panel(cellColor(rarity), 0xFF0B0305, density));
+        picture.setPadding(dp(6), dp(6), dp(6), dp(6));
+        tile.addView(picture, new LinearLayout.LayoutParams(dp(92), dp(74)));
         TextView label = Ui.label(activity, name, 11, Ui.TEXT, true);
         label.setGravity(Gravity.CENTER);
-        label.setMaxWidth(dp(100));
+        label.setMaxWidth(dp(96));
+        label.setPadding(0, dp(3), 0, 0);
         tile.addView(label);
         tile.addView(Ui.label(activity, on ? "надето" : Cosmetics.rarityName(rarity), 9, on ? 0xFFFF8090 : Cosmetics.rarityColor(rarity), false));
         tile.setClickable(true);
@@ -253,10 +387,131 @@ final class WardrobeScreen {
                 action.run();
             }
         });
-        GridLayout.LayoutParams p = new GridLayout.LayoutParams();
-        p.setMargins(dp(4), dp(4), dp(4), dp(4));
-        grid.addView(tile, p);
+        grid.addView(tile, new ViewGroup.LayoutParams(dp(102), ViewGroup.LayoutParams.WRAP_CONTENT));
     }
+
+    /* ------------------------------------------------------------ the skin of the account */
+
+    private void showSkins() {
+        final Account account = activity.account();
+        if (account == null || !account.ownsJava) {
+            section.setText("Скин можно сменить только на аккаунте с Minecraft: Java Edition");
+            return;
+        }
+        float density = activity.getResources().getDisplayMetrics().density;
+        LinearLayout panel = new LinearLayout(activity);
+        panel.setOrientation(LinearLayout.VERTICAL);
+        panel.setPadding(dp(12), dp(10), dp(12), dp(12));
+        panel.setBackground(PixelDrawable.panel(0xFF1C080D, 0xFF5A1E2A, density));
+        panel.addView(Ui.label(activity, "Свой скин", 15, Ui.TEXT, true));
+        TextView text = Ui.label(activity, "PNG 64×64 из файла: его сразу видно в лобби, а в игре — всем игрокам. Выбери, какие руки у скина.", 12, Ui.HINT,
+                                 false);
+        text.setPadding(0, dp(2), 0, dp(8));
+        panel.addView(text);
+        LinearLayout arms = new LinearLayout(activity);
+        final Button classic = Ui.button(activity, "Широкие руки (Steve)", !slim);
+        final Button thin = Ui.button(activity, "Тонкие руки (Alex)", slim);
+        classic.setTextSize(12);
+        thin.setTextSize(12);
+        classic.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                slim = false;
+                Ui.styleButton(activity, classic, true);
+                Ui.styleButton(activity, thin, false);
+            }
+        });
+        thin.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                slim = true;
+                Ui.styleButton(activity, classic, false);
+                Ui.styleButton(activity, thin, true);
+            }
+        });
+        arms.addView(classic, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+        tp.leftMargin = dp(6);
+        arms.addView(thin, tp);
+        panel.addView(arms);
+        Button pick = Ui.button(activity, "⬆ Выбрать PNG и загрузить", true);
+        pick.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                pickSkin();
+            }
+        });
+        LinearLayout.LayoutParams pp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        pp.topMargin = dp(8);
+        panel.addView(pick, pp);
+        Button reset = Ui.button(activity, "Вернуть стандартный скин", false);
+        reset.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                changeSkin(null);
+            }
+        });
+        panel.addView(reset, new LinearLayout.LayoutParams(pp));
+        Button nick = Ui.button(activity, "Аккаунт и ник", false);
+        nick.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                activity.showAccount();
+            }
+        });
+        panel.addView(nick, new LinearLayout.LayoutParams(pp));
+        grid.addView(panel, new ViewGroup.LayoutParams(dp(330), ViewGroup.LayoutParams.WRAP_CONTENT));
+    }
+
+    private void pickSkin() {
+        activity.pickSkinFile(this);
+    }
+
+    /** the PNG the player chose (null: back to the standard skin) */
+    void changeSkin(final Uri uri) {
+        final Account account = activity.account();
+        if (account == null || !account.ownsJava) {
+            Toast.makeText(activity, "Нужен аккаунт с Minecraft: Java Edition", Toast.LENGTH_LONG).show();
+            return;
+        }
+        final boolean thin = slim;
+        Toast.makeText(activity, uri == null ? "Возвращаю стандартный скин..." : "Загружаю скин...", Toast.LENGTH_SHORT).show();
+        activity.background(new MainActivity.Job<Boolean>() {
+            public Boolean run() throws Exception {
+                if (uri == null) {
+                    account.resetSkin();
+                    return true;
+                }
+                java.io.InputStream in = activity.getContentResolver().openInputStream(uri);
+                byte[] png;
+                try {
+                    java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+                    byte[] buffer = new byte[16384];
+                    int n;
+                    while ((n = in.read(buffer)) > 0 && out.size() < 1 << 20) {
+                        out.write(buffer, 0, n);
+                    }
+                    png = out.toByteArray();
+                } finally {
+                    in.close();
+                }
+                Bitmap check = android.graphics.BitmapFactory.decodeByteArray(png, 0, png.length);
+                if (check == null || check.getWidth() != 64 || (check.getHeight() != 64 && check.getHeight() != 32)) {
+                    throw new Account.LoginException("Это не скин Minecraft: нужна картинка PNG 64×64 (или 64×32)");
+                }
+                account.uploadSkin(png, thin);
+                return true;
+            }
+
+            public void done(Boolean ok, Exception error) {
+                if (error != null) {
+                    Toast.makeText(activity, error.getMessage(), Toast.LENGTH_LONG).show();
+                    return;
+                }
+                account.save(activity);
+                Toast.makeText(activity, uri == null ? "Стандартный скин возвращён" : "Скин загружен — его видно в игре", Toast.LENGTH_LONG).show();
+                loadSkinAndCape(activity, character);
+                activity.accountChanged();
+            }
+        });
+    }
+
+    /* ------------------------------------------------------------ capes */
 
     private void showCapes() {
         final Account account = activity.account();
@@ -270,7 +525,7 @@ final class WardrobeScreen {
             }
 
             public void done(List<Account.Cape> capes, Exception error) {
-                if (!"capes".equals(tab)) {
+                if (!CAPES.equals(tab)) {
                     return;
                 }
                 if (error != null) {
@@ -331,9 +586,141 @@ final class WardrobeScreen {
                         }
                     });
                 }
-                showTab("capes");
+                showTab(CAPES);
             }
         });
+    }
+
+    /* ------------------------------------------------------------ pictures */
+
+    /** the stage behind the player: a crimson light in the middle and hard rays, like the stage of Millida's wardrobe */
+    static final class StageDrawable extends android.graphics.drawable.Drawable {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final PixelDrawable frame;
+        private final float inset;
+
+        StageDrawable(float density) {
+            frame = PixelDrawable.panel(0xFF2A0A12, 0xFF060103, density);
+            inset = 2 * Math.max(1, Math.round(2 * density));
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            Rect b = getBounds();
+            frame.setBounds(b);
+            frame.draw(canvas);
+            canvas.save();
+            canvas.clipRect(b.left + inset, b.top + inset, b.right - inset, b.bottom - inset);
+            float cx = b.exactCenterX(), cy = b.top + b.height() * 0.45f, r = Math.max(b.width(), b.height());
+            paint.setShader(new RadialGradient(cx, cy, r * 0.6f, new int[] { 0xFF8A2036, 0xFF4A1020, 0xFF1C060B }, new float[] { 0f, 0.45f, 1f },
+                                               Shader.TileMode.CLAMP));
+            canvas.drawRect(b, paint);
+            paint.setShader(null);
+            paint.setColor(0x22FFB0BC);
+            Path path = new Path();
+            for (int i = 0; i < 18; i++) {
+                double a0 = Math.toRadians(i * 20), a1 = Math.toRadians(i * 20 + 8);
+                path.reset();
+                path.moveTo(cx, cy);
+                path.lineTo(cx + (float) Math.cos(a0) * r, cy + (float) Math.sin(a0) * r);
+                path.lineTo(cx + (float) Math.cos(a1) * r, cy + (float) Math.sin(a1) * r);
+                path.close();
+                canvas.drawPath(path, paint);
+            }
+            canvas.restore();
+        }
+
+        @Override
+        public void setAlpha(int alpha) {}
+
+        @Override
+        public void setColorFilter(android.graphics.ColorFilter filter) {}
+
+        @Override
+        public int getOpacity() {
+            return android.graphics.PixelFormat.OPAQUE;
+        }
+    }
+
+    /** one item alone, as big as it fits, moving like on the player (wings flap, pets hop); effects show their particles */
+    static final class ItemIcon extends View {
+        final Cosmetics.Item item;
+        private final long start = android.os.SystemClock.uptimeMillis();
+
+        ItemIcon(Context context, Cosmetics.Item item) {
+            super(context);
+            this.item = item;
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            if (item == null) {
+                return;
+            }
+            float time = (android.os.SystemClock.uptimeMillis() - start) / 1000f;
+            float w = getWidth() - getPaddingLeft() - getPaddingRight(), h = getHeight() - getPaddingTop() - getPaddingBottom();
+            if (item.particleColors != null) {
+                // an effect: its particles around an empty place where the player stands
+                float u = Math.min(w / 28f, h / 44f);
+                float ox = getPaddingLeft() + (w - 28 * u) / 2 + 6 * u, oy = getPaddingTop() + (h - 44 * u) / 2 + 8 * u;
+                Cosmetics.Pen pen = new Cosmetics.Pen(canvas, ox, oy, u);
+                pen.rect(4, 0, 8, 8, 0x332B0E15);
+                pen.rect(4, 8, 8, 24, 0x332B0E15);
+                Cosmetics.drawParticles(pen, item, time);
+                postInvalidateDelayed(60);
+                return;
+            }
+            boolean behind = false;
+            float[] box = Cosmetics.bounds(item, false);
+            if (box == null) {
+                box = Cosmetics.bounds(item, true);
+                behind = true;
+            }
+            if (box == null) {
+                return;
+            }
+            float bw = box[2] - box[0], bh = box[3] - box[1];
+            float u = Math.min(w / (bw + 1), h / (bh + 1));
+            float ox = getPaddingLeft() + (w - bw * u) / 2 - box[0] * u;
+            float oy = getPaddingTop() + (h - bh * u) / 2 - box[1] * u;
+            Cosmetics.draw(new Cosmetics.Pen(canvas, ox, oy, u), item, behind, time);
+            for (Cosmetics.Layer layer : item.layers) {
+                if (!layer.anim.isEmpty()) {
+                    postInvalidateDelayed(60);
+                    break;
+                }
+            }
+        }
+    }
+
+    /** a small one-colour pixel picture (the tab icons) */
+    static final class PixelIcon extends View {
+        private final String[] rows;
+        private final Paint paint = new Paint();
+
+        PixelIcon(Context context, String[] rows) {
+            super(context);
+            this.rows = rows;
+            paint.setColor(0xFFFBEFF1);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            int cols = 0;
+            for (String row : rows) {
+                cols = Math.max(cols, row.length());
+            }
+            float u = (float) Math.floor(Math.min(getWidth() / (float) (cols + 1), getHeight() / (float) (rows.length + 1)));
+            u = Math.max(1, u);
+            float ox = (getWidth() - cols * u) / 2, oy = (getHeight() - rows.length * u) / 2;
+            for (int j = 0; j < rows.length; j++) {
+                for (int i = 0; i < rows[j].length(); i++) {
+                    if (rows[j].charAt(i) != '.') {
+                        canvas.drawRect(ox + i * u, oy + j * u, ox + (i + 1) * u, oy + (j + 1) * u, paint);
+                    }
+                }
+            }
+        }
     }
 
     /** a small picture of an item on a dark figure (or a whole outfit); it moves a little, like the big one */
@@ -355,9 +742,10 @@ final class WardrobeScreen {
         protected void onDraw(Canvas canvas) {
             Context context = getContext();
             float time = (android.os.SystemClock.uptimeMillis() - start) / 1000f;
-            float u = closeUp ? Math.min(getWidth() / 34f, getHeight() / 24f) : Math.min(getWidth() / 32f, getHeight() / 40f);
-            float ox = closeUp ? (getWidth() - 16 * u) / 2 : (getWidth() - 32 * u) / 2 + 8 * u;
-            float oy = closeUp ? getHeight() * 0.08f + 7 * u : (getHeight() - 40 * u) / 2 + 8 * u;
+            float w = getWidth() - getPaddingLeft() - getPaddingRight(), h = getHeight() - getPaddingTop() - getPaddingBottom();
+            float u = closeUp ? Math.min(w / 34f, h / 24f) : Math.min(w / 32f, h / 40f);
+            float ox = getPaddingLeft() + (closeUp ? (w - 16 * u) / 2 : (w - 32 * u) / 2 + 8 * u);
+            float oy = getPaddingTop() + (closeUp ? h * 0.08f + 7 * u : (h - 40 * u) / 2 + 8 * u);
             Cosmetics.Pen pen = new Cosmetics.Pen(canvas, ox, oy, u);
             Cosmetics.draw(pen, Cosmetics.find(context, back), false, time);
             boolean waving = emote.equals("wave") || emote.equals("cheer");
@@ -387,7 +775,7 @@ final class WardrobeScreen {
     /** a cape seen from behind (its back face), or an empty back */
     static final class CapePicture extends View {
         Bitmap cape;
-        private final android.graphics.Paint pixels = new android.graphics.Paint();
+        private final Paint pixels = new Paint();
 
         CapePicture(Context context, Bitmap cape) {
             super(context);

@@ -173,6 +173,21 @@ final class Modrinth {
         return out;
     }
 
+    /** every Minecraft version, newest first: {version, type} where type is release, snapshot, beta or alpha */
+    static List<String[]> allGameVersions() throws IOException, JSONException {
+        List<String[]> out = new ArrayList<String[]>();
+        Http.Response r = Http.get(Builder.MODRINTH + "/tag/game_version");
+        if (!r.ok()) {
+            throw new IOException("HTTP " + r.status);
+        }
+        JSONArray versions = new JSONArray(r.body);
+        for (int i = 0; i < versions.length(); i++) {
+            JSONObject v = versions.getJSONObject(i);
+            out.add(new String[] { v.optString("version"), v.optString("version_type") });
+        }
+        return out;
+    }
+
     /** One page of search results. */
     static JSONArray search(String query, String facets, String index, int offset, int limit) throws IOException, JSONException {
         Http.Response r = Http.get(Builder.MODRINTH + "/search?query=" + Http.encode(query) + "&facets=" + Http.encode(facets) + "&index=" + index

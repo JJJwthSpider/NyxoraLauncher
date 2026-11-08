@@ -33,6 +33,9 @@ final class CharacterView extends View {
     private String previewSlot, previewId;
     private boolean turnable = true;
     private boolean closeUp;  // in a lobby tile: the head and shoulders, big
+    private String nametag = "";  // the name over the head, like in the game
+    private final Paint tagText = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint tagBack = new Paint();
 
     CharacterView(Context context) {
         super(context);
@@ -53,6 +56,15 @@ final class CharacterView extends View {
 
     void setTurnable(boolean turnable) {
         this.turnable = turnable;
+    }
+
+    void setNametag(String name) {
+        nametag = name == null ? "" : name;
+        tagText.setColor(0xFFFFFFFF);
+        tagText.setTypeface(Ui.pixel(getContext()));
+        tagText.setTextAlign(Paint.Align.CENTER);
+        tagBack.setColor(0x8C000000);
+        invalidate();
     }
 
     void setCloseUp(boolean closeUp) {
@@ -167,6 +179,15 @@ final class CharacterView extends View {
         Cosmetics.draw(pen, Cosmetics.find(context, worn(Cosmetics.HEAD)), back, time);
         Cosmetics.draw(pen, Cosmetics.find(context, worn(Cosmetics.PET)), back, time);
         Cosmetics.drawParticles(pen, Cosmetics.find(context, worn(Cosmetics.EFFECT)), time);
+        if (!nametag.isEmpty() && !closeUp) {
+            // the name over the head, on a dark plate, like a nametag in Minecraft
+            tagText.setTextSize(Math.max(10 * getResources().getDisplayMetrics().density, 2.6f * u));
+            float tx = ox + 8 * u, ty = oy - 4.5f * u;
+            float half = tagText.measureText(nametag) / 2 + u;
+            android.graphics.Paint.FontMetrics fm = tagText.getFontMetrics();
+            canvas.drawRect(tx - half, ty + fm.ascent - u * 0.4f, tx + half, ty + fm.descent + u * 0.4f, tagBack);
+            canvas.drawText(nametag, tx, ty, tagText);
+        }
         if (emoting && emote.equals("spin")) {
             back = wasBack;
         }

@@ -93,6 +93,8 @@ final class Plan {
             return "Fabric";
         if ("quilt".equals(loader))
             return "Quilt";
+        if ("vanilla".equals(loader) || loader.isEmpty())
+            return "Vanilla";
         return loader;
     }
 
