@@ -43,6 +43,33 @@ QLabel* caption(const QString& text, int pointSize, const QString& color, QWidge
 }
 }  // namespace
 
+namespace {
+/// a pixel speaker with sound waves, or crossed out
+QIcon speakerIcon(bool on)
+{
+    const QStringList rows = on ? QStringList{ "....w.......", "...ww..w....", "..www...w...", "wwwww.w..w..", "wwwww..w.w..", "wwwww..w.w..",
+                                               "wwwww.w..w..", "..www...w...", "...ww..w....", "....w......." }
+                                : QStringList{ "....w.......", "...ww.......", "..www.r...r.", "wwwww..r.r..", "wwwww...r...", "wwwww..r.r..",
+                                               "wwwww.r...r.", "..www.......", "...ww.......", "....w......." };
+    const int u = 2;
+    QPixmap pixmap(12 * u, 10 * u);
+    pixmap.fill(Qt::transparent);
+    QPainter p(&pixmap);
+    for (int j = 0; j < rows.size(); j++) {
+        for (int i = 0; i < rows.at(j).size(); i++) {
+            const QChar c = rows.at(j).at(i);
+            if (c == 'w') {
+                p.fillRect(i * u, j * u, u, u, QColor(0xfb, 0xef, 0xf1));
+            } else if (c == 'r') {
+                p.fillRect(i * u, j * u, u, u, QColor(0xff, 0x46, 0x54));
+            }
+        }
+    }
+    p.end();
+    return QIcon(pixmap);
+}
+}  // namespace
+
 QImage VelloraLobby::silhouette()
 {
     // no skin yet (not signed in): a dark player-shaped shadow with a crimson rim
@@ -296,13 +323,16 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     auto* chips = new QHBoxLayout;
     chips->addStretch(1);
     // the interface sounds on and off, like the sound button of Millida's lobby
-    auto* sound = new QPushButton(VelloraSound::enabled() ? "🔊" : "🔇", this);
+    // (a drawn speaker, not an emoji: a missing emoji font made Qt's font fallback crash under Wine)
+    auto* sound = new QPushButton(this);
     sound->setMinimumSize(44, 44);
+    sound->setIconSize(QSize(24, 24));
+    sound->setIcon(speakerIcon(VelloraSound::enabled()));
     sound->setToolTip(tr("Interface sounds"));
     connect(sound, &QPushButton::clicked, this, [sound] {
         const bool on = !VelloraSound::enabled();
         VelloraSound::setEnabled(on);
-        sound->setText(on ? "🔊" : "🔇");
+        sound->setIcon(speakerIcon(on));
         VelloraSound::play("toggle");
     });
     chips->addWidget(sound);
