@@ -35,7 +35,7 @@ final class WardrobeScreen {
     static final String SETS = "sets", SKINS = "skins", CAPES = "capes";
     private static final String[][] TABS = { { SETS, "Образы" }, { SKINS, "Скины" }, { CAPES, "Плащи" }, { Cosmetics.HEAD, "Голова" },
                                              { Cosmetics.BODY, "Тело" }, { Cosmetics.BACK, "Спина" }, { Cosmetics.PET, "Питомцы" },
-                                             { Cosmetics.EFFECT, "Эффекты" }, { Cosmetics.EMOTE, "Эмоции" } };
+                                             { Cosmetics.HAND, "В руке" }, { Cosmetics.EFFECT, "Эффекты" }, { Cosmetics.EMOTE, "Эмоции" } };
 
     private final MainActivity activity;
     private final LinearLayout root;
@@ -183,6 +183,9 @@ final class WardrobeScreen {
         }
         if (Cosmetics.BACK.equals(id)) {
             return new ItemIcon(activity, Cosmetics.find(activity, "bat_wings"));
+        }
+        if (Cosmetics.HAND.equals(id)) {
+            return new ItemIcon(activity, Cosmetics.find(activity, "diamond_sword"));
         }
         if (Cosmetics.PET.equals(id)) {
             return new ItemIcon(activity, Cosmetics.find(activity, "cat_pet"));
@@ -399,7 +402,7 @@ final class WardrobeScreen {
     /** an outfit as a card of its pieces (two by two), the name and how many are worn, like Millida's sets */
     private void addOutfit(final Cosmetics.Outfit outfit) {
         float density = activity.getResources().getDisplayMetrics().density;
-        String[][] pieces = { { Cosmetics.HEAD, outfit.head }, { Cosmetics.BACK, outfit.back }, { Cosmetics.BODY, outfit.body },
+        String[][] pieces = { { Cosmetics.HEAD, outfit.head }, { Cosmetics.BACK, outfit.back }, { Cosmetics.HAND, outfit.hand }, { Cosmetics.BODY, outfit.body },
                               { Cosmetics.PET, outfit.pet }, { Cosmetics.EFFECT, outfit.effect } };
         List<Cosmetics.Item> items = new ArrayList<Cosmetics.Item>();
         int worn = 0;
@@ -1044,12 +1047,9 @@ final class WardrobeScreen {
                 postInvalidateDelayed(60);
                 return;
             }
-            boolean behind = false;
-            float[] box = Cosmetics.bounds(item, false);
-            if (box == null) {
-                box = Cosmetics.bounds(item, true);
-                behind = true;
-            }
+            // the side that shows more of it (a cape from behind, a hat from the front)
+            boolean behind = Cosmetics.pixels(item, true) > Cosmetics.pixels(item, false);
+            float[] box = Cosmetics.bounds(item, behind);
             if (box == null) {
                 return;
             }

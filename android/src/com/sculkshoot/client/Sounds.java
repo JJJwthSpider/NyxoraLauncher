@@ -10,7 +10,8 @@ import java.util.Map;
 /**
  * The interface sounds, like Millida Launcher's: a blip when a tab changes ("nav"), a sweep when a screen opens or
  * closes, a tick, a sparkle when an item is put on, a chord on Play. The sounds are Vellora's own (art/sounds.py), short
- * and quiet; the 🔊 button in the lobby turns them off.
+ * and quiet; the 🔊 button in the lobby turns them off. The music ("Crimson Rain", a calm loop) plays in the menu and pauses
+ * in the game and in the background; 🎵 turns it off.
  */
 final class Sounds {
     private Sounds() {}
@@ -46,6 +47,87 @@ final class Sounds {
             }
         } catch (RuntimeException e) {
             pool = null;  // no audio on this device
+        }
+    }
+
+    /* ------------------------------------------------------------ the music */
+
+    private static android.media.MediaPlayer music;
+    private static final android.os.Handler FADE = new android.os.Handler(android.os.Looper.getMainLooper());
+    private static final float MUSIC_VOLUME = 0.32f;
+    private static float musicLevel;
+
+    static boolean musicEnabled(Context context) {
+        return context.getSharedPreferences("sound", Context.MODE_PRIVATE).getBoolean("music", true);
+    }
+
+    static void setMusicEnabled(Context context, boolean on) {
+        context.getSharedPreferences("sound", Context.MODE_PRIVATE).edit().putBoolean("music", on).apply();
+        if (on) {
+            startMusic(context);
+        } else {
+            pauseMusic();
+        }
+    }
+
+    /** "Crimson Rain" (art/sounds.py), quiet, looping, faded in */
+    static synchronized void startMusic(Context context) {
+        if (!musicEnabled(context)) {
+            return;
+        }
+        try {
+            if (music == null) {
+                android.content.res.AssetFileDescriptor fd = context.getApplicationContext().getAssets().openFd("music/vellora_theme.ogg");
+                music = new android.media.MediaPlayer();
+                music.setAudioAttributes(new AudioAttributes.Builder()
+                                             .setUsage(AudioAttributes.USAGE_MEDIA)
+                                             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                             .build());
+                music.setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getLength());
+                fd.close();
+                music.setLooping(true);
+                music.prepare();
+            }
+            if (!music.isPlaying()) {
+                musicLevel = 0;
+                music.setVolume(0, 0);
+                music.start();
+                fadeIn();
+            }
+        } catch (Exception e) {
+            music = null;  // no music on this device: the launcher works on in silence
+        }
+    }
+
+    private static void fadeIn() {
+        FADE.removeCallbacksAndMessages(null);
+        FADE.post(new Runnable() {
+            public void run() {
+                if (music == null) {
+                    return;
+                }
+                musicLevel = Math.min(MUSIC_VOLUME, musicLevel + MUSIC_VOLUME / 25);
+                try {
+                    music.setVolume(musicLevel, musicLevel);
+                } catch (IllegalStateException e) {
+                    return;
+                }
+                if (musicLevel < MUSIC_VOLUME) {
+                    FADE.postDelayed(this, 80);
+                }
+            }
+        });
+    }
+
+    /** the app goes to the background or the game starts */
+    static synchronized void pauseMusic() {
+        FADE.removeCallbacksAndMessages(null);
+        try {
+            if (music != null && music.isPlaying()) {
+                music.pause();
+            }
+        } catch (IllegalStateException e) {
+            music = null;
         }
     }
 

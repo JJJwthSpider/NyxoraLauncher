@@ -45,7 +45,7 @@ namespace {
 /// a wardrobe tile: the item on a dark figure and its name; a crimson frame when it is worn
 class ItemTile : public QAbstractButton {
    public:
-    QString head, body, back, pet, emote, effect;
+    QString head, body, back, pet, emote, effect, hand;
     QColor frame = QColor(0x8A, 0x93, 0xA0);  // the rarity
     bool worn = false;
     explicit ItemTile(QWidget* parent) : QAbstractButton(parent)
@@ -63,7 +63,7 @@ class ItemTile : public QAbstractButton {
         p.setPen(QPen(worn ? QColor(0xFF, 0x5A, 0x6E) : (underMouse() ? frame.lighter(130) : frame), 2));
         p.drawRect(r);
         p.fillRect(QRectF(r.left(), r.bottom() - 4, r.width(), 4), worn ? QColor(0x8E, 0x14, 0x28) : QColor(0x12, 0x04, 0x0A));
-        VelloraCharacter::paintItems(p, QRectF(r.left() + 6, r.top() + 6, r.width() - 12, r.height() - 58), head, body, back, pet, emote, effect, 1.3);
+        VelloraCharacter::paintItems(p, QRectF(r.left() + 6, r.top() + 6, r.width() - 12, r.height() - 58), head, body, back, pet, emote, effect, 1.3, hand);
         p.setPen(QColor(0xFB, 0xEF, 0xF1));
         QFont f = font();
         f.setBold(true);
@@ -116,7 +116,7 @@ WardrobeDialog::WardrobeDialog(const QImage& skin,
     left->addWidget(skins);
     auto* undress = new QPushButton(tr("Take everything off"), this);
     connect(undress, &QPushButton::clicked, this, [this] {
-        for (const auto& slot : { Cosmetics::Head, Cosmetics::Body, Cosmetics::Back, Cosmetics::Pet, Cosmetics::Effect }) {
+        for (const auto& slot : { Cosmetics::Head, Cosmetics::Body, Cosmetics::Back, Cosmetics::Pet, Cosmetics::Hand, Cosmetics::Effect }) {
             Cosmetics::wear(slot, QString());
         }
         VelloraSound::play("close");
@@ -129,7 +129,7 @@ WardrobeDialog::WardrobeDialog(const QImage& skin,
     auto* tabs = new QHBoxLayout;
     const std::pair<QString, QString> names[] = { { "outfits", tr("Outfits") }, { "skins", tr("Skins") }, { "capes", tr("Capes") },
                                                   { Cosmetics::Head, tr("Head") }, { Cosmetics::Body, tr("Body") },
-                                                  { Cosmetics::Back, tr("Back") },  { Cosmetics::Pet, tr("Pets") },  { Cosmetics::Effect, tr("Effects") },
+                                                  { Cosmetics::Back, tr("Back") },  { Cosmetics::Pet, tr("Pets") },  { Cosmetics::Hand, tr("In hand") }, { Cosmetics::Effect, tr("Effects") },
                                                   { Cosmetics::Emote, tr("Emotes") } };
     for (const auto& [id, name] : names) {
         auto* tab = new QPushButton(name, this);
@@ -169,6 +169,7 @@ void WardrobeDialog::addTile(const QString& title, const QString& rarity, bool w
     tile->pet = look.value(3);
     tile->emote = look.value(4);
     tile->effect = look.value(5);
+    tile->hand = look.value(6);
     connect(tile, &QAbstractButton::clicked, this, [action] { action(); });
     m_grid->addWidget(tile, m_count / 4, m_count % 4);
     m_count++;
@@ -222,7 +223,7 @@ void WardrobeDialog::showTab(const QString& tab)
         for (const auto& outfit : Cosmetics::outfits()) {
             const bool worn = Cosmetics::worn(Cosmetics::Head) == outfit.head && Cosmetics::worn(Cosmetics::Back) == outfit.back &&
                               Cosmetics::worn(Cosmetics::Body) == outfit.body;
-            addTile(Cosmetics::title(outfit), "legendary", worn, { outfit.head, outfit.body, outfit.back, outfit.pet, QString(), outfit.effect },
+            addTile(Cosmetics::title(outfit), "legendary", worn, { outfit.head, outfit.body, outfit.back, outfit.pet, QString(), outfit.effect, outfit.hand },
                     [this, outfit] {
                         Cosmetics::wearOutfit(outfit);
                         VelloraSound::play("wear");
@@ -242,7 +243,8 @@ void WardrobeDialog::showTab(const QString& tab)
         const bool worn = tab != Cosmetics::Emote && Cosmetics::worn(tab) == item.id;
         const QStringList look = { tab == Cosmetics::Head ? item.id : QString(), tab == Cosmetics::Body ? item.id : QString(),
                                    tab == Cosmetics::Back ? item.id : QString(), tab == Cosmetics::Pet ? item.id : QString(),
-                                   tab == Cosmetics::Emote ? item.id : QString(), tab == Cosmetics::Effect ? item.id : QString() };
+                                   tab == Cosmetics::Emote ? item.id : QString(), tab == Cosmetics::Effect ? item.id : QString(),
+                                   tab == Cosmetics::Hand ? item.id : QString() };
         addTile(Cosmetics::title(item), item.rarity, worn, look, [this, tab, item] {
             if (tab == Cosmetics::Emote) {
                 VelloraSound::play("toggle");

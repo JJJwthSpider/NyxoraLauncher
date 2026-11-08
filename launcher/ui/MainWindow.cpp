@@ -372,6 +372,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         m_libraryLayout->setSpacing(0);
         m_pages->addWidget(m_lobby);
         m_pages->addWidget(libraryPage);
+        // the music: in the menu, paused while a game runs
+        connect(APPLICATION, &Application::updateAllowedChanged, this, [](bool nothingRunning) {
+            if (nothingRunning) {
+                VelloraSound::startMusic();
+            } else {
+                VelloraSound::pauseMusic();
+            }
+        });
+        QTimer::singleShot(1500, this, [] { VelloraSound::startMusic(); });
         // "Create", like Millida's "Новая сборка" with the ready packs next to it
         auto* createPage = new VelloraCreatePage(m_pages);
         m_pages->addWidget(createPage);

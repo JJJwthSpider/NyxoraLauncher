@@ -22,8 +22,8 @@ import java.util.List;
 final class Cosmetics {
     private Cosmetics() {}
 
-    static final String HEAD = "head", BODY = "body", BACK = "back", PET = "pet", EFFECT = "effect", EMOTE = "emote";
-    static final String[] WEARABLE = { HEAD, BODY, BACK, PET, EFFECT };
+    static final String HEAD = "head", BODY = "body", BACK = "back", PET = "pet", HAND = "hand", EFFECT = "effect", EMOTE = "emote";
+    static final String[] WEARABLE = { HEAD, BODY, BACK, PET, HAND, EFFECT };
 
     static final class Layer {
         float x, y;
@@ -48,7 +48,7 @@ final class Cosmetics {
     }
 
     static final class Outfit {
-        final String title, head, body, back, pet, effect;
+        final String title, head, body, back, pet, effect, hand;
 
         Outfit(JSONObject o) {
             title = o.optString("title");
@@ -57,6 +57,7 @@ final class Cosmetics {
             back = o.optString("back");
             pet = o.optString("pet");
             effect = o.optString("effect");
+            hand = o.optString("hand");
         }
     }
 
@@ -204,6 +205,7 @@ final class Cosmetics {
         wear(context, BODY, outfit.body);
         wear(context, PET, outfit.pet);
         wear(context, EFFECT, outfit.effect);
+        wear(context, HAND, outfit.hand);
     }
 
     /* ------------------------------------------------------------ drawing */
@@ -289,6 +291,24 @@ final class Cosmetics {
         return box;
     }
 
+    /** how many pixels an item paints from the front (or from behind): a cape is mostly seen from behind */
+    static int pixels(Item item, boolean behind) {
+        int n = 0;
+        for (Layer layer : item.layers) {
+            if (!"both".equals(layer.view) && !(behind ? "back" : "front").equals(layer.view)) {
+                continue;
+            }
+            for (String row : layer.rows) {
+                for (int i = 0; i < row.length(); i++) {
+                    if (row.charAt(i) != '.') {
+                        n++;
+                    }
+                }
+            }
+        }
+        return n;
+    }
+
     private static float hash(int a, int b) {
         int h = a * 374761393 + b * 668265263 + 0x2545F491;
         h = (h ^ (h >>> 13)) * 1274126177;
@@ -331,6 +351,13 @@ final class Cosmetics {
                 pen.rect(x + 2, y, 1, 1, c);
                 pen.rect(x, y + 1, 3, 1, c);
                 pen.rect(x + 1, y + 2, 1, 1, c);
+            } else if ("note".equals(item.shape)) {
+                pen.rect(x + 1, y, 1.6f, 0.6f, c);
+                pen.rect(x + 1, y, 0.6f, 2.4f, c);
+                pen.rect(x, y + 2, 1.4f, 1, c);
+            } else if ("star".equals(item.shape)) {
+                pen.rect(x + 0.6f, y, 0.8f, 2, c);
+                pen.rect(x, y + 0.6f, 2, 0.8f, c);
             } else if ("drop".equals(item.shape)) {
                 pen.rect(x, y, 0.6f, 1.6f, c);
             } else {

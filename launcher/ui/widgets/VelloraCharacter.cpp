@@ -99,7 +99,7 @@ const Data& data()
             const auto o = value.toObject();
             d.outfits << Outfit{ o.value("title").toString(), o.value("titleEn").toString(), o.value("head").toString(),
                                  o.value("back").toString(),  o.value("body").toString(),    o.value("pet").toString(),
-                                 o.value("effect").toString() };
+                                 o.value("effect").toString(), o.value("hand").toString() };
         }
         return d;
     }();
@@ -194,6 +194,7 @@ void wearOutfit(const Outfit& outfit)
     wear(Body, outfit.body);
     wear(Pet, outfit.pet);
     wear(Effect, outfit.effect);
+    wear(Hand, outfit.hand);
 }
 }  // namespace Cosmetics
 
@@ -282,6 +283,13 @@ void drawFlatParticles(const Pen& p, const Cosmetics::Item* item, double time)
             p.rect(x + 1, y + 2, 1, 1, color);
         } else if (item->shape == "drop") {
             p.rect(x, y, 0.6, 1.6, color);
+        } else if (item->shape == "note") {
+            p.rect(x + 1, y, 1.6, 0.6, color);
+            p.rect(x + 1, y, 0.6, 2.4, color);
+            p.rect(x, y + 2, 1.4, 1, color);
+        } else if (item->shape == "star") {
+            p.rect(x + 0.6, y, 0.8, 2, color);
+            p.rect(x, y + 0.6, 2, 0.8, color);
         } else {
             p.rect(x, y, 0.9, 0.9, color);
         }
@@ -306,7 +314,7 @@ void drawSilhouette(const Pen& p, bool leftUp, bool rightUp, double lift, bool b
 namespace {
 constexpr int HEAD = 0, BODY = 1, RARM = 2, LARM = 3, RLEG = 4, LLEG = 5, WORLD = 6, RWING = 7, LWING = 8, CAPE = 9;
 constexpr float BASE_YAW = 0.42f;  // about 24 degrees: the player turned a little, like Millida's
-const char* const EMOTES[] = { "wave", "jump", "dance", "spin", "bow", "cheer" };
+const char* const EMOTES[] = { "wave", "jump", "dance", "spin", "bow", "cheer", "clap", "salute", "shrug", "point", "dab", "flip", "think", "punch" };
 
 using Mat = std::array<float, 12>;
 
@@ -497,7 +505,7 @@ void VelloraCharacter::mouseReleaseEvent(QMouseEvent* event)
         // a click: an animation, never the same twice in a row
         QString next;
         do {
-            next = EMOTES[QRandomGenerator::global()->bounded(6)];
+            next = EMOTES[QRandomGenerator::global()->bounded(int(std::size(EMOTES)))];
         } while (next == m_emote);
         playEmote(next);
         VelloraSound::play("toggle");
@@ -732,6 +740,8 @@ QList<VelloraCharacter::Box3> VelloraCharacter::build(const Cosmetics::Item& ite
                     } else if (backView || !hasBack || frontGx < 4 || frontGx >= 12) {
                         add(BODY, x0, y0, -3.2f, x1, y1, -2.3f, c);
                     }
+                } else if (slot == Cosmetics::Hand && !backView) {
+                    add(RARM, x0, y0, 2.1f, x1, y1, 2.9f, c);  // held in the right hand, in front of it: it moves with the arm
                 } else if (slot == Cosmetics::Pet && !backView) {
                     add(WORLD, x0 + 1, y0, 1.5f, x1 + 1, y1, 4.5f, c);
                 }
@@ -828,7 +838,8 @@ void VelloraCharacter::drawParticles(const Cosmetics::Item* item, double time)
         }
         float depth = 0;
         const QPointF p = project(m_mats[WORLD], float(x), float(y), float(z), &depth);
-        const int size = std::max(1, qRound(m_scale * (item->shape == "heart" ? 0.45f : 0.8f)));
+        const int size =
+            std::max(1, qRound(m_scale * (item->shape == "heart" ? 0.45f : (item->shape == "note" || item->shape == "star") ? 1.2f : 0.8f)));
         if (item->shape == "heart") {
             const int heart[][2] = { { 0, 0 }, { 2, 0 }, { 0, 1 }, { 1, 1 }, { 2, 1 }, { 1, 2 } };
             for (const auto& h : heart) {
@@ -837,6 +848,19 @@ void VelloraCharacter::drawParticles(const Cosmetics::Item* item, double time)
         } else if (item->shape == "drop") {
             dot(float(p.x()), float(p.y()), depth, size, color, alpha);
             dot(float(p.x()), float(p.y()) + size, depth, size, color, alpha);
+        } else if (item->shape == "note") {
+            const int q = std::max(1, size / 2);
+            for (int k = 0; k < 4; k++) {
+                dot(float(p.x()) + q, float(p.y()) - k * q, depth, q, color, alpha);
+            }
+            dot(float(p.x()) + 2 * q, float(p.y()) - 3 * q, depth, q, color, alpha);
+            dot(float(p.x()), float(p.y()), depth, q * 2, color, alpha);
+        } else if (item->shape == "star") {
+            const int q = std::max(1, size / 2);
+            const int offsets[][2] = { { 0, 0 }, { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+            for (const auto& o : offsets) {
+                dot(float(p.x()) + o[0] * q, float(p.y()) + o[1] * q, depth, q, color, alpha);
+            }
         } else {
             dot(float(p.x()), float(p.y()), depth, size, color, alpha);
         }
@@ -844,7 +868,7 @@ void VelloraCharacter::drawParticles(const Cosmetics::Item* item, double time)
 }
 
 void VelloraCharacter::paintItems(QPainter& painter, const QRectF& target, const QString& head, const QString& body, const QString& back,
-                                  const QString& pet, const QString& emote, const QString& effect, double time)
+                                  const QString& pet, const QString& emote, const QString& effect, double time, const QString& hand)
 {
     const double u = std::min(target.width() / 32.0, target.height() / 40.0);
     Pen pen{ painter, target.left() + (target.width() - 32 * u) / 2 + 8 * u, target.top() + (target.height() - 40 * u) / 2 + 8 * u, u };
@@ -853,6 +877,7 @@ void VelloraCharacter::paintItems(QPainter& painter, const QRectF& target, const
     drawFlatItem(pen, Cosmetics::find(body), false, time);
     drawFlatItem(pen, Cosmetics::find(head), false, time);
     drawFlatItem(pen, Cosmetics::find(pet), false, time);
+    drawFlatItem(pen, Cosmetics::find(hand), false, time);
     drawFlatParticles(pen, Cosmetics::find(effect), time);
 }
 
@@ -892,7 +917,7 @@ void VelloraCharacter::paintEvent(QPaintEvent*)
     }
 
     // the pose
-    float breath = std::sin(time * 2) * 0.25f, lift = 0, spin = 0, bow = 0, sway = 0;
+    float breath = std::sin(time * 2) * 0.25f, lift = 0, spin = 0, bow = 0, sway = 0, flipAngle = 0;
     float rArmX = std::sin(time * 1.3) * 0.07f, lArmX = -rArmX;
     float rArmZ = -0.05f - std::sin(time * 2) * 0.02f, lArmZ = -rArmZ;
     float rLegX = 0, lLegX = 0;
@@ -938,6 +963,53 @@ void VelloraCharacter::paintEvent(QPaintEvent*)
             bow = float(std::sin(std::min(1.f, p * 1.4f) * std::numbers::pi)) * 0.6f;
             rArmX = mixf(rArmX, -0.4f, fade);
             lArmX = mixf(lArmX, 0.3f, fade);
+        } else if (m_emote == "clap") {
+            const float c = std::abs(std::sin(et * 9));
+            rArmX = mixf(rArmX, -1.25f, fade);
+            lArmX = mixf(lArmX, -1.25f, fade);
+            rArmZ = mixf(rArmZ, 0.15f + c * 0.35f, fade);
+            lArmZ = mixf(lArmZ, -0.15f - c * 0.35f, fade);
+        } else if (m_emote == "salute") {
+            rArmZ = mixf(rArmZ, -2.35f, fade);
+            rArmX = mixf(rArmX, -0.55f, fade);
+            headPitch = mixf(headPitch, -0.08f, fade);
+            headYaw *= 1 - fade;
+        } else if (m_emote == "shrug") {
+            const float u = std::abs(std::sin(et * 3));
+            rArmZ = mixf(rArmZ, -0.8f - u * 0.2f, fade);
+            lArmZ = mixf(lArmZ, 0.8f + u * 0.2f, fade);
+            rArmX = mixf(rArmX, -0.6f, fade);
+            lArmX = mixf(lArmX, -0.6f, fade);
+            headPitch = mixf(headPitch, 0.12f, fade);
+            headYaw = mixf(headYaw, std::sin(et * 3) * 0.25f, fade);
+        } else if (m_emote == "point") {
+            rArmX = mixf(rArmX, -1.6f, fade);
+            rArmZ = mixf(rArmZ, 0.05f, fade);
+            headYaw *= 1 - fade;
+        } else if (m_emote == "dab") {
+            rArmZ = mixf(rArmZ, -2.3f, fade);
+            rArmX = mixf(rArmX, -0.3f, fade);
+            lArmX = mixf(lArmX, -1.3f, fade);
+            lArmZ = mixf(lArmZ, -0.7f, fade);
+            headPitch = mixf(headPitch, 0.45f, fade);
+            headYaw = mixf(headYaw, 0.45f, fade);
+        } else if (m_emote == "flip") {
+            const float e = std::min(1.f, p * 1.5f);
+            const float arc = float(std::sin(e * std::numbers::pi));
+            lift = arc * 9;
+            flipAngle = -float(std::numbers::pi * 2) * (e * e * (3 - 2 * e));
+            rArmZ = mixf(rArmZ, -2.6f, arc);
+            lArmZ = mixf(lArmZ, 2.6f, arc);
+        } else if (m_emote == "think") {
+            rArmX = mixf(rArmX, -2.0f, fade);
+            rArmZ = mixf(rArmZ, 0.55f, fade);
+            headPitch = mixf(headPitch, 0.18f, fade);
+            headYaw = mixf(headYaw, -0.2f, fade);
+        } else if (m_emote == "punch") {
+            const float a = std::max(0.f, float(std::sin(et * 10))), b = std::max(0.f, float(-std::sin(et * 10)));
+            rArmX = mixf(rArmX, -0.6f - a, fade);
+            lArmX = mixf(lArmX, -0.6f - b, fade);
+            sway = (a - b) * 0.15f * fade;
         }
     }
     if (m_animated && !emoting && !m_dragging) {
@@ -947,6 +1019,9 @@ void VelloraCharacter::paintEvent(QPaintEvent*)
 
     Mat camera = mul(rot(0, 0, 0, m_pitch, 0, 0), rot(0, 0, 0, 0, m_yaw + spin + sway * 0.4f, 0));
     camera = mul(camera, translate(0, lift + breath * 0.3f, 0));
+    if (flipAngle != 0) {
+        camera = mul(camera, rot(0, 16, 0, flipAngle, 0, 0));  // a backflip about the middle of the body
+    }
     const Mat upper = mul(camera, rot(0, 12, 0, bow, sway * 0.6f, 0));
     const float armW = m_slim ? 3 : 4;
     m_mats[HEAD] = mul(upper, rot(0, 24, 0, headPitch + bow * 0.5f, headYaw, 0));
@@ -1003,6 +1078,7 @@ void VelloraCharacter::paintEvent(QPaintEvent*)
         drawItem(Cosmetics::find(Cosmetics::worn(Cosmetics::Body)), Cosmetics::Body, time);
         drawItem(Cosmetics::find(Cosmetics::worn(Cosmetics::Head)), Cosmetics::Head, time);
         drawItem(Cosmetics::find(Cosmetics::worn(Cosmetics::Pet)), Cosmetics::Pet, time);
+        drawItem(Cosmetics::find(Cosmetics::worn(Cosmetics::Hand)), Cosmetics::Hand, time);
         drawParticles(Cosmetics::find(Cosmetics::worn(Cosmetics::Effect)), time);
     }
 

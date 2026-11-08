@@ -29,7 +29,7 @@ import java.util.Random;
  */
 final class CharacterView extends View {
     private static final int HEAD = 0, BODY = 1, RARM = 2, LARM = 3, RLEG = 4, LLEG = 5, WORLD = 6, RWING = 7, LWING = 8, CAPE = 9, PARTS = 10;
-    private static final String[] EMOTES = { "wave", "jump", "dance", "spin", "bow", "cheer" };
+    private static final String[] EMOTES = { "wave", "jump", "dance", "spin", "bow", "cheer", "clap", "salute", "shrug", "point", "dab", "flip", "think", "punch" };
     private static final float BASE_YAW = (float) Math.toRadians(24);
 
     // the textures as pixels
@@ -343,7 +343,7 @@ final class CharacterView extends View {
 
         // the pose
         float breath = (float) Math.sin(time * 2) * 0.25f;
-        float lift = 0, spin = 0, bow = 0, sway = 0;
+        float lift = 0, spin = 0, bow = 0, sway = 0, flipAngle = 0;
         float rArmX = (float) Math.sin(time * 1.3) * 0.07f, lArmX = -rArmX;
         float rArmZ = -0.05f - (float) Math.sin(time * 2) * 0.02f, lArmZ = -rArmZ;
         float rLegX = 0, lLegX = 0;
@@ -390,6 +390,53 @@ final class CharacterView extends View {
                 bow = (float) Math.sin(Math.min(1, p * 1.4f) * Math.PI) * 0.6f;
                 rArmX = mix(rArmX, -0.4f, fade);
                 lArmX = mix(lArmX, 0.3f, fade);
+            } else if (emote.equals("clap")) {
+                float c = (float) Math.abs(Math.sin(emoteTime * 9));
+                rArmX = mix(rArmX, -1.25f, fade);
+                lArmX = mix(lArmX, -1.25f, fade);
+                rArmZ = mix(rArmZ, 0.15f + c * 0.35f, fade);
+                lArmZ = mix(lArmZ, -0.15f - c * 0.35f, fade);
+            } else if (emote.equals("salute")) {
+                rArmZ = mix(rArmZ, -2.35f, fade);
+                rArmX = mix(rArmX, -0.55f, fade);
+                headPitch = mix(headPitch, -0.08f, fade);
+                headYaw *= 1 - fade;
+            } else if (emote.equals("shrug")) {
+                float u = (float) Math.abs(Math.sin(emoteTime * 3));
+                rArmZ = mix(rArmZ, -0.8f - u * 0.2f, fade);
+                lArmZ = mix(lArmZ, 0.8f + u * 0.2f, fade);
+                rArmX = mix(rArmX, -0.6f, fade);
+                lArmX = mix(lArmX, -0.6f, fade);
+                headPitch = mix(headPitch, 0.12f, fade);
+                headYaw = mix(headYaw, (float) Math.sin(emoteTime * 3) * 0.25f, fade);
+            } else if (emote.equals("point")) {
+                rArmX = mix(rArmX, -1.6f, fade);
+                rArmZ = mix(rArmZ, 0.05f, fade);
+                headYaw *= 1 - fade;
+            } else if (emote.equals("dab")) {
+                rArmZ = mix(rArmZ, -2.3f, fade);
+                rArmX = mix(rArmX, -0.3f, fade);
+                lArmX = mix(lArmX, -1.3f, fade);
+                lArmZ = mix(lArmZ, -0.7f, fade);
+                headPitch = mix(headPitch, 0.45f, fade);
+                headYaw = mix(headYaw, 0.45f, fade);
+            } else if (emote.equals("flip")) {
+                float e = Math.min(1, p * 1.5f);
+                float arc = (float) Math.sin(e * Math.PI);
+                lift = arc * 9;
+                flipAngle = -(float) (Math.PI * 2 * (e * e * (3 - 2 * e)));
+                rArmZ = mix(rArmZ, -2.6f, arc);
+                lArmZ = mix(lArmZ, 2.6f, arc);
+            } else if (emote.equals("think")) {
+                rArmX = mix(rArmX, -2.0f, fade);
+                rArmZ = mix(rArmZ, 0.55f, fade);
+                headPitch = mix(headPitch, 0.18f, fade);
+                headYaw = mix(headYaw, -0.2f, fade);
+            } else if (emote.equals("punch")) {
+                float a = (float) Math.max(0, Math.sin(emoteTime * 10)), b = (float) Math.max(0, -Math.sin(emoteTime * 10));
+                rArmX = mix(rArmX, -0.6f - a * 1.0f, fade);
+                lArmX = mix(lArmX, -0.6f - b * 1.0f, fade);
+                sway = (a - b) * 0.15f * fade;
             }
         }
         if (animated && !emoting && !dragging) {
@@ -403,6 +450,9 @@ final class CharacterView extends View {
         float[] camera = rot(0, 0, 0, pitch, 0, 0);
         mul(camera, rot(0, 0, 0, 0, totalYaw, 0), camera);
         mul(camera, translate(0, lift + breath * 0.3f, 0), camera);
+        if (flipAngle != 0) {
+            mul(camera, rot(0, 16, 0, flipAngle, 0, 0), camera);  // a backflip about the middle of the body
+        }
         float[] upper = rot(0, 12, 0, bow, sway * 0.6f, 0);
         float[] upperCam = new float[12];
         mul(camera, upper, upperCam);
@@ -481,6 +531,7 @@ final class CharacterView extends View {
             drawItem(Cosmetics.find(context, worn(Cosmetics.BODY)), Cosmetics.BODY, time);
             drawItem(Cosmetics.find(context, worn(Cosmetics.HEAD)), Cosmetics.HEAD, time);
             drawItem(Cosmetics.find(context, worn(Cosmetics.PET)), Cosmetics.PET, time);
+            drawItem(Cosmetics.find(context, worn(Cosmetics.HAND)), Cosmetics.HAND, time);
             drawParticles(Cosmetics.find(context, worn(Cosmetics.EFFECT)), time);
         }
 
@@ -842,6 +893,11 @@ final class CharacterView extends View {
                 }
                 add(out, BODY, x0, y0, -3.2f, x1, y1, -2.3f, c);
             }
+        } else if (Cosmetics.HAND.equals(slot)) {
+            if (backView) {
+                return;
+            }
+            add(out, RARM, x0, y0, 2.1f, x1, y1, 2.9f, c);  // held in the right hand, in front of it: it moves with the arm
         } else if (Cosmetics.PET.equals(slot)) {
             if (backView) {
                 return;
@@ -894,7 +950,7 @@ final class CharacterView extends View {
                 continue;
             }
             float[] p = project(m, x, y, z);
-            int size = Math.max(1, Math.round(scale * ("heart".equals(item.shape) ? 0.45f : 0.8f)));
+            int size = Math.max(1, Math.round(scale * ("heart".equals(item.shape) ? 0.45f : "note".equals(item.shape) || "star".equals(item.shape) ? 1.2f : 0.8f)));
             if ("heart".equals(item.shape)) {
                 int[][] heart = { { 0, 0 }, { 2, 0 }, { 0, 1 }, { 1, 1 }, { 2, 1 }, { 1, 2 } };
                 for (int[] h : heart) {
@@ -903,6 +959,20 @@ final class CharacterView extends View {
             } else if ("drop".equals(item.shape)) {
                 dot(p[0], p[1], p[2], size, col, alpha);
                 dot(p[0], p[1] + size, p[2], size, col, alpha);
+            } else if ("note".equals(item.shape)) {
+                int q = Math.max(1, size / 2);
+                for (int k = 0; k < 4; k++) {
+                    dot(p[0] + q, p[1] - k * q, p[2], q, col, alpha);  // the stem
+                }
+                dot(p[0] + 2 * q, p[1] - 3 * q, p[2], q, col, alpha);
+                dot(p[0], p[1], p[2], q * 2, col, alpha);             // the head
+            } else if ("star".equals(item.shape)) {
+                int q = Math.max(1, size / 2);
+                dot(p[0], p[1], p[2], q, col, alpha);
+                dot(p[0] - q, p[1], p[2], q, col, alpha);
+                dot(p[0] + q, p[1], p[2], q, col, alpha);
+                dot(p[0], p[1] - q, p[2], q, col, alpha);
+                dot(p[0], p[1] + q, p[2], q, col, alpha);
             } else {
                 dot(p[0], p[1], p[2], size, col, alpha);
             }

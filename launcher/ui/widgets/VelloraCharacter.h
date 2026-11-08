@@ -30,7 +30,7 @@
 /// launcher (the same items as the Android app, android/src/.../Cosmetics.java). Only the real Minecraft capes of the
 /// account are seen in the game; the rest is for the launcher.
 namespace Cosmetics {
-inline const QString Head = "head", Body = "body", Back = "back", Pet = "pet", Effect = "effect", Emote = "emote";
+inline const QString Head = "head", Body = "body", Back = "back", Pet = "pet", Hand = "hand", Effect = "effect", Emote = "emote";
 
 struct Layer {
     double x = 0, y = 0;
@@ -54,7 +54,7 @@ QString title(const Item& item);
 QColor rarityColor(const QString& rarity);
 
 struct Outfit {
-    QString titleRu, titleEn, head, back, body, pet, effect;
+    QString titleRu, titleEn, head, back, body, pet, effect, hand;
 };
 const QList<Outfit>& outfits();
 QString title(const Outfit& outfit);
@@ -89,7 +89,8 @@ class VelloraCharacter : public QWidget {
     void setShowItems(bool show);
     /// draws a still figure (no skin) with these items into `target`, for the wardrobe tiles
     static void paintItems(QPainter& painter, const QRectF& target, const QString& head, const QString& body, const QString& back,
-                           const QString& pet, const QString& emote = QString(), const QString& effect = QString(), double time = 0);
+                           const QString& pet, const QString& emote = QString(), const QString& effect = QString(), double time = 0,
+                           const QString& hand = QString());
 
    protected:
     void paintEvent(QPaintEvent* event) override;

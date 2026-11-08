@@ -37,5 +37,6 @@
         <file>sounds/toggle.wav</file>
         <file>sounds/wear.wav</file>
         <file>sounds/launch.wav</file>
+        <file>music/vellora_theme.wav</file>
     </qresource>
 </RCC>

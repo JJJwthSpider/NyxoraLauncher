@@ -21,9 +21,16 @@
 /// The interface sounds of Vellora Client, like Millida Launcher's: "nav" when a tab changes, "open" and "close" for
 /// windows, "click", "toggle", "wear" when an item is put on and "launch" on Play. The sounds are Vellora's own
 /// (android/art/sounds.py, in the resources). Windows plays them from memory with PlaySound, Linux and macOS with the
-/// system player (paplay, aplay or afplay) if there is one. The 🔊 button in the lobby turns them off.
+/// system player (paplay, aplay or afplay) if there is one. The 🔊 button in the lobby turns them off. The music loops
+/// with waveOut on Windows (the sounds play over it) and with the system player elsewhere.
 namespace VelloraSound {
 void play(const QString& name);
 bool enabled();
 void setEnabled(bool on);
+
+/// the music: "Crimson Rain" (android/art/sounds.py), a calm loop, quiet; it pauses while a game runs. 🎵 turns it off.
+bool musicEnabled();
+void setMusicEnabled(bool on);
+void startMusic();
+void pauseMusic();
 }  // namespace VelloraSound

@@ -70,6 +70,7 @@ final class HomeScreen {
     private View buildPanel;         // the page of the chosen installation, slides in from the right
     private android.widget.FrameLayout pagesBox;  // the pages; the one leaving fades out in its overlay
     private Button soundButton;
+    private Button musicButton;
 
     HomeScreen(MainActivity activity) {
         this.activity = activity;
@@ -240,6 +241,16 @@ final class HomeScreen {
             }
         });
         lobbyBar.addView(soundButton);
+        musicButton = square(Sounds.musicEnabled(activity) ? "🎵" : "🔕", "Музыка", new Runnable() {
+            public void run() {
+                boolean on = !Sounds.musicEnabled(HomeScreen.this.activity);
+                Sounds.setMusicEnabled(HomeScreen.this.activity, on);
+                musicButton.setText(on ? "🎵" : "🔕");
+                Sounds.play(Sounds.TOGGLE);
+                android.widget.Toast.makeText(HomeScreen.this.activity, on ? "Музыка включена" : "Музыка выключена", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+        lobbyBar.addView(musicButton);
         lobbyBar.addView(square("📦", "Мои сборки", new Runnable() {
             public void run() {
                 showPage(LIBRARY);

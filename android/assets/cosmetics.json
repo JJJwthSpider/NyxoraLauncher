@@ -1527,6 +1527,4128 @@
    "titleEn": "Cheer",
    "rarity": "common",
    "layers": []
+  },
+  {
+   "id": "sombrero",
+   "slot": "head",
+   "title": "Сомбреро",
+   "titleEn": "Sombrero",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 0,
+     "y": -4,
+     "rows": [
+      "......aaaa......",
+      ".....abbbba.....",
+      "....aaaaaaaa....",
+      "aaaaccacacaaaaaa",
+      ".aaaaaaaaaaaaaa."
+     ],
+     "colors": {
+      "a": "#D9A441",
+      "b": "#B5832A",
+      "c": "#E8364F"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "cowboy_hat",
+   "slot": "head",
+   "title": "Ковбойская шляпа",
+   "titleEn": "Cowboy hat",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 1,
+     "y": -4,
+     "rows": [
+      "....aa..aa....",
+      "...aaaaaaaa...",
+      "...bbbbbbbb...",
+      "a.aaaaaaaaaa.a",
+      ".aaaaaaaaaaaa."
+     ],
+     "colors": {
+      "a": "#7A4A24",
+      "b": "#3A1A10"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "chef_hat",
+   "slot": "head",
+   "title": "Колпак повара",
+   "titleEn": "Chef hat",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 3,
+     "y": -6,
+     "rows": [
+      ".aa.aa.aa.",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      ".aaaaaaaa.",
+      ".aaaaaaaa.",
+      "bbbbbbbbbb"
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#D6CCD0"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "santa_hat",
+   "slot": "head",
+   "title": "Новогодний колпак",
+   "titleEn": "Santa hat",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": -5,
+     "rows": [
+      ".........aa",
+      "......aaaab",
+      "....aaaaa..",
+      "..aaaaaaa..",
+      "bbbbbbbbbb."
+     ],
+     "colors": {
+      "a": "#D6283A",
+      "b": "#F4EEF0"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "party_hat",
+   "slot": "head",
+   "title": "Праздничный колпак",
+   "titleEn": "Party hat",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 5,
+     "y": -7,
+     "rows": [
+      "..c...",
+      "..a...",
+      ".aba..",
+      ".abaa.",
+      "abaaba",
+      "aabaab"
+     ],
+     "colors": {
+      "a": "#5CB6FF",
+      "b": "#FFE08A",
+      "c": "#FF7AA2"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "beret",
+   "slot": "head",
+   "title": "Берет",
+   "titleEn": "Beret",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 3,
+     "y": -2,
+     "rows": [
+      "....a.....",
+      ".aaaaaaaa.",
+      "aaaaaaaaab"
+     ],
+     "colors": {
+      "a": "#B01C38",
+      "b": "#7A0F22"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "graduation_cap",
+   "slot": "head",
+   "title": "Шапка выпускника",
+   "titleEn": "Graduation cap",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 2,
+     "y": -3,
+     "rows": [
+      "aaaaaaaaaaaa",
+      "..bbbbbbbb.c",
+      "..bbbbbbbb.c"
+     ],
+     "colors": {
+      "a": "#1A1A22",
+      "b": "#2A2A34",
+      "c": "#E6B43C"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "police_cap",
+   "slot": "head",
+   "title": "Фуражка",
+   "titleEn": "Officer cap",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": -3,
+     "rows": [
+      ".aaaaaaaa.",
+      "aaaabbaaaa",
+      "cccccccccc",
+      "...ddddd.."
+     ],
+     "colors": {
+      "a": "#1E2A4A",
+      "b": "#E6B43C",
+      "c": "#120306",
+      "d": "#0E0E14"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "propeller_cap",
+   "slot": "head",
+   "title": "Кепка с пропеллером",
+   "titleEn": "Propeller cap",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 3,
+     "y": -5,
+     "rows": [
+      "aaa.c.bbb.",
+      "....c.....",
+      "..dedede..",
+      ".dedededed",
+      "eeeeeeeeee"
+     ],
+     "colors": {
+      "a": "#E8364F",
+      "b": "#5CB6FF",
+      "c": "#7C8794",
+      "d": "#FFD23C",
+      "e": "#2C5BD6"
+     },
+     "view": "both",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "samurai_helmet",
+   "slot": "head",
+   "title": "Шлем самурая",
+   "titleEn": "Samurai helmet",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 1,
+     "y": -5,
+     "rows": [
+      "...a......a...",
+      "....a....a....",
+      ".....abba.....",
+      "..cccccccccc..",
+      ".cccccccccccc.",
+      "cc..........cc",
+      "c............c"
+     ],
+     "colors": {
+      "a": "#E6B43C",
+      "b": "#E8364F",
+      "c": "#2A0A12"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "knight_helmet",
+   "slot": "head",
+   "title": "Шлем рыцаря",
+   "titleEn": "Knight helmet",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 3,
+     "y": -3,
+     "rows": [
+      "....aa....",
+      "....aa....",
+      "bbbbbbbbbb"
+     ],
+     "colors": {
+      "a": "#E8364F",
+      "b": "#9AA4AE"
+     },
+     "view": "both",
+     "anim": ""
+    },
+    {
+     "x": 4,
+     "y": 0,
+     "rows": [
+      "cccccccc",
+      "cccccccc",
+      "cccccccc",
+      "dddddddd",
+      "c.c.c.c.",
+      "cccccccc"
+     ],
+     "colors": {
+      "c": "#9AA4AE",
+      "d": "#1A1A22"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "pumpkin_head",
+   "slot": "head",
+   "title": "Голова-тыква",
+   "titleEn": "Pumpkin head",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 7,
+     "y": -2,
+     "rows": [
+      "ab",
+      ".b"
+     ],
+     "colors": {
+      "a": "#4C9A52",
+      "b": "#2E6B32"
+     },
+     "view": "both",
+     "anim": ""
+    },
+    {
+     "x": 4,
+     "y": 0,
+     "rows": [
+      "cccccccc",
+      "cddccddc",
+      "cddccddc",
+      "cccccccc",
+      "cdcddcdc",
+      "ccddddcc",
+      "cccccccc",
+      "cccccccc"
+     ],
+     "colors": {
+      "c": "#E07A1E",
+      "d": "#FFD23C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "creeper_mask",
+   "slot": "head",
+   "title": "Маска крипера",
+   "titleEn": "Creeper mask",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 4,
+     "y": 0,
+     "rows": [
+      "aaaaaaaa",
+      "abbaabba",
+      "abbaabba",
+      "aaabbaaa",
+      "aabbbbaa",
+      "aabbbbaa",
+      "aabaabaa",
+      "aaaaaaaa"
+     ],
+     "colors": {
+      "a": "#5BB04E",
+      "b": "#13200F"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "pilot_goggles",
+   "slot": "head",
+   "title": "Очки пилота",
+   "titleEn": "Pilot goggles",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": 2,
+     "rows": [
+      "aaaaaaaaaa",
+      "abbcaabbca",
+      "abbbaabbba",
+      "aaaaaaaaaa"
+     ],
+     "colors": {
+      "a": "#6E3A1E",
+      "b": "#5CB6FF",
+      "c": "#F4EEF0"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "vr_goggles",
+   "slot": "head",
+   "title": "VR-шлем",
+   "titleEn": "VR headset",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 3,
+     "y": 2,
+     "rows": [
+      "aaaaaaaaaa",
+      "abbbbbbbba",
+      "abccbbccba",
+      "aaaaaaaaaa"
+     ],
+     "colors": {
+      "a": "#1A1A22",
+      "b": "#2C2C3A",
+      "c": "#39FFD2"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "glasses_3d",
+   "slot": "head",
+   "title": "3D-очки",
+   "titleEn": "3D glasses",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 4,
+     "y": 3,
+     "rows": [
+      "aaaaaaaa",
+      ".bb..cc.",
+      ".aa..aa."
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#E8364F",
+      "c": "#3C8CFF"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "heart_glasses",
+   "slot": "head",
+   "title": "Очки-сердечки",
+   "titleEn": "Heart glasses",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 4,
+     "y": 3,
+     "rows": [
+      "aa.aa.aa",
+      "aaaaaaaa",
+      ".a.....a"
+     ],
+     "colors": {
+      "a": "#FF5A8A"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "star_glasses",
+   "slot": "head",
+   "title": "Очки-звёзды",
+   "titleEn": "Star glasses",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 4,
+     "y": 2,
+     "rows": [
+      ".a....a.",
+      "aaa..aaa",
+      ".a....a."
+     ],
+     "colors": {
+      "a": "#FFD23C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "monocle",
+   "slot": "head",
+   "title": "Монокль",
+   "titleEn": "Monocle",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 8,
+     "y": 3,
+     "rows": [
+      ".aa.",
+      "abba",
+      ".aa.",
+      "...a",
+      "...a"
+     ],
+     "colors": {
+      "a": "#E6B43C",
+      "b": "#DDEFFF88"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "nerd_glasses",
+   "slot": "head",
+   "title": "Очки отличника",
+   "titleEn": "Nerd glasses",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 4,
+     "y": 3,
+     "rows": [
+      "aaaaaaaa",
+      "abbaabba",
+      "aaa..aaa"
+     ],
+     "colors": {
+      "a": "#120306",
+      "b": "#DDEFFF66"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "mustache",
+   "slot": "head",
+   "title": "Усы",
+   "titleEn": "Mustache",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 4,
+     "y": 5,
+     "rows": [
+      ".aa..aa.",
+      "aaaaaaaa",
+      "a......a"
+     ],
+     "colors": {
+      "a": "#3A1A10"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "clown_nose",
+   "slot": "head",
+   "title": "Нос клоуна",
+   "titleEn": "Clown nose",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 7,
+     "y": 4,
+     "rows": [
+      "aa",
+      "aa"
+     ],
+     "colors": {
+      "a": "#FF2A3C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "bandana_head",
+   "slot": "head",
+   "title": "Бандана",
+   "titleEn": "Bandana",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 3,
+     "y": -1,
+     "rows": [
+      ".aaaaaaaa.",
+      "aabaabaaba",
+      "aaaaaaaaaa"
+     ],
+     "colors": {
+      "a": "#C62828",
+      "b": "#F4EEF0"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "ninja_headband",
+   "slot": "head",
+   "title": "Повязка ниндзя",
+   "titleEn": "Ninja headband",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": 1,
+     "rows": [
+      "aaaaaaaaaa",
+      "abbbbbbbba"
+     ],
+     "colors": {
+      "a": "#1A1A22",
+      "b": "#C62828"
+     },
+     "view": "front",
+     "anim": ""
+    },
+    {
+     "x": 3,
+     "y": 1,
+     "rows": [
+      "aaaaaaaaaa",
+      "aaaabbaaaa",
+      "....aa....",
+      "...a..a..."
+     ],
+     "colors": {
+      "a": "#C62828",
+      "b": "#7A0F22"
+     },
+     "view": "back",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "fox_ears",
+   "slot": "head",
+   "title": "Лисьи уши",
+   "titleEn": "Fox ears",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": -3,
+     "rows": [
+      "a........a",
+      "ab......ba",
+      "abb....bba"
+     ],
+     "colors": {
+      "a": "#E06A1E",
+      "b": "#F4EEF0"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "wolf_ears",
+   "slot": "head",
+   "title": "Волчьи уши",
+   "titleEn": "Wolf ears",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": -3,
+     "rows": [
+      "a........a",
+      "aa......aa",
+      "aba....aba"
+     ],
+     "colors": {
+      "a": "#7C8794",
+      "b": "#3A3F48"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "bear_ears",
+   "slot": "head",
+   "title": "Медвежьи ушки",
+   "titleEn": "Bear ears",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 3,
+     "y": -2,
+     "rows": [
+      "aa......aa",
+      "ab......ba"
+     ],
+     "colors": {
+      "a": "#6E3A1E",
+      "b": "#C08A5A"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "antlers",
+   "slot": "head",
+   "title": "Рога оленя",
+   "titleEn": "Antlers",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 1,
+     "y": -6,
+     "rows": [
+      "a.a......a.a",
+      "aaa......aaa",
+      ".a.a....a.a.",
+      ".aa......aa.",
+      "..a......a..",
+      "..a......a.."
+     ],
+     "colors": {
+      "a": "#8A5A2E"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "unicorn_horn",
+   "slot": "head",
+   "title": "Рог единорога",
+   "titleEn": "Unicorn horn",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 7,
+     "y": -5,
+     "rows": [
+      "..a",
+      ".ab",
+      ".ba",
+      "bac",
+      "abc"
+     ],
+     "colors": {
+      "a": "#FFE08A",
+      "b": "#FF9AD5",
+      "c": "#B98CFF"
+     },
+     "view": "both",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "ram_horns",
+   "slot": "head",
+   "title": "Рога барана",
+   "titleEn": "Ram horns",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 2,
+     "y": -2,
+     "rows": [
+      ".aa........aa.",
+      "a..a......a..a",
+      "a.a........a.a",
+      ".a..........a."
+     ],
+     "colors": {
+      "a": "#D8C29D"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "laurel_wreath",
+   "slot": "head",
+   "title": "Лавровый венок",
+   "titleEn": "Laurel wreath",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": -1,
+     "rows": [
+      "a.a.a..a.a.a",
+      "aaaaaaaaaa"
+     ],
+     "colors": {
+      "a": "#6BAA3E"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "mushroom_hat",
+   "slot": "head",
+   "title": "Шляпка гриба",
+   "titleEn": "Mushroom cap",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 2,
+     "y": -4,
+     "rows": [
+      "...aaaaaa...",
+      "..abaaabaa..",
+      ".aaaaaaaaaa.",
+      "abaaaabaaaba"
+     ],
+     "colors": {
+      "a": "#D6283A",
+      "b": "#F4EEF0"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "frog_hat",
+   "slot": "head",
+   "title": "Шапка-лягушка",
+   "titleEn": "Frog hat",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": -4,
+     "rows": [
+      ".ab....ab.",
+      ".bb....bb.",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa"
+     ],
+     "colors": {
+      "a": "#5BB04E",
+      "b": "#120306"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "ice_crown",
+   "slot": "head",
+   "title": "Ледяная корона",
+   "titleEn": "Ice crown",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 3,
+     "y": -3,
+     "rows": [
+      "a..a..a..a",
+      "aaaaaaaaaa",
+      "abaacaabaa",
+      "dddddddddd"
+     ],
+     "colors": {
+      "a": "#BFE6FF",
+      "b": "#F4EEF0",
+      "c": "#5CB6FF",
+      "d": "#5CB6FF"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "emerald_crown",
+   "slot": "head",
+   "title": "Изумрудная корона",
+   "titleEn": "Emerald crown",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 3,
+     "y": -3,
+     "rows": [
+      "a..a..a..a",
+      "aaaaaaaaaa",
+      "abaacaabaa",
+      "dddddddddd"
+     ],
+     "colors": {
+      "a": "#3EC27A",
+      "b": "#E6B43C",
+      "c": "#5CB6FF",
+      "d": "#1E7A48"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "blue_halo",
+   "slot": "head",
+   "title": "Голубой нимб",
+   "titleEn": "Blue halo",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 3,
+     "y": -5,
+     "rows": [
+      ".aaaaaaaa.",
+      "a........a",
+      ".bbbbbbbb."
+     ],
+     "colors": {
+      "a": "#7FD6FF",
+      "b": "#3C8CFF"
+     },
+     "view": "both",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "crimson_halo",
+   "slot": "head",
+   "title": "Багровый нимб",
+   "titleEn": "Crimson halo",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 3,
+     "y": -5,
+     "rows": [
+      ".aaaaaaaa.",
+      "a........a",
+      ".bbbbbbbb."
+     ],
+     "colors": {
+      "a": "#E8364F",
+      "b": "#7A0F22"
+     },
+     "view": "both",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "white_cat_ears",
+   "slot": "head",
+   "title": "Белые ушки",
+   "titleEn": "White cat ears",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": -3,
+     "rows": [
+      "a........a",
+      "aa......aa",
+      "aba....aba"
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#E87A90"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "white_top_hat",
+   "slot": "head",
+   "title": "Белый цилиндр",
+   "titleEn": "White top hat",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": -7,
+     "rows": [
+      "..aaaaaa..",
+      "..aaaaaa..",
+      "..aaaaaa..",
+      "..aaaaaa..",
+      "..bbbbbb..",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa"
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#2C5BD6"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "blue_wizard_hat",
+   "slot": "head",
+   "title": "Синяя шляпа мага",
+   "titleEn": "Blue wizard hat",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 2,
+     "y": -9,
+     "rows": [
+      "......ab....",
+      ".....aab....",
+      ".....aabb...",
+      "....aaabb...",
+      "....aaabbb..",
+      "...aaaabbb..",
+      "...aaaaabbb.",
+      "..aaaaaabbb.",
+      "cccccccccccc",
+      "dddddddddddd"
+     ],
+     "colors": {
+      "a": "#1E2A6A",
+      "b": "#3C4CB0",
+      "c": "#E6B43C",
+      "d": "#120306"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "medal",
+   "slot": "body",
+   "title": "Медаль",
+   "titleEn": "Medal",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 7,
+     "y": 8,
+     "rows": [
+      "ab",
+      "ab",
+      "cc",
+      "cc"
+     ],
+     "colors": {
+      "a": "#E8364F",
+      "b": "#3C8CFF",
+      "c": "#E6B43C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "sash",
+   "slot": "body",
+   "title": "Лента",
+   "titleEn": "Sash",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 4,
+     "y": 8,
+     "rows": [
+      "a.......",
+      "aa......",
+      ".aa.....",
+      "..aa....",
+      "...aa...",
+      "....aa..",
+      ".....aa.",
+      "......aa",
+      ".......a"
+     ],
+     "colors": {
+      "a": "#B01C38"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "pearl_necklace",
+   "slot": "body",
+   "title": "Жемчуг",
+   "titleEn": "Pearls",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 4,
+     "y": 8,
+     "rows": [
+      "a......a",
+      ".a....a.",
+      "..aaaa.."
+     ],
+     "colors": {
+      "a": "#F4EEF0"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "thick_chain",
+   "slot": "body",
+   "title": "Толстая цепь",
+   "titleEn": "Thick chain",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 4,
+     "y": 8,
+     "rows": [
+      "aa....aa",
+      ".aa..aa.",
+      "..aaaa..",
+      "...bb...",
+      "...bb..."
+     ],
+     "colors": {
+      "a": "#E6B43C",
+      "b": "#FFE08A"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "cross_necklace",
+   "slot": "body",
+   "title": "Крестик",
+   "titleEn": "Cross",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 5,
+     "y": 9,
+     "rows": [
+      "a....a",
+      ".a..a.",
+      "..ab..",
+      ".bbbb.",
+      "..bb..",
+      "..bb.."
+     ],
+     "colors": {
+      "a": "#C9C2C8",
+      "b": "#E6B43C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "tesseract_amulet",
+   "slot": "body",
+   "title": "Амулет тессеракта",
+   "titleEn": "Tesseract amulet",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 5,
+     "y": 9,
+     "rows": [
+      "a....a",
+      ".a..a.",
+      "..aa..",
+      ".bccb.",
+      ".cddc.",
+      ".bccb."
+     ],
+     "colors": {
+      "a": "#E6B43C",
+      "b": "#E8364F",
+      "c": "#7A0F22",
+      "d": "#FFC8CD"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "v_badge",
+   "slot": "body",
+   "title": "Значок V",
+   "titleEn": "V badge",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 9,
+     "y": 10,
+     "rows": [
+      "a.a",
+      "a.a",
+      ".a."
+     ],
+     "colors": {
+      "a": "#E8364F"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "heart_badge",
+   "slot": "body",
+   "title": "Значок-сердце",
+   "titleEn": "Heart badge",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 9,
+     "y": 10,
+     "rows": [
+      "a.a",
+      "aaa",
+      ".a."
+     ],
+     "colors": {
+      "a": "#FF5A8A"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "star_badge",
+   "slot": "body",
+   "title": "Значок-звезда",
+   "titleEn": "Star badge",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 9,
+     "y": 10,
+     "rows": [
+      ".a.",
+      "aaa",
+      "a.a"
+     ],
+     "colors": {
+      "a": "#FFD23C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "suspenders",
+   "slot": "body",
+   "title": "Подтяжки",
+   "titleEn": "Suspenders",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 5,
+     "y": 8,
+     "rows": [
+      "a....a",
+      "a....a",
+      "a....a",
+      "a....a",
+      "a....a",
+      "a....a",
+      "a....a",
+      "a....a",
+      "a....a",
+      "a....a",
+      "a....a"
+     ],
+     "colors": {
+      "a": "#2C5BD6"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "bandolier",
+   "slot": "body",
+   "title": "Патронташ",
+   "titleEn": "Bandolier",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 4,
+     "y": 8,
+     "rows": [
+      "a.......",
+      "ba......",
+      ".ba.....",
+      "..ba....",
+      "...ba...",
+      "....ba..",
+      ".....ba.",
+      "......ba",
+      ".......b"
+     ],
+     "colors": {
+      "a": "#6E3A1E",
+      "b": "#E6B43C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "flower_lei",
+   "slot": "body",
+   "title": "Гавайские цветы",
+   "titleEn": "Flower lei",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 4,
+     "y": 8,
+     "rows": [
+      "abcabcab",
+      ".c....a.",
+      "..bcab.."
+     ],
+     "colors": {
+      "a": "#FF7AA2",
+      "b": "#FFE08A",
+      "c": "#B98CFF"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "bell_collar",
+   "slot": "body",
+   "title": "Ошейник с колокольчиком",
+   "titleEn": "Bell collar",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 4,
+     "y": 8,
+     "rows": [
+      "aaaaaaaa",
+      "...bb...",
+      "...bb..."
+     ],
+     "colors": {
+      "a": "#E8364F",
+      "b": "#E6B43C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "tool_belt",
+   "slot": "body",
+   "title": "Пояс с инструментами",
+   "titleEn": "Tool belt",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 4,
+     "y": 18,
+     "rows": [
+      "aaaaaaaa",
+      "abcabdca",
+      ".b.....d"
+     ],
+     "colors": {
+      "a": "#6E3A1E",
+      "b": "#9AA4AE",
+      "c": "#E6B43C",
+      "d": "#E8364F"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "fur_collar",
+   "slot": "body",
+   "title": "Меховой воротник",
+   "titleEn": "Fur collar",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 3,
+     "y": 7,
+     "rows": [
+      "aaaaaaaaaa",
+      "abaababaab",
+      ".a......a."
+     ],
+     "colors": {
+      "a": "#E8DCC8",
+      "b": "#C8BCA8"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "vest",
+   "slot": "body",
+   "title": "Жилет",
+   "titleEn": "Vest",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 4,
+     "y": 8,
+     "rows": [
+      "aa....aa",
+      "aa....aa",
+      "aab..baa",
+      "aa....aa",
+      "aab..baa",
+      "aa....aa",
+      "aaaaaaaa"
+     ],
+     "colors": {
+      "a": "#3A4A2A",
+      "b": "#E6B43C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "blue_scarf",
+   "slot": "body",
+   "title": "Синий шарф",
+   "titleEn": "Blue scarf",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 4,
+     "y": 8,
+     "rows": [
+      "aaaaaaaa",
+      "bbbbbbbb",
+      ".....bb.",
+      ".....bb.",
+      ".....cc."
+     ],
+     "colors": {
+      "a": "#3C8CFF",
+      "b": "#2C5BD6",
+      "c": "#1E3A8A"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "green_scarf",
+   "slot": "body",
+   "title": "Зелёный шарф",
+   "titleEn": "Green scarf",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 4,
+     "y": 8,
+     "rows": [
+      "aaaaaaaa",
+      "bbbbbbbb",
+      ".....bb.",
+      ".....bb.",
+      ".....cc."
+     ],
+     "colors": {
+      "a": "#5BB04E",
+      "b": "#3E9B47",
+      "c": "#2E6B32"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "white_scarf",
+   "slot": "body",
+   "title": "Белый шарф",
+   "titleEn": "White scarf",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 4,
+     "y": 8,
+     "rows": [
+      "aaaaaaaa",
+      "bbbbbbbb",
+      ".....bb.",
+      ".....bb.",
+      ".....cc."
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#D6CCD0",
+      "c": "#A89CA2"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "blue_tie",
+   "slot": "body",
+   "title": "Синий галстук",
+   "titleEn": "Blue tie",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 7,
+     "y": 8,
+     "rows": [
+      "aa",
+      "bb",
+      "bb",
+      "bb",
+      "bb",
+      "bb",
+      "aa"
+     ],
+     "colors": {
+      "a": "#120306",
+      "b": "#2C5BD6"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "gold_bow_tie",
+   "slot": "body",
+   "title": "Золотая бабочка",
+   "titleEn": "Gold bow tie",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 6,
+     "y": 8,
+     "rows": [
+      "a.aa.a",
+      "aaaaaa",
+      "a.aa.a"
+     ],
+     "colors": {
+      "a": "#E6B43C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "black_bow_tie",
+   "slot": "body",
+   "title": "Чёрная бабочка",
+   "titleEn": "Black bow tie",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 6,
+     "y": 8,
+     "rows": [
+      "a.aa.a",
+      "aaaaaa",
+      "a.aa.a"
+     ],
+     "colors": {
+      "a": "#120306"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "gold_armor",
+   "slot": "body",
+   "title": "Золотой нагрудник",
+   "titleEn": "Gold chestplate",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 4,
+     "y": 9,
+     "rows": [
+      "abbbbbba",
+      "abccccba",
+      "abccccba",
+      "abbbbbba",
+      ".abbbba."
+     ],
+     "colors": {
+      "a": "#9C6E1E",
+      "b": "#E6B43C",
+      "c": "#E8364F"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "phoenix_wings",
+   "slot": "back",
+   "title": "Крылья феникса",
+   "titleEn": "Phoenix wings",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": -5,
+     "y": 6,
+     "rows": [
+      "...aab",
+      "..aabc",
+      ".aabbc",
+      "aabbcc",
+      "abbcc.",
+      "abcc..",
+      "bc....",
+      "c....."
+     ],
+     "colors": {
+      "a": "#FFD23C",
+      "b": "#FF8A3C",
+      "c": "#E8364F"
+     },
+     "view": "both",
+     "anim": "flap"
+    },
+    {
+     "x": 15,
+     "y": 6,
+     "rows": [
+      "baa...",
+      "cbaa..",
+      "cbbaa.",
+      "ccbbaa",
+      ".ccbba",
+      "..ccba",
+      "....cb",
+      ".....c"
+     ],
+     "colors": {
+      "a": "#FFD23C",
+      "b": "#FF8A3C",
+      "c": "#E8364F"
+     },
+     "view": "both",
+     "anim": "flap"
+    }
+   ]
+  },
+  {
+   "id": "ice_wings",
+   "slot": "back",
+   "title": "Ледяные крылья",
+   "titleEn": "Ice wings",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": -5,
+     "y": 6,
+     "rows": [
+      "....ab",
+      "...abb",
+      "..abbc",
+      ".abbcc",
+      "abbcc.",
+      "abc...",
+      ".bc...",
+      "..c..."
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#BFE6FF",
+      "c": "#5CB6FF"
+     },
+     "view": "both",
+     "anim": "flap"
+    },
+    {
+     "x": 15,
+     "y": 6,
+     "rows": [
+      "ba....",
+      "bba...",
+      "cbba..",
+      "ccbba.",
+      ".ccbba",
+      "...cba",
+      "...cb.",
+      "...c.."
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#BFE6FF",
+      "c": "#5CB6FF"
+     },
+     "view": "both",
+     "anim": "flap"
+    }
+   ]
+  },
+  {
+   "id": "bee_wings",
+   "slot": "back",
+   "title": "Крылья пчелы",
+   "titleEn": "Bee wings",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": -5,
+     "y": 6,
+     "rows": [
+      "..aa..",
+      ".abba.",
+      ".abba.",
+      "..aa..",
+      "......",
+      "......",
+      "......",
+      "......"
+     ],
+     "colors": {
+      "a": "#FFFFFFAA",
+      "b": "#DDEFFF99",
+      "c": "#BCDCFF88"
+     },
+     "view": "both",
+     "anim": "flap"
+    },
+    {
+     "x": 15,
+     "y": 6,
+     "rows": [
+      "..aa..",
+      ".abba.",
+      ".abba.",
+      "..aa..",
+      "......",
+      "......",
+      "......",
+      "......"
+     ],
+     "colors": {
+      "a": "#FFFFFFAA",
+      "b": "#DDEFFF99",
+      "c": "#BCDCFF88"
+     },
+     "view": "both",
+     "anim": "flap"
+    }
+   ]
+  },
+  {
+   "id": "dragonfly_wings",
+   "slot": "back",
+   "title": "Крылья стрекозы",
+   "titleEn": "Dragonfly wings",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": -5,
+     "y": 6,
+     "rows": [
+      "......",
+      "aaabbc",
+      "aabbcc",
+      "......",
+      "aabbcc",
+      "abbcc.",
+      "......",
+      "......"
+     ],
+     "colors": {
+      "a": "#BFFFF4AA",
+      "b": "#7FE6D9AA",
+      "c": "#39C2B099"
+     },
+     "view": "both",
+     "anim": "flap"
+    },
+    {
+     "x": 15,
+     "y": 6,
+     "rows": [
+      "......",
+      "cbbaaa",
+      "ccbbaa",
+      "......",
+      "ccbbaa",
+      ".ccbba",
+      "......",
+      "......"
+     ],
+     "colors": {
+      "a": "#BFFFF4AA",
+      "b": "#7FE6D9AA",
+      "c": "#39C2B099"
+     },
+     "view": "both",
+     "anim": "flap"
+    }
+   ]
+  },
+  {
+   "id": "mech_wings",
+   "slot": "back",
+   "title": "Механические крылья",
+   "titleEn": "Mechanical wings",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": -5,
+     "y": 6,
+     "rows": [
+      "....ab",
+      "...abc",
+      "..abc.",
+      ".abcab",
+      "abc.bc",
+      ".bcabc",
+      "..c.c.",
+      "......"
+     ],
+     "colors": {
+      "a": "#C9D4DE",
+      "b": "#7C8794",
+      "c": "#3A3F48"
+     },
+     "view": "both",
+     "anim": "flap"
+    },
+    {
+     "x": 15,
+     "y": 6,
+     "rows": [
+      "ba....",
+      "cba...",
+      ".cba..",
+      "bacba.",
+      "cb.cba",
+      "cbacb.",
+      ".c.c..",
+      "......"
+     ],
+     "colors": {
+      "a": "#C9D4DE",
+      "b": "#7C8794",
+      "c": "#3A3F48"
+     },
+     "view": "both",
+     "anim": "flap"
+    }
+   ]
+  },
+  {
+   "id": "golden_wings",
+   "slot": "back",
+   "title": "Золотые крылья",
+   "titleEn": "Golden wings",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": -5,
+     "y": 6,
+     "rows": [
+      "....aa",
+      "..aabb",
+      ".abbbc",
+      "abbbcc",
+      "abbcc.",
+      "abcc..",
+      ".bc...",
+      ".c...."
+     ],
+     "colors": {
+      "a": "#FFE08A",
+      "b": "#E6B43C",
+      "c": "#9C6E1E"
+     },
+     "view": "both",
+     "anim": "flap"
+    },
+    {
+     "x": 15,
+     "y": 6,
+     "rows": [
+      "aa....",
+      "bbaa..",
+      "cbbba.",
+      "ccbbba",
+      ".ccbba",
+      "..ccba",
+      "...cb.",
+      "....c."
+     ],
+     "colors": {
+      "a": "#FFE08A",
+      "b": "#E6B43C",
+      "c": "#9C6E1E"
+     },
+     "view": "both",
+     "anim": "flap"
+    }
+   ]
+  },
+  {
+   "id": "shadow_wings",
+   "slot": "back",
+   "title": "Крылья тени",
+   "titleEn": "Shadow wings",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": -5,
+     "y": 6,
+     "rows": [
+      "...aaa",
+      "..abbb",
+      ".abbbc",
+      "abbccc",
+      "abbcc.",
+      "abc.c.",
+      "ab.c..",
+      "a....."
+     ],
+     "colors": {
+      "a": "#3A2A4A",
+      "b": "#22162E",
+      "c": "#0E0812"
+     },
+     "view": "both",
+     "anim": "flap"
+    },
+    {
+     "x": 15,
+     "y": 6,
+     "rows": [
+      "aaa...",
+      "bbba..",
+      "cbbba.",
+      "cccbba",
+      ".ccbba",
+      ".c.cba",
+      "..c.ba",
+      ".....a"
+     ],
+     "colors": {
+      "a": "#3A2A4A",
+      "b": "#22162E",
+      "c": "#0E0812"
+     },
+     "view": "both",
+     "anim": "flap"
+    }
+   ]
+  },
+  {
+   "id": "emerald_wings",
+   "slot": "back",
+   "title": "Изумрудные крылья",
+   "titleEn": "Emerald wings",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": -5,
+     "y": 6,
+     "rows": [
+      "....aa",
+      "..aabb",
+      ".abbbc",
+      "abbbcc",
+      "abbcc.",
+      "abcc..",
+      ".bc...",
+      ".c...."
+     ],
+     "colors": {
+      "a": "#7FE6A0",
+      "b": "#3EC27A",
+      "c": "#1E7A48"
+     },
+     "view": "both",
+     "anim": "flap"
+    },
+    {
+     "x": 15,
+     "y": 6,
+     "rows": [
+      "aa....",
+      "bbaa..",
+      "cbbba.",
+      "ccbbba",
+      ".ccbba",
+      "..ccba",
+      "...cb.",
+      "....c."
+     ],
+     "colors": {
+      "a": "#7FE6A0",
+      "b": "#3EC27A",
+      "c": "#1E7A48"
+     },
+     "view": "both",
+     "anim": "flap"
+    }
+   ]
+  },
+  {
+   "id": "royal_cape",
+   "slot": "back",
+   "title": "Королевская мантия",
+   "titleEn": "Royal mantle",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 3,
+     "y": 8,
+     "rows": [
+      "cccccccccc",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaababaaaa",
+      "aaabbbbaaa",
+      "aaabbbbaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "dddddddddd",
+      ".dddddddd."
+     ],
+     "colors": {
+      "a": "#2C3E9E",
+      "b": "#E6B43C",
+      "c": "#E6B43C",
+      "d": "#1E2A6A"
+     },
+     "view": "back",
+     "anim": ""
+    },
+    {
+     "x": 2,
+     "y": 9,
+     "rows": [
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a"
+     ],
+     "colors": {
+      "a": "#2C3E9E"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "forest_cape",
+   "slot": "back",
+   "title": "Лесной плащ",
+   "titleEn": "Forest cloak",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": 8,
+     "rows": [
+      "cccccccccc",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaabaaaaa",
+      "aaabbbaaaa",
+      "aaaabaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "dddddddddd",
+      ".dddddddd."
+     ],
+     "colors": {
+      "a": "#2E6B32",
+      "b": "#8A5A2E",
+      "c": "#5BB04E",
+      "d": "#1E4A22"
+     },
+     "view": "back",
+     "anim": ""
+    },
+    {
+     "x": 2,
+     "y": 9,
+     "rows": [
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a"
+     ],
+     "colors": {
+      "a": "#2E6B32"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "shadow_cape",
+   "slot": "back",
+   "title": "Плащ тени",
+   "titleEn": "Shadow cloak",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 3,
+     "y": 8,
+     "rows": [
+      "cccccccccc",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaabaabaaa",
+      "aaaabbaaaa",
+      "aaabaabaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "dddddddddd",
+      ".dddddddd."
+     ],
+     "colors": {
+      "a": "#16101C",
+      "b": "#E8364F",
+      "c": "#E8364F",
+      "d": "#0A060E"
+     },
+     "view": "back",
+     "anim": ""
+    },
+    {
+     "x": 2,
+     "y": 9,
+     "rows": [
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a"
+     ],
+     "colors": {
+      "a": "#16101C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "snow_cape",
+   "slot": "back",
+   "title": "Снежный плащ",
+   "titleEn": "Snow cloak",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 3,
+     "y": 8,
+     "rows": [
+      "cccccccccc",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaabaaaaa",
+      "aaabbbaaaa",
+      "aaaabaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "dddddddddd",
+      ".dddddddd."
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#5CB6FF",
+      "c": "#5CB6FF",
+      "d": "#BFE6FF"
+     },
+     "view": "back",
+     "anim": ""
+    },
+    {
+     "x": 2,
+     "y": 9,
+     "rows": [
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a"
+     ],
+     "colors": {
+      "a": "#F4EEF0"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "vellora_cape",
+   "slot": "back",
+   "title": "Плащ Vellora",
+   "titleEn": "Vellora cloak",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 3,
+     "y": 8,
+     "rows": [
+      "cccccccccc",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaabaabaaa",
+      "aaabaabaaa",
+      "aaaabbaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "aaaaaaaaaa",
+      "dddddddddd",
+      ".dddddddd."
+     ],
+     "colors": {
+      "a": "#5A0A18",
+      "b": "#E8364F",
+      "c": "#E8364F",
+      "d": "#2A0A12"
+     },
+     "view": "back",
+     "anim": ""
+    },
+    {
+     "x": 2,
+     "y": 9,
+     "rows": [
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a",
+      "a..........a"
+     ],
+     "colors": {
+      "a": "#5A0A18"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "quiver",
+   "slot": "back",
+   "title": "Колчан со стрелами",
+   "titleEn": "Quiver",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 8,
+     "y": 5,
+     "rows": [
+      "a.a.",
+      "bbbb",
+      "cccc",
+      "cddc",
+      "cccc",
+      "cddc",
+      "cccc",
+      "cccc",
+      ".cc."
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#8A5A2E",
+      "c": "#6E3A1E",
+      "d": "#E6B43C"
+     },
+     "view": "back",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "guitar_back",
+   "slot": "back",
+   "title": "Гитара за спиной",
+   "titleEn": "Guitar",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 5,
+     "y": 4,
+     "rows": [
+      "....aa",
+      "....a.",
+      "...a..",
+      "..b...",
+      ".bbbb.",
+      "bbccbb",
+      "bbccbb",
+      ".bbbb.",
+      "bbbbbb",
+      "bbbbbb",
+      ".bbbb."
+     ],
+     "colors": {
+      "a": "#3A1A10",
+      "b": "#E8364F",
+      "c": "#120306"
+     },
+     "view": "back",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "surfboard",
+   "slot": "back",
+   "title": "Доска для серфинга",
+   "titleEn": "Surfboard",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 6,
+     "y": 3,
+     "rows": [
+      ".aa.",
+      "abba",
+      "abba",
+      "acca",
+      "abba",
+      "abba",
+      "acca",
+      "abba",
+      "abba",
+      "abba",
+      "abba",
+      "abba",
+      ".aa."
+     ],
+     "colors": {
+      "a": "#5CB6FF",
+      "b": "#F4EEF0",
+      "c": "#FF8A3C"
+     },
+     "view": "back",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "shield_back",
+   "slot": "back",
+   "title": "Щит за спиной",
+   "titleEn": "Shield",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 4,
+     "y": 9,
+     "rows": [
+      "aaaaaaaa",
+      "abbbbbba",
+      "abbccbba",
+      "abccccba",
+      "abbccbba",
+      "abbbbbba",
+      ".abbbba.",
+      "..aaaa.."
+     ],
+     "colors": {
+      "a": "#9AA4AE",
+      "b": "#7A0F22",
+      "c": "#E6B43C"
+     },
+     "view": "back",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "crossed_swords",
+   "slot": "back",
+   "title": "Скрещённые мечи",
+   "titleEn": "Crossed swords",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 2,
+     "y": 4,
+     "rows": [
+      "a..........a",
+      ".a........a.",
+      "..a......a..",
+      "...a....a...",
+      "....a..a....",
+      ".....aa.....",
+      ".....aa.....",
+      "....b..b....",
+      "...c....c...",
+      "..b......b.."
+     ],
+     "colors": {
+      "a": "#C9D4DE",
+      "b": "#E6B43C",
+      "c": "#3A1A10"
+     },
+     "view": "both",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "turtle_shell",
+   "slot": "back",
+   "title": "Панцирь черепахи",
+   "titleEn": "Turtle shell",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 4,
+     "y": 9,
+     "rows": [
+      ".aaaaaa.",
+      "abbabbaa",
+      "abaabbba",
+      "aabbaaba",
+      "abbaabba",
+      "abaabbaa",
+      ".aaaaaa."
+     ],
+     "colors": {
+      "a": "#3E9B47",
+      "b": "#2E6B32"
+     },
+     "view": "back",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "fox_tail",
+   "slot": "back",
+   "title": "Лисий хвост",
+   "titleEn": "Fox tail",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 7,
+     "y": 17,
+     "rows": [
+      ".aa.",
+      "aaaa",
+      "aaaa",
+      "aaaa",
+      ".aa.",
+      ".ab.",
+      "..b."
+     ],
+     "colors": {
+      "a": "#E06A1E",
+      "b": "#F4EEF0"
+     },
+     "view": "back",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "cat_tail",
+   "slot": "back",
+   "title": "Кошачий хвост",
+   "titleEn": "Cat tail",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 8,
+     "y": 18,
+     "rows": [
+      "a.",
+      "a.",
+      "a.",
+      ".a",
+      ".a",
+      "a.",
+      "a."
+     ],
+     "colors": {
+      "a": "#1A0A0E"
+     },
+     "view": "back",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "devil_tail",
+   "slot": "back",
+   "title": "Хвост демона",
+   "titleEn": "Devil tail",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 7,
+     "y": 18,
+     "rows": [
+      ".a..",
+      ".a..",
+      "..a.",
+      "..a.",
+      ".a..",
+      "aaa.",
+      ".a.."
+     ],
+     "colors": {
+      "a": "#E8364F"
+     },
+     "view": "back",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "dragon_tail",
+   "slot": "back",
+   "title": "Хвост дракона",
+   "titleEn": "Dragon tail",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 6,
+     "y": 17,
+     "rows": [
+      ".aaaa.",
+      "abaaba",
+      ".aaaa.",
+      "..aa..",
+      "..ab..",
+      "..aa..",
+      "...a..",
+      "...ab.",
+      "....a."
+     ],
+     "colors": {
+      "a": "#7A0F22",
+      "b": "#E6B43C"
+     },
+     "view": "back",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "rocket_pack",
+   "slot": "back",
+   "title": "Ракетный ранец",
+   "titleEn": "Rocket pack",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 3,
+     "y": 9,
+     "rows": [
+      "aa....aa",
+      "ab....ba",
+      "ab....ba",
+      "ab....ba",
+      "aa....aa",
+      "cc....cc",
+      ".d....d."
+     ],
+     "colors": {
+      "a": "#7A0F22",
+      "b": "#E8364F",
+      "c": "#FF8A3C",
+      "d": "#FFE08A"
+     },
+     "view": "both",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "blue_backpack",
+   "slot": "back",
+   "title": "Синий рюкзак",
+   "titleEn": "Blue backpack",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 4,
+     "y": 9,
+     "rows": [
+      ".aaaaaa.",
+      "abbbbbba",
+      "abbccbba",
+      "abbbbbba",
+      "abbbbbba",
+      ".aaaaaa."
+     ],
+     "colors": {
+      "a": "#1E2A6A",
+      "b": "#3C4CB0",
+      "c": "#E6B43C"
+     },
+     "view": "back",
+     "anim": ""
+    },
+    {
+     "x": 3,
+     "y": 9,
+     "rows": [
+      "a........a",
+      "a........a",
+      "a........a",
+      "a........a"
+     ],
+     "colors": {
+      "a": "#1E2A6A"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "diamond_sword",
+   "slot": "hand",
+   "title": "Алмазный меч",
+   "titleEn": "Diamond sword",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": -3,
+     "y": 7,
+     "rows": [
+      ".......ab",
+      "......aba",
+      ".....aba.",
+      "....aba..",
+      "...aba...",
+      "..aba....",
+      "d.ba.....",
+      ".dd......",
+      ".cd......",
+      "c..d....."
+     ],
+     "colors": {
+      "a": "#BFFFF4",
+      "b": "#39C2B0",
+      "c": "#3A1A10",
+      "d": "#1E7A6A"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "iron_sword",
+   "slot": "hand",
+   "title": "Железный меч",
+   "titleEn": "Iron sword",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": -3,
+     "y": 7,
+     "rows": [
+      ".......ab",
+      "......aba",
+      ".....aba.",
+      "....aba..",
+      "...aba...",
+      "..aba....",
+      "d.ba.....",
+      ".dd......",
+      ".cd......",
+      "c..d....."
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#C9D4DE",
+      "c": "#3A1A10",
+      "d": "#7C8794"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "gold_sword",
+   "slot": "hand",
+   "title": "Золотой меч",
+   "titleEn": "Gold sword",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": -3,
+     "y": 7,
+     "rows": [
+      ".......ab",
+      "......aba",
+      ".....aba.",
+      "....aba..",
+      "...aba...",
+      "..aba....",
+      "d.ba.....",
+      ".dd......",
+      ".cd......",
+      "c..d....."
+     ],
+     "colors": {
+      "a": "#FFF2B0",
+      "b": "#E6B43C",
+      "c": "#3A1A10",
+      "d": "#9C6E1E"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "netherite_sword",
+   "slot": "hand",
+   "title": "Незеритовый меч",
+   "titleEn": "Netherite sword",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": -3,
+     "y": 7,
+     "rows": [
+      ".......ab",
+      "......aba",
+      ".....aba.",
+      "....aba..",
+      "...aba...",
+      "..aba....",
+      "d.ba.....",
+      ".dd......",
+      ".cd......",
+      "c..d....."
+     ],
+     "colors": {
+      "a": "#6A5A62",
+      "b": "#3A2E36",
+      "c": "#1A1218",
+      "d": "#2A2228"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "crimson_blade",
+   "slot": "hand",
+   "title": "Багровый клинок",
+   "titleEn": "Crimson blade",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": -3,
+     "y": 7,
+     "rows": [
+      ".......ab",
+      "......aba",
+      ".....aba.",
+      "....aba..",
+      "...aba...",
+      "..aba....",
+      "d.ba.....",
+      ".dd......",
+      ".cd......",
+      "c..d....."
+     ],
+     "colors": {
+      "a": "#FFC8CD",
+      "b": "#E8364F",
+      "c": "#2A0A12",
+      "d": "#E6B43C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "pickaxe",
+   "slot": "hand",
+   "title": "Кирка",
+   "titleEn": "Pickaxe",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": -3,
+     "y": 9,
+     "rows": [
+      ".aaaa..",
+      "a...ba.",
+      "...b..a",
+      "..b....",
+      ".b.....",
+      "b......"
+     ],
+     "colors": {
+      "a": "#5CE0D0",
+      "b": "#8A5A2E"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "axe",
+   "slot": "hand",
+   "title": "Топор",
+   "titleEn": "Axe",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": -2,
+     "y": 9,
+     "rows": [
+      "..aa.",
+      ".aaab",
+      "..a.b",
+      "...b.",
+      "..b..",
+      ".b..."
+     ],
+     "colors": {
+      "a": "#C9D4DE",
+      "b": "#8A5A2E"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "bow",
+   "slot": "hand",
+   "title": "Лук",
+   "titleEn": "Bow",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": -2,
+     "y": 8,
+     "rows": [
+      "..aa",
+      ".a.b",
+      "a..b",
+      "a..b",
+      "a..b",
+      ".a.b",
+      "..aa"
+     ],
+     "colors": {
+      "a": "#8A5A2E",
+      "b": "#F4EEF0"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "trident",
+   "slot": "hand",
+   "title": "Трезубец",
+   "titleEn": "Trident",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": -3,
+     "y": 5,
+     "rows": [
+      "a.a.a",
+      "aaaaa",
+      "..a..",
+      "..b..",
+      "..b..",
+      "..b..",
+      "..b..",
+      "..b..",
+      "..b..",
+      "..b.."
+     ],
+     "colors": {
+      "a": "#5CE0D0",
+      "b": "#2E8B84"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "torch",
+   "slot": "hand",
+   "title": "Факел",
+   "titleEn": "Torch",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 0,
+     "y": 12,
+     "rows": [
+      ".a.",
+      "aba",
+      ".c.",
+      ".c.",
+      ".c.",
+      ".c."
+     ],
+     "colors": {
+      "a": "#FF8A3C",
+      "b": "#FFE08A",
+      "c": "#8A5A2E"
+     },
+     "view": "front",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "lantern",
+   "slot": "hand",
+   "title": "Фонарь",
+   "titleEn": "Lantern",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 0,
+     "y": 14,
+     "rows": [
+      ".a.",
+      "aaa",
+      "aba",
+      "aba",
+      "aaa"
+     ],
+     "colors": {
+      "a": "#3A3F48",
+      "b": "#FFD23C"
+     },
+     "view": "front",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "magic_staff",
+   "slot": "hand",
+   "title": "Посох тессеракта",
+   "titleEn": "Tesseract staff",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": -1,
+     "y": 3,
+     "rows": [
+      ".aaa.",
+      "abcba",
+      "acdca",
+      "abcba",
+      ".aaa.",
+      "..e..",
+      "..e..",
+      "..e..",
+      "..e..",
+      "..e..",
+      "..e..",
+      "..e..",
+      "..e..",
+      "..e.."
+     ],
+     "colors": {
+      "a": "#E8364F",
+      "b": "#7A0F22",
+      "c": "#FFC8CD",
+      "d": "#F4EEF0",
+      "e": "#3A1A10"
+     },
+     "view": "front",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "magic_wand",
+   "slot": "hand",
+   "title": "Волшебная палочка",
+   "titleEn": "Magic wand",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": -1,
+     "y": 11,
+     "rows": [
+      "a.a..",
+      ".b...",
+      "a.c..",
+      "...c.",
+      "....c"
+     ],
+     "colors": {
+      "a": "#FFE08A",
+      "b": "#F4EEF0",
+      "c": "#3A1A10"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "shield",
+   "slot": "hand",
+   "title": "Щит",
+   "titleEn": "Shield",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": -3,
+     "y": 12,
+     "rows": [
+      "aaaaa",
+      "abcba",
+      "accca",
+      "abcba",
+      ".aba.",
+      "..a.."
+     ],
+     "colors": {
+      "a": "#9AA4AE",
+      "b": "#7A0F22",
+      "c": "#E6B43C"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "fishing_rod",
+   "slot": "hand",
+   "title": "Удочка",
+   "titleEn": "Fishing rod",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": -4,
+     "y": 6,
+     "rows": [
+      "a.....",
+      "ba....",
+      "b.a...",
+      "b..a..",
+      "c...a.",
+      "c....a"
+     ],
+     "colors": {
+      "a": "#8A5A2E",
+      "b": "#F4EEF0",
+      "c": "#E8364F"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "bouquet",
+   "slot": "hand",
+   "title": "Букет",
+   "titleEn": "Bouquet",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": -1,
+     "y": 13,
+     "rows": [
+      "abcab",
+      ".aca.",
+      "..d..",
+      "..d.."
+     ],
+     "colors": {
+      "a": "#FF7AA2",
+      "b": "#FFE08A",
+      "c": "#B98CFF",
+      "d": "#4C9A52"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "heart_balloon",
+   "slot": "hand",
+   "title": "Шарик-сердце",
+   "titleEn": "Heart balloon",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": -2,
+     "y": 0,
+     "rows": [
+      "aa.aa",
+      "aaaaa",
+      "aaaaa",
+      ".aaa.",
+      "..a..",
+      "..b..",
+      "..b..",
+      "..b..",
+      "...b.",
+      "...b.",
+      "..b..",
+      "..b..",
+      "..b.."
+     ],
+     "colors": {
+      "a": "#FF3B6E",
+      "b": "#F4EEF0"
+     },
+     "view": "front",
+     "anim": "float"
+    }
+   ]
+  },
+  {
+   "id": "ice_cream",
+   "slot": "hand",
+   "title": "Мороженое",
+   "titleEn": "Ice cream",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 0,
+     "y": 14,
+     "rows": [
+      ".ab.",
+      "abba",
+      ".cc.",
+      ".cc.",
+      "..c."
+     ],
+     "colors": {
+      "a": "#FF9AD5",
+      "b": "#F4EEF0",
+      "c": "#D9A441"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "lollipop",
+   "slot": "hand",
+   "title": "Леденец",
+   "titleEn": "Lollipop",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": -1,
+     "y": 12,
+     "rows": [
+      ".aba.",
+      "abbba",
+      ".aba.",
+      "..c..",
+      "..c.."
+     ],
+     "colors": {
+      "a": "#FF5A8A",
+      "b": "#F4EEF0",
+      "c": "#F4EEF0"
+     },
+     "view": "front",
+     "anim": ""
+    }
+   ]
+  },
+  {
+   "id": "talisman",
+   "slot": "hand",
+   "title": "Талисман",
+   "titleEn": "Talisman",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": -1,
+     "y": 14,
+     "rows": [
+      ".aa.",
+      "abba",
+      "acca",
+      ".aa."
+     ],
+     "colors": {
+      "a": "#E6B43C",
+      "b": "#3EC27A",
+      "c": "#FFE08A"
+     },
+     "view": "front",
+     "anim": "bob"
+    }
+   ]
+  },
+  {
+   "id": "dog_pet",
+   "slot": "pet",
+   "title": "Щенок",
+   "titleEn": "Puppy",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 17,
+     "y": 25,
+     "rows": [
+      "aa......",
+      "aba.....",
+      "aaaa...a",
+      ".aaaaaa.",
+      ".aaaaaa.",
+      ".a.a.a.a"
+     ],
+     "colors": {
+      "a": "#C08A5A",
+      "b": "#120306"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "wolf_pet",
+   "slot": "pet",
+   "title": "Волчонок",
+   "titleEn": "Wolf cub",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 17,
+     "y": 25,
+     "rows": [
+      "a.a.....",
+      "aaa.....",
+      "aba....a",
+      "aaaaaaa.",
+      ".aaaaaa.",
+      ".a..a..a"
+     ],
+     "colors": {
+      "a": "#C9D4DE",
+      "b": "#120306"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "panda_pet",
+   "slot": "pet",
+   "title": "Панда",
+   "titleEn": "Panda",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 18,
+     "y": 25,
+     "rows": [
+      "a...a",
+      "bbbbb",
+      "babab",
+      "bbbbb",
+      "aaaaa",
+      "a...a"
+     ],
+     "colors": {
+      "a": "#120306",
+      "b": "#F4EEF0"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "penguin_pet",
+   "slot": "pet",
+   "title": "Пингвин",
+   "titleEn": "Penguin",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 18,
+     "y": 25,
+     "rows": [
+      ".aaa.",
+      "abcba",
+      "aaaaa",
+      "abbba",
+      "abbba",
+      ".d.d."
+     ],
+     "colors": {
+      "a": "#1A1A22",
+      "b": "#F4EEF0",
+      "c": "#FF8A3C",
+      "d": "#FF8A3C"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "frog_pet",
+   "slot": "pet",
+   "title": "Лягушонок",
+   "titleEn": "Froggy",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 18,
+     "y": 27,
+     "rows": [
+      "a...a",
+      "aaaaa",
+      "aabaa",
+      ".aaa.",
+      "a...a"
+     ],
+     "colors": {
+      "a": "#5BB04E",
+      "b": "#E8364F"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "owl_pet",
+   "slot": "pet",
+   "title": "Совёнок",
+   "titleEn": "Owlet",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 18,
+     "y": 14,
+     "rows": [
+      "a...a",
+      "aaaaa",
+      "bcacb",
+      "aaaaa",
+      "adada",
+      ".a.a."
+     ],
+     "colors": {
+      "a": "#8A5A2E",
+      "b": "#FFE08A",
+      "c": "#120306",
+      "d": "#C08A5A"
+     },
+     "view": "both",
+     "anim": "float"
+    }
+   ]
+  },
+  {
+   "id": "bunny_pet",
+   "slot": "pet",
+   "title": "Крольчонок",
+   "titleEn": "Bunny",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 18,
+     "y": 24,
+     "rows": [
+      ".a.a.",
+      ".a.a.",
+      "aaaaa",
+      "abaab",
+      "aaaaa",
+      ".a.a."
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#FF7AA2"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "turtle_pet",
+   "slot": "pet",
+   "title": "Черепашка",
+   "titleEn": "Turtle",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 17,
+     "y": 28,
+     "rows": [
+      "..aaaa..",
+      ".abbbba.",
+      "cabbbbac",
+      ".c....c."
+     ],
+     "colors": {
+      "a": "#3E9B47",
+      "b": "#2E6B32",
+      "c": "#8BD13B"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "snail_pet",
+   "slot": "pet",
+   "title": "Улитка",
+   "titleEn": "Snail",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 17,
+     "y": 28,
+     "rows": [
+      "...aaa.",
+      "..abcba",
+      "a.abbba",
+      "dddddd."
+     ],
+     "colors": {
+      "a": "#D9A441",
+      "b": "#B5832A",
+      "c": "#7A4A24",
+      "d": "#C8BCA8"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "mushroom_pet",
+   "slot": "pet",
+   "title": "Грибочек",
+   "titleEn": "Shroom",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 18,
+     "y": 26,
+     "rows": [
+      ".aaa.",
+      "abaab",
+      "aaaaa",
+      ".cdc.",
+      ".ccc."
+     ],
+     "colors": {
+      "a": "#D6283A",
+      "b": "#F4EEF0",
+      "c": "#F4E6D0",
+      "d": "#120306"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "creeper_pet",
+   "slot": "pet",
+   "title": "Мини-крипер",
+   "titleEn": "Mini creeper",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 18,
+     "y": 24,
+     "rows": [
+      "aaaa",
+      "baab",
+      "abba",
+      "abba",
+      "aaaa",
+      "a..a"
+     ],
+     "colors": {
+      "a": "#5BB04E",
+      "b": "#13200F"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "ghast_pet",
+   "slot": "pet",
+   "title": "Мини-гаст",
+   "titleEn": "Mini ghast",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 17,
+     "y": 12,
+     "rows": [
+      "aaaaaa",
+      "abaaba",
+      "aaaaaa",
+      "aacaaa",
+      "a.a.a.",
+      ".a.a.a"
+     ],
+     "colors": {
+      "a": "#F4EEF0",
+      "b": "#120306",
+      "c": "#E8364F"
+     },
+     "view": "both",
+     "anim": "float"
+    }
+   ]
+  },
+  {
+   "id": "spirit_pet",
+   "slot": "pet",
+   "title": "Дух-хранитель",
+   "titleEn": "Guardian spirit",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 18,
+     "y": 14,
+     "rows": [
+      ".aaa.",
+      "abcba",
+      "aaaaa",
+      "da.ad",
+      ".a.a."
+     ],
+     "colors": {
+      "a": "#7FD6FF",
+      "b": "#F4EEF0",
+      "c": "#3C8CFF",
+      "d": "#BFE6FF"
+     },
+     "view": "both",
+     "anim": "float"
+    }
+   ]
+  },
+  {
+   "id": "drone_pet",
+   "slot": "pet",
+   "title": "Дрон",
+   "titleEn": "Drone",
+   "rarity": "epic",
+   "layers": [
+    {
+     "x": 17,
+     "y": 14,
+     "rows": [
+      "aa..aa",
+      ".bbbb.",
+      ".bcdb.",
+      ".bbbb.",
+      "a....a"
+     ],
+     "colors": {
+      "a": "#7C8794",
+      "b": "#3A3F48",
+      "c": "#E8364F",
+      "d": "#39FFD2"
+     },
+     "view": "both",
+     "anim": "float"
+    }
+   ]
+  },
+  {
+   "id": "jelly_pet",
+   "slot": "pet",
+   "title": "Медуза",
+   "titleEn": "Jellyfish",
+   "rarity": "rare",
+   "layers": [
+    {
+     "x": 18,
+     "y": 13,
+     "rows": [
+      ".aaa.",
+      "aabaa",
+      "aaaaa",
+      "c.c.c",
+      ".c.c.",
+      "c.c.c"
+     ],
+     "colors": {
+      "a": "#B98CFF",
+      "b": "#F4EEF0",
+      "c": "#FF9AD5"
+     },
+     "view": "both",
+     "anim": "float"
+    }
+   ]
+  },
+  {
+   "id": "phoenix_pet",
+   "slot": "pet",
+   "title": "Феникс",
+   "titleEn": "Phoenix chick",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 17,
+     "y": 13,
+     "rows": [
+      "a....a",
+      "ab..ba",
+      "abccba",
+      ".cdcc.",
+      "..cc..",
+      ".e..e."
+     ],
+     "colors": {
+      "a": "#E8364F",
+      "b": "#FF8A3C",
+      "c": "#FFD23C",
+      "d": "#120306",
+      "e": "#FF8A3C"
+     },
+     "view": "both",
+     "anim": "float"
+    }
+   ]
+  },
+  {
+   "id": "sculk_pet",
+   "slot": "pet",
+   "title": "Скалк-малыш",
+   "titleEn": "Sculk baby",
+   "rarity": "legendary",
+   "layers": [
+    {
+     "x": 18,
+     "y": 26,
+     "rows": [
+      ".aaa.",
+      "abcba",
+      "aacaa",
+      "abbba",
+      ".a.a."
+     ],
+     "colors": {
+      "a": "#0F2A33",
+      "b": "#1E5B6A",
+      "c": "#39FFD2"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "pig_pet",
+   "slot": "pet",
+   "title": "Поросёнок",
+   "titleEn": "Piglet",
+   "rarity": "common",
+   "layers": [
+    {
+     "x": 17,
+     "y": 26,
+     "rows": [
+      "aa......",
+      "abaaaaa.",
+      "aacaaaa.",
+      ".aaaaaa.",
+      ".a.a.a.a"
+     ],
+     "colors": {
+      "a": "#F2A7B8",
+      "b": "#120306",
+      "c": "#D9507A"
+     },
+     "view": "both",
+     "anim": "hop"
+    }
+   ]
+  },
+  {
+   "id": "music_notes",
+   "slot": "effect",
+   "title": "Ноты",
+   "titleEn": "Music notes",
+   "rarity": "rare",
+   "layers": [],
+   "particles": {
+    "colors": [
+     "#FFFFFF",
+     "#FF9AD5",
+     "#7FD6FF"
+    ],
+    "count": 9,
+    "motion": "rise",
+    "shape": "note"
+   }
+  },
+  {
+   "id": "star_orbit",
+   "slot": "effect",
+   "title": "Звёздная орбита",
+   "titleEn": "Star orbit",
+   "rarity": "legendary",
+   "layers": [],
+   "particles": {
+    "colors": [
+     "#FFE08A",
+     "#FFFFFF"
+    ],
+    "count": 8,
+    "motion": "orbit",
+    "shape": "star"
+   }
+  },
+  {
+   "id": "sakura",
+   "slot": "effect",
+   "title": "Сакура",
+   "titleEn": "Sakura",
+   "rarity": "epic",
+   "layers": [],
+   "particles": {
+    "colors": [
+     "#FFB7D5",
+     "#FF9AC5",
+     "#FFFFFF"
+    ],
+    "count": 18,
+    "motion": "fall"
+   }
+  },
+  {
+   "id": "autumn_leaves",
+   "slot": "effect",
+   "title": "Осенние листья",
+   "titleEn": "Autumn leaves",
+   "rarity": "rare",
+   "layers": [],
+   "particles": {
+    "colors": [
+     "#E07A1E",
+     "#D6283A",
+     "#FFD23C"
+    ],
+    "count": 14,
+    "motion": "fall"
+   }
+  },
+  {
+   "id": "bubbles",
+   "slot": "effect",
+   "title": "Пузыри",
+   "titleEn": "Bubbles",
+   "rarity": "common",
+   "layers": [],
+   "particles": {
+    "colors": [
+     "#BFE6FFAA",
+     "#FFFFFFAA"
+    ],
+    "count": 12,
+    "motion": "rise"
+   }
+  },
+  {
+   "id": "confetti",
+   "slot": "effect",
+   "title": "Конфетти",
+   "titleEn": "Confetti",
+   "rarity": "rare",
+   "layers": [],
+   "particles": {
+    "colors": [
+     "#FF5A6E",
+     "#FFD23C",
+     "#5CB6FF",
+     "#7CE07C",
+     "#B98CFF"
+    ],
+    "count": 26,
+    "motion": "fall"
+   }
+  },
+  {
+   "id": "embers",
+   "slot": "effect",
+   "title": "Угольки",
+   "titleEn": "Embers",
+   "rarity": "epic",
+   "layers": [],
+   "particles": {
+    "colors": [
+     "#FF8A3C",
+     "#FF3B4F"
+    ],
+    "count": 16,
+    "motion": "rise"
+   }
+  },
+  {
+   "id": "fireflies",
+   "slot": "effect",
+   "title": "Светлячки",
+   "titleEn": "Fireflies",
+   "rarity": "rare",
+   "layers": [],
+   "particles": {
+    "colors": [
+     "#E6FF7A",
+     "#B8FF5A"
+    ],
+    "count": 12,
+    "motion": "spark"
+   }
+  },
+  {
+   "id": "ghost_wisps",
+   "slot": "effect",
+   "title": "Блуждающие огни",
+   "titleEn": "Wisps",
+   "rarity": "epic",
+   "layers": [],
+   "particles": {
+    "colors": [
+     "#7FD6FF",
+     "#BFE6FF"
+    ],
+    "count": 6,
+    "motion": "orbit"
+   }
+  },
+  {
+   "id": "rune_orbit",
+   "slot": "effect",
+   "title": "Руны",
+   "titleEn": "Runes",
+   "rarity": "legendary",
+   "layers": [],
+   "particles": {
+    "colors": [
+     "#B04CFF",
+     "#E0B0FF"
+    ],
+    "count": 10,
+    "motion": "orbit",
+    "shape": "star"
+   }
+  },
+  {
+   "id": "crimson_aura",
+   "slot": "effect",
+   "title": "Багровая аура",
+   "titleEn": "Crimson aura",
+   "rarity": "legendary",
+   "layers": [],
+   "particles": {
+    "colors": [
+     "#E8364F",
+     "#7A0F22",
+     "#FFC8CD"
+    ],
+    "count": 30,
+    "motion": "rise"
+   }
+  },
+  {
+   "id": "clap",
+   "slot": "emote",
+   "title": "Хлопать",
+   "titleEn": "Clap",
+   "rarity": "rare",
+   "layers": []
+  },
+  {
+   "id": "salute",
+   "slot": "emote",
+   "title": "Честь",
+   "titleEn": "Salute",
+   "rarity": "rare",
+   "layers": []
+  },
+  {
+   "id": "shrug",
+   "slot": "emote",
+   "title": "Ну не знаю",
+   "titleEn": "Shrug",
+   "rarity": "rare",
+   "layers": []
+  },
+  {
+   "id": "point",
+   "slot": "emote",
+   "title": "Указать",
+   "titleEn": "Point",
+   "rarity": "rare",
+   "layers": []
+  },
+  {
+   "id": "dab",
+   "slot": "emote",
+   "title": "Дэб",
+   "titleEn": "Dab",
+   "rarity": "rare",
+   "layers": []
+  },
+  {
+   "id": "flip",
+   "slot": "emote",
+   "title": "Сальто",
+   "titleEn": "Backflip",
+   "rarity": "rare",
+   "layers": []
+  },
+  {
+   "id": "think",
+   "slot": "emote",
+   "title": "Думать",
+   "titleEn": "Think",
+   "rarity": "rare",
+   "layers": []
+  },
+  {
+   "id": "punch",
+   "slot": "emote",
+   "title": "Бокс",
+   "titleEn": "Punch",
+   "rarity": "rare",
+   "layers": []
   }
  ],
  "outfits": [
@@ -1637,6 +5759,126 @@
    "body": "bow_tie",
    "pet": "axolotl_pet",
    "effect": ""
+  },
+  {
+   "title": "Самурай",
+   "titleEn": "Samurai",
+   "head": "samurai_helmet",
+   "back": "shadow_cape",
+   "body": "sash",
+   "pet": "fox_pet",
+   "effect": "sakura",
+   "hand": "crimson_blade"
+  },
+  {
+   "title": "Феникс",
+   "titleEn": "Phoenix",
+   "head": "crimson_halo",
+   "back": "phoenix_wings",
+   "body": "tesseract_amulet",
+   "pet": "phoenix_pet",
+   "effect": "embers",
+   "hand": "magic_staff"
+  },
+  {
+   "title": "Снежная королева",
+   "titleEn": "Snow queen",
+   "head": "ice_crown",
+   "back": "ice_wings",
+   "body": "pearl_necklace",
+   "pet": "penguin_pet",
+   "effect": "snow",
+   "hand": "magic_wand"
+  },
+  {
+   "title": "Рыцарь",
+   "titleEn": "Knight",
+   "head": "knight_helmet",
+   "back": "royal_cape",
+   "body": "gold_armor",
+   "pet": "wolf_pet",
+   "effect": "",
+   "hand": "diamond_sword"
+  },
+  {
+   "title": "Лесной охотник",
+   "titleEn": "Forest hunter",
+   "head": "antlers",
+   "back": "quiver",
+   "body": "vest",
+   "pet": "owl_pet",
+   "effect": "fireflies",
+   "hand": "bow"
+  },
+  {
+   "title": "Рок-звезда",
+   "titleEn": "Rock star",
+   "head": "star_glasses",
+   "back": "guitar_back",
+   "body": "thick_chain",
+   "pet": "drone_pet",
+   "effect": "music_notes",
+   "hand": ""
+  },
+  {
+   "title": "Хэллоуин",
+   "titleEn": "Halloween",
+   "head": "pumpkin_head",
+   "back": "bat_wings",
+   "body": "bell_collar",
+   "pet": "ghost_pet",
+   "effect": "embers",
+   "hand": "lantern"
+  },
+  {
+   "title": "Праздник",
+   "titleEn": "Party",
+   "head": "party_hat",
+   "back": "",
+   "body": "flower_lei",
+   "pet": "bunny_pet",
+   "effect": "confetti",
+   "hand": "heart_balloon"
+  },
+  {
+   "title": "Шахтёр",
+   "titleEn": "Miner",
+   "head": "pilot_goggles",
+   "back": "blue_backpack",
+   "body": "tool_belt",
+   "pet": "creeper_pet",
+   "effect": "",
+   "hand": "pickaxe"
+  },
+  {
+   "title": "Повелитель Vellora",
+   "titleEn": "Vellora lord",
+   "head": "devil_crown",
+   "back": "vellora_cape",
+   "body": "v_badge",
+   "pet": "sculk_pet",
+   "effect": "crimson_aura",
+   "hand": "talisman"
+  },
+  {
+   "title": "Морской волк",
+   "titleEn": "Sea wolf",
+   "head": "bandana_head",
+   "back": "surfboard",
+   "body": "bandolier",
+   "pet": "turtle_pet",
+   "effect": "bubbles",
+   "hand": "trident"
+  },
+  {
+   "title": "Единорог",
+   "titleEn": "Unicorn",
+   "head": "unicorn_horn",
+   "back": "butterfly_wings",
+   "body": "heart_badge",
+   "pet": "jelly_pet",
+   "effect": "sparkles",
+   "hand": "lollipop"
   }
  ]
 }

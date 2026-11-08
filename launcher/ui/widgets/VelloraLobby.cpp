@@ -70,6 +70,32 @@ QIcon speakerIcon(bool on)
 }
 }  // namespace
 
+namespace {
+/// a pixel note, or crossed out
+QIcon noteIcon(bool on)
+{
+    const QStringList rows = { "....wwwww...", "....w...w...", "....w...w...", "....w...w...", "....w...w...", "..www.www...", ".wwww.www...", "..ww...w...." };
+    const int u = 2;
+    QPixmap pixmap(12 * u, 10 * u);
+    pixmap.fill(Qt::transparent);
+    QPainter p(&pixmap);
+    for (int j = 0; j < rows.size(); j++) {
+        for (int i = 0; i < rows.at(j).size(); i++) {
+            if (rows.at(j).at(i) == 'w') {
+                p.fillRect(i * u, (j + 1) * u, u, u, on ? QColor(0xfb, 0xef, 0xf1) : QColor(0x8a, 0x6a, 0x70));
+            }
+        }
+    }
+    if (!on) {
+        for (int k = 0; k < 10; k++) {
+            p.fillRect((k + 1) * u, k * u, u, u, QColor(0xff, 0x46, 0x54));
+        }
+    }
+    p.end();
+    return QIcon(pixmap);
+}
+}  // namespace
+
 QImage VelloraLobby::silhouette()
 {
     // no skin yet (not signed in): a dark player-shaped shadow with a crimson rim
@@ -336,6 +362,18 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
         VelloraSound::play("toggle");
     });
     chips->addWidget(sound);
+    auto* music = new QPushButton(this);
+    music->setMinimumSize(44, 44);
+    music->setIconSize(QSize(24, 24));
+    music->setIcon(noteIcon(VelloraSound::musicEnabled()));
+    music->setToolTip(tr("Music"));
+    connect(music, &QPushButton::clicked, this, [music] {
+        const bool on = !VelloraSound::musicEnabled();
+        VelloraSound::setMusicEnabled(on);
+        music->setIcon(noteIcon(on));
+        VelloraSound::play("toggle");
+    });
+    chips->addWidget(music);
     auto* friendsChip = new QPushButton(tr("👥 Friends"), this);
     friendsChip->setMinimumHeight(44);
     friendsChip->setToolTip(tr("Play with friends: a lobby, a server, an invite code"));

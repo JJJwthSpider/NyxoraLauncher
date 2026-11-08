@@ -3085,6 +3085,10 @@ Are you sure?</source>
 <context>
     <name>VelloraLobby</name>
     <message>
+        <source>Music</source>
+        <translation>Музыка</translation>
+    </message>
+    <message>
         <source>Interface sounds</source>
         <translation>Звуки интерфейса</translation>
     </message>
@@ -3330,6 +3334,10 @@ Are you sure?</source>
 </context>
 <context>
     <name>WardrobeDialog</name>
+    <message>
+        <source>In hand</source>
+        <translation>В руке</translation>
+    </message>
     <message>
         <source>Drag to turn · click for an animation</source>
         <translation>Крути мышью · клик — анимация</translation>

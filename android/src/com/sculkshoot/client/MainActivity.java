@@ -194,6 +194,7 @@ public final class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        Sounds.startMusic(this);
         resumedActivity = this;
         if (GameEngine.get() != null) {
             GameEngine.get().attach(this);
@@ -244,6 +245,7 @@ public final class MainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        Sounds.pauseMusic();
         if (resumedActivity == this) {
             resumedActivity = null;
         }
