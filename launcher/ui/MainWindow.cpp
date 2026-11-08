@@ -123,6 +123,7 @@
 #include "ui/widgets/LabeledToolButton.h"
 #include "ui/widgets/LaunchPanel.h"
 #include "ui/widgets/VelloraLobby.h"
+#include "ui/dialogs/WardrobeDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
 
 #include "minecraft/PackProfile.h"
@@ -377,6 +378,26 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(m_lobby, &VelloraLobby::newInstanceRequested, this, [this] { addInstance(QString(), {}, "quick"); });
         connect(m_lobby, &VelloraLobby::friendsRequested, this, [this] { openLobby(lobbyInstance()); });
         connect(m_lobby, &VelloraLobby::skinRequested, this, &MainWindow::showProfileMenu);
+        connect(m_lobby, &VelloraLobby::wardrobeRequested, this, [this] {
+            const auto account = APPLICATION->accounts()->defaultAccount();
+            QImage skin, cape;
+            if (account) {
+                const auto& profile = account->accountData()->minecraftProfile;
+                skin.loadFromData(profile.skin.data, "PNG");
+                cape.loadFromData(profile.capes.value(profile.currentCape).data, "PNG");
+            }
+            WardrobeDialog dialog(skin, cape, [this, account] {
+                if (account) {
+                    SkinManageDialog skins(this, account);
+                    skins.exec();
+                    updateLaunchPanelProfile();
+                } else {
+                    APPLICATION->ShowGlobalSettings(this, "accounts");
+                }
+            }, this);
+            dialog.exec();
+            m_lobby->refreshCharacter();
+        });
 
         m_launchPanel = new LaunchPanel(libraryPage);
         m_libraryLayout->addWidget(m_launchPanel);
@@ -1162,7 +1183,8 @@ void MainWindow::updateLaunchPanelProfile()
     }
     m_launchPanel->setProfile(account->profileName(), account->getFace(32, 32));
     if (m_lobby) {
-        m_lobby->setPlayer(account->profileName(), account->accountData()->minecraftProfile.skin.data);
+        const auto& profile = account->accountData()->minecraftProfile;
+        m_lobby->setPlayer(account->profileName(), profile.skin.data, profile.capes.value(profile.currentCape).data);
     }
 }
 

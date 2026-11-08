@@ -35,7 +35,9 @@ class VelloraLobby : public QWidget {
     explicit VelloraLobby(QWidget* parent = nullptr);
 
     /// the player: the nickname and the skin texture (PNG); empty: no account yet
-    void setPlayer(const QString& name, const QByteArray& skinPng);
+    void setPlayer(const QString& name, const QByteArray& skinPng, const QByteArray& capePng = QByteArray());
+    /// the outfit changed in the wardrobe
+    void refreshCharacter();
     /// the installation the Play button starts (empty name: none yet)
     void setToday(const QString& name, const QString& info, const QIcon& icon, bool running);
 
@@ -46,6 +48,7 @@ class VelloraLobby : public QWidget {
 
    signals:
     void playRequested();
+    void wardrobeRequested();
     void chooseRequested();
     void agentRequested();
     void packsRequested();
@@ -59,7 +62,7 @@ class VelloraLobby : public QWidget {
    private:
     SculkAmbience* m_ambience = nullptr;
     QPixmap m_scene;
-    QWidget* m_body = nullptr;  // draws the player as sharp pixels
+    class VelloraCharacter* m_character = nullptr;  // the player, alive, with the outfit
     QLabel* m_playerName = nullptr;
     QLabel* m_todayIcon = nullptr;
     QLabel* m_todayName = nullptr;

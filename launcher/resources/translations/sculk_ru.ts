@@ -1723,6 +1723,10 @@ Are you sure?</source>
 <context>
     <name>QObject</name>
     <message>
+        <source>worn</source>
+        <translation>надето</translation>
+    </message>
+    <message>
         <source>Sculk (Dark)</source>
         <translation>Скалк (тёмная)</translation>
     </message>
@@ -3073,6 +3077,14 @@ Are you sure?</source>
 <context>
     <name>VelloraLobby</name>
     <message>
+        <source>Wardrobe</source>
+        <translation>Гардероб</translation>
+    </message>
+    <message>
+        <source>Outfits, capes, pets</source>
+        <translation>Образы, плащи, питомцы</translation>
+    </message>
+    <message>
         <source>With friends</source>
         <translation>С друзьями</translation>
     </message>
@@ -3151,6 +3163,175 @@ Are you sure?</source>
     <message>
         <source>■  Playing</source>
         <translation>■  Идёт игра</translation>
+    </message>
+</context>
+<context>
+    <name>Cosmetics</name>
+    <message>
+        <source>Crown</source>
+        <translation>Корона</translation>
+    </message>
+    <message>
+        <source>Demon horns</source>
+        <translation>Рога демона</translation>
+    </message>
+    <message>
+        <source>Halo</source>
+        <translation>Нимб</translation>
+    </message>
+    <message>
+        <source>Wizard hat</source>
+        <translation>Шляпа мага</translation>
+    </message>
+    <message>
+        <source>Cat ears</source>
+        <translation>Кошачьи уши</translation>
+    </message>
+    <message>
+        <source>Headphones</source>
+        <translation>Наушники</translation>
+    </message>
+    <message>
+        <source>Shades</source>
+        <translation>Тёмные очки</translation>
+    </message>
+    <message>
+        <source>Scarf</source>
+        <translation>Шарф</translation>
+    </message>
+    <message>
+        <source>Gold chain</source>
+        <translation>Золотая цепь</translation>
+    </message>
+    <message>
+        <source>Tie</source>
+        <translation>Галстук</translation>
+    </message>
+    <message>
+        <source>Bat wings</source>
+        <translation>Крылья летучей мыши</translation>
+    </message>
+    <message>
+        <source>Angel wings</source>
+        <translation>Крылья ангела</translation>
+    </message>
+    <message>
+        <source>Demon wings</source>
+        <translation>Крылья демона</translation>
+    </message>
+    <message>
+        <source>Crimson mantle</source>
+        <translation>Багровая мантия</translation>
+    </message>
+    <message>
+        <source>Tesseract</source>
+        <translation>Тессеракт</translation>
+    </message>
+    <message>
+        <source>Bat</source>
+        <translation>Летучая мышь</translation>
+    </message>
+    <message>
+        <source>Slime</source>
+        <translation>Слизень</translation>
+    </message>
+    <message>
+        <source>Ghost</source>
+        <translation>Призрак</translation>
+    </message>
+    <message>
+        <source>Wave</source>
+        <translation>Помахать</translation>
+    </message>
+    <message>
+        <source>Jump</source>
+        <translation>Прыжок</translation>
+    </message>
+    <message>
+        <source>Dance</source>
+        <translation>Танец</translation>
+    </message>
+    <message>
+        <source>Demon lord</source>
+        <translation>Демон-повелитель</translation>
+    </message>
+    <message>
+        <source>Fallen angel</source>
+        <translation>Падший ангел</translation>
+    </message>
+    <message>
+        <source>Tesseract mage</source>
+        <translation>Маг тессеракта</translation>
+    </message>
+    <message>
+        <source>Night shadow</source>
+        <translation>Тень ночи</translation>
+    </message>
+    <message>
+        <source>King</source>
+        <translation>Король</translation>
+    </message>
+</context>
+<context>
+    <name>WardrobeDialog</name>
+    <message>
+        <source>Wardrobe</source>
+        <translation>Гардероб</translation>
+    </message>
+    <message>
+        <source>Click the player to turn around</source>
+        <translation>Нажми на персонажа, чтобы повернуть</translation>
+    </message>
+    <message>
+        <source>Skins and capes...</source>
+        <translation>Скины и плащи...</translation>
+    </message>
+    <message>
+        <source>The real Minecraft capes of your account: everyone sees them in the game</source>
+        <translation>Настоящие плащи Minecraft твоего аккаунта: их видят все в игре</translation>
+    </message>
+    <message>
+        <source>Take everything off</source>
+        <translation>Снять всё</translation>
+    </message>
+    <message>
+        <source>Outfits</source>
+        <translation>Образы</translation>
+    </message>
+    <message>
+        <source>Head</source>
+        <translation>Голова</translation>
+    </message>
+    <message>
+        <source>Body</source>
+        <translation>Тело</translation>
+    </message>
+    <message>
+        <source>Back</source>
+        <translation>Спина</translation>
+    </message>
+    <message>
+        <source>Pets</source>
+        <translation>Питомцы</translation>
+    </message>
+    <message>
+        <source>Emotes</source>
+        <translation>Эмоции</translation>
+    </message>
+    <message>
+        <source>Emotes: click and the player plays it</source>
+        <translation>Эмоции: нажми, и персонаж её сыграет</translation>
+    </message>
+    <message>
+        <source>worn</source>
+        <translation>надето</translation>
+    </message>
+</context>
+<context>
+    <name>VelloraCharacter</name>
+    <message>
+        <source>Click to turn around</source>
+        <translation>Нажми, чтобы повернуть</translation>
     </message>
 </context>
 </TS>

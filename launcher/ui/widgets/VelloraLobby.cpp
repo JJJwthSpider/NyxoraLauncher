@@ -26,44 +26,10 @@
 
 #include "LaunchPanel.h"
 #include "MoonyWidget.h"
+#include "VelloraCharacter.h"
 #include "ui/themes/SculkAmbience.h"
 
 namespace {
-/// a label that shows a pixel picture as big as it fits, without blurring
-class PixelLabel : public QWidget {
-   public:
-    explicit PixelLabel(QWidget* parent) : QWidget(parent) { setMinimumSize(80, 120); }
-    void setImage(const QImage& image)
-    {
-        m_image = image;
-        update();
-    }
-
-   protected:
-    void paintEvent(QPaintEvent*) override
-    {
-        if (m_image.isNull()) {
-            return;
-        }
-        QPainter p(this);
-        p.setRenderHint(QPainter::SmoothPixmapTransform, false);
-        const int scale = std::max(1, std::min(width() / m_image.width(), height() / m_image.height()));
-        const QSize size = m_image.size() * scale;
-        const QRect target(QPoint((width() - size.width()) / 2, (height() - size.height()) / 2), size);
-        // a soft red glow under the player's feet
-        QRadialGradient glow(QPointF(target.center().x(), target.bottom()), target.width() * 0.9);
-        glow.setColorAt(0, QColor(232, 54, 79, 90));
-        glow.setColorAt(1, QColor(232, 54, 79, 0));
-        p.setPen(Qt::NoPen);
-        p.setBrush(glow);
-        p.drawEllipse(QPointF(target.center().x(), target.bottom()), target.width() * 0.9, target.width() * 0.25);
-        p.drawImage(target, m_image);
-    }
-
-   private:
-    QImage m_image;
-};
-
 QLabel* caption(const QString& text, int pointSize, const QString& color, QWidget* parent)
 {
     auto* label = new QLabel(text, parent);
@@ -150,9 +116,16 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
         connect(tile, &QAbstractButton::clicked, this, signal);
         tiles->addWidget(tile, 1);
     };
+    // like Millida's lobby: the wardrobe, ready packs, friends
+    QPixmap outfit(128, 128);
+    outfit.fill(Qt::transparent);
+    {
+        QPainter p(&outfit);
+        VelloraCharacter::paintItems(p, QRectF(0, 0, 128, 128), "crown", "chain", "demon_wings", "cube_pet");
+    }
+    addTile(tr("Wardrobe"), tr("Outfits, capes, pets"), QIcon(outfit), &VelloraLobby::wardrobeRequested);
     addTile(tr("Ready-made packs"), tr("Modrinth and CurseForge"), QIcon(":/sculk_theme/tile-packs-vellora.png"), &VelloraLobby::packsRequested);
     addTile(tr("With friends"), tr("Lobby, server, invite code"), QIcon::fromTheme("accounts"), &VelloraLobby::friendsRequested);
-    addTile(tr("New instance"), tr("Version, loader and mods"), QIcon(":/sculk_theme/tile-plus-lunar.svg"), &VelloraLobby::newInstanceRequested);
     auto* tilesBox = new QWidget(this);
     tilesBox->setLayout(tiles);
     tilesBox->setFixedWidth(200);
@@ -160,14 +133,21 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
 
     // middle: the player
     auto* middle = new QVBoxLayout;
-    m_body = new PixelLabel(this);
-    middle->addWidget(m_body, 1);
+    m_character = new VelloraCharacter(this);
+    middle->addWidget(m_character, 1);
     m_playerName = caption(QString(), 16, "#fbeff1", this);
     m_playerName->setAlignment(Qt::AlignHCenter);
     middle->addWidget(m_playerName);
+    auto* buttons = new QHBoxLayout;
+    buttons->addStretch(1);
+    auto* wardrobeButton = new QPushButton(tr("Wardrobe"), this);
+    connect(wardrobeButton, &QPushButton::clicked, this, &VelloraLobby::wardrobeRequested);
+    buttons->addWidget(wardrobeButton);
     auto* skinButton = new QPushButton(tr("My skin"), this);
     connect(skinButton, &QPushButton::clicked, this, &VelloraLobby::skinRequested);
-    middle->addWidget(skinButton, 0, Qt::AlignHCenter);
+    buttons->addWidget(skinButton);
+    buttons->addStretch(1);
+    middle->addLayout(buttons);
     stage->addLayout(middle, 1);
 
     // right: Arkan the wizard
@@ -230,14 +210,23 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     setToday(QString(), QString(), QIcon(), false);
 }
 
-void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng)
+void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng, const QByteArray& capePng)
 {
     m_playerName->setText(name.isEmpty() ? tr("Sign in to play") : name);
-    QImage skin;
+    QImage skin, cape;
     if (!skinPng.isEmpty()) {
         skin.loadFromData(skinPng, "PNG");
     }
-    static_cast<PixelLabel*>(m_body)->setImage(skin.isNull() ? silhouette() : renderBody(skin));
+    if (!capePng.isEmpty()) {
+        cape.loadFromData(capePng, "PNG");
+    }
+    m_character->setSkin(skin);
+    m_character->setCape(cape);
+}
+
+void VelloraLobby::refreshCharacter()
+{
+    m_character->update();
 }
 
 void VelloraLobby::setToday(const QString& name, const QString& info, const QIcon& icon, bool running)
