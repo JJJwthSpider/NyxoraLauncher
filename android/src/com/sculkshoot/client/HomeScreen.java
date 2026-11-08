@@ -57,6 +57,7 @@ final class HomeScreen {
     private Button lobbyTab;
     private Button libraryTab;
     private ImageView playerBody;
+    private LinearLayout recommendations;
     private TextView playerName;
 
     HomeScreen(MainActivity activity) {
@@ -317,6 +318,17 @@ final class HomeScreen {
         emptyParams.setMargins(dp(24), dp(30), dp(24), 0);
         listColumn.addView(empty, emptyParams);
         listColumn.addView(grid, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        // "Рекомендуем", like Millida Launcher's library: the most popular modpacks on Modrinth
+        TextView recommended = Ui.label(activity, "Рекомендуем", 16, Ui.TEXT, true);
+        recommended.setPadding(dp(12), dp(2), 0, dp(4));
+        listColumn.addView(recommended);
+        android.widget.HorizontalScrollView recScroll = new android.widget.HorizontalScrollView(activity);
+        recScroll.setHorizontalScrollBarEnabled(false);
+        recommendations = new LinearLayout(activity);
+        recommendations.setPadding(dp(8), 0, dp(8), dp(8));
+        recScroll.addView(recommendations);
+        listColumn.addView(recScroll);
+        loadRecommendations(recommended);
         library.addView(listColumn, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
         ScrollView side = new ScrollView(activity);
         actions = new LinearLayout(activity);
@@ -327,6 +339,51 @@ final class HomeScreen {
         library.addView(side, new LinearLayout.LayoutParams(dp(210), ViewGroup.LayoutParams.MATCH_PARENT));
         pages.addView(library);
         showPage(true);
+    }
+
+    private void loadRecommendations(final TextView title) {
+        activity.background(new MainActivity.Job<org.json.JSONArray>() {
+            public org.json.JSONArray run() throws Exception {
+                return Modrinth.search("", "[[\"project_type:modpack\"]]", "downloads", 0, 10);
+            }
+
+            public void done(org.json.JSONArray hits, Exception error) {
+                if (error != null || hits == null || hits.length() == 0) {
+                    title.setVisibility(View.GONE);  // offline: no row
+                    return;
+                }
+                recommendations.removeAllViews();
+                for (int i = 0; i < hits.length(); i++) {
+                    final org.json.JSONObject hit = hits.optJSONObject(i);
+                    LinearLayout card = new LinearLayout(activity);
+                    card.setGravity(Gravity.CENTER_VERTICAL);
+                    card.setPadding(dp(6), dp(5), dp(10), dp(8));
+                    card.setBackground(PixelDrawable.plain(activity.getResources().getDisplayMetrics().density));
+                    ImageView icon = new ImageView(activity);
+                    Icons.load(icon, hit.isNull("icon_url") ? "" : hit.optString("icon_url"));
+                    card.addView(icon, new LinearLayout.LayoutParams(dp(36), dp(36)));
+                    LinearLayout texts = new LinearLayout(activity);
+                    texts.setOrientation(LinearLayout.VERTICAL);
+                    texts.setPadding(dp(6), 0, 0, 0);
+                    TextView name = Ui.label(activity, hit.optString("title"), 12, Ui.TEXT, true);
+                    name.setSingleLine(true);
+                    name.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                    name.setMaxWidth(dp(120));
+                    texts.addView(name);
+                    texts.addView(Ui.label(activity, "⬇ " + Ui.downloads(hit.optLong("downloads")), 10, Ui.HINT, false));
+                    card.addView(texts);
+                    card.setClickable(true);
+                    card.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            activity.openCatalog(hit.optString("title"));
+                        }
+                    });
+                    LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    p.rightMargin = dp(8);
+                    recommendations.addView(card, p);
+                }
+            }
+        });
     }
 
     /** the lobby or the library */
@@ -542,6 +599,10 @@ final class HomeScreen {
         TextView sub = Ui.label(activity, inst.describe() + " " + inst.loaderVersion + "\nмодов: " + inst.count(Mod.MOD) + ", ресурспаков: "
                                     + inst.count(Mod.RESOURCE_PACK) + ", шейдеров: " + inst.count(Mod.SHADER),
                                 12, Ui.HINT, false);
+        String played = Installation.playTime(inst.playedMillis);
+        if (!played.isEmpty()) {
+            sub.append("\nнаиграно: " + played);
+        }
         sub.setPadding(0, dp(2), 0, dp(8));
         actions.addView(sub);
 
@@ -564,6 +625,32 @@ final class HomeScreen {
             actions.addView(action("Чат с Арканом", new Runnable() {
                 public void run() {
                     activity.openChat(inst.chatId);
+                }
+            }), actionParams());
+        }
+        if (GameEngine.get() != null) {
+            // like Millida Launcher: "Буст FPS", the screenshots and the worlds of the installation
+            final Button boost = action(inst.fpsBoost ? "Буст FPS: вкл" : "Буст FPS: выкл", null);
+            Ui.styleButton(activity, boost, inst.fpsBoost);
+            boost.setOnClickListener(click(new Runnable() {
+                public void run() {
+                    inst.fpsBoost = !inst.fpsBoost;
+                    activity.saveInstallation(inst);
+                    android.widget.Toast.makeText(activity, inst.fpsBoost
+                        ? "Буст FPS включён: при запуске графика станет легче (дальность 6, быстрая графика, без облаков и теней)"
+                        : "Буст FPS выключен: при запуске вернутся твои настройки графики", android.widget.Toast.LENGTH_LONG).show();
+                    updateActions();
+                }
+            }));
+            actions.addView(boost, actionParams());
+            actions.addView(action("Скриншоты", new Runnable() {
+                public void run() {
+                    new GameFiles(activity, inst).showScreenshots();
+                }
+            }), actionParams());
+            actions.addView(action("Миры", new Runnable() {
+                public void run() {
+                    new GameFiles(activity, inst).showWorlds();
                 }
             }), actionParams());
         }

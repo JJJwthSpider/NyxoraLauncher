@@ -97,6 +97,23 @@ abstract class GameEngine {
         return Math.max(1024, mb / 256 * 256);
     }
 
+    /** the game folder of an installation (saves, screenshots, options.txt) */
+    abstract java.io.File gameDir(Installation inst);
+
+    /** whether the game is running now (its own process) */
+    static boolean gameRunning(Activity activity) {
+        android.app.ActivityManager manager = (android.app.ActivityManager) activity.getSystemService(Activity.ACTIVITY_SERVICE);
+        java.util.List<android.app.ActivityManager.RunningAppProcessInfo> list = manager.getRunningAppProcesses();
+        if (list != null) {
+            for (android.app.ActivityManager.RunningAppProcessInfo info : list) {
+                if (info.processName != null && info.processName.endsWith(":game")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /** the log of the last game start (and the crash report, if there was one), or null */
     abstract java.io.File gameLog();
 

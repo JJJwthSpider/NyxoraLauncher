@@ -196,9 +196,31 @@ public final class MainActivity extends Activity {
         if (GameEngine.get() != null) {
             GameEngine.get().attach(this);
         }
+        checkPlaySession();
         // back from the browser: the sign-in may have finished meanwhile
         if (login != null && current == login.view()) {
             signInFinished(LoginScreen.lastProblem);
+        }
+    }
+
+    /** the game started from here has ended: its time goes to the installation's play time (at most 12 hours a session) */
+    private void checkPlaySession() {
+        android.content.SharedPreferences session = getSharedPreferences("session", MODE_PRIVATE);
+        String id = session.getString("id", null);
+        if (id == null || GameEngine.get() == null || GameEngine.gameRunning(this)) {
+            return;
+        }
+        long start = session.getLong("start", 0);
+        session.edit().clear().apply();
+        Installation inst = installations.get(id);
+        if (inst == null || start <= 0) {
+            return;
+        }
+        long played = Math.max(0, Math.min(System.currentTimeMillis() - start, 12L * 3600 * 1000));
+        inst.playedMillis += played;
+        saveInstallation(inst);
+        if (home != null) {
+            home.refresh();
         }
     }
 
@@ -395,6 +417,12 @@ public final class MainActivity extends Activity {
     void openBrowser(Installation inst, String kind) {
         browser = new BrowserScreen(this, inst, kind);
         show(browser.view());
+    }
+
+    /** the modpack catalog with this pack already found */
+    void openCatalog(String text) {
+        openBrowser(null, BrowserScreen.MODPACK);
+        browser.searchFor(text);
     }
 
     void saveInstallation(Installation inst) {
@@ -1757,7 +1785,12 @@ public final class MainActivity extends Activity {
         engine.play(this, inst, account, progress, new GameEngine.Done() {
             public void finished(boolean started, String problem) {
                 if (started) {
-                    // the engine downloads Minecraft and opens the game; its progress keeps showing here
+                    // the engine downloads Minecraft and opens the game; its progress keeps showing here.
+                    // The play time is counted from now until the game's process is gone (checkPlaySession)
+                    inst.lastPlayed = System.currentTimeMillis();
+                    saveInstallation(inst);
+                    getSharedPreferences("session", MODE_PRIVATE).edit().putString("id", inst.id).putLong("start", inst.lastPlayed).apply();
+                    getSharedPreferences("lastgame", MODE_PRIVATE).edit().putString("id", inst.id).apply();
                     return;
                 }
                 progress.dismiss();
@@ -1901,7 +1934,12 @@ public final class MainActivity extends Activity {
         view.setTypeface(Typeface.MONOSPACE);
         view.setPadding(Ui.dp(this, 14), Ui.dp(this, 8), Ui.dp(this, 14), Ui.dp(this, 8));
         android.widget.ScrollView scroll = new android.widget.ScrollView(this);
-        scroll.addView(view);
+        LinearLayout column = new LinearLayout(this);
+        column.setOrientation(LinearLayout.VERTICAL);
+        final AlertDialog[] opened = new AlertDialog[1];
+        addCrashFixes(column, shown, opened);
+        column.addView(view);
+        scroll.addView(column);
         AlertDialog.Builder dialog = new AlertDialog.Builder(this).setTitle("Журнал игры (конец)").setView(scroll)
             .setPositiveButton("Скопировать", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int which) {
@@ -1930,7 +1968,79 @@ public final class MainActivity extends Activity {
                 }
             });
         }
-        dialog.show();
+        opened[0] = dialog.show();
+    }
+
+    /**
+     * Like Millida Launcher's crash fix: one button for what the crash points at. The mod the crash report names (by its
+     * file or as "Suspected Mod") is switched off in the installation; "out of memory" gives the game 1 GB more.
+     */
+    private void addCrashFixes(LinearLayout column, String text, final AlertDialog[] dialog) {
+        String id = getSharedPreferences("lastgame", MODE_PRIVATE).getString("id", null);
+        final Installation inst = id == null ? null : installations.get(id);
+        if (inst == null || !text.contains("Отчёт о сбое") && !text.contains("Ошибки")) {
+            return;
+        }
+        String lower = text.toLowerCase(Locale.ROOT);
+        List<View> fixes = new ArrayList<View>();
+        if (lower.contains("outofmemoryerror") || lower.contains("java heap space")) {
+            Button more = Ui.button(this, "Дать игре больше памяти (+1 ГБ)", true);
+            more.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    int now = GameEngine.memoryFor(MainActivity.this, inst);
+                    int next = Math.min(now + 1024, GameEngine.phoneMemory(MainActivity.this) * 75 / 100) / 256 * 256;
+                    GameEngine.chooseMemory(MainActivity.this, next);
+                    Toast.makeText(MainActivity.this, "Теперь игре " + next + " МБ памяти. Запусти ещё раз.", Toast.LENGTH_LONG).show();
+                    if (dialog[0] != null) {
+                        dialog[0].dismiss();
+                    }
+                }
+            });
+            fixes.add(more);
+        }
+        for (final Mod mod : inst.mods) {
+            if (!mod.enabled || !Mod.MOD.equals(mod.kind)) {
+                continue;
+            }
+            String file = new File(mod.targetPath()).getName().toLowerCase(Locale.ROOT);
+            boolean named = file.length() > 4 && lower.contains(file);
+            for (String line : text.split("\n")) {
+                String l = line.toLowerCase(Locale.ROOT);
+                if (l.contains("suspected mod") && !mod.title.isEmpty() && l.contains(mod.title.toLowerCase(Locale.ROOT))) {
+                    named = true;
+                }
+            }
+            if (!named) {
+                continue;
+            }
+            Button off = Ui.button(this, "Отключить «" + mod.title + "» и попробовать снова", true);
+            off.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    mod.enabled = false;
+                    saveInstallation(inst);
+                    Toast.makeText(MainActivity.this, "«" + mod.title + "» отключён в «" + inst.name + "». Его можно включить в «Моды и ресурсы».",
+                                   Toast.LENGTH_LONG).show();
+                    if (dialog[0] != null) {
+                        dialog[0].dismiss();
+                    }
+                    if (home != null) {
+                        home.refresh();
+                    }
+                }
+            });
+            fixes.add(off);
+        }
+        if (fixes.isEmpty()) {
+            return;
+        }
+        TextView title = Ui.label(this, "Как починить", 14, 0xFFFF8090, true);
+        title.setPadding(Ui.dp(this, 14), Ui.dp(this, 10), Ui.dp(this, 14), Ui.dp(this, 4));
+        column.addView(title);
+        for (View fix : fixes) {
+            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            p.setMargins(Ui.dp(this, 14), Ui.dp(this, 2), Ui.dp(this, 14), Ui.dp(this, 4));
+            column.addView(fix, p);
+        }
     }
 
     private Installation javaWaiting;  // played again once Java is there

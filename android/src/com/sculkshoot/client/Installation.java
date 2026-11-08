@@ -30,10 +30,22 @@ final class Installation {
     boolean hasSourcePack;   // made from a modpack: its original .mrpack (configs, worlds...) is kept next to the JSON
     long created = System.currentTimeMillis();
     long updated = created;
+    boolean fpsBoost;        // "Буст FPS": lighter graphics in options.txt (FpsBoost)
+    long playedMillis;       // how long it was played, like Millida's play time
+    long lastPlayed;         // when it was started last (0: never)
     List<Mod> mods = new ArrayList<Mod>();
 
     String describe() {
         return "Minecraft " + minecraftVersion + " · " + Plan.loaderName(loader);
+    }
+
+    /** "3 ч 20 мин", "12 мин" or "" */
+    static String playTime(long millis) {
+        long minutes = millis / 60000;
+        if (minutes <= 0) {
+            return "";
+        }
+        return minutes >= 60 ? (minutes / 60) + " ч " + (minutes % 60) + " мин" : minutes + " мин";
     }
 
     int count(String kind) {
@@ -68,6 +80,9 @@ final class Installation {
         o.put("hasSourcePack", hasSourcePack);
         o.put("created", created);
         o.put("updated", updated);
+        o.put("fpsBoost", fpsBoost);
+        o.put("playedMillis", playedMillis);
+        o.put("lastPlayed", lastPlayed);
         JSONArray list = new JSONArray();
         for (Mod mod : mods) {
             list.put(mod.toJson());
@@ -88,6 +103,9 @@ final class Installation {
         i.hasSourcePack = o.optBoolean("hasSourcePack");
         i.created = o.optLong("created", i.created);
         i.updated = o.optLong("updated", i.created);
+        i.fpsBoost = o.optBoolean("fpsBoost");
+        i.playedMillis = o.optLong("playedMillis");
+        i.lastPlayed = o.optLong("lastPlayed");
         JSONArray list = o.optJSONArray("mods");
         for (int k = 0; list != null && k < list.length(); k++) {
             i.mods.add(Mod.fromJson(list.optJSONObject(k)));
@@ -104,6 +122,8 @@ final class Installation {
             c.chatId = "";
             c.created = System.currentTimeMillis();
             c.updated = c.created;
+            c.playedMillis = 0;
+            c.lastPlayed = 0;
             return c;
         } catch (JSONException e) {
             throw new IllegalStateException(e);

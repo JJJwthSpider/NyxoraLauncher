@@ -449,6 +449,11 @@ public final class PojavEngine extends GameEngine {
         return player == null || player.trim().isEmpty() ? own : player.trim() + " " + own;
     }
 
+    @Override
+    java.io.File gameDir(Installation inst) {
+        return new File(Tools.DIR_GAME_HOME, "custom_instances/lullaby-" + inst.id);
+    }
+
     /** everything before the engine takes over; returns a message for the user when the game cannot start yet */
     private String prepare(final MainActivity activity, Installation inst, Account account, final Builder.Listener log, final Done done) throws Exception {
         if (!account.ownsJava) {
@@ -487,6 +492,10 @@ public final class PojavEngine extends GameEngine {
         // the files: mods, resource packs, shaders and the modpack's own files
         File gameDir = new File(Tools.DIR_GAME_HOME, "custom_instances/lullaby-" + inst.id);
         installFiles(activity, inst, gameDir, log);
+        // "Буст FPS": lighter graphics, or exactly the player's own settings back
+        if (FpsBoost.apply(gameDir, inst.fpsBoost) && inst.fpsBoost) {
+            log.log("Буст FPS: графика полегче.");
+        }
         // mods that close the game on purpose on a phone (Sodium): their check is switched off
         for (String fixed : ModFixes.fixMods(new File(gameDir, "mods"))) {
             log.log("Исправил для телефона: " + fixed);

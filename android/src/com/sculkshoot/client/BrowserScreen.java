@@ -34,17 +34,18 @@ final class BrowserScreen {
     private static final String[][] SORTS = { { "downloads", "Популярные" }, { "relevance", "Подходящие" }, { "updated", "Обновлённые" },
                                               { "newest", "Новые" } };
     private static final int PAGE = 20;
+    private static final String FAVORITES = "★";  // the goal that shows the favorites instead of a search
     /** "Для чего": Modrinth categories as quick filters, like the catalog of Millida Launcher */
-    private static final String[][] PACK_GOALS = { { "", "Все" }, { "lightweight", "Для слабого телефона" }, { "multiplayer", "С друзьями" },
+    private static final String[][] PACK_GOALS = { { "", "Все" }, { FAVORITES, "★ Избранное" }, { "lightweight", "Для слабого телефона" }, { "multiplayer", "С друзьями" },
                                                    { "adventure", "Приключения" }, { "technology", "Технологии" }, { "magic", "Магия" },
                                                    { "quests", "Квесты" }, { "challenging", "Хардкор" }, { "optimization", "Оптимизация" } };
-    private static final String[][] MOD_GOALS = { { "", "Все" }, { "optimization", "Оптимизация" }, { "adventure", "Приключения" },
+    private static final String[][] MOD_GOALS = { { "", "Все" }, { FAVORITES, "★ Избранное" }, { "optimization", "Оптимизация" }, { "adventure", "Приключения" },
                                                   { "technology", "Технологии" }, { "magic", "Магия" }, { "mobs", "Мобы" },
                                                   { "worldgen", "Мир" }, { "decoration", "Декор" }, { "food", "Еда" }, { "storage", "Хранение" },
                                                   { "utility", "Удобство" } };
-    private static final String[][] SHADER_GOALS = { { "", "Все" }, { "potato", "Очень лёгкие" }, { "low", "Лёгкие" }, { "medium", "Средние" },
+    private static final String[][] SHADER_GOALS = { { "", "Все" }, { FAVORITES, "★ Избранное" }, { "potato", "Очень лёгкие" }, { "low", "Лёгкие" }, { "medium", "Средние" },
                                                      { "realistic", "Реалистичные" }, { "fantasy", "Фэнтези" }, { "cartoon", "Мультяшные" } };
-    private static final String[][] PACK_STYLE_GOALS = { { "", "Все" }, { "16x", "16x" }, { "32x", "32x" }, { "realistic", "Реалистичные" },
+    private static final String[][] PACK_STYLE_GOALS = { { "", "Все" }, { FAVORITES, "★ Избранное" }, { "16x", "16x" }, { "32x", "32x" }, { "realistic", "Реалистичные" },
                                                          { "simplistic", "Простые" }, { "cartoon", "Мультяшные" } };
     private String goal = "";  // the chosen category ("" = all)
     private final List<Button> goalButtons = new ArrayList<Button>();
@@ -201,7 +202,7 @@ final class BrowserScreen {
                     for (Button other : goalButtons) {
                         Ui.styleButton(BrowserScreen.this.activity, other, other == chip);
                     }
-                    if (curseForge && !goal.isEmpty()) {
+                    if (curseForge && !goal.isEmpty() && !FAVORITES.equals(goal)) {
                         setSource(false);  // the categories are Modrinth's
                     } else {
                         search(true);
@@ -229,6 +230,12 @@ final class BrowserScreen {
         list.addFooterView(more);
         list.setAdapter(adapter);
         root.addView(list, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        search(true);
+    }
+
+    /** opens with these words already searched (from "Рекомендуем" in the library) */
+    void searchFor(String text) {
+        query.setText(text);
         search(true);
     }
 
@@ -266,7 +273,69 @@ final class BrowserScreen {
         search(true);
     }
 
+    /* ------------------------------------------------------------ favorites, like Millida's stars */
+
+    private String favoritesKey() {
+        return (inst == null ? MODPACK : kind) + "";
+    }
+
+    private List<JSONObject> favorites() {
+        List<JSONObject> out = new ArrayList<JSONObject>();
+        try {
+            JSONArray saved = new JSONArray(activity.getSharedPreferences("favorites", android.content.Context.MODE_PRIVATE).getString(favoritesKey(), "[]"));
+            for (int i = 0; i < saved.length(); i++) {
+                out.add(saved.getJSONObject(i));
+            }
+        } catch (org.json.JSONException e) {
+            // a broken list starts again empty
+        }
+        return out;
+    }
+
+    private boolean isFavorite(JSONObject hit) {
+        for (JSONObject f : favorites()) {
+            if (f.optString("project_id").equals(hit.optString("project_id"))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void toggleFavorite(JSONObject hit) {
+        List<JSONObject> list = favorites();
+        boolean removed = false;
+        for (int i = list.size() - 1; i >= 0; i--) {
+            if (list.get(i).optString("project_id").equals(hit.optString("project_id"))) {
+                list.remove(i);
+                removed = true;
+            }
+        }
+        if (!removed) {
+            list.add(0, hit);
+        }
+        JSONArray out = new JSONArray();
+        for (JSONObject f : list) {
+            out.put(f);
+        }
+        activity.getSharedPreferences("favorites", android.content.Context.MODE_PRIVATE).edit().putString(favoritesKey(), out.toString()).apply();
+        if (FAVORITES.equals(goal)) {
+            search(true);
+        } else {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
     private void search(final boolean fresh) {
+        if (FAVORITES.equals(goal)) {
+            loading = false;
+            generation++;
+            results.clear();
+            results.addAll(favorites());
+            more.setVisibility(View.GONE);
+            status.setText(results.isEmpty() ? "В избранном пусто: нажми ☆ у сборки или мода" : "В избранном: " + results.size());
+            adapter.notifyDataSetChanged();
+            return;
+        }
         if (loading && !fresh) {
             return;  // "show more" waits for the running search; a new search replaces it
         }
@@ -353,6 +422,18 @@ final class BrowserScreen {
                                   + (CurseForge.isCurseForge(hit.optString("project_id")) ? " · CurseForge" : ""),
                                   11, Ui.ACCENT_DARK, false));
             row.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+            final boolean favorite = isFavorite(hit);
+            Button star = Ui.button(activity, favorite ? "★" : "☆", favorite);
+            star.setTextSize(18);
+            star.setContentDescription(favorite ? "Убрать из избранного" : "В избранное");
+            star.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    toggleFavorite(hit);
+                }
+            });
+            LinearLayout.LayoutParams starParams = new LinearLayout.LayoutParams(dp(48), ViewGroup.LayoutParams.WRAP_CONTENT);
+            starParams.rightMargin = dp(6);
+            row.addView(star, starParams);
             final boolean installed = inst != null && (inst.find(hit.optString("project_id")) != null
                                                        || (!hit.optString("slug").isEmpty() && Installer.findBySlug(inst, hit.optString("slug")) != null));
             Button install = Ui.button(activity, installed ? "Установлено" : "Установить", !installed);
