@@ -29,12 +29,31 @@ echo   и ярлык "Vellora Client" на рабочем столе.
 echo.
 pause
 
+rem ---------- 0. исходный код должен лежать рядом с этим файлом ----------
+rem  Запуск прямо из zip-архива: Windows достаёт во временную папку один этот файл,
+rem  а исходников рядом нет. Тогда не копируем ничего, а объясняем, что делать.
+if exist "%SRC%\CMakePresets.json" if exist "%SRC%\launcher\" goto :have_sources
+echo.
+echo  [x] Рядом с build-windows.bat нет исходного кода - нет файла CMakePresets.json.
+echo      Скорее всего, этот файл запущен прямо из zip-архива.
+echo.
+echo      Что сделать:
+echo        1. Правой кнопкой по архиву VelloraClient-src.zip - «Извлечь все...» - «Извлечь».
+echo        2. Открой распакованную папку и запусти build-windows.bat уже из неё.
+echo.
+echo      Если нужно просто играть, собирать ничего не надо: распакуй
+echo      VelloraClient-Windows.zip и запусти vellora.exe - это готовый лаунчер.
+echo.
+echo      Сейчас файл запущен из папки: %SRC%
+goto :fail
+:have_sources
+
 if not exist "%WORK%" mkdir "%WORK%"
 
 where winget >nul 2>&1
 if errorlevel 1 (
     echo.
-    echo  [!] Не найден winget. Обнови Windows или установи "Установщик приложений"
+    echo  [x] Не найден winget. Обнови Windows или установи "Установщик приложений"
     echo      из Microsoft Store, потом запусти этот файл снова.
     goto :fail
 )
@@ -76,7 +95,7 @@ echo  [2/6] Копирую исходный код в %WORK%\src ...
 if /i not "%SRC%"=="%WORK%\src" (
     robocopy "%SRC%" "%WORK%\src" /MIR /XD build .git /NFL /NDL /NJH /NJS /NP >nul
     if errorlevel 8 (
-        echo  [!] Не удалось скопировать исходный код.
+        echo  [x] Не удалось скопировать исходный код.
         goto :fail
     )
 )
@@ -139,7 +158,7 @@ powershell -NoProfile -Command "$s=(New-Object -ComObject WScript.Shell).CreateS
 
 echo.
 echo  ================================================================
-echo   ГОТОВО! Лаунчер собран:  %OUT%\vellora.exe
+echo   ГОТОВО. Лаунчер собран:  %OUT%\vellora.exe
 echo   На рабочем столе есть ярлык "Vellora Client".
 echo  ================================================================
 explorer "%OUT%"
