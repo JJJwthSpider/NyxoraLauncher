@@ -121,7 +121,7 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     outfit.fill(Qt::transparent);
     {
         QPainter p(&outfit);
-        VelloraCharacter::paintItems(p, QRectF(0, 0, 128, 128), "crown", "chain", "demon_wings", "cube_pet");
+        VelloraCharacter::paintItems(p, QRectF(0, 0, 128, 128), "crown", "chain", "demon_wings", "cube_pet", QString(), "void_orbit", 1.0);
     }
     addTile(tr("Wardrobe"), tr("Outfits, capes, pets"), QIcon(outfit), &VelloraLobby::wardrobeRequested);
     addTile(tr("Ready-made packs"), tr("Modrinth and CurseForge"), QIcon(":/sculk_theme/tile-packs-vellora.png"), &VelloraLobby::packsRequested);

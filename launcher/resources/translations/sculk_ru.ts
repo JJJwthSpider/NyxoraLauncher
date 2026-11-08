@@ -3275,6 +3275,14 @@ Are you sure?</source>
 <context>
     <name>WardrobeDialog</name>
     <message>
+        <source>Effects</source>
+        <translation>Эффекты</translation>
+    </message>
+    <message>
+        <source>Outfits — all open</source>
+        <translation>Образы — все открыты</translation>
+    </message>
+    <message>
         <source>Wardrobe</source>
         <translation>Гардероб</translation>
     </message>

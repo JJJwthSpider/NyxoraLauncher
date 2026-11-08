@@ -20,7 +20,12 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QRadialGradient>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QSettings>
+#include "settings/SettingsObject.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -29,32 +34,84 @@
 #include "FileSystem.h"
 
 namespace Cosmetics {
+namespace {
+struct Data {
+    QList<Item> items;
+    QList<Outfit> outfits;
+};
+
+QColor hexColor(const QString& hex)
+{
+    QColor c(hex.left(7));
+    if (hex.size() >= 9) {
+        c.setAlpha(hex.mid(7, 2).toInt(nullptr, 16));
+    }
+    return c;
+}
+
+/// the wardrobe from cosmetics.json (written by android/art/cosmetics.py; the Android app draws the same file)
+const Data& data()
+{
+    static const Data s_data = [] {
+        Data d;
+        QFile file(":/sculk_theme/cosmetics.json");
+        if (!file.open(QIODevice::ReadOnly)) {
+            return d;
+        }
+        const auto root = QJsonDocument::fromJson(file.readAll()).object();
+        for (const auto& value : root.value("items").toArray()) {
+            const auto o = value.toObject();
+            Item item;
+            item.id = o.value("id").toString();
+            item.slot = o.value("slot").toString();
+            item.titleRu = o.value("title").toString();
+            item.titleEn = o.value("titleEn").toString();
+            item.rarity = o.value("rarity").toString("common");
+            for (const auto& lv : o.value("layers").toArray()) {
+                const auto l = lv.toObject();
+                Layer layer;
+                layer.x = l.value("x").toDouble();
+                layer.y = l.value("y").toDouble();
+                for (const auto& row : l.value("rows").toArray()) {
+                    layer.rows << row.toString();
+                }
+                const auto colors = l.value("colors").toObject();
+                for (auto it = colors.begin(); it != colors.end(); ++it) {
+                    layer.colors.insert(it.key().at(0), hexColor(it.value().toString()));
+                }
+                layer.view = l.value("view").toString("front");
+                layer.anim = l.value("anim").toString();
+                item.layers << layer;
+            }
+            const auto particles = o.value("particles").toObject();
+            for (const auto& c : particles.value("colors").toArray()) {
+                item.particleColors << hexColor(c.toString());
+            }
+            item.particleCount = particles.value("count").toInt(10);
+            item.motion = particles.value("motion").toString();
+            item.shape = particles.value("shape").toString();
+            d.items << item;
+        }
+        for (const auto& value : root.value("outfits").toArray()) {
+            const auto o = value.toObject();
+            d.outfits << Outfit{ o.value("title").toString(), o.value("titleEn").toString(), o.value("head").toString(),
+                                 o.value("back").toString(),  o.value("body").toString(),    o.value("pet").toString(),
+                                 o.value("effect").toString() };
+        }
+        return d;
+    }();
+    return s_data;
+}
+
+bool russian()
+{
+    return APPLICATION->settings()->get("Language").toString().startsWith("ru");
+}
+}  // namespace
+
 const QList<Item>& items()
 {
-    static const QList<Item> s_items = {
-        { "crown", Head, QT_TRANSLATE_NOOP("Cosmetics", "Crown") },
-        { "horns", Head, QT_TRANSLATE_NOOP("Cosmetics", "Demon horns") },
-        { "halo", Head, QT_TRANSLATE_NOOP("Cosmetics", "Halo") },
-        { "wizard_hat", Head, QT_TRANSLATE_NOOP("Cosmetics", "Wizard hat") },
-        { "cat_ears", Head, QT_TRANSLATE_NOOP("Cosmetics", "Cat ears") },
-        { "headphones", Head, QT_TRANSLATE_NOOP("Cosmetics", "Headphones") },
-        { "shades", Head, QT_TRANSLATE_NOOP("Cosmetics", "Shades") },
-        { "scarf", Body, QT_TRANSLATE_NOOP("Cosmetics", "Scarf") },
-        { "chain", Body, QT_TRANSLATE_NOOP("Cosmetics", "Gold chain") },
-        { "tie", Body, QT_TRANSLATE_NOOP("Cosmetics", "Tie") },
-        { "bat_wings", Back, QT_TRANSLATE_NOOP("Cosmetics", "Bat wings") },
-        { "angel_wings", Back, QT_TRANSLATE_NOOP("Cosmetics", "Angel wings") },
-        { "demon_wings", Back, QT_TRANSLATE_NOOP("Cosmetics", "Demon wings") },
-        { "crimson_cape", Back, QT_TRANSLATE_NOOP("Cosmetics", "Crimson mantle") },
-        { "cube_pet", Pet, QT_TRANSLATE_NOOP("Cosmetics", "Tesseract") },
-        { "bat_pet", Pet, QT_TRANSLATE_NOOP("Cosmetics", "Bat") },
-        { "slime_pet", Pet, QT_TRANSLATE_NOOP("Cosmetics", "Slime") },
-        { "ghost_pet", Pet, QT_TRANSLATE_NOOP("Cosmetics", "Ghost") },
-        { "wave", Emote, QT_TRANSLATE_NOOP("Cosmetics", "Wave") },
-        { "jump", Emote, QT_TRANSLATE_NOOP("Cosmetics", "Jump") },
-        { "dance", Emote, QT_TRANSLATE_NOOP("Cosmetics", "Dance") },
-    };
-    return s_items;
+    return data().items;
 }
 
 QList<Item> inSlot(const QString& slot)
@@ -68,21 +125,46 @@ QList<Item> inSlot(const QString& slot)
     return out;
 }
 
+const Item* find(const QString& id)
+{
+    if (id.isEmpty()) {
+        return nullptr;
+    }
+    for (const auto& item : items()) {
+        if (item.id == id) {
+            return &item;
+        }
+    }
+    return nullptr;
+}
+
 QString title(const Item& item)
 {
-    return QCoreApplication::translate("Cosmetics", item.title);
+    return russian() || item.titleEn.isEmpty() ? item.titleRu : item.titleEn;
+}
+
+QString title(const Outfit& outfit)
+{
+    return russian() || outfit.titleEn.isEmpty() ? outfit.titleRu : outfit.titleEn;
+}
+
+QColor rarityColor(const QString& rarity)
+{
+    if (rarity == "legendary") {
+        return QColor(0xFF, 0xB4, 0x3C);
+    }
+    if (rarity == "epic") {
+        return QColor(0xB0, 0x4C, 0xFF);
+    }
+    if (rarity == "rare") {
+        return QColor(0x3C, 0x8C, 0xFF);
+    }
+    return QColor(0x8A, 0x93, 0xA0);
 }
 
 const QList<Outfit>& outfits()
 {
-    static const QList<Outfit> s_outfits = {
-        { QT_TRANSLATE_NOOP("Cosmetics", "Demon lord"), "horns", "demon_wings", "scarf", "" },
-        { QT_TRANSLATE_NOOP("Cosmetics", "Fallen angel"), "halo", "angel_wings", "chain", "" },
-        { QT_TRANSLATE_NOOP("Cosmetics", "Tesseract mage"), "wizard_hat", "crimson_cape", "chain", "cube_pet" },
-        { QT_TRANSLATE_NOOP("Cosmetics", "Night shadow"), "shades", "bat_wings", "tie", "bat_pet" },
-        { QT_TRANSLATE_NOOP("Cosmetics", "King"), "crown", "crimson_cape", "chain", "slime_pet" },
-    };
-    return s_outfits;
+    return data().outfits;
 }
 
 static QSettings& store()
@@ -101,156 +183,112 @@ void wear(const QString& slot, const QString& id)
     store().setValue(slot, id);
     store().sync();
 }
+
+void wearOutfit(const Outfit& outfit)
+{
+    wear(Head, outfit.head);
+    wear(Back, outfit.back);
+    wear(Body, outfit.body);
+    wear(Pet, outfit.pet);
+    wear(Effect, outfit.effect);
+}
 }  // namespace Cosmetics
 
 namespace {
-const QColor s_gold(0xE6, 0xB4, 0x3C), s_goldDark(0x9C, 0x6E, 0x1E), s_ruby(0xE8, 0x36, 0x4F), s_black(0x12, 0x03, 0x06),
-    s_white(0xF4, 0xEE, 0xF0);
-
 /// draws in skin pixels relative to the figure's top left corner; `u` is one pixel on screen
 struct Pen {
     QPainter& p;
     double ox, oy, u;
     void rect(double x, double y, double w, double h, const QColor& c) const { p.fillRect(QRectF(ox + x * u, oy + y * u, w * u, h * u), c); }
-    void sprite(double x, double y, const QStringList& rows, const QString& keys, const QList<QColor>& colors) const
-    {
-        for (int j = 0; j < rows.size(); j++) {
-            for (int i = 0; i < rows[j].size(); i++) {
-                const int k = keys.indexOf(rows[j][i]);
-                if (k >= 0) {
-                    rect(x + i, y + j, 1, 1, colors[k]);
+};
+
+/// the layers of an item seen from this side, with their animation
+void drawItem(const Pen& p, const Cosmetics::Item* item, bool behind, double time)
+{
+    if (!item) {
+        return;
+    }
+    for (const auto& layer : item->layers) {
+        if (layer.view != "both" && layer.view != (behind ? "back" : "front")) {
+            continue;
+        }
+        double dy = 0;
+        if (layer.anim == "bob") {
+            dy = std::sin(time * 2) * 0.5;
+        } else if (layer.anim == "flap") {
+            dy = -(0.5 + 0.5 * std::sin(time * 2.2)) * 2;
+        } else if (layer.anim == "hop") {
+            dy = -std::abs(std::sin(time * 3)) * 2;
+        } else if (layer.anim == "float") {
+            dy = std::sin(time * 2) * 1.5;
+        }
+        for (int j = 0; j < layer.rows.size(); j++) {
+            const auto& row = layer.rows[j];
+            for (int i = 0; i < row.size(); i++) {
+                const auto it = layer.colors.constFind(row[i]);
+                if (it != layer.colors.constEnd()) {
+                    p.rect(layer.x + i, layer.y + j + dy, 1, 1, *it);
                 }
             }
         }
     }
-    void glow(double x, double y, double radius, const QColor& c) const
-    {
-        QRadialGradient g(QPointF(ox + x * u, oy + y * u), radius * u);
-        g.setColorAt(0, c);
-        g.setColorAt(1, QColor(c.red(), c.green(), c.blue(), 0));
-        p.setPen(Qt::NoPen);
-        p.setBrush(g);
-        p.drawEllipse(QPointF(ox + x * u, oy + y * u), radius * u, radius * u);
-    }
-};
+}
 
-void drawBack(const Pen& p, const QString& id, double flap, bool fromBehind)
+double unitHash(int a, int b)
 {
-    if (id.isEmpty()) {
+    quint32 h = quint32(a) * 374761393u + quint32(b) * 668265263u + 0x2545F491u;
+    h = (h ^ (h >> 13)) * 1274126177u;
+    return ((h ^ (h >> 16)) % 10000) / 10000.0;
+}
+
+/// the particles of an effect around the figure (rise, fall, orbit, spark)
+void drawParticles(const Pen& p, const Cosmetics::Item* item, double time)
+{
+    if (!item || item->particleColors.isEmpty()) {
         return;
     }
-    if (id == "crimson_cape") {
-        if (fromBehind) {
-            p.rect(3, 8, 10, 17, QColor(0x7A, 0x0F, 0x22));
-            p.rect(3, 8, 10, 1, QColor(0xB0, 0x1C, 0x38));
-            p.rect(4, 23, 8, 2, QColor(0x5A, 0x0A, 0x18));
-            p.rect(7, 12, 2, 2, s_gold);
+    for (int i = 0; i < item->particleCount; i++) {
+        QColor color = item->particleColors[i % item->particleColors.size()];
+        const double speed = 4 + unitHash(i, 1) * 5;
+        const double phase = unitHash(i, 2) * 40;
+        double x, y, alpha;
+        if (item->motion == "orbit") {
+            const double angle = time * 1.4 + i * std::numbers::pi * 2 / item->particleCount;
+            x = 8 + std::cos(angle) * 12;
+            y = 16 + std::sin(angle) * 4 + std::sin(time * 2 + i) * 6;
+            alpha = 0.6 + 0.4 * std::sin(angle);
+        } else if (item->motion == "fall") {
+            x = -6 + unitHash(i, 3) * 28;
+            y = -8 + std::fmod(time * speed + phase, 44.0);
+            alpha = 0.8;
+        } else if (item->motion == "spark") {
+            x = -4 + unitHash(i, 3) * 24;
+            y = -4 + unitHash(i, 4) * 38;
+            alpha = std::max(0.0, std::sin(time * (2 + unitHash(i, 5) * 3) + phase));
         } else {
-            p.rect(2, 9, 1, 15, QColor(0x7A, 0x0F, 0x22));
-            p.rect(13, 9, 1, 15, QColor(0x7A, 0x0F, 0x22));
+            x = -2 + unitHash(i, 3) * 20;
+            const double travel = std::fmod(time * speed + phase, 40.0);
+            y = 34 - travel;
+            alpha = std::min(1.0, travel / 6) * std::max(0.0, 1 - travel / 40);
         }
-        return;
-    }
-    QList<QColor> colors;
-    if (id == "angel_wings") {
-        colors = { s_white, QColor(0xE8, 0xE2, 0xE6), QColor(0xC9, 0xC2, 0xC8) };
-    } else if (id == "demon_wings") {
-        colors = { s_ruby, QColor(0x9E, 0x16, 0x30), QColor(0x5A, 0x0A, 0x18) };
-    } else {
-        colors = { QColor(0x4A, 0x1A, 0x26), QColor(0x2E, 0x10, 0x18), QColor(0x14, 0x07, 0x0B) };
-    }
-    const QStringList wing = { "....aa", "..aabb", ".abbbc", "abbbcc", "abbcc.", "abcc..", ".bc...", ".c...." };
-    QStringList mirrored;
-    for (const auto& row : wing) {
-        QString r = row;
-        std::reverse(r.begin(), r.end());
-        mirrored << r;
-    }
-    const double lift = flap * 2;
-    p.sprite(-5, 6 - lift, wing, "abc", colors);
-    p.sprite(15, 6 - lift, mirrored, "abc", colors);
-}
-
-void drawBody(const Pen& p, const QString& id)
-{
-    if (id == "scarf") {
-        p.rect(4, 8, 8, 2, QColor(0xB0, 0x1C, 0x38));
-        p.rect(4, 8, 8, 1, s_ruby);
-        p.rect(9, 10, 2, 4, QColor(0xB0, 0x1C, 0x38));
-    } else if (id == "chain") {
-        p.rect(5, 9, 1, 1, s_gold);
-        p.rect(6, 10, 1, 1, s_gold);
-        p.rect(7, 11, 2, 1, s_gold);
-        p.rect(9, 10, 1, 1, s_gold);
-        p.rect(10, 9, 1, 1, s_gold);
-        p.rect(7, 12, 2, 2, s_ruby);
-    } else if (id == "tie") {
-        p.rect(7, 8, 2, 1, s_black);
-        p.rect(7, 9, 2, 5, QColor(0x7A, 0x0F, 0x22));
+        color.setAlphaF(std::clamp(color.alphaF() * alpha, 0.0, 1.0));
+        if (item->shape == "heart") {
+            p.rect(x, y, 1, 1, color);
+            p.rect(x + 2, y, 1, 1, color);
+            p.rect(x, y + 1, 3, 1, color);
+            p.rect(x + 1, y + 2, 1, 1, color);
+        } else if (item->shape == "drop") {
+            p.rect(x, y, 0.6, 1.6, color);
+        } else {
+            p.rect(x, y, 0.9, 0.9, color);
+        }
     }
 }
 
-void drawHead(const Pen& p, const QString& id, double time)
+void drawSilhouette(const Pen& p, bool leftUp, bool rightUp, double lift, bool back)
 {
-    if (id == "crown") {
-        p.sprite(3, -3, { "a..a..a..a", "aaaaaaaaaa", "abaacaabaa" }, "abc", { s_gold, s_ruby, QColor(0x5C, 0xB6, 0xFF) });
-        p.rect(3, -1, 10, 1, s_goldDark);
-    } else if (id == "horns") {
-        p.sprite(1, -5, { "b.........b", "a.........a", "aa.......aa", ".aa.....aa." }, "ab", { QColor(0x2A, 0x0A, 0x12), QColor(0x7A, 0x0F, 0x22) });
-    } else if (id == "halo") {
-        const double bob = std::sin(time * 2) * 0.4;
-        p.glow(8, -3 + bob, 5, QColor(255, 224, 138, 70));
-        p.rect(4, -4 + bob, 8, 1, s_gold);
-        p.rect(3, -3 + bob, 1, 1, s_gold);
-        p.rect(12, -3 + bob, 1, 1, s_gold);
-        p.rect(4, -2 + bob, 8, 1, s_goldDark);
-    } else if (id == "wizard_hat") {
-        p.sprite(2, -9,
-                 { "......ab....", ".....aab....", ".....aabb...", "....aaabb...", "....aaabbb..", "...aaaabbb..", "...aaaaabbb.",
-                   "..aaaaaabbb.", "cccccccccccc", "dddddddddddd" },
-                 "abcd", { QColor(0x5A, 0x0A, 0x18), QColor(0x8E, 0x14, 0x28), s_gold, s_black });
-    } else if (id == "cat_ears") {
-        p.sprite(3, -3, { "a........a", "aa......aa", "aba....aba" }, "ab", { QColor(0x1A, 0x0A, 0x0E), QColor(0xE8, 0x7A, 0x90) });
-    } else if (id == "headphones") {
-        p.rect(3, -1, 10, 1, s_black);
-        p.rect(3, 0, 1, 3, s_black);
-        p.rect(12, 0, 1, 3, s_black);
-        p.rect(2, 3, 2, 3, s_ruby);
-        p.rect(12, 3, 2, 3, s_ruby);
-    } else if (id == "shades") {
-        p.rect(4, 3, 8, 1, s_black);
-        p.rect(5, 4, 2, 1, s_black);
-        p.rect(9, 4, 2, 1, s_black);
-    }
-}
-
-void drawPet(const Pen& p, const QString& id, double time)
-{
-    if (id.isEmpty()) {
-        return;
-    }
-    const double hop = std::abs(std::sin(time * 3)) * 2;
-    const double x = 18;
-    double y = 24 - hop;
-    if (id == "cube_pet") {
-        p.glow(x + 2.5, y + 2.5, 4, QColor(255, 40, 60, 70));
-        p.sprite(x, y, { ".aaa.", "abbba", "abcba", "abbba", ".aaa." }, "abc", { s_ruby, QColor(0x7A, 0x0F, 0x22), QColor(0xFF, 0xC8, 0xCD) });
-    } else if (id == "bat_pet") {
-        const bool up = std::sin(time * 12) > 0;
-        y = 14 + std::sin(time * 2) * 2;
-        p.sprite(x, y, { up ? "a.....a" : ".......", up ? "aa.b.aa" : "aaabaaa", ".abbba.", "..bcb.." }, "abc",
-                 { QColor(0x2E, 0x10, 0x18), s_black, s_ruby });
-    } else if (id == "slime_pet") {
-        p.sprite(x, y + 2, { ".aaaa.", "abbbba", "abcbca", "abbbba", ".aaaa." }, "abc", { QColor(0x7A, 0x0F, 0x22), QColor(0xC8, 0x1F, 0x3A), s_black });
-    } else if (id == "ghost_pet") {
-        y = 16 + std::sin(time * 1.5) * 1.5;
-        p.sprite(x, y, { ".aaa.", "aaaaa", "abaab", "aaaaa", "aaaaa", "a.a.a" }, "ab", { QColor(0xF4, 0xEE, 0xF0, 204), s_black });
-    }
-}
-
-void drawSilhouette(const Pen& p, bool wave, double lift, bool back)
-{
-    const QRectF parts[] = { { 4, 0, 8, 8 }, { 4, 8, 8, 12 }, { 0, 8, 4, 12 }, { 12, wave ? -4.0 : 8.0, 4, 12 }, { 4, 20, 4, 12 }, { 8, 20, 4, 12 } };
+    const QRectF parts[] = { { 4, 0, 8, 8 },   { 4, 8, 8, 12 }, { 0, rightUp ? -4.0 : 8.0, 4, 12 }, { 12, leftUp ? -4.0 : 8.0, 4, 12 },
+                             { 4, 20, 4, 12 }, { 8, 20, 4, 12 } };
     for (const auto& r : parts) {
         p.rect(r.x(), r.y() + lift, r.width(), r.height(), QColor(0x8A, 0x34, 0x42));
         p.rect(r.x() + 0.5, r.y() + 0.5 + lift, r.width() - 1, r.height() - 1, QColor(0x2B, 0x0E, 0x15));
@@ -318,15 +356,16 @@ void VelloraCharacter::hideEvent(QHideEvent* event)
 }
 
 void VelloraCharacter::paintItems(QPainter& painter, const QRectF& target, const QString& head, const QString& body, const QString& back,
-                                  const QString& pet, const QString& emote)
+                                  const QString& pet, const QString& emote, const QString& effect, double time)
 {
-    const double u = std::min(target.width() / 32.0, target.height() / 38.0);
-    Pen pen{ painter, target.left() + (target.width() - 32 * u) / 2 + 8 * u, target.top() + (target.height() - 38 * u) / 2 + 6 * u, u };
-    drawBack(pen, back, 0.5, false);
-    drawSilhouette(pen, emote == "wave", emote == "jump" ? -3 : 0, false);
-    drawBody(pen, body);
-    drawHead(pen, head, 0);
-    drawPet(pen, pet, 0);
+    const double u = std::min(target.width() / 32.0, target.height() / 40.0);
+    Pen pen{ painter, target.left() + (target.width() - 32 * u) / 2 + 8 * u, target.top() + (target.height() - 40 * u) / 2 + 8 * u, u };
+    drawItem(pen, Cosmetics::find(back), false, time);
+    drawSilhouette(pen, emote == "wave" || emote == "cheer", emote == "cheer", emote == "jump" ? -3 : emote == "bow" ? 1 : 0, false);
+    drawItem(pen, Cosmetics::find(body), false, time);
+    drawItem(pen, Cosmetics::find(head), false, time);
+    drawItem(pen, Cosmetics::find(pet), false, time);
+    drawParticles(pen, Cosmetics::find(effect), time);
 }
 
 void VelloraCharacter::paintEvent(QPaintEvent*)
@@ -342,7 +381,10 @@ void VelloraCharacter::paintEvent(QPaintEvent*)
     const double emoteTime = (m_clock.elapsed() - m_emoteStart) / 1000.0;
     const bool emoting = !m_emote.isEmpty() && emoteTime < 2.4;
     const double breath = std::sin(time * 2) * 0.35;
-    const double jump = emoting && m_emote == "jump" ? std::max(0.0, std::sin(emoteTime * std::numbers::pi / 0.6)) * 5 : 0;
+    double jump = emoting && m_emote == "jump" ? std::max(0.0, std::sin(emoteTime * std::numbers::pi / 0.6)) * 5 : 0;
+    if (emoting && m_emote == "bow") {
+        jump = -std::max(0.0, std::sin(emoteTime * std::numbers::pi / 1.2)) * 2;  // a nod down
+    }
     const double sway = emoting && m_emote == "dance" ? std::sin(emoteTime * 9) * 1.5 : 0;
     const double left = (width() - gridW * u) / 2, top = (height() - gridH * u) / 2;
     const double ox = left + (figureX + sway) * u, oy = top + (figureY - jump + breath) * u;
@@ -358,11 +400,15 @@ void VelloraCharacter::paintEvent(QPaintEvent*)
 
     Pen pen{ painter, ox, oy, u };
     const QString back = Cosmetics::worn(Cosmetics::Back);
-    const double flap = 0.5 + 0.5 * std::sin(time * (back.contains("wings") ? 2.2 : 0));
-    if (!m_back) {
-        drawBack(pen, back, flap, false);
+    const bool savedBack = m_back;
+    if (emoting && m_emote == "spin") {
+        m_back = int(emoteTime * 5) % 2 == 1;  // turns round and round
     }
-    const bool wave = emoting && m_emote == "wave";
+    if (!m_back) {
+        drawItem(pen, Cosmetics::find(back), false, time);
+    }
+    const bool wave = emoting && (m_emote == "wave" || m_emote == "cheer");
+    const bool cheer = emoting && m_emote == "cheer";
     const double armY = wave ? -4 + std::sin(emoteTime * 10) * 0.6 : 8;
     auto part = [&](int sx, int sy, int w, int h, double x, double y, bool mirror) {
         if (sx + w > m_skin.width() || sy + h > m_skin.height()) {
@@ -375,21 +421,21 @@ void VelloraCharacter::paintEvent(QPaintEvent*)
         painter.drawImage(QRectF(ox + x * u, oy + y * u, w * u, h * u), piece);
     };
     if (m_skin.isNull()) {
-        drawSilhouette(pen, wave, 0, m_back);
+        drawSilhouette(pen, wave, cheer, 0, m_back);
     } else {
         const bool modern = m_skin.height() >= 64;
         if (!m_back) {
             part(4, 20, 4, 12, 4, 20, false);
             modern ? part(20, 52, 4, 12, 8, 20, false) : part(4, 20, 4, 12, 8, 20, true);
             part(20, 20, 8, 12, 4, 8, false);
-            part(44, 20, 4, 12, 0, 8, false);
+            part(44, 20, 4, 12, 0, cheer ? armY : 8, false);
             modern ? part(36, 52, 4, 12, 12, armY, false) : part(44, 20, 4, 12, 12, armY, true);
             part(8, 8, 8, 8, 4, 0, false);
             if (modern) {
                 part(4, 36, 4, 12, 4, 20, false);
                 part(4, 52, 4, 12, 8, 20, false);
                 part(20, 36, 8, 12, 4, 8, false);
-                part(44, 36, 4, 12, 0, 8, false);
+                part(44, 36, 4, 12, 0, cheer ? armY : 8, false);
                 part(52, 52, 4, 12, 12, armY, false);
             }
             part(40, 8, 8, 8, 4, 0, false);
@@ -410,14 +456,15 @@ void VelloraCharacter::paintEvent(QPaintEvent*)
         }
     }
     if (m_back) {
-        if (!m_cape.isNull() && back != "crimson_cape") {
+        if (!m_cape.isNull() && back != "crimson_cape" && back != "backpack") {
             const double s = m_cape.width() / 64.0;
             painter.drawImage(QRectF(ox + 3 * u, oy + 8 * u, 10 * u, 16 * u), m_cape, QRectF(1 * s, 1 * s, 10 * s, 16 * s));
         }
-        drawBack(pen, back, flap, true);
-    } else {
-        drawBody(pen, Cosmetics::worn(Cosmetics::Body));
-        drawHead(pen, Cosmetics::worn(Cosmetics::Head), time);
+        drawItem(pen, Cosmetics::find(back), true, time);
     }
-    drawPet(pen, Cosmetics::worn(Cosmetics::Pet), time);
+    drawItem(pen, Cosmetics::find(Cosmetics::worn(Cosmetics::Body)), m_back, time);
+    drawItem(pen, Cosmetics::find(Cosmetics::worn(Cosmetics::Head)), m_back, time);
+    drawItem(pen, Cosmetics::find(Cosmetics::worn(Cosmetics::Pet)), m_back, time);
+    drawParticles(pen, Cosmetics::find(Cosmetics::worn(Cosmetics::Effect)), time);
+    m_back = savedBack;
 }

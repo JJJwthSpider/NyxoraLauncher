@@ -17,6 +17,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QStringList>
 #include <functional>
 
 class QGridLayout;
@@ -34,8 +35,8 @@ class WardrobeDialog : public QDialog {
 
    private:
     void showTab(const QString& tab);
-    void addTile(const QString& title, bool worn, const QString& head, const QString& body, const QString& back, const QString& pet,
-                 const QString& emote, std::function<void()> action);
+    /// look: head, body, back, pet, emote, effect
+    void addTile(const QString& title, const QString& rarity, bool worn, const QStringList& look, std::function<void()> action);
 
     VelloraCharacter* m_character = nullptr;
     QGridLayout* m_grid = nullptr;

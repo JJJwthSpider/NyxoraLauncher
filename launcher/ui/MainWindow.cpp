@@ -66,6 +66,8 @@
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QMenu>
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
 #include <QStackedWidget>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -1221,7 +1223,29 @@ void MainWindow::updateLobby()
 
 void MainWindow::showLobbyPage(bool lobby)
 {
-    m_pages->setCurrentIndex(lobby ? 0 : 1);
+    const int index = lobby ? 0 : 1;
+    if (m_pages->currentIndex() != index && m_pages->isVisible()) {
+        // like Millida's screens: the new page slides in a little and fades up
+        QWidget* page = m_pages->widget(index);
+        auto* effect = new QGraphicsOpacityEffect(page);
+        page->setGraphicsEffect(effect);
+        auto* fade = new QPropertyAnimation(effect, "opacity", page);
+        fade->setDuration(260);
+        fade->setStartValue(0.0);
+        fade->setEndValue(1.0);
+        fade->setEasingCurve(QEasingCurve::OutCubic);
+        connect(fade, &QPropertyAnimation::finished, page, [page] { page->setGraphicsEffect(nullptr); });
+        auto* slide = new QPropertyAnimation(page, "pos", page);
+        slide->setDuration(260);
+        slide->setStartValue(QPoint(lobby ? -36 : 36, 0));
+        slide->setEndValue(QPoint(0, 0));
+        slide->setEasingCurve(QEasingCurve::OutCubic);
+        m_pages->setCurrentIndex(index);
+        fade->start(QAbstractAnimation::DeleteWhenStopped);
+        slide->start(QAbstractAnimation::DeleteWhenStopped);
+    } else {
+        m_pages->setCurrentIndex(index);
+    }
     m_lobbyTab->setChecked(lobby);
     m_libraryTab->setChecked(!lobby);
     ui->instanceToolBar->setVisible(!lobby);
