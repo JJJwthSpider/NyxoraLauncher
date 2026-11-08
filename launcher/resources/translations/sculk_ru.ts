@@ -3073,6 +3073,10 @@ Are you sure?</source>
 <context>
     <name>VelloraLobby</name>
     <message>
+        <source>With friends</source>
+        <translation>С друзьями</translation>
+    </message>
+    <message>
         <source>Ready-made packs</source>
         <translation>Готовые сборки</translation>
     </message>

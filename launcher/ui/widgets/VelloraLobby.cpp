@@ -151,7 +151,7 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
         tiles->addWidget(tile, 1);
     };
     addTile(tr("Ready-made packs"), tr("Modrinth and CurseForge"), QIcon(":/sculk_theme/tile-packs-vellora.png"), &VelloraLobby::packsRequested);
-    addTile(tr("Play with friends"), tr("Lobby, server, invite code"), QIcon::fromTheme("accounts"), &VelloraLobby::friendsRequested);
+    addTile(tr("With friends"), tr("Lobby, server, invite code"), QIcon::fromTheme("accounts"), &VelloraLobby::friendsRequested);
     addTile(tr("New instance"), tr("Version, loader and mods"), QIcon(":/sculk_theme/tile-plus-lunar.svg"), &VelloraLobby::newInstanceRequested);
     auto* tilesBox = new QWidget(this);
     tilesBox->setLayout(tiles);
