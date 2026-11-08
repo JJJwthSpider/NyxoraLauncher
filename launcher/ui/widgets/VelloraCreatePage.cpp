@@ -44,6 +44,7 @@
 #include "meta/Index.h"
 #include "minecraft/VanillaInstanceCreationTask.h"
 #include "settings/SettingsObject.h"
+#include "ui/themes/VelloraSound.h"
 
 namespace {
 const char* MODRINTH = "https://api.modrinth.com/v2";
@@ -192,6 +193,7 @@ VelloraCreatePage::VelloraCreatePage(QWidget* parent) : QWidget(parent)
     m_loaderButtons.first()->setChecked(true);
     form->addLayout(loaders);
     connect(m_loaderGroup, &QButtonGroup::idClicked, this, [this](int id) {
+        VelloraSound::play("click");
         m_loader = m_loaders.at(id).key;
         updateLoaders();
     });
@@ -223,7 +225,11 @@ VelloraCreatePage::VelloraCreatePage(QWidget* parent) : QWidget(parent)
         "QListWidget#versionGrid::item:selected { background-color: #e8364f; color: white; border-bottom-color: #8e1428; }");
     form->addWidget(m_versions, 1);
     connect(m_versionSearch, &QLineEdit::textChanged, this, [this] { fillVersions(); });
-    connect(m_snapshots, &QCheckBox::toggled, this, [this] { fillVersions(); });
+    connect(m_snapshots, &QCheckBox::toggled, this, [this] {
+        VelloraSound::play("toggle");
+        fillVersions();
+    });
+    connect(m_versions, &QListWidget::itemClicked, this, [] { VelloraSound::play("click"); });
     connect(m_versions, &QListWidget::currentItemChanged, this, [this] {
         updateLoaders();
         updateName();

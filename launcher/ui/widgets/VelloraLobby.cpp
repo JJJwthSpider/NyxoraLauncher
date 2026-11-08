@@ -32,6 +32,7 @@
 #include "MoonyWidget.h"
 #include "VelloraCharacter.h"
 #include "ui/themes/SculkAmbience.h"
+#include "ui/themes/VelloraSound.h"
 
 namespace {
 QLabel* caption(const QString& text, int pointSize, const QString& color, QWidget* parent)
@@ -294,6 +295,17 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     auto* right = new QVBoxLayout;
     auto* chips = new QHBoxLayout;
     chips->addStretch(1);
+    // the interface sounds on and off, like the sound button of Millida's lobby
+    auto* sound = new QPushButton(VelloraSound::enabled() ? "🔊" : "🔇", this);
+    sound->setMinimumSize(44, 44);
+    sound->setToolTip(tr("Interface sounds"));
+    connect(sound, &QPushButton::clicked, this, [sound] {
+        const bool on = !VelloraSound::enabled();
+        VelloraSound::setEnabled(on);
+        sound->setText(on ? "🔊" : "🔇");
+        VelloraSound::play("toggle");
+    });
+    chips->addWidget(sound);
     auto* friendsChip = new QPushButton(tr("👥 Friends"), this);
     friendsChip->setMinimumHeight(44);
     friendsChip->setToolTip(tr("Play with friends: a lobby, a server, an invite code"));

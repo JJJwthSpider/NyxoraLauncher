@@ -885,6 +885,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/SculkTheme.cpp
     ui/themes/SculkAmbience.h
     ui/themes/SculkAmbience.cpp
+    ui/themes/VelloraSound.cpp
+    ui/themes/VelloraSound.h
     ui/themes/SculkTheme.h
     ui/themes/ITheme.cpp
     ui/themes/ITheme.h
@@ -1391,7 +1393,11 @@ if(${Launcher_USE_PCH})
     target_precompile_headers(Launcher_logic PRIVATE ${PRECOMPILED_HEADERS})
 endif()
 
+if(WIN32)
+    set(VELLORA_SOUND_LIBS winmm)  # PlaySound for the interface sounds
+endif()
 target_link_libraries(Launcher_logic
+    ${VELLORA_SOUND_LIBS}
     Launcher_murmur2
     nbt++
     ${ZLIB_LIBRARIES}

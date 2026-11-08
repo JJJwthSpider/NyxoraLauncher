@@ -16,6 +16,11 @@
  */
 #include "WardrobeDialog.h"
 
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
+
+#include "ui/themes/VelloraSound.h"
+
 #include <QAbstractButton>
 #include <QCoreApplication>
 #include <QGridLayout>
@@ -89,6 +94,7 @@ WardrobeDialog::WardrobeDialog(const QImage& skin, const QImage& cape, std::func
         for (const auto& slot : { Cosmetics::Head, Cosmetics::Body, Cosmetics::Back, Cosmetics::Pet, Cosmetics::Effect }) {
             Cosmetics::wear(slot, QString());
         }
+        VelloraSound::play("close");
         showTab(m_tab);
     });
     left->addWidget(undress);
@@ -113,6 +119,7 @@ WardrobeDialog::WardrobeDialog(const QImage& skin, const QImage& cape, std::func
     m_section->setStyleSheet("font-size: 14pt; font-weight: bold;");
     right->addWidget(m_section);
     auto* scroll = new QScrollArea(this);
+    m_scroll = scroll;
     scroll->setWidgetResizable(true);
     scroll->setFrameShape(QFrame::NoFrame);
     auto* holder = new QWidget(scroll);
@@ -143,6 +150,31 @@ void WardrobeDialog::addTile(const QString& title, const QString& rarity, bool w
 
 void WardrobeDialog::showTab(const QString& tab)
 {
+    if (tab != m_tab && m_scroll && m_scroll->widget()) {
+        // like Millida's tabs: the items slide in from the side of the new tab and fade up, with a blip
+        VelloraSound::play("nav");
+        int from = 0, to = 0;
+        for (int i = 0; i < m_tabs.size(); i++) {
+            from = m_tabs.at(i)->property("tab").toString() == m_tab ? i : from;
+            to = m_tabs.at(i)->property("tab").toString() == tab ? i : to;
+        }
+        QWidget* holder = m_scroll->widget();
+        auto* effect = new QGraphicsOpacityEffect(holder);
+        holder->setGraphicsEffect(effect);
+        auto* fade = new QPropertyAnimation(effect, "opacity", holder);
+        fade->setDuration(240);
+        fade->setStartValue(0.0);
+        fade->setEndValue(1.0);
+        fade->setEasingCurve(QEasingCurve::OutCubic);
+        connect(fade, &QPropertyAnimation::finished, holder, [holder] { holder->setGraphicsEffect(nullptr); });
+        auto* slide = new QPropertyAnimation(holder, "pos", holder);
+        slide->setDuration(240);
+        slide->setStartValue(QPoint(to >= from ? 30 : -30, 0));
+        slide->setEndValue(QPoint(0, 0));
+        slide->setEasingCurve(QEasingCurve::OutCubic);
+        fade->start(QAbstractAnimation::DeleteWhenStopped);
+        slide->start(QAbstractAnimation::DeleteWhenStopped);
+    }
     m_tab = tab;
     for (auto* button : m_tabs) {
         button->setChecked(button->property("tab").toString() == tab);
@@ -161,6 +193,7 @@ void WardrobeDialog::showTab(const QString& tab)
             addTile(Cosmetics::title(outfit), "legendary", worn, { outfit.head, outfit.body, outfit.back, outfit.pet, QString(), outfit.effect },
                     [this, outfit] {
                         Cosmetics::wearOutfit(outfit);
+                        VelloraSound::play("wear");
                         showTab("outfits");
                     });
         }
@@ -180,10 +213,13 @@ void WardrobeDialog::showTab(const QString& tab)
                                    tab == Cosmetics::Emote ? item.id : QString(), tab == Cosmetics::Effect ? item.id : QString() };
         addTile(Cosmetics::title(item), item.rarity, worn, look, [this, tab, item] {
             if (tab == Cosmetics::Emote) {
+                VelloraSound::play("toggle");
                 m_character->playEmote(item.id);
                 return;
             }
-            Cosmetics::wear(tab, Cosmetics::worn(tab) == item.id ? QString() : item.id);
+            const bool putOn = Cosmetics::worn(tab) != item.id;
+            VelloraSound::play(putOn ? "wear" : "click");
+            Cosmetics::wear(tab, putOn ? item.id : QString());
             showTab(tab);
         });
     }

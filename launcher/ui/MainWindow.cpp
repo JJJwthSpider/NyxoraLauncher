@@ -124,6 +124,7 @@
 #include "ui/pages/instance/ModFolderPage.h"
 #include "ui/widgets/LabeledToolButton.h"
 #include "ui/widgets/LaunchPanel.h"
+#include "ui/themes/VelloraSound.h"
 #include "ui/widgets/VelloraCreatePage.h"
 #include "ui/widgets/VelloraLobby.h"
 #include "ui/dialogs/WardrobeDialog.h"
@@ -399,6 +400,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
             if (!instance) {
                 showPage(2);
             } else if (!instance->isRunning()) {
+                VelloraSound::play("launch");
                 APPLICATION->launch(instance);
             }
         });
@@ -425,7 +427,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
                     APPLICATION->ShowGlobalSettings(this, "accounts");
                 }
             }, this);
+            VelloraSound::play("open");
             dialog.exec();
+            VelloraSound::play("close");
             m_lobby->refreshCharacter();
         });
 
@@ -1140,11 +1144,14 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
     }
 
     NewInstanceDialog newInstDlg(groupName, url, extra_info, this);
+    VelloraSound::play("open");
     newInstDlg.selectPage(pageId);
     if (pageId == "agent" && extra_info.contains("agent_request")) {
         newInstDlg.askAgent(extra_info.value("agent_request"));
     }
-    if (!newInstDlg.exec())
+    const bool accepted = newInstDlg.exec();
+    VelloraSound::play("close");
+    if (!accepted)
         return;
 
     APPLICATION->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
@@ -1261,6 +1268,31 @@ void MainWindow::showPage(int index)
 {
     const bool lobby = index == 0;
     if (m_pages->currentIndex() != index && m_pages->isVisible()) {
+        VelloraSound::play("nav");
+        // the old page: a picture of it stays on top for a moment, slides away and fades out
+        if (QWidget* old = m_pages->currentWidget()) {
+            auto* ghost = new QLabel(m_pages);
+            ghost->setPixmap(old->grab());
+            ghost->setGeometry(old->geometry());
+            ghost->setAttribute(Qt::WA_TransparentForMouseEvents);
+            ghost->show();
+            ghost->raise();
+            auto* ghostEffect = new QGraphicsOpacityEffect(ghost);
+            ghost->setGraphicsEffect(ghostEffect);
+            auto* vanish = new QPropertyAnimation(ghostEffect, "opacity", ghost);
+            vanish->setDuration(200);
+            vanish->setStartValue(1.0);
+            vanish->setEndValue(0.0);
+            vanish->setEasingCurve(QEasingCurve::InCubic);
+            auto* away = new QPropertyAnimation(ghost, "pos", ghost);
+            away->setDuration(200);
+            away->setStartValue(old->pos());
+            away->setEndValue(old->pos() + QPoint(index < m_pages->currentIndex() ? 24 : -24, 0));
+            away->setEasingCurve(QEasingCurve::InCubic);
+            connect(vanish, &QPropertyAnimation::finished, ghost, &QObject::deleteLater);
+            vanish->start(QAbstractAnimation::DeleteWhenStopped);
+            away->start(QAbstractAnimation::DeleteWhenStopped);
+        }
         // like Millida's screens: the new page slides in a little and fades up
         QWidget* page = m_pages->widget(index);
         auto* effect = new QGraphicsOpacityEffect(page);
@@ -1277,6 +1309,9 @@ void MainWindow::showPage(int index)
         slide->setEndValue(QPoint(0, 0));
         slide->setEasingCurve(QEasingCurve::OutCubic);
         m_pages->setCurrentIndex(index);
+        for (auto* ghost : m_pages->findChildren<QLabel*>(QString(), Qt::FindDirectChildrenOnly)) {
+            ghost->raise();
+        }
         fade->start(QAbstractAnimation::DeleteWhenStopped);
         slide->start(QAbstractAnimation::DeleteWhenStopped);
     } else {

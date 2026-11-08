@@ -40,6 +40,7 @@ class WardrobeDialog : public QDialog {
 
     VelloraCharacter* m_character = nullptr;
     QGridLayout* m_grid = nullptr;
+    class QScrollArea* m_scroll = nullptr;
     QLabel* m_section = nullptr;
     QList<QPushButton*> m_tabs;
     QString m_tab = "outfits";

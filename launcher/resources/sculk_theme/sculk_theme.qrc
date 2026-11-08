@@ -30,5 +30,12 @@
         <file>dark-arrow-right.svg</file>
         <file>dark-arrow-up-disabled.svg</file>
         <file>dark-arrow-up.svg</file>
+        <file>sounds/nav.wav</file>
+        <file>sounds/open.wav</file>
+        <file>sounds/close.wav</file>
+        <file>sounds/click.wav</file>
+        <file>sounds/toggle.wav</file>
+        <file>sounds/wear.wav</file>
+        <file>sounds/launch.wav</file>
     </qresource>
 </RCC>

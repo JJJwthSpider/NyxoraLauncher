@@ -3081,6 +3081,10 @@ Are you sure?</source>
 <context>
     <name>VelloraLobby</name>
     <message>
+        <source>Interface sounds</source>
+        <translation>Звуки интерфейса</translation>
+    </message>
+    <message>
         <source>56 items — all open</source>
         <translation>56 вещей — всё открыто</translation>
     </message>
