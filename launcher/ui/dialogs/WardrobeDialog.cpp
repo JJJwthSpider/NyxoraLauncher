@@ -621,7 +621,7 @@ QWidget* WardrobeDialog::generator(bool capes)
             variants->addWidget(tile);
         }
         auto* more = new QPushButton(tr("More\nvariants"));
-        more->setFixedSize(capes ? 96 : 104, capes ? 160 : 196);
+        more->setFixedSize(112, capes ? 160 : 196);
         connect(more, &QPushButton::clicked, this, [weakDraw] {
             VelloraSound::play("open");
             if (auto d = weakDraw.lock()) {
