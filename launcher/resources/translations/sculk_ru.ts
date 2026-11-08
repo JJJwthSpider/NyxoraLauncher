@@ -3394,11 +3394,11 @@ Are you sure?</source>
     <name>VelloraCreatePage</name>
     <message>
         <source>light, fast</source>
-        <translation>лёгкий, быстрый</translation>
+        <translation>лёгкий</translation>
     </message>
     <message>
         <source>new mods</source>
-        <translation>новые моды</translation>
+        <translation>новые</translation>
     </message>
     <message>
         <source>the classic</source>

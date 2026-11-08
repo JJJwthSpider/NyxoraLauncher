@@ -181,7 +181,7 @@ VelloraCreatePage::VelloraCreatePage(QWidget* parent) : QWidget(parent)
         tile->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
         tile->setIcon(loaderSign(loader.key));
         tile->setIconSize(QSize(36, 28));
-        tile->setMinimumSize(96, 78);
+        tile->setMinimumSize(84, 78);
         tile->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         tile->setCursor(Qt::PointingHandCursor);
         tile->setText(loader.name + "\n" + loader.note);
@@ -251,7 +251,7 @@ VelloraCreatePage::VelloraCreatePage(QWidget* parent) : QWidget(parent)
     connect(m_create, &QPushButton::clicked, this, &VelloraCreatePage::create);
     foot->addWidget(m_create, 1);
     form->addLayout(foot);
-    outer->addWidget(left, 13);
+    outer->addWidget(left, 3);
 
     /* ---------------- the ready packs */
     auto* right = panel(this);
@@ -307,7 +307,7 @@ VelloraCreatePage::VelloraCreatePage(QWidget* parent) : QWidget(parent)
     m_packs->addStretch(1);
     scroll->setWidget(packsBox);
     ready->addWidget(scroll, 1);
-    outer->addWidget(right, 10);
+    outer->addWidget(right, 2);
 
     setStyleSheet(
         "QToolButton#loaderTile { background-color: #2b0e15; color: #fbeff1; border: 2px solid #060103; border-bottom: 5px solid #12040a; "
