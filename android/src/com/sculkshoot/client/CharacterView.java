@@ -45,6 +45,7 @@ final class CharacterView extends View {
     private boolean turnable = true;
     private boolean closeUp;
     private boolean animated = true;
+    private boolean showItems = true;
     private boolean back;
     private String nametag = "";
     private String previewSlot, previewId;
@@ -115,6 +116,12 @@ final class CharacterView extends View {
     /** false: drawn once, still (the small pictures of the skin generator) */
     void setAnimated(boolean animated) {
         this.animated = animated;
+        invalidate();
+    }
+
+    /** false: only the skin, without the wardrobe items (the generator's variants) */
+    void setShowItems(boolean show) {
+        showItems = show;
         invalidate();
     }
 
@@ -452,7 +459,7 @@ final class CharacterView extends View {
         }
 
         // the cape: the real one of the account, or one from the generator (an item cape replaces it)
-        String backItem = worn(Cosmetics.BACK);
+        String backItem = showItems ? worn(Cosmetics.BACK) : "";
         if (cape != null && !backItem.contains("cape") && !"backpack".equals(backItem) && !"jetpack".equals(backItem)) {
             float[] capeMat = new float[12];
             mul(mats[CAPE], rot(0, 24, -2.9f, 0, (float) Math.PI, 0), capeMat);
@@ -469,11 +476,13 @@ final class CharacterView extends View {
 
         // the accessories in 3D, and the effect around
         Context context = getContext();
-        drawItem(Cosmetics.find(context, backItem), Cosmetics.BACK, time);
-        drawItem(Cosmetics.find(context, worn(Cosmetics.BODY)), Cosmetics.BODY, time);
-        drawItem(Cosmetics.find(context, worn(Cosmetics.HEAD)), Cosmetics.HEAD, time);
-        drawItem(Cosmetics.find(context, worn(Cosmetics.PET)), Cosmetics.PET, time);
-        drawParticles(Cosmetics.find(context, worn(Cosmetics.EFFECT)), time);
+        if (showItems) {
+            drawItem(Cosmetics.find(context, backItem), Cosmetics.BACK, time);
+            drawItem(Cosmetics.find(context, worn(Cosmetics.BODY)), Cosmetics.BODY, time);
+            drawItem(Cosmetics.find(context, worn(Cosmetics.HEAD)), Cosmetics.HEAD, time);
+            drawItem(Cosmetics.find(context, worn(Cosmetics.PET)), Cosmetics.PET, time);
+            drawParticles(Cosmetics.find(context, worn(Cosmetics.EFFECT)), time);
+        }
 
         // the crimson light on the floor, then the frame, sharp
         float[] foot = project(mats[WORLD], 0, 0, 0);

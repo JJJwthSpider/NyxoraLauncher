@@ -71,6 +71,7 @@
 #include <QStackedWidget>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QBuffer>
 #include <QProgressDialog>
 #include <QShortcut>
 #include <QStatusBar>
@@ -115,6 +116,7 @@
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/skins/SkinManageDialog.h"
+#include "minecraft/skins/SkinUpload.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
@@ -418,18 +420,40 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
                 skin.loadFromData(profile.skin.data, "PNG");
                 cape.loadFromData(profile.capes.value(profile.currentCape).data, "PNG");
             }
-            WardrobeDialog dialog(skin, cape, [this, account] {
-                if (account) {
-                    SkinManageDialog skins(this, account);
-                    skins.exec();
+            const bool slim = account && account->accountData()->minecraftProfile.skin.variant.compare("slim", Qt::CaseInsensitive) == 0;
+            WardrobeDialog dialog(
+                skin, cape,
+                [this, account] {
+                    if (account) {
+                        SkinManageDialog skins(this, account);
+                        skins.exec();
+                        updateLaunchPanelProfile();
+                    } else {
+                        APPLICATION->ShowGlobalSettings(this, "accounts");
+                    }
+                },
+                [this, account](const QImage& generated, bool thin) {
+                    // a skin from the generator onto the account, like the skin manager uploads one
+                    if (!account || account->accountData()->minecraftProfile.id.isEmpty()) {
+                        return false;
+                    }
+                    const QString file = QDir(APPLICATION->dataRoot()).filePath("vellora-generated-skin.png");
+                    if (!generated.save(file, "PNG")) {
+                        return false;
+                    }
+                    ProgressDialog progress(this);
+                    NetJob::Ptr upload{ new NetJob(tr("Skin Upload"), APPLICATION->network(), 1) };
+                    upload->addNetAction(SkinUpload::make(account->accessToken(), file, thin ? "slim" : "classic"));
+                    upload->addTask(account->refresh().staticCast<Task>());
+                    const bool ok = progress.execWithTask(upload.get()) == QDialog::Accepted;
                     updateLaunchPanelProfile();
-                } else {
-                    APPLICATION->ShowGlobalSettings(this, "accounts");
-                }
-            }, this);
+                    return ok;
+                },
+                slim, this);
             VelloraSound::play("open");
             dialog.exec();
             VelloraSound::play("close");
+            updateLaunchPanelProfile();  // a new skin or a generated cape shows in the lobby
             m_lobby->refreshCharacter();
         });
 
@@ -1224,7 +1248,16 @@ void MainWindow::updateLaunchPanelProfile()
     m_launchPanel->setProfile(account->profileName(), account->getFace(32, 32));
     if (m_lobby) {
         const auto& profile = account->accountData()->minecraftProfile;
-        m_lobby->setPlayer(account->profileName(), profile.skin.data, profile.capes.value(profile.currentCape).data);
+        // a cape from the generator, chosen in the wardrobe, shows instead of the account's one (in Vellora only)
+        QByteArray capePng = profile.capes.value(profile.currentCape).data;
+        const QImage generated = WardrobeDialog::generatedCape();
+        if (!generated.isNull()) {
+            QBuffer buffer(&capePng);
+            capePng.clear();
+            buffer.open(QIODevice::WriteOnly);
+            generated.save(&buffer, "PNG");
+        }
+        m_lobby->setPlayer(account->profileName(), profile.skin.data, capePng, profile.skin.variant.compare("slim", Qt::CaseInsensitive) == 0);
     }
 }
 

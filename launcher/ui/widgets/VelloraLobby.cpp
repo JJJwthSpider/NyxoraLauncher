@@ -424,8 +424,9 @@ bool VelloraLobby::eventFilter(QObject* watched, QEvent* event)
     return QWidget::eventFilter(watched, event);
 }
 
-void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng, const QByteArray& capePng)
+void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng, const QByteArray& capePng, bool slim)
 {
+    m_character->setSlim(slim);
     m_playerName->setText(name.isEmpty() ? tr("Sign in to play") : name);
     QImage skin, cape;
     if (!skinPng.isEmpty()) {

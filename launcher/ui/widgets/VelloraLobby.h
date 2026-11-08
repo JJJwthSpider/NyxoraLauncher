@@ -35,7 +35,7 @@ class VelloraLobby : public QWidget {
     explicit VelloraLobby(QWidget* parent = nullptr);
 
     /// the player: the nickname and the skin texture (PNG); empty: no account yet
-    void setPlayer(const QString& name, const QByteArray& skinPng, const QByteArray& capePng = QByteArray());
+    void setPlayer(const QString& name, const QByteArray& skinPng, const QByteArray& capePng = QByteArray(), bool slim = false);
     /// the outfit changed in the wardrobe
     void refreshCharacter();
     /// the installation the Play button starts (empty name: none yet)

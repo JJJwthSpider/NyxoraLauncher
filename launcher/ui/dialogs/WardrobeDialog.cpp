@@ -27,11 +27,19 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPainter>
+#include <QDateTime>
+#include <QDir>
+#include <QFileDialog>
+#include <QFrame>
+#include <QLineEdit>
 #include <QPushButton>
+#include <QSettings>
 #include <QScrollArea>
 #include <QVBoxLayout>
 
+#include "Application.h"
 #include "ui/widgets/VelloraCharacter.h"
+#include "ui/widgets/VelloraSkinGen.h"
 
 namespace {
 /// a wardrobe tile: the item on a dark figure and its name; a crimson frame when it is worn
@@ -70,7 +78,23 @@ class ItemTile : public QAbstractButton {
 };
 }  // namespace
 
-WardrobeDialog::WardrobeDialog(const QImage& skin, const QImage& cape, std::function<void()> openSkins, QWidget* parent) : QDialog(parent)
+QImage WardrobeDialog::generatedCape()
+{
+    const QString path = QDir(APPLICATION->dataRoot()).filePath("vellora-cape.png");
+    QImage cape;
+    if (QSettings(QDir(APPLICATION->dataRoot()).filePath("vellora-ui.ini"), QSettings::IniFormat).value("generatedCape", false).toBool()) {
+        cape.load(path);
+    }
+    return cape;
+}
+
+WardrobeDialog::WardrobeDialog(const QImage& skin,
+                               const QImage& cape,
+                               std::function<void()> openSkins,
+                               std::function<bool(const QImage&, bool)> wearSkin,
+                               bool slim,
+                               QWidget* parent)
+    : QDialog(parent), m_skin(skin), m_cape(cape), m_slim(slim), m_wearSkin(std::move(wearSkin)), m_seed(QDateTime::currentMSecsSinceEpoch())
 {
     setWindowTitle(tr("Wardrobe"));
     resize(1060, 640);
@@ -79,10 +103,11 @@ WardrobeDialog::WardrobeDialog(const QImage& skin, const QImage& cape, std::func
     auto* left = new QVBoxLayout;
     m_character = new VelloraCharacter(this);
     m_character->setSkin(skin);
-    m_character->setCape(cape);
+    m_character->setCape(generatedCape().isNull() ? cape : generatedCape());
+    m_character->setSlim(slim);
     m_character->setMinimumWidth(340);
     left->addWidget(m_character, 1);
-    auto* hint = new QLabel(tr("Click the player to turn around"), this);
+    auto* hint = new QLabel(tr("Drag to turn · click for an animation"), this);
     hint->setAlignment(Qt::AlignCenter);
     left->addWidget(hint);
     auto* skins = new QPushButton(tr("Skins and capes..."), this);
@@ -102,7 +127,8 @@ WardrobeDialog::WardrobeDialog(const QImage& skin, const QImage& cape, std::func
 
     auto* right = new QVBoxLayout;
     auto* tabs = new QHBoxLayout;
-    const std::pair<QString, QString> names[] = { { "outfits", tr("Outfits") }, { Cosmetics::Head, tr("Head") }, { Cosmetics::Body, tr("Body") },
+    const std::pair<QString, QString> names[] = { { "outfits", tr("Outfits") }, { "skins", tr("Skins") }, { "capes", tr("Capes") },
+                                                  { Cosmetics::Head, tr("Head") }, { Cosmetics::Body, tr("Body") },
                                                   { Cosmetics::Back, tr("Back") },  { Cosmetics::Pet, tr("Pets") },  { Cosmetics::Effect, tr("Effects") },
                                                   { Cosmetics::Emote, tr("Emotes") } };
     for (const auto& [id, name] : names) {
@@ -184,7 +210,13 @@ void WardrobeDialog::showTab(const QString& tab)
         delete item;
     }
     m_count = 0;
-    m_character->setBack(tab == Cosmetics::Back);
+    m_character->setBack(tab == Cosmetics::Back || tab == "capes");
+    if (tab == "skins" || tab == "capes") {
+        m_section->setText(tab == "skins" ? tr("AI skin generator — describe a character, Arkan draws four skins")
+                                          : tr("AI cape generator — describe a cape, Arkan draws four"));
+        m_grid->addWidget(generator(tab == "capes"), 0, 0, 1, 4);
+        return;
+    }
     if (tab == "outfits") {
         m_section->setText(tr("Outfits — all open"));
         for (const auto& outfit : Cosmetics::outfits()) {
@@ -223,4 +255,159 @@ void WardrobeDialog::showTab(const QString& tab)
             showTab(tab);
         });
     }
+}
+
+/// Arkan's generator: a description, ideas, four variants; a click tries one on the 3D player, then it is worn or saved
+QWidget* WardrobeDialog::generator(bool capes)
+{
+    auto* panel = new QFrame(this);
+    panel->setObjectName("generatorPanel");
+    panel->setStyleSheet("QFrame#generatorPanel { background-color: #241018; border: 2px solid #b3263a; border-bottom: 5px solid #3a0d16; }");
+    panel->setMinimumWidth(560);
+    auto* layout = new QVBoxLayout(panel);
+    auto* inputRow = new QHBoxLayout;
+    auto* prompt = new QLineEdit(panel);
+    prompt->setPlaceholderText(capes ? tr("For example: a purple galaxy with stars") : tr("For example: a red-haired girl wizard in a blue robe"));
+    prompt->setMinimumHeight(34);
+    inputRow->addWidget(prompt, 1);
+    auto* go = new QPushButton(tr("Create"), panel);
+    go->setObjectName("accentButton");
+    go->setMinimumHeight(34);
+    inputRow->addWidget(go);
+    layout->addLayout(inputRow);
+    auto* ideas = new QGridLayout;
+    const QStringList skinIdeas = { tr("Knight in golden armour"), tr("Ninja with a red headband"), tr("Wizard in a purple robe"), tr("Pirate"),
+                                    tr("Princess"),                tr("Astronaut"),                 tr("Demon"),                   tr("Cyber neon"),
+                                    tr("Zombie"),                  tr("Skeleton"),                  tr("Elf"),                     tr("Viking") };
+    const QStringList capeIdeas = { tr("Galaxy with stars"), tr("Fire"),       tr("Ice"),          tr("Gold with a crown"), tr("Pink with a heart"),
+                                    tr("Rainbow"),           tr("Burgundy Vellora"), tr("Forest"), tr("Blue with lightning"), tr("Black and red stripes") };
+    const QStringList& list = capes ? capeIdeas : skinIdeas;
+    for (int i = 0; i < list.size(); i++) {
+        auto* idea = new QPushButton(list[i], panel);
+        connect(idea, &QPushButton::clicked, this, [prompt, text = list[i]] {
+            prompt->setText(text);
+            VelloraSound::play("click");
+        });
+        ideas->addWidget(idea, i / 3, i % 3);
+    }
+    layout->addLayout(ideas);
+    auto* variants = new QHBoxLayout;
+    layout->addLayout(variants);
+    auto* actions = new QHBoxLayout;
+    layout->addLayout(actions);
+    auto* status = new QLabel(panel);
+    status->setWordWrap(true);
+    status->setStyleSheet("color: #d1a3aa;");
+    layout->addWidget(status);
+    layout->addStretch(1);
+
+    auto clear = [](QLayout* l) {
+        while (auto* item = l->takeAt(0)) {
+            delete item->widget();
+            delete item;
+        }
+    };
+    connect(go, &QPushButton::clicked, this, [this, capes, prompt, variants, actions, status, clear] {
+        m_seed++;
+        VelloraSound::play("open");
+        clear(variants);
+        clear(actions);
+        status->clear();
+        if (capes) {
+            for (const QImage& cape : SkinGen::capes(prompt->text(), 4, m_seed)) {
+                auto* tile = new QPushButton;
+                tile->setFixedSize(96, 136);
+                QImage face = cape.copy(1, 1, 10, 16).scaled(70, 112);
+                tile->setIcon(QIcon(QPixmap::fromImage(face)));
+                tile->setIconSize(QSize(70, 112));
+                connect(tile, &QPushButton::clicked, this, [this, cape, actions, status, clear] {
+                    m_character->setCape(cape);
+                    m_character->setBack(true);
+                    VelloraSound::play("wear");
+                    clear(actions);
+                    auto* wear = new QPushButton(tr("Wear in Vellora"));
+                    wear->setObjectName("accentButton");
+                    connect(wear, &QPushButton::clicked, this, [cape, status] {
+                        cape.save(QDir(APPLICATION->dataRoot()).filePath("vellora-cape.png"), "PNG");
+                        QSettings(QDir(APPLICATION->dataRoot()).filePath("vellora-ui.ini"), QSettings::IniFormat).setValue("generatedCape", true);
+                        VelloraSound::play("wear");
+                        status->setText(tr("The cape is on in Vellora: you see it in the lobby and the wardrobe. In the game itself Minecraft shows "
+                                           "only official capes."));
+                    });
+                    actions->addWidget(wear);
+                    auto* save = new QPushButton(tr("Save PNG..."));
+                    connect(save, &QPushButton::clicked, this, [this, cape] {
+                        const QString file = QFileDialog::getSaveFileName(this, tr("Save the cape"), "vellora-cape.png", "PNG (*.png)");
+                        if (!file.isEmpty()) {
+                            cape.save(file, "PNG");
+                        }
+                    });
+                    actions->addWidget(save);
+                    auto* off = new QPushButton(tr("Take it off"));
+                    connect(off, &QPushButton::clicked, this, [this, status] {
+                        QSettings(QDir(APPLICATION->dataRoot()).filePath("vellora-ui.ini"), QSettings::IniFormat).setValue("generatedCape", false);
+                        m_character->setCape(m_cape);
+                        VelloraSound::play("close");
+                        status->setText(tr("The generated cape is off."));
+                    });
+                    actions->addWidget(off);
+                });
+                variants->addWidget(tile);
+            }
+        } else {
+            for (const auto& skin : SkinGen::skins(prompt->text(), 4, m_seed)) {
+                auto* box = new QWidget;
+                auto* boxLayout = new QVBoxLayout(box);
+                boxLayout->setContentsMargins(2, 2, 2, 2);
+                auto* picture = new VelloraCharacter(box);
+                picture->setAnimated(false);
+                picture->setShowItems(false);
+                picture->setSlim(skin.slim);
+                picture->setSkin(skin.image);
+                picture->turnTo(28);
+                picture->setFixedSize(120, 160);
+                picture->setAttribute(Qt::WA_TransparentForMouseEvents);
+                boxLayout->addWidget(picture);
+                auto* pick = new QPushButton(skin.title, box);
+                connect(pick, &QPushButton::clicked, this, [this, skin, actions, status, clear] {
+                    m_character->setSlim(skin.slim);
+                    m_character->setSkin(skin.image);
+                    m_character->setBack(false);
+                    VelloraSound::play("wear");
+                    clear(actions);
+                    auto* wear = new QPushButton(tr("Put on the account"));
+                    wear->setObjectName("accentButton");
+                    connect(wear, &QPushButton::clicked, this, [this, skin, status] {
+                        if (m_wearSkin && m_wearSkin(skin.image, skin.slim)) {
+                            m_skin = skin.image;
+                            m_slim = skin.slim;
+                            VelloraSound::play("wear");
+                            status->setText(tr("The skin is on: everyone sees it in the game."));
+                        } else {
+                            status->setText(tr("The skin was not put on (an account with Minecraft: Java Edition is needed). Save the PNG to use it later."));
+                        }
+                    });
+                    actions->addWidget(wear);
+                    auto* save = new QPushButton(tr("Save PNG..."));
+                    connect(save, &QPushButton::clicked, this, [this, skin] {
+                        const QString file = QFileDialog::getSaveFileName(this, tr("Save the skin"), "vellora-skin.png", "PNG (*.png)");
+                        if (!file.isEmpty()) {
+                            skin.image.save(file, "PNG");
+                        }
+                    });
+                    actions->addWidget(save);
+                    auto* mine = new QPushButton(tr("My skin"));
+                    connect(mine, &QPushButton::clicked, this, [this] {
+                        m_character->setSlim(m_slim);
+                        m_character->setSkin(m_skin);
+                        VelloraSound::play("close");
+                    });
+                    actions->addWidget(mine);
+                });
+                boxLayout->addWidget(pick);
+                variants->addWidget(box);
+            }
+        }
+    });
+    return panel;
 }

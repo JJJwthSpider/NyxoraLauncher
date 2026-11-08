@@ -736,6 +736,7 @@ final class WardrobeScreen {
         CharacterView picture = new CharacterView(activity);
         picture.setTurnable(false);
         picture.setAnimated(false);
+        picture.setShowItems(false);
         picture.setSlim(skin.slim);
         picture.setSkin(skin.bitmap);
         picture.turnTo(28);

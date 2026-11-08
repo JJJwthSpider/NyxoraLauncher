@@ -869,6 +869,10 @@ In Vellora Client: Lobby → Join a friend, paste the address. In Minecraft: Mul
 <context>
     <name>MainWindow</name>
     <message>
+        <source>Skin Upload</source>
+        <translation>Загрузка скина</translation>
+    </message>
+    <message>
         <source>✚ Create</source>
         <translation>✚ Создать</translation>
     </message>
@@ -3327,6 +3331,170 @@ Are you sure?</source>
 <context>
     <name>WardrobeDialog</name>
     <message>
+        <source>Drag to turn · click for an animation</source>
+        <translation>Крути мышью · клик — анимация</translation>
+    </message>
+    <message>
+        <source>Skins</source>
+        <translation>Скины</translation>
+    </message>
+    <message>
+        <source>Capes</source>
+        <translation>Плащи</translation>
+    </message>
+    <message>
+        <source>AI skin generator — describe a character, Arkan draws four skins</source>
+        <translation>ИИ-генератор скинов — опиши персонажа, Аркан нарисует четыре скина</translation>
+    </message>
+    <message>
+        <source>AI cape generator — describe a cape, Arkan draws four</source>
+        <translation>ИИ-генератор плащей — опиши плащ, Аркан нарисует четыре</translation>
+    </message>
+    <message>
+        <source>For example: a purple galaxy with stars</source>
+        <translation>Например: фиолетовая галактика со звёздами</translation>
+    </message>
+    <message>
+        <source>For example: a red-haired girl wizard in a blue robe</source>
+        <translation>Например: рыжая девушка-маг в синей мантии</translation>
+    </message>
+    <message>
+        <source>Create</source>
+        <translation>🔮 Создать</translation>
+    </message>
+    <message>
+        <source>Knight in golden armour</source>
+        <translation>Рыцарь в золотых доспехах</translation>
+    </message>
+    <message>
+        <source>Ninja with a red headband</source>
+        <translation>Ниндзя с красной повязкой</translation>
+    </message>
+    <message>
+        <source>Wizard in a purple robe</source>
+        <translation>Маг в фиолетовой мантии</translation>
+    </message>
+    <message>
+        <source>Pirate</source>
+        <translation>Пират</translation>
+    </message>
+    <message>
+        <source>Princess</source>
+        <translation>Принцесса</translation>
+    </message>
+    <message>
+        <source>Astronaut</source>
+        <translation>Космонавт</translation>
+    </message>
+    <message>
+        <source>Demon</source>
+        <translation>Демон</translation>
+    </message>
+    <message>
+        <source>Cyber neon</source>
+        <translation>Кибер неон</translation>
+    </message>
+    <message>
+        <source>Zombie</source>
+        <translation>Зомби</translation>
+    </message>
+    <message>
+        <source>Skeleton</source>
+        <translation>Скелет</translation>
+    </message>
+    <message>
+        <source>Elf</source>
+        <translation>Эльф</translation>
+    </message>
+    <message>
+        <source>Viking</source>
+        <translation>Викинг</translation>
+    </message>
+    <message>
+        <source>Galaxy with stars</source>
+        <translation>Галактика со звёздами</translation>
+    </message>
+    <message>
+        <source>Fire</source>
+        <translation>Огненный</translation>
+    </message>
+    <message>
+        <source>Ice</source>
+        <translation>Ледяной</translation>
+    </message>
+    <message>
+        <source>Gold with a crown</source>
+        <translation>Золотой с короной</translation>
+    </message>
+    <message>
+        <source>Pink with a heart</source>
+        <translation>Розовый с сердцем</translation>
+    </message>
+    <message>
+        <source>Rainbow</source>
+        <translation>Радуга</translation>
+    </message>
+    <message>
+        <source>Burgundy Vellora</source>
+        <translation>Бордовый Vellora</translation>
+    </message>
+    <message>
+        <source>Forest</source>
+        <translation>Лесной</translation>
+    </message>
+    <message>
+        <source>Blue with lightning</source>
+        <translation>Синий с молнией</translation>
+    </message>
+    <message>
+        <source>Black and red stripes</source>
+        <translation>Чёрно-красные полосы</translation>
+    </message>
+    <message>
+        <source>Wear in Vellora</source>
+        <translation>Носить в Vellora</translation>
+    </message>
+    <message>
+        <source>The cape is on in Vellora: you see it in the lobby and the wardrobe. In the game itself Minecraft shows only official capes.</source>
+        <translation>Плащ надет в Vellora: он виден в лобби и гардеробе. В самой игре Minecraft показывает только официальные плащи.</translation>
+    </message>
+    <message>
+        <source>Save PNG...</source>
+        <translation>💾 Сохранить PNG...</translation>
+    </message>
+    <message>
+        <source>Save the cape</source>
+        <translation>Сохранить плащ</translation>
+    </message>
+    <message>
+        <source>Take it off</source>
+        <translation>Снять</translation>
+    </message>
+    <message>
+        <source>The generated cape is off.</source>
+        <translation>Плащ из генератора снят.</translation>
+    </message>
+    <message>
+        <source>Put on the account</source>
+        <translation>⬆ Надеть на аккаунт</translation>
+    </message>
+    <message>
+        <source>The skin is on: everyone sees it in the game.</source>
+        <translation>Скин надет: его видят все в игре.</translation>
+    </message>
+    <message>
+        <source>The skin was not put on (an account with Minecraft: Java Edition is needed). Save the PNG to use it later.</source>
+        <translation>Скин не надет (нужен аккаунт с Minecraft: Java Edition). Сохрани PNG, чтобы поставить его позже.</translation>
+    </message>
+    <message>
+        <source>Save the skin</source>
+        <translation>Сохранить скин</translation>
+    </message>
+    <message>
+        <source>My skin</source>
+        <translation>↺ Мой скин</translation>
+    </message>
+    <message>
         <source>Effects</source>
         <translation>Эффекты</translation>
     </message>
@@ -3389,6 +3557,10 @@ Are you sure?</source>
 </context>
 <context>
     <name>VelloraCharacter</name>
+    <message>
+        <source>Drag to turn, click for an animation</source>
+        <translation>Крути мышью, клик — анимация</translation>
+    </message>
     <message>
         <source>Click to turn around</source>
         <translation>Нажми, чтобы повернуть</translation>

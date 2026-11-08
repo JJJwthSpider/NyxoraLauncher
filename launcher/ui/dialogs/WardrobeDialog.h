@@ -31,9 +31,19 @@ class VelloraCharacter;
 class WardrobeDialog : public QDialog {
     Q_OBJECT
    public:
-    WardrobeDialog(const QImage& skin, const QImage& cape, std::function<void()> openSkins, QWidget* parent = nullptr);
+    /// `wearSkin` puts a generated skin on the account (true when it worked)
+    WardrobeDialog(const QImage& skin,
+                   const QImage& cape,
+                   std::function<void()> openSkins,
+                   std::function<bool(const QImage&, bool slim)> wearSkin,
+                   bool slim = false,
+                   QWidget* parent = nullptr);
+
+    /// the cape made by the generator and chosen to wear in Vellora (a null image: none)
+    static QImage generatedCape();
 
    private:
+    QWidget* generator(bool capes);
     void showTab(const QString& tab);
     /// look: head, body, back, pet, emote, effect
     void addTile(const QString& title, const QString& rarity, bool worn, const QStringList& look, std::function<void()> action);
@@ -44,5 +54,9 @@ class WardrobeDialog : public QDialog {
     QLabel* m_section = nullptr;
     QList<QPushButton*> m_tabs;
     QString m_tab = "outfits";
+    QImage m_skin, m_cape;
+    bool m_slim = false;
+    std::function<bool(const QImage&, bool)> m_wearSkin;
+    qint64 m_seed = 0;
     int m_count = 0;
 };
