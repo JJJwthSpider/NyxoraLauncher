@@ -29,6 +29,70 @@ final class SkinGenerator {
         }
     }
 
+    /**
+     * What was chosen with the buttons under the description: it wins over the words. 0 or null is "as the words say, or
+     * at random". The same options with the same seed give the same skins, so a tap on a colour repaints the variants.
+     */
+    static final class Options {
+        int clothes, hair, eyes, skin;
+        int gender;        // 0: as said, 1: a boy, 2: a girl
+        String emblem;     // null: as said or at random; "": none
+        String hairStyle;  // null: as said or at random
+        int second;        // capes: the second colour
+        String pattern;    // capes: gradient, stripes, checker, diagonal, border, galaxy, flames, ice, leaves, rainbow
+
+        boolean empty() {
+            return clothes == 0 && hair == 0 && eyes == 0 && skin == 0 && gender == 0 && emblem == null && hairStyle == null && second == 0
+                && pattern == null;
+        }
+    }
+
+    /* ------------------------------------------------------------ "surprise me" */
+
+    private static final String[] SURPRISE_WHO = { "рыцарь", "ниндзя", "маг", "пират", "принцесса", "космонавт", "демон", "кибер", "зомби", "скелет",
+                                                   "эльф", "викинг", "вампир", "ангел", "король", "солдат", "хакер в худи", "агент в костюме", "повар",
+                                                   "доктор", "футболист", "ведьма", "девушка-маг", "девушка-эльф", "девушка в худи" };
+    private static final String[] SURPRISE_COLOR = { "в красном", "в бордовом", "в синем", "в зелёном", "в фиолетовом", "в золотом", "в чёрном",
+                                                     "в белом", "в розовом", "в оранжевом", "в бирюзовом", "в голубом", "" };
+    private static final String[] SURPRISE_DETAIL = { "с короной", "с бородой", "со светящимися глазами", "с черепом", "со звездой", "с молнией",
+                                                      "с длинными волосами", "с ирокезом", "в капюшоне", "в шлеме", "с сердцем", "рыжий", "блондин", "", "" };
+    private static final String[] SURPRISE_CAPE = { "галактика", "огненный плащ", "ледяной плащ", "плащ в полоску", "плащ в клетку", "радужный плащ",
+                                                    "лесной плащ", "плащ с рамкой", "плащ" };
+    private static final String[] SURPRISE_CAPE_COLOR = { "красный", "бордовый", "синий", "зелёный", "фиолетовый", "золотой", "чёрный", "белый",
+                                                          "розовый", "оранжевый", "бирюзовый", "голубой" };
+    private static final String[] SURPRISE_CAPE_MARK = { "со звездой", "с сердцем", "с молнией", "с короной", "с луной", "с черепом", "с крипером",
+                                                         "с алмазом", "с пламенем", "", "" };
+
+    /** a description at random, for the 🎲 button: "викинг в синем с бородой", "фиолетовая галактика со звездой" */
+    static String surprise(Random rnd, boolean cape) {
+        StringBuilder b = new StringBuilder();
+        if (cape) {
+            String what = SURPRISE_CAPE[rnd.nextInt(SURPRISE_CAPE.length)];
+            String color = SURPRISE_CAPE_COLOR[rnd.nextInt(SURPRISE_CAPE_COLOR.length)];
+            if (what.startsWith("галактика") || what.startsWith("радужн") || what.startsWith("огнен") || what.startsWith("ледян") || what.startsWith("лесн")) {
+                b.append(what);
+            } else {
+                b.append(color).append(' ').append(what);
+            }
+            String mark = SURPRISE_CAPE_MARK[rnd.nextInt(SURPRISE_CAPE_MARK.length)];
+            if (!mark.isEmpty()) {
+                b.append(' ').append(mark);
+            }
+        } else {
+            b.append(SURPRISE_WHO[rnd.nextInt(SURPRISE_WHO.length)]);
+            String color = SURPRISE_COLOR[rnd.nextInt(SURPRISE_COLOR.length)];
+            if (!color.isEmpty()) {
+                b.append(' ').append(color);
+            }
+            String detail = SURPRISE_DETAIL[rnd.nextInt(SURPRISE_DETAIL.length)];
+            if (!detail.isEmpty()) {
+                b.append(' ').append(detail);
+            }
+        }
+        String text = b.toString();
+        return Character.toUpperCase(text.charAt(0)) + text.substring(1);
+    }
+
     /* ------------------------------------------------------------ the words */
 
     private static final String[][] COLORS = { { "бордов", "6E1423" }, { "burgundy", "6E1423" }, { "maroon", "6E1423" }, { "красн", "C62828" }, { "red", "C62828" },
@@ -261,10 +325,13 @@ final class SkinGenerator {
     private static final String[] EMBLEM_CHOICES = { "heart", "star", "bolt", "moon", "flame", "diamond", "v", "" };
     private static final String[] HAIR_STYLES = { "short", "spiky", "long", "short", "bun", "mohawk" };
 
-    private static Look look(String prompt, Random rnd, int variant) {
+    private static Look look(String prompt, Random rnd, int variant, Options o) {
         String[] w = words(prompt);
         Look l = new Look();
         l.girl = has(w, GIRL) || has(w, "принцесс", "princess", "ведьм", "witch", "фея", "fairy", "королев", "queen");
+        if (o != null && o.gender != 0) {
+            l.girl = o.gender == 2;
+        }
         for (String[] t : THEMES) {
             if (has(w, t[0])) {
                 l.theme = t[1];
@@ -571,7 +638,57 @@ final class SkinGenerator {
         if (has(w, "светящ", "glow")) {
             l.glowEyes = true;
         }
+        if (o != null) {
+            applyOptions(l, o, variant);
+        }
         return l;
+    }
+
+    /** the buttons win over the words */
+    private static void applyOptions(Look l, Options o, int variant) {
+        if (o.gender == 2 && !"princess".equals(l.theme) && ("bald".equals(l.hairStyle) || "mohawk".equals(l.hairStyle) || "spiky".equals(l.hairStyle))) {
+            l.hairStyle = variant % 2 == 0 ? "long" : "bun";
+        }
+        if (o.gender == 1) {
+            if ("princess".equals(l.theme)) {
+                l.outfit = "robe";
+                l.head = "crown";
+                l.title = "Принц";
+            }
+            if ("Девушка".equals(l.title)) {
+                l.title = "Игрок";
+            }
+        } else if (o.gender == 2 && "Игрок".equals(l.title)) {
+            l.title = "Девушка";
+        }
+        if (o.clothes != 0) {
+            int c = o.clothes;
+            if ("armor".equals(l.outfit)) {
+                l.metal = c;
+            } else if ("cyber".equals(l.theme) || "vampire".equals(l.theme) || "demon".equals(l.theme) || "ninja".equals(l.theme)) {
+                l.accent = c;  // dark looks keep their dark clothes; the colour lights them up
+                if ("cyber".equals(l.theme)) {
+                    l.eyes = c;
+                }
+            } else {
+                l.top = variant == 0 ? c : mix(c, hueShift(c, variant * 12f - 18), 0.35f);
+            }
+        }
+        if (o.hair != 0) {
+            l.hair = o.hair;
+        }
+        if (o.eyes != 0) {
+            l.eyes = o.eyes;
+        }
+        if (o.skin != 0) {
+            l.skin = o.skin;
+        }
+        if (o.emblem != null) {
+            l.emblem = o.emblem;
+        }
+        if (o.hairStyle != null) {
+            l.hairStyle = o.hairStyle;
+        }
     }
 
     /** a few bright, pretty base colours for random looks */
@@ -581,7 +698,10 @@ final class SkinGenerator {
 
     /* ------------------------------------------------------------ emblems: 5x5 pictures for the chest and capes */
 
-    private static String[] emblemRows(String id) {
+    /** the emblems a button can choose, and their 5x5 pictures (the buttons draw them) */
+    static final String[] EMBLEM_IDS = { "heart", "star", "bolt", "moon", "flame", "diamond", "crown", "skull", "creeper", "v" };
+
+    static String[] emblemRows(String id) {
         switch (id) {
         case "heart": return new String[] { ".#.#.", "#####", "#####", ".###.", "..#.." };
         case "star": return new String[] { "..#..", ".###.", "#####", ".###.", ".#.#." };
@@ -600,10 +720,17 @@ final class SkinGenerator {
     /* ------------------------------------------------------------ skins */
 
     static List<Skin> skins(String prompt, int count, long seed) {
+        return skins(prompt, count, seed, null);
+    }
+
+    static List<Skin> skins(String prompt, int count, long seed, Options options) {
         List<Skin> out = new ArrayList<Skin>();
+        if (prompt == null) {
+            prompt = "";
+        }
         for (int i = 0; i < count; i++) {
             Random rnd = new Random(seed * 31 + i * 7919L + prompt.hashCode());
-            Look l = look(prompt == null ? "" : prompt, rnd, i);
+            Look l = look(prompt, rnd, i, options);
             out.add(new Skin(paint(l, rnd), l.girl, l.title + " #" + (i + 1)));
         }
         return out;
@@ -1236,6 +1363,13 @@ final class SkinGenerator {
 
     /** capes (64x32, the Minecraft cape layout) from words: colours, a picture, a pattern */
     static List<Bitmap> capes(String prompt, int count, long seed) {
+        return capes(prompt, count, seed, null);
+    }
+
+    /** the patterns of a cape a button can choose */
+    static final String[] CAPE_PATTERNS = { "gradient", "stripes", "checker", "diagonal", "border", "galaxy", "flames", "ice", "leaves", "rainbow" };
+
+    static List<Bitmap> capes(String prompt, int count, long seed, Options o) {
         String[] w = words(prompt == null ? "" : prompt);
         List<Integer> said = clothesColors(w);
         String emblem = "";
@@ -1268,10 +1402,25 @@ final class SkinGenerator {
             if (i > 0 && said.isEmpty()) {
                 main = 0xFF000000 | Color.HUE[(rnd.nextInt(Color.HUE.length) + i) % Color.HUE.length];
             }
+            if (o != null && o.clothes != 0) {
+                main = o.clothes;
+            }
             // a second colour that goes with the first: a deeper or a lighter shade of it (or the one that was said)
             int second = said.size() > 1 ? said.get(1) : i % 2 == 0 ? shade(main, 0.55f) : mix(main, 0xFFFFFFFF, 0.35f);
+            if (o != null && o.second != 0) {
+                second = o.second;
+            }
             String s = !style.isEmpty() ? style : CAPE_STYLES[(i * 3 + rnd.nextInt(CAPE_STYLES.length)) % CAPE_STYLES.length];
+            if (o != null && o.pattern != null) {
+                s = o.pattern;
+            }
             String mark = !emblem.isEmpty() ? emblem : (s.equals("emblem") || s.equals("border")) ? EMBLEM_CHOICES[rnd.nextInt(EMBLEM_CHOICES.length - 1)] : "";
+            if (o != null && o.emblem != null) {
+                mark = o.emblem;
+            } else if (o != null && o.pattern != null && emblem.isEmpty()) {
+                // one pattern for all four: they differ by the picture on them
+                mark = i == 0 ? "" : EMBLEM_CHOICES[(i * 2 + rnd.nextInt(3)) % (EMBLEM_CHOICES.length - 1)];
+            }
             out.add(cape(main, second, s, mark, rnd));
         }
         return out;

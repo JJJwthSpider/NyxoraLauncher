@@ -43,7 +43,6 @@ final class WardrobeScreen {
     private final FlowLayout grid;
     private final ScrollView scroll;
     private final LinearLayout header;  // the generator above the tiles on the skins and capes tabs
-    private long seed = System.currentTimeMillis();
     private final TextView section;
     private final List<View> tabViews = new ArrayList<View>();
     private String tab = SETS;
@@ -619,8 +618,71 @@ final class WardrobeScreen {
     private static final String[] CAPE_IDEAS = { "🌌 Галактика со звёздами", "🔥 Огненный", "❄ Ледяной", "👑 Золотой с короной", "💗 Розовый с сердцем",
                                                  "🌈 Радуга", "🍷 Бордовый Vellora", "🌲 Лесной", "⚡ Синий с молнией", "🖤 Чёрно-красные полосы" };
 
-    /** the generator: a description, ideas, four variants; a tap tries one on, then it can be worn or saved */
+    /** the colours of the buttons: clothes and capes, hair, eyes, skin */
+    private static final int[] CLOTH_COLORS = { 0xFFC62828, 0xFF6E1423, 0xFFEF7C1E, 0xFFE0A526, 0xFFF2C230, 0xFF3E9B47, 0xFF8BD13B, 0xFF23B5B5,
+                                                0xFF5AB4F0, 0xFF2C5BD6, 0xFF7B3FC4, 0xFFEC6FA8, 0xFF1E1E24, 0xFF8A8F98, 0xFFECECEC, 0xFF6B4423 };
+    private static final int[] HAIR_COLORS = { 0xFF1E1E24, 0xFF2B1B12, 0xFF6B4423, 0xFFD9632B, 0xFFE8CF7A, 0xFFE6E6E6, 0xFFEC6FA8, 0xFF5AB4F0,
+                                               0xFF3E9B47, 0xFF7B3FC4, 0xFFC62828 };
+    private static final int[] EYE_COLORS = { 0xFF3B6FD6, 0xFF2E8B57, 0xFF6B4423, 0xFF1E1E24, 0xFF4FA3E0, 0xFFE53935, 0xFFFFD34A, 0xFFB04CFF };
+    private static final int[] SKIN_COLORS = { 0xFFFFDBB8, 0xFFF2C7A5, 0xFFE8B48C, 0xFFD39A6A, 0xFFB57A4A, 0xFF8D5524, 0xFFE9E4E0, 0xFF5E9E52,
+                                               0xFFB3262F, 0xFF5A8FD6 };
+    private static final String[][] HAIR_STYLES = { { "short", "Короткая" }, { "long", "Длинная" }, { "spiky", "Ёжик" }, { "bun", "Пучок" },
+                                                    { "mohawk", "Ирокез" }, { "bald", "Лысый" } };
+    private static final String[][] PATTERNS = { { "gradient", "Градиент" }, { "stripes", "Полосы" }, { "checker", "Клетка" }, { "diagonal", "Диагональ" },
+                                                 { "border", "Рамка" }, { "galaxy", "Галактика" }, { "flames", "Пламя" }, { "ice", "Лёд" },
+                                                 { "leaves", "Листва" }, { "rainbow", "Радуга" } };
+
+    /** what was chosen and made, kept while the wardrobe is open: a return to the tab shows it again */
+    private static final class GenState {
+        final SkinGenerator.Options options = new SkinGenerator.Options();
+        String prompt = "";
+        List<Object> results;  // skins or capes
+        int selected;
+        long seed = System.nanoTime();
+        int run;               // the newest request; older answers are dropped
+        boolean madeOnce;
+    }
+
+    private final GenState skinGen = new GenState(), capeGen = new GenState();
+    private final android.os.Handler typing = new android.os.Handler(android.os.Looper.getMainLooper());
+
+    private android.content.SharedPreferences genPrefs() {
+        return activity.getSharedPreferences("generator", android.content.Context.MODE_PRIVATE);
+    }
+
+    /** the last descriptions asked for (newest first), shown before the ideas */
+    private List<String> history(boolean capes) {
+        List<String> out = new ArrayList<String>();
+        for (String line : genPrefs().getString(capes ? "capes" : "skins", "").split("\n")) {
+            if (!line.trim().isEmpty()) {
+                out.add(line.trim());
+            }
+        }
+        return out;
+    }
+
+    private void remember(boolean capes, String prompt) {
+        prompt = prompt.trim();
+        if (prompt.isEmpty()) {
+            return;
+        }
+        List<String> list = history(capes);
+        list.remove(prompt);
+        list.add(0, prompt);
+        while (list.size() > 6) {
+            list.remove(list.size() - 1);
+        }
+        genPrefs().edit().putString(capes ? "capes" : "skins", android.text.TextUtils.join("\n", list)).apply();
+    }
+
+    /**
+     * Arkan's generator: a description (it draws while it is typed, Enter or "Создать" for new variants), ideas and the
+     * last descriptions in one row (a tap draws at once), 🎲 for a surprise, and the buttons for colours and details,
+     * which repaint the same four variants. The first variant is tried on the big player at once; a tap tries another;
+     * "↻ Ещё" gives four new ones.
+     */
     private View generator(final boolean capes) {
+        final GenState st = capes ? capeGen : skinGen;
         float density = activity.getResources().getDisplayMetrics().density;
         final LinearLayout panel = new LinearLayout(activity);
         panel.setOrientation(LinearLayout.VERTICAL);
@@ -634,7 +696,8 @@ final class WardrobeScreen {
         titles.setOrientation(LinearLayout.VERTICAL);
         titles.setPadding(dp(8), 0, 0, 0);
         titles.addView(Ui.label(activity, capes ? "ИИ-генератор плащей" : "ИИ-генератор скинов", 15, Ui.TEXT, true));
-        titles.addView(Ui.label(activity, capes ? "Опиши плащ — Аркан нарисует 4 варианта" : "Опиши персонажа — Аркан нарисует 4 скина", 11, Ui.HINT, false));
+        titles.addView(Ui.label(activity, capes ? "Опиши плащ или собери его кнопками — Аркан рисует сразу"
+                                                : "Опиши персонажа или собери его кнопками — Аркан рисует сразу", 11, Ui.HINT, false));
         titleRow.addView(titles, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         panel.addView(titleRow);
 
@@ -647,33 +710,30 @@ final class WardrobeScreen {
         prompt.setTextColor(Ui.TEXT);
         prompt.setTextSize(13);
         prompt.setSingleLine(true);
+        prompt.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_GO);
         prompt.setBackground(Ui.rounded(activity, 0xFF0E0407, 0, 0xFF5A1E2A));
         prompt.setPadding(dp(10), dp(7), dp(10), dp(7));
+        prompt.setText(st.prompt);
         inputRow.addView(prompt, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button dice = Ui.button(activity, "🎲", false);
+        dice.setTextSize(15);
+        dice.setContentDescription("Случайный");
+        LinearLayout.LayoutParams dp6 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dp6.leftMargin = dp(6);
+        inputRow.addView(dice, dp6);
         Button go = Ui.button(activity, "🔮 Создать", true);
         go.setTextSize(13);
-        LinearLayout.LayoutParams gp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        gp.leftMargin = dp(6);
-        inputRow.addView(go, gp);
+        inputRow.addView(go, new LinearLayout.LayoutParams(dp6));
         panel.addView(inputRow);
 
-        FlowLayout ideas = new FlowLayout(activity, dp(5));
-        for (final String idea : capes ? CAPE_IDEAS : SKIN_IDEAS) {
-            Button b = Ui.button(activity, idea, false);
-            b.setTextSize(11);
-            b.setMinHeight(dp(30));
-            b.setMinimumHeight(dp(30));
-            b.setPadding(dp(8), dp(3), dp(8), dp(6));
-            b.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    prompt.setText(idea.substring(idea.indexOf(' ') + 1));
-                    Sounds.play(Sounds.CLICK);
-                }
-            });
-            ideas.addView(b);
-        }
-        panel.addView(ideas);
+        // ideas and the last descriptions, one row that scrolls
+        HorizontalScrollView ideasScroll = new HorizontalScrollView(activity);
+        ideasScroll.setHorizontalScrollBarEnabled(false);
+        LinearLayout ideas = new LinearLayout(activity);
+        ideasScroll.addView(ideas);
+        panel.addView(ideasScroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
+        // the variants right under the description: they are seen at once
         final FlowLayout variants = new FlowLayout(activity, dp(8));
         variants.setPadding(0, dp(10), 0, 0);
         panel.addView(variants);
@@ -682,60 +742,302 @@ final class WardrobeScreen {
         actions.setVisibility(View.GONE);
         panel.addView(actions);
 
-        go.setOnClickListener(new View.OnClickListener() {
+        // the buttons for colours and details, which can be folded away
+        final LinearLayout custom = new LinearLayout(activity);
+        custom.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout customBar = new LinearLayout(activity);
+        customBar.setGravity(Gravity.CENTER_VERTICAL);
+        customBar.setPadding(0, dp(8), 0, dp(2));
+        final Button fold = Ui.button(activity, "", false);
+        fold.setTextSize(11);
+        customBar.addView(fold);
+        customBar.addView(new View(activity), new LinearLayout.LayoutParams(0, 1, 1));
+        final Button reset = Ui.button(activity, "Сбросить", false);
+        reset.setTextSize(11);
+        customBar.addView(reset);
+        panel.addView(customBar);
+        panel.addView(custom);
+        boolean open = genPrefs().getBoolean("custom_open", true);
+        custom.setVisibility(open ? View.VISIBLE : View.GONE);
+        fold.setText(open ? "🎨 Цвета и детали ▴" : "🎨 Цвета и детали ▾");
+        fold.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                final String text = prompt.getText().toString().trim();
-                seed++;
-                Sounds.play(Sounds.OPEN);
-                android.view.inputmethod.InputMethodManager keyboard =
-                    (android.view.inputmethod.InputMethodManager) activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
-                if (keyboard != null) {
-                    keyboard.hideSoftInputFromWindow(prompt.getWindowToken(), 0);
-                }
-                final long mySeed = seed;
-                activity.background(new MainActivity.Job<Object>() {
-                    public Object run() {
-                        return capes ? SkinGenerator.capes(text, 4, mySeed) : SkinGenerator.skins(text, 4, mySeed);
-                    }
-
-                    @SuppressWarnings("unchecked")
-                    public void done(Object result, Exception error) {
-                        if (error != null || result == null) {
-                            Toast.makeText(activity, "Не получилось: " + (error == null ? "" : error.getMessage()), Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        variants.removeAllViews();
-                        actions.setVisibility(View.GONE);
-                        if (capes) {
-                            for (Bitmap cape : (List<Bitmap>) result) {
-                                variants.addView(capeVariant(cape, actions));
-                            }
-                        } else {
-                            for (SkinGenerator.Skin skin : (List<SkinGenerator.Skin>) result) {
-                                variants.addView(skinVariant(skin, actions));
-                            }
-                        }
-                        for (int i = 0; i < variants.getChildCount(); i++) {
-                            View tile = variants.getChildAt(i);
-                            tile.setAlpha(0f);
-                            tile.setScaleX(0.85f);
-                            tile.setScaleY(0.85f);
-                            tile.animate().alpha(1f).scaleX(1f).scaleY(1f).setStartDelay(i * 70L).setDuration(220).start();
-                        }
-                    }
-                });
+                boolean now = custom.getVisibility() != View.VISIBLE;
+                custom.setVisibility(now ? View.VISIBLE : View.GONE);
+                fold.setText(now ? "🎨 Цвета и детали ▴" : "🎨 Цвета и детали ▾");
+                genPrefs().edit().putBoolean("custom_open", now).apply();
+                Sounds.play(Sounds.CLICK);
             }
         });
+
+
+        // drawing: the same seed repaints, a new one gives new variants
+        final Runnable[] draw = new Runnable[2];  // [0] repaint, [1] new variants
+        final Runnable[] fillCustom = new Runnable[1];
+        draw[0] = new Runnable() {
+            public void run() {
+                generate(capes, st, prompt.getText().toString(), variants, actions, false);
+            }
+        };
+        draw[1] = new Runnable() {
+            public void run() {
+                generate(capes, st, prompt.getText().toString(), variants, actions, true);
+            }
+        };
+        fillCustom[0] = new Runnable() {
+            public void run() {
+                custom.removeAllViews();
+                SkinGenerator.Options o = st.options;
+                if (capes) {
+                    custom.addView(colorRow("Цвет", CLOTH_COLORS, o.clothes, 0, st, draw[0], fillCustom[0]));
+                    custom.addView(colorRow("Второй", CLOTH_COLORS, o.second, 1, st, draw[0], fillCustom[0]));
+                    custom.addView(textRow("Узор", PATTERNS, o.pattern, 0, st, draw[0], fillCustom[0]));
+                } else {
+                    custom.addView(textRow("Кто", new String[][] { { "1", "Парень" }, { "2", "Девушка" } }, o.gender == 0 ? null : String.valueOf(o.gender), 1,
+                                           st, draw[0], fillCustom[0]));
+                    custom.addView(colorRow("Одежда", CLOTH_COLORS, o.clothes, 0, st, draw[0], fillCustom[0]));
+                    custom.addView(colorRow("Волосы", HAIR_COLORS, o.hair, 2, st, draw[0], fillCustom[0]));
+                    custom.addView(textRow("Причёска", HAIR_STYLES, o.hairStyle, 2, st, draw[0], fillCustom[0]));
+                    custom.addView(colorRow("Глаза", EYE_COLORS, o.eyes, 3, st, draw[0], fillCustom[0]));
+                    custom.addView(colorRow("Кожа", SKIN_COLORS, o.skin, 4, st, draw[0], fillCustom[0]));
+                }
+                custom.addView(emblemRow(o.emblem, st, draw[0], fillCustom[0]));
+            }
+        };
+        fillCustom[0].run();
+        reset.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                SkinGenerator.Options o = st.options;
+                o.clothes = o.hair = o.eyes = o.skin = o.gender = o.second = 0;
+                o.emblem = o.hairStyle = o.pattern = null;
+                fillCustom[0].run();
+                Sounds.play(Sounds.CLICK);
+                if (st.madeOnce) {
+                    draw[0].run();
+                }
+            }
+        });
+
+        final Runnable fillIdeas = new Runnable() {
+            public void run() {
+                ideas.removeAllViews();
+                List<String> all = new ArrayList<String>();
+                List<String> said = history(capes);
+                for (String h : said) {
+                    all.add("🕘 " + h);
+                }
+                for (String idea : capes ? CAPE_IDEAS : SKIN_IDEAS) {
+                    if (!said.contains(idea.substring(idea.indexOf(' ') + 1))) {
+                        all.add(idea);  // an idea already in the history is not shown twice
+                    }
+                }
+                for (final String idea : all) {
+                    Button b = Ui.button(activity, idea, false);
+                    b.setTextSize(11);
+                    b.setMinHeight(dp(30));
+                    b.setMinimumHeight(dp(30));
+                    b.setPadding(dp(8), dp(3), dp(8), dp(6));
+                    b.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            typing.removeCallbacksAndMessages(null);
+                            String text = idea.substring(idea.indexOf(' ') + 1);
+                            st.prompt = text;
+                            prompt.setText(text);
+                            prompt.setSelection(text.length());
+                            Sounds.play(Sounds.OPEN);
+                            draw[1].run();
+                        }
+                    });
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    lp.rightMargin = dp(5);
+                    ideas.addView(b, lp);
+                }
+            }
+        };
+        fillIdeas.run();
+
+        final Runnable now = new Runnable() {
+            public void run() {
+                typing.removeCallbacksAndMessages(null);
+                hideKeyboard(prompt);
+                remember(capes, prompt.getText().toString());
+                fillIdeas.run();
+                Sounds.play(Sounds.OPEN);
+                draw[1].run();
+            }
+        };
+        go.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                now.run();
+            }
+        });
+        prompt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView v, int actionId, android.view.KeyEvent event) {
+                now.run();
+                return true;
+            }
+        });
+        dice.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String text = SkinGenerator.surprise(new java.util.Random(), capes);
+                typing.removeCallbacksAndMessages(null);
+                prompt.setText(text);
+                prompt.setSelection(text.length());
+                now.run();
+            }
+        });
+        // it draws while it is typed: a pause of a moment after the last letter
+        prompt.addTextChangedListener(new android.text.TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            public void afterTextChanged(android.text.Editable s) {
+                final String text = s.toString().trim();
+                if (text.equals(st.prompt.trim())) {
+                    return;
+                }
+                st.prompt = s.toString();
+                typing.removeCallbacksAndMessages(null);
+                if (text.length() >= 3) {
+                    typing.postDelayed(draw[0], 650);
+                }
+            }
+        });
+
+        if (st.results != null) {
+            showVariants(capes, st, variants, actions, false);  // back on the tab: what was made is still there
+        } else {
+            TextView hint = Ui.label(activity, "Напиши, кого нарисовать, нажми идею или 🎲 — варианты появятся здесь", 11, Ui.HINT, false);
+            variants.addView(hint);
+        }
         return panel;
     }
 
-    private View skinVariant(final SkinGenerator.Skin skin, final LinearLayout actions) {
+    private void hideKeyboard(View view) {
+        android.view.inputmethod.InputMethodManager keyboard =
+            (android.view.inputmethod.InputMethodManager) activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (keyboard != null) {
+            keyboard.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    /** draws four variants in the background; `fresh` takes a new seed (new variants), otherwise the same ones are repainted */
+    private void generate(final boolean capes, final GenState st, final String text, final FlowLayout variants, final LinearLayout actions,
+                          final boolean fresh) {
+        if (fresh) {
+            st.seed++;
+            st.selected = 0;
+        }
+        st.prompt = text;
+        final int run = ++st.run;
+        final long mySeed = st.seed;
+        final SkinGenerator.Options o = copy(st.options);
+        activity.background(new MainActivity.Job<List<Object>>() {
+            public List<Object> run() {
+                List<Object> out = new ArrayList<Object>();
+                if (capes) {
+                    out.addAll(SkinGenerator.capes(text, 4, mySeed, o));
+                } else {
+                    out.addAll(SkinGenerator.skins(text, 4, mySeed, o));
+                }
+                return out;
+            }
+
+            public void done(List<Object> result, Exception error) {
+                if (run != st.run) {
+                    return;  // a newer request is on its way
+                }
+                if (error != null || result == null) {
+                    Toast.makeText(activity, "Не получилось: " + (error == null ? "" : error.getMessage()), Toast.LENGTH_LONG).show();
+                    return;
+                }
+                st.results = result;
+                st.madeOnce = true;
+                showVariants(capes, st, variants, actions, fresh);
+            }
+        });
+    }
+
+    private static SkinGenerator.Options copy(SkinGenerator.Options o) {
+        SkinGenerator.Options c = new SkinGenerator.Options();
+        c.clothes = o.clothes;
+        c.hair = o.hair;
+        c.eyes = o.eyes;
+        c.skin = o.skin;
+        c.gender = o.gender;
+        c.emblem = o.emblem;
+        c.hairStyle = o.hairStyle;
+        c.second = o.second;
+        c.pattern = o.pattern;
+        return c;
+    }
+
+    /** the variants as tiles, the chosen one tried on the big player; "↻ Ещё" at the end */
+    private void showVariants(final boolean capes, final GenState st, final FlowLayout variants, final LinearLayout actions, boolean animate) {
+        variants.removeAllViews();
+        for (int i = 0; i < st.results.size(); i++) {
+            Object r = st.results.get(i);
+            View tile = capes ? capeVariant((Bitmap) r, i, st, variants, actions) : skinVariant((SkinGenerator.Skin) r, i, st, variants, actions);
+            variants.addView(tile);
+            if (animate) {
+                tile.setAlpha(0f);
+                tile.setScaleX(0.85f);
+                tile.setScaleY(0.85f);
+                tile.animate().alpha(1f).scaleX(1f).scaleY(1f).setStartDelay(i * 70L).setDuration(220).start();
+            }
+        }
         float density = activity.getResources().getDisplayMetrics().density;
+        LinearLayout more = new LinearLayout(activity);
+        more.setOrientation(LinearLayout.VERTICAL);
+        more.setGravity(Gravity.CENTER);
+        more.setBackground(PixelDrawable.panel(0xFF1C080D, 0xFF5A1E2A, density));
+        TextView arrow = Ui.label(activity, "↻", 26, Ui.TEXT, false);
+        arrow.setGravity(Gravity.CENTER);
+        more.addView(arrow);
+        TextView label = Ui.label(activity, "Ещё", 11, Ui.HINT, true);
+        label.setGravity(Gravity.CENTER);
+        more.addView(label);
+        more.setClickable(true);
+        more.setContentDescription("Ещё варианты");
+        more.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Sounds.play(Sounds.OPEN);
+                generate(capes, st, st.prompt, variants, actions, true);
+            }
+        });
+        more.setLayoutParams(new ViewGroup.LayoutParams(dp(capes ? 64 : 72), capes ? dp(128) : dp(152)));
+        variants.addView(more);
+        select(capes, st, variants, actions, Math.min(st.selected, st.results.size() - 1));
+    }
+
+    /** tries the variant on the big player and marks its tile */
+    private void select(boolean capes, GenState st, FlowLayout variants, LinearLayout actions, int index) {
+        st.selected = index;
+        float density = activity.getResources().getDisplayMetrics().density;
+        for (int i = 0; i < st.results.size() && i < variants.getChildCount(); i++) {
+            variants.getChildAt(i).setBackground(PixelDrawable.panel(i == index ? 0xFF3A1019 : 0xFF1C080D, i == index ? 0xFFFF5A6E : 0xFF8A3442, density));
+        }
+        Object r = st.results.get(index);
+        if (capes) {
+            Bitmap cape = (Bitmap) r;
+            character.setCape(cape);
+            character.setBack(true);
+            showCapeActions(actions, cape);
+        } else {
+            SkinGenerator.Skin skin = (SkinGenerator.Skin) r;
+            character.setSlim(skin.slim);
+            character.setSkin(skin.bitmap);
+            character.setBack(false);
+            showSkinActions(actions, skin);
+        }
+    }
+
+    private View skinVariant(final SkinGenerator.Skin skin, final int index, final GenState st, final FlowLayout variants, final LinearLayout actions) {
         LinearLayout tile = new LinearLayout(activity);
         tile.setOrientation(LinearLayout.VERTICAL);
         tile.setGravity(Gravity.CENTER_HORIZONTAL);
         tile.setPadding(dp(4), dp(4), dp(4), dp(6));
-        tile.setBackground(PixelDrawable.panel(0xFF1C080D, 0xFF8A3442, density));
         CharacterView picture = new CharacterView(activity);
         picture.setTurnable(false);
         picture.setAnimated(false);
@@ -750,16 +1052,221 @@ final class WardrobeScreen {
         tile.setClickable(true);
         tile.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                // try it on the big player
-                character.setSlim(skin.slim);
-                character.setSkin(skin.bitmap);
-                character.setBack(false);
+                select(false, st, variants, actions, index);
                 pop(true);
-                showSkinActions(actions, skin);
             }
         });
         tile.setLayoutParams(new ViewGroup.LayoutParams(dp(104), ViewGroup.LayoutParams.WRAP_CONTENT));
         return tile;
+    }
+
+    private View capeVariant(final Bitmap cape, final int index, final GenState st, final FlowLayout variants, final LinearLayout actions) {
+        LinearLayout tile = new LinearLayout(activity);
+        tile.setOrientation(LinearLayout.VERTICAL);
+        tile.setGravity(Gravity.CENTER_HORIZONTAL);
+        tile.setPadding(dp(4), dp(6), dp(4), dp(6));
+        tile.addView(new CapePicture(activity, cape), new LinearLayout.LayoutParams(dp(70), dp(100)));
+        tile.setClickable(true);
+        tile.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                select(true, st, variants, actions, index);
+                pop(true);
+            }
+        });
+        tile.setLayoutParams(new ViewGroup.LayoutParams(dp(82), ViewGroup.LayoutParams.WRAP_CONTENT));
+        return tile;
+    }
+
+    /* the rows of buttons for colours and details */
+
+    /** the tapped button of a row is the chosen one now (in place: the row keeps where it was scrolled to) */
+    private void mark(View tapped) {
+        ViewGroup row = (ViewGroup) tapped.getParent();
+        for (int i = 0; i < row.getChildCount(); i++) {
+            View c = row.getChildAt(i);
+            if (c instanceof Chip) {
+                ((Chip) c).selected = c == tapped;
+                c.invalidate();
+            } else if (c instanceof Button) {
+                int l = c.getPaddingLeft(), t = c.getPaddingTop(), r = c.getPaddingRight(), b = c.getPaddingBottom();
+                Ui.styleButton(activity, (Button) c, c == tapped);
+                c.setPadding(l, t, r, b);  // the small buttons keep their size
+            }
+        }
+    }
+
+    private LinearLayout optionRow(String title) {
+        LinearLayout row = new LinearLayout(activity);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(0, dp(3), 0, dp(3));
+        TextView label = Ui.label(activity, title, 11, Ui.HINT, false);
+        row.addView(label, new LinearLayout.LayoutParams(dp(68), ViewGroup.LayoutParams.WRAP_CONTENT));
+        return row;
+    }
+
+    private LinearLayout chipsIn(LinearLayout row) {
+        HorizontalScrollView scroll = new HorizontalScrollView(activity);
+        scroll.setHorizontalScrollBarEnabled(false);
+        LinearLayout chips = new LinearLayout(activity);
+        chips.setGravity(Gravity.CENTER_VERTICAL);
+        scroll.addView(chips);
+        row.addView(scroll, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        return chips;
+    }
+
+    private LinearLayout.LayoutParams chipParams() {
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(30), dp(30));
+        lp.rightMargin = dp(5);
+        return lp;
+    }
+
+    /** which: 0 clothes (or a cape's colour), 1 a cape's second colour, 2 hair, 3 eyes, 4 skin */
+    private View colorRow(String title, int[] colors, int chosen, final int which, final GenState st, final Runnable draw, final Runnable refill) {
+        LinearLayout row = optionRow(title);
+        LinearLayout chips = chipsIn(row);
+        int[] all = new int[colors.length + 1];
+        System.arraycopy(colors, 0, all, 1, colors.length);
+        for (final int c : all) {
+            Chip chip = new Chip(activity);
+            chip.color = c;
+            chip.auto = c == 0;
+            chip.selected = c == chosen;
+            chip.setContentDescription(c == 0 ? title + ": авто" : title + ": " + String.format("#%06X", c & 0xFFFFFF));
+            chip.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    SkinGenerator.Options o = st.options;
+                    switch (which) {
+                    case 0: o.clothes = c; break;
+                    case 1: o.second = c; break;
+                    case 2: o.hair = c; break;
+                    case 3: o.eyes = c; break;
+                    default: o.skin = c; break;
+                    }
+                    Sounds.play(Sounds.CLICK);
+                    mark(v);
+                    draw.run();
+                }
+            });
+            chips.addView(chip, chipParams());
+        }
+        return row;
+    }
+
+    /** which: 0 a cape's pattern, 1 boy or girl, 2 the hair style */
+    private View textRow(String title, String[][] choices, String chosen, final int which, final GenState st, final Runnable draw, final Runnable refill) {
+        LinearLayout row = optionRow(title);
+        LinearLayout chips = chipsIn(row);
+        String[][] all = new String[choices.length + 1][];
+        all[0] = new String[] { null, "Авто" };
+        System.arraycopy(choices, 0, all, 1, choices.length);
+        for (final String[] choice : all) {
+            boolean on = choice[0] == null ? chosen == null : choice[0].equals(chosen);
+            Button b = Ui.button(activity, choice[1], on);
+            b.setTextSize(10);
+            b.setMinHeight(dp(28));
+            b.setMinimumHeight(dp(28));
+            b.setPadding(dp(8), dp(2), dp(8), dp(5));
+            b.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    SkinGenerator.Options o = st.options;
+                    if (which == 0) {
+                        o.pattern = choice[0];
+                    } else if (which == 1) {
+                        o.gender = choice[0] == null ? 0 : Integer.parseInt(choice[0]);
+                    } else {
+                        o.hairStyle = choice[0];
+                    }
+                    Sounds.play(Sounds.CLICK);
+                    mark(v);
+                    draw.run();
+                }
+            });
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.rightMargin = dp(5);
+            chips.addView(b, lp);
+        }
+        return row;
+    }
+
+    private View emblemRow(String chosen, final GenState st, final Runnable draw, final Runnable refill) {
+        LinearLayout row = optionRow("Эмблема");
+        LinearLayout chips = chipsIn(row);
+        List<String> all = new ArrayList<String>();
+        all.add(null);
+        all.add("");
+        for (String id : SkinGenerator.EMBLEM_IDS) {
+            all.add(id);
+        }
+        for (final String id : all) {
+            Chip chip = new Chip(activity);
+            chip.auto = id == null;
+            chip.none = id != null && id.isEmpty();
+            chip.rows = id == null || id.isEmpty() ? null : SkinGenerator.emblemRows(id);
+            chip.selected = id == null ? chosen == null : id.equals(chosen);
+            chip.setContentDescription(id == null ? "Эмблема: авто" : id.isEmpty() ? "Без эмблемы" : "Эмблема " + id);
+            chip.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    st.options.emblem = id;
+                    Sounds.play(Sounds.CLICK);
+                    mark(v);
+                    draw.run();
+                }
+            });
+            chips.addView(chip, chipParams());
+        }
+        return row;
+    }
+
+    /** a square button of the generator: a colour, an emblem, "auto" (✦) or "none" (a crossed square) */
+    static final class Chip extends View {
+        int color;
+        String[] rows;
+        boolean auto, none, selected;
+        private final Paint paint = new Paint();
+
+        Chip(Context context) {
+            super(context);
+            setClickable(true);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            float w = getWidth(), h = getHeight(), d = getResources().getDisplayMetrics().density;
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(selected ? 0xFFFF5A6E : 0xFF5A1E2A);
+            canvas.drawRect(0, 0, w, h, paint);
+            float in = selected ? 3 * d : 1.5f * d;
+            paint.setColor(0xFF120508);
+            canvas.drawRect(in, in, w - in, h - in, paint);
+            float pad = in + 2 * d;
+            if (color != 0) {
+                paint.setColor(color);
+                canvas.drawRect(pad, pad, w - pad, h - pad, paint);
+                paint.setColor(0x33FFFFFF);
+                canvas.drawRect(pad, pad, w - pad, pad + 2 * d, paint);  // a little light on top, like a block
+            } else if (rows != null) {
+                float cell = Math.min(w - 2 * pad, h - 2 * pad) / 5f;
+                float ox = (w - 5 * cell) / 2, oy = (h - 5 * cell) / 2;
+                paint.setColor(0xFFFBEFF1);
+                for (int y = 0; y < 5; y++) {
+                    for (int x = 0; x < 5; x++) {
+                        if (rows[y].charAt(x) == '#') {
+                            canvas.drawRect(ox + x * cell, oy + y * cell, ox + (x + 1) * cell, oy + (y + 1) * cell, paint);
+                        }
+                    }
+                }
+            } else if (none) {
+                paint.setColor(0xFF8A3442);
+                paint.setStrokeWidth(2 * d);
+                canvas.drawLine(pad, h - pad, w - pad, pad, paint);
+            } else if (auto) {
+                paint.setColor(0xFFFBEFF1);
+                paint.setTextAlign(Paint.Align.CENTER);
+                paint.setTextSize(h * 0.42f);
+                Paint.FontMetrics fm = paint.getFontMetrics();
+                canvas.drawText("A", w / 2, h / 2 - (fm.ascent + fm.descent) / 2, paint);
+            }
+        }
     }
 
     private void showSkinActions(LinearLayout actions, final SkinGenerator.Skin skin) {
@@ -822,27 +1329,6 @@ final class WardrobeScreen {
                 activity.accountChanged();
             }
         });
-    }
-
-    private View capeVariant(final Bitmap cape, final LinearLayout actions) {
-        float density = activity.getResources().getDisplayMetrics().density;
-        LinearLayout tile = new LinearLayout(activity);
-        tile.setOrientation(LinearLayout.VERTICAL);
-        tile.setGravity(Gravity.CENTER_HORIZONTAL);
-        tile.setPadding(dp(4), dp(6), dp(4), dp(6));
-        tile.setBackground(PixelDrawable.panel(0xFF1C080D, 0xFF8A3442, density));
-        tile.addView(new CapePicture(activity, cape), new LinearLayout.LayoutParams(dp(70), dp(100)));
-        tile.setClickable(true);
-        tile.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                character.setCape(cape);
-                character.setBack(true);
-                pop(true);
-                showCapeActions(actions, cape);
-            }
-        });
-        tile.setLayoutParams(new ViewGroup.LayoutParams(dp(82), ViewGroup.LayoutParams.WRAP_CONTENT));
-        return tile;
     }
 
     private void showCapeActions(LinearLayout actions, final Bitmap cape) {
