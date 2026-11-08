@@ -3092,9 +3092,13 @@ Are you sure?</source>
         <source>Interface sounds</source>
         <translation>Звуки интерфейса</translation>
     </message>
-    <message>
-        <source>56 items — all open</source>
-        <translation>56 вещей — всё открыто</translation>
+    <message numerus="yes">
+        <source>%n item(s) — all open</source>
+        <translation>
+            <numerusform>%n вещь — всё открыто</numerusform>
+            <numerusform>%n вещи — всё открыто</numerusform>
+            <numerusform>%n вещей — всё открыто</numerusform>
+        </translation>
     </message>
     <message>
         <source>Upload your own</source>

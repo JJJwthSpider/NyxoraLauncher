@@ -29,6 +29,8 @@ def item(id, slot, ru, en, rarity, layers=None, particles=None):
     d = {"id": id, "slot": slot, "title": ru, "titleEn": en, "rarity": rarity, "layers": layers or []}
     if particles:
         d["particles"] = particles
+    # the wardrobe finds an item by its id alone: two items with one id would hide one of them
+    assert all(other["id"] != id for other in ITEMS), "two items are called " + id
     ITEMS.append(d)
 
 
@@ -333,7 +335,7 @@ blade("crimson_blade", "Багровый клинок", "Crimson blade", "legend
 item("pickaxe", "hand", "Кирка", "Pickaxe", "common",
      [L(-3, 9, [".aaaa..", "a...ba.", "...b..a", "..b....", ".b.....", "b......"], {"a": "#5CE0D0", "b": "#8A5A2E"})])
 item("axe", "hand", "Топор", "Axe", "common", [L(-2, 9, ["..aa.", ".aaab", "..a.b", "...b.", "..b..", ".b..."], {"a": "#C9D4DE", "b": "#8A5A2E"})])
-item("bow", "hand", "Лук", "Bow", "rare", [L(-2, 8, ["..aa", ".a.b", "a..b", "a..b", "a..b", ".a.b", "..aa"], {"a": "#8A5A2E", "b": WHITE})])
+item("longbow", "hand", "Лук", "Bow", "rare", [L(-2, 8, ["..aa", ".a.b", "a..b", "a..b", "a..b", ".a.b", "..aa"], {"a": "#8A5A2E", "b": WHITE})])
 item("trident", "hand", "Трезубец", "Trident", "legendary",
      [L(-3, 5, ["a.a.a", "aaaaa", "..a..", "..b..", "..b..", "..b..", "..b..", "..b..", "..b..", "..b.."], {"a": "#5CE0D0", "b": "#2E8B84"})])
 item("torch", "hand", "Факел", "Torch", "common", [L(0, 12, [".a.", "aba", ".c.", ".c.", ".c.", ".c."], {"a": "#FF8A3C", "b": "#FFE08A", "c": "#8A5A2E"}, "front", "bob")])
@@ -406,7 +408,7 @@ OUTFITS = [
     {"title": "Феникс", "titleEn": "Phoenix", "head": "crimson_halo", "back": "phoenix_wings", "body": "tesseract_amulet", "pet": "phoenix_pet", "effect": "embers", "hand": "magic_staff"},
     {"title": "Снежная королева", "titleEn": "Snow queen", "head": "ice_crown", "back": "ice_wings", "body": "pearl_necklace", "pet": "penguin_pet", "effect": "snow", "hand": "magic_wand"},
     {"title": "Рыцарь", "titleEn": "Knight", "head": "knight_helmet", "back": "royal_cape", "body": "gold_armor", "pet": "wolf_pet", "effect": "", "hand": "diamond_sword"},
-    {"title": "Лесной охотник", "titleEn": "Forest hunter", "head": "antlers", "back": "quiver", "body": "vest", "pet": "owl_pet", "effect": "fireflies", "hand": "bow"},
+    {"title": "Лесной охотник", "titleEn": "Forest hunter", "head": "antlers", "back": "quiver", "body": "vest", "pet": "owl_pet", "effect": "fireflies", "hand": "longbow"},
     {"title": "Рок-звезда", "titleEn": "Rock star", "head": "star_glasses", "back": "guitar_back", "body": "thick_chain", "pet": "drone_pet", "effect": "music_notes", "hand": ""},
     {"title": "Хэллоуин", "titleEn": "Halloween", "head": "pumpkin_head", "back": "bat_wings", "body": "bell_collar", "pet": "ghost_pet", "effect": "embers", "hand": "lantern"},
     {"title": "Праздник", "titleEn": "Party", "head": "party_hat", "back": "", "body": "flower_lei", "pet": "bunny_pet", "effect": "confetti", "hand": "heart_balloon"},

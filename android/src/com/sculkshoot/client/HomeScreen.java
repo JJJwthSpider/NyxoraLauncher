@@ -38,6 +38,13 @@ import java.util.Locale;
 final class HomeScreen {
     static final int LOBBY = 0, LIBRARY = 1, CREATE = 2;
 
+    /** "201 вещь", "56 вещей", "3 вещи" */
+    static String things(int n) {
+        int last = n % 10, two = n % 100;
+        String word = last == 1 && two != 11 ? "вещь" : last >= 2 && last <= 4 && (two < 12 || two > 14) ? "вещи" : "вещей";
+        return n + " " + word;
+    }
+
     private final MainActivity activity;
     private final LinearLayout root;
     private LinearLayout accountChip;
@@ -146,7 +153,7 @@ final class HomeScreen {
         tiles.setOrientation(LinearLayout.VERTICAL);
         tiles.setClipChildren(false);
         WardrobeScreen.ItemPicture outfit = new WardrobeScreen.ItemPicture(activity, "crown", "chain", "demon_wings", "cube_pet");
-        wardrobeTile = new HubTile(activity, 0xFFB3263A, outfit, "Гардероб", "56 вещей — всё открыто");
+        wardrobeTile = new HubTile(activity, 0xFFB3263A, outfit, "Гардероб", things(Cosmetics.items(activity).size()) + " — всё открыто");
         wardrobeTile.setAlert(!activity.getSharedPreferences("lobby", android.content.Context.MODE_PRIVATE).getBoolean("wardrobeSeen", false));
         wardrobeTile.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

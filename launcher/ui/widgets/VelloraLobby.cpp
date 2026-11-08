@@ -297,7 +297,8 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     // left: the tiles of Millida's lobby, in burgundy: the wardrobe, my skin, playing with friends
     auto* tiles = new QVBoxLayout;
     tiles->setSpacing(6);
-    auto* wardrobe = new VelloraHubTile(QColor(0xb3, 0x26, 0x3a), tr("Wardrobe"), tr("56 items — all open"),
+    auto* wardrobe = new VelloraHubTile(QColor(0xb3, 0x26, 0x3a), tr("Wardrobe"),
+                                        tr("%n item(s) — all open", nullptr, int(Cosmetics::items().size())),
                                         [](QPainter& p, const QRectF& r) {
                                             VelloraCharacter::paintItems(p, r, "crown", "chain", "demon_wings", "cube_pet", QString(),
                                                                          QString(), 1.0);

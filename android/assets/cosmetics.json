@@ -4530,7 +4530,7 @@
    ]
   },
   {
-   "id": "bow",
+   "id": "longbow",
    "slot": "hand",
    "title": "Лук",
    "titleEn": "Bow",
@@ -5808,7 +5808,7 @@
    "body": "vest",
    "pet": "owl_pet",
    "effect": "fireflies",
-   "hand": "bow"
+   "hand": "longbow"
   },
   {
    "title": "Рок-звезда",

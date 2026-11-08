@@ -881,6 +881,47 @@ void VelloraCharacter::paintItems(QPainter& painter, const QRectF& target, const
     drawFlatParticles(pen, Cosmetics::find(effect), time);
 }
 
+void VelloraCharacter::paintIcon(QPainter& painter, const QRectF& target, const QString& id, double time)
+{
+    const Cosmetics::Item* item = Cosmetics::find(id);
+    if (!item) {
+        return;
+    }
+    // the side with more pixels, and the box of its layers
+    int pixels[2] = { 0, 0 };
+    for (const auto& layer : item->layers) {
+        for (int side = 0; side < 2; side++) {
+            if (layer.view == "both" || layer.view == (side ? "back" : "front")) {
+                for (const QString& row : layer.rows) {
+                    pixels[side] += int(row.size() - row.count('.'));
+                }
+            }
+        }
+    }
+    const bool behind = pixels[1] > pixels[0];
+    double x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (const auto& layer : item->layers) {
+        if (layer.view != "both" && layer.view != (behind ? "back" : "front")) {
+            continue;
+        }
+        qsizetype width = 0;
+        for (const QString& row : layer.rows) {
+            width = std::max(width, row.size());
+        }
+        x0 = std::min(x0, layer.x);
+        y0 = std::min(y0, layer.y);
+        x1 = std::max(x1, layer.x + double(width));
+        y1 = std::max(y1, layer.y + double(layer.rows.size()));
+    }
+    if (x1 <= x0 || y1 <= y0) {
+        return;
+    }
+    const double u = std::min(target.width() / (x1 - x0 + 1), target.height() / (y1 - y0 + 1));
+    Pen pen{ painter, target.left() + (target.width() - (x1 - x0) * u) / 2 - x0 * u, target.top() + (target.height() - (y1 - y0) * u) / 2 - y0 * u,
+             u };
+    drawFlatItem(pen, item, behind, time);
+}
+
 
 void VelloraCharacter::paintEvent(QPaintEvent*)
 {

@@ -87,6 +87,8 @@ class VelloraCharacter : public QWidget {
     void setCloseUp(bool closeUp);
     /// false: only the skin, without the wardrobe items (the generator's variants)
     void setShowItems(bool show);
+    /// one item alone, as large as it fits, from the side that shows more of it (a sword in the "In hand" tab)
+    static void paintIcon(QPainter& painter, const QRectF& target, const QString& id, double time = 0);
     /// draws a still figure (no skin) with these items into `target`, for the wardrobe tiles
     static void paintItems(QPainter& painter, const QRectF& target, const QString& head, const QString& body, const QString& back,
                            const QString& pet, const QString& emote = QString(), const QString& effect = QString(), double time = 0,

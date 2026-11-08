@@ -63,7 +63,12 @@ class ItemTile : public QAbstractButton {
         p.setPen(QPen(worn ? QColor(0xFF, 0x5A, 0x6E) : (underMouse() ? frame.lighter(130) : frame), 2));
         p.drawRect(r);
         p.fillRect(QRectF(r.left(), r.bottom() - 4, r.width(), 4), worn ? QColor(0x8E, 0x14, 0x28) : QColor(0x12, 0x04, 0x0A));
-        VelloraCharacter::paintItems(p, QRectF(r.left() + 6, r.top() + 6, r.width() - 12, r.height() - 58), head, body, back, pet, emote, effect, 1.3, hand);
+        const QRectF picture(r.left() + 6, r.top() + 6, r.width() - 12, r.height() - 58);
+        if (!hand.isEmpty() && head.isEmpty() && body.isEmpty() && back.isEmpty() && pet.isEmpty() && emote.isEmpty() && effect.isEmpty()) {
+            VelloraCharacter::paintIcon(p, picture.adjusted(14, 4, -14, -4), hand, 1.3);  // a thing in the hand, large
+        } else {
+            VelloraCharacter::paintItems(p, picture, head, body, back, pet, emote, effect, 1.3, hand);
+        }
         p.setPen(QColor(0xFB, 0xEF, 0xF1));
         QFont f = font();
         f.setBold(true);
