@@ -124,6 +124,7 @@
 #include "ui/pages/instance/ModFolderPage.h"
 #include "ui/widgets/LabeledToolButton.h"
 #include "ui/widgets/LaunchPanel.h"
+#include "ui/widgets/VelloraCreatePage.h"
 #include "ui/widgets/VelloraLobby.h"
 #include "ui/dialogs/WardrobeDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
@@ -223,16 +224,19 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         m_lobbyTab = new QPushButton(tr("Lobby"), tabs);
         m_libraryTab = new QPushButton(tr("Library"), tabs);
         auto* catalogTab = new QPushButton(tr("Catalog"), tabs);
-        for (auto* tab : { m_lobbyTab, m_libraryTab }) {
+        m_createTab = new QPushButton(tr("✚ Create"), tabs);
+        for (auto* tab : { m_lobbyTab, m_libraryTab, m_createTab }) {
             tab->setCheckable(true);
             tab->setAutoExclusive(true);
         }
-        connect(m_lobbyTab, &QPushButton::clicked, this, [this] { showLobbyPage(true); });
-        connect(m_libraryTab, &QPushButton::clicked, this, [this] { showLobbyPage(false); });
+        connect(m_lobbyTab, &QPushButton::clicked, this, [this] { showPage(0); });
+        connect(m_libraryTab, &QPushButton::clicked, this, [this] { showPage(1); });
         connect(catalogTab, &QPushButton::clicked, this, [this] { addInstance(QString(), {}, "modrinth"); });
+        connect(m_createTab, &QPushButton::clicked, this, [this] { showPage(2); });
         tabsLayout->addWidget(m_lobbyTab);
         tabsLayout->addWidget(m_libraryTab);
         tabsLayout->addWidget(catalogTab);
+        tabsLayout->addWidget(m_createTab);
         ui->mainToolBar->insertWidget(ui->mainToolBar->actions().value(0), tabs);
 
         auto* lobbyAction = new QAction(QIcon::fromTheme("accounts"), tr("Play with friends"), this);
@@ -365,19 +369,43 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         m_libraryLayout->setSpacing(0);
         m_pages->addWidget(m_lobby);
         m_pages->addWidget(libraryPage);
+        // "Create", like Millida's "Новая сборка" with the ready packs next to it
+        auto* createPage = new VelloraCreatePage(m_pages);
+        m_pages->addWidget(createPage);
+        connect(createPage, &VelloraCreatePage::taskReady, this, [this](InstanceTask* creationTask, bool openMods) {
+            QString createdId;
+            auto connection = connect(APPLICATION->instances(), &InstanceList::instanceSelectRequest, this,
+                                      [&createdId](const QString& id) { createdId = id; });
+            instanceFromInstanceTask(creationTask);
+            disconnect(connection);
+            if (!createdId.isEmpty()) {
+                showPage(1);
+                if (openMods) {
+                    openModBrowser(createdId);
+                }
+            }
+        });
+        connect(createPage, &VelloraCreatePage::agentRequested, this, [this](const QString& text) {
+            QMap<QString, QString> extra;
+            if (!text.isEmpty()) {
+                extra.insert("agent_request", text);
+            }
+            addInstance(QString(), extra, "agent");
+        });
+        connect(createPage, &VelloraCreatePage::catalogRequested, this, [this] { addInstance(QString(), {}, "modrinth"); });
         ui->horizontalLayout->addWidget(m_pages, 1);
         connect(m_lobby, &VelloraLobby::playRequested, this, [this] {
             BaseInstance* instance = lobbyInstance();
             if (!instance) {
-                addInstance(QString(), {}, "quick");
+                showPage(2);
             } else if (!instance->isRunning()) {
                 APPLICATION->launch(instance);
             }
         });
-        connect(m_lobby, &VelloraLobby::chooseRequested, this, [this] { showLobbyPage(false); });
+        connect(m_lobby, &VelloraLobby::chooseRequested, this, [this] { showPage(1); });
         connect(m_lobby, &VelloraLobby::agentRequested, this, [this] { addInstance(QString(), {}, "agent"); });
         connect(m_lobby, &VelloraLobby::packsRequested, this, [this] { addInstance(QString(), {}, "modrinth"); });
-        connect(m_lobby, &VelloraLobby::newInstanceRequested, this, [this] { addInstance(QString(), {}, "quick"); });
+        connect(m_lobby, &VelloraLobby::newInstanceRequested, this, [this] { showPage(2); });
         connect(m_lobby, &VelloraLobby::friendsRequested, this, [this] { openLobby(lobbyInstance()); });
         connect(m_lobby, &VelloraLobby::skinRequested, this, &MainWindow::showProfileMenu);
         connect(m_lobby, &VelloraLobby::wardrobeRequested, this, [this] {
@@ -1113,6 +1141,9 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
 
     NewInstanceDialog newInstDlg(groupName, url, extra_info, this);
     newInstDlg.selectPage(pageId);
+    if (pageId == "agent" && extra_info.contains("agent_request")) {
+        newInstDlg.askAgent(extra_info.value("agent_request"));
+    }
     if (!newInstDlg.exec())
         return;
 
@@ -1223,7 +1254,12 @@ void MainWindow::updateLobby()
 
 void MainWindow::showLobbyPage(bool lobby)
 {
-    const int index = lobby ? 0 : 1;
+    showPage(lobby ? 0 : 1);
+}
+
+void MainWindow::showPage(int index)
+{
+    const bool lobby = index == 0;
     if (m_pages->currentIndex() != index && m_pages->isVisible()) {
         // like Millida's screens: the new page slides in a little and fades up
         QWidget* page = m_pages->widget(index);
@@ -1237,7 +1273,7 @@ void MainWindow::showLobbyPage(bool lobby)
         connect(fade, &QPropertyAnimation::finished, page, [page] { page->setGraphicsEffect(nullptr); });
         auto* slide = new QPropertyAnimation(page, "pos", page);
         slide->setDuration(260);
-        slide->setStartValue(QPoint(lobby ? -36 : 36, 0));
+        slide->setStartValue(QPoint(index < m_pages->currentIndex() ? -36 : 36, 0));
         slide->setEndValue(QPoint(0, 0));
         slide->setEasingCurve(QEasingCurve::OutCubic);
         m_pages->setCurrentIndex(index);
@@ -1246,9 +1282,10 @@ void MainWindow::showLobbyPage(bool lobby)
     } else {
         m_pages->setCurrentIndex(index);
     }
-    m_lobbyTab->setChecked(lobby);
-    m_libraryTab->setChecked(!lobby);
-    ui->instanceToolBar->setVisible(!lobby);
+    m_lobbyTab->setChecked(index == 0);
+    m_libraryTab->setChecked(index == 1);
+    m_createTab->setChecked(index == 2);
+    ui->instanceToolBar->setVisible(index == 1);
     if (lobby) {
         updateLobby();
     }

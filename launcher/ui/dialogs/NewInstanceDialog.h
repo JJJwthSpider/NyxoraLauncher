@@ -77,6 +77,8 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     QString instGroup() const;
     QString iconKey() const;
 
+    /// the AI pack page with a new chat that starts from these words
+    void askAgent(const QString& text);
     /// opens the dialog on a specific page ("quick", "agent", "modrinth", ...)
     void selectPage(const QString& pageId);
     /// the user wants to pick mods (Modrinth / CurseForge) right after the instance is created
@@ -99,6 +101,7 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     QString InstIconKey;
     ImportPage* importPage = nullptr;
     QuickPage* quickPage = nullptr;
+    class AgentPage* agentPage = nullptr;
     std::unique_ptr<InstanceTask> creationTask;
 
     bool importIcon = false;

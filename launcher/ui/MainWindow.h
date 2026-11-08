@@ -246,6 +246,7 @@ class MainWindow : public QMainWindow {
     class QHBoxLayout* m_libraryLayout = nullptr;
     class QPushButton* m_lobbyTab = nullptr;
     class QPushButton* m_libraryTab = nullptr;
+    class QPushButton* m_createTab = nullptr;
     // search and sorting above the instance list
     class QLineEdit* m_instanceSearch = nullptr;
     class QComboBox* m_instanceSort = nullptr;
@@ -254,6 +255,8 @@ class MainWindow : public QMainWindow {
     void openLobby(BaseInstance* instance);
     /// the lobby (Millida-like home page) or the library of instances
     void showLobbyPage(bool lobby);
+    /// 0: the lobby, 1: the library, 2: "Create"
+    void showPage(int index);
     void updateLobby();
     /// the instance the lobby's Play button starts: the selected one, or the one played last
     BaseInstance* lobbyInstance() const;

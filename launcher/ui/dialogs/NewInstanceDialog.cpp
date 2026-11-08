@@ -180,7 +180,8 @@ QList<BasePage*> NewInstanceDialog::getPages()
 
     // the simple ways first: two-click creation, the AI pack agent and ready packs, then the detailed pages
     pages.append(quickPage);
-    pages.append(new AgentPage(this));
+    agentPage = new AgentPage(this);
+    pages.append(agentPage);
     pages.append(new ModrinthPage(this));
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(new FlamePage(this));
@@ -199,6 +200,14 @@ void NewInstanceDialog::selectPage(const QString& pageId)
 {
     if (!pageId.isEmpty()) {
         m_container->selectPage(pageId);
+    }
+}
+
+void NewInstanceDialog::askAgent(const QString& text)
+{
+    m_container->selectPage("agent");
+    if (agentPage) {
+        agentPage->ask(text);
     }
 }
 

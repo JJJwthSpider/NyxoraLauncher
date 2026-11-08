@@ -16,7 +16,11 @@
  */
 #include "VelloraLobby.h"
 
+#include <QAbstractButton>
+#include <QEvent>
 #include <QHBoxLayout>
+#include <QtMath>
+#include <functional>
 #include <QLabel>
 #include <QPainter>
 #include <QPushButton>
@@ -93,98 +97,258 @@ QImage VelloraLobby::renderBody(const QImage& source)
     return out;
 }
 
+/// A tile of the lobby, drawn the way Millida Launcher draws its tiles, in Vellora's burgundy: a dark outline with cut
+/// corners, a plate in the colour of the section, hard rays behind the picture, the picture standing on the tile (its top
+/// rises over the edge) and the name on a dense band over the bottom; a "!" or a ribbon calls for attention.
+class VelloraHubTile : public QAbstractButton {
+   public:
+    using Painter = std::function<void(QPainter&, const QRectF&)>;
+
+    VelloraHubTile(const QColor& plate, const QString& title, const QString& subtitle, Painter art, QWidget* parent)
+        : QAbstractButton(parent), m_plate(plate), m_subtitle(subtitle), m_art(std::move(art))
+    {
+        setText(title);
+        setCursor(Qt::PointingHandCursor);
+        setAttribute(Qt::WA_Hover);
+        setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    }
+    void setRibbon(const QString& text) { m_ribbon = text; update(); }
+    void setAlert(bool on) { m_alert = on; update(); }
+    QSize sizeHint() const override { return { 210, 140 }; }
+    QSize minimumSizeHint() const override { return { 210, 110 }; }
+
+   protected:
+    void paintEvent(QPaintEvent*) override
+    {
+        QPainter p(this);
+        const int over = 18;  // the picture rises this much over the plate
+        const QRectF tile(0, over, width(), height() - over);
+        const int s = 3;
+        auto notched = [&](const QRectF& r, qreal cut, const QColor& c) {
+            p.fillRect(r.adjusted(cut, 0, -cut, 0), c);
+            p.fillRect(r.adjusted(0, cut, 0, -cut), c);
+        };
+        const bool hot = underMouse() || isDown();
+        const QColor plate = hot ? m_plate.lighter(112) : m_plate;
+        notched(tile, 2 * s, m_plate.darker(330));
+        notched(tile.adjusted(s, s, -s, -s), s, plate);
+        p.fillRect(QRectF(tile.left() + 2 * s, tile.top() + s, tile.width() - 4 * s, s), m_plate.lighter(140));
+        // hard rays from a point near the top right
+        p.save();
+        p.setClipRect(tile.adjusted(2 * s, 2 * s, -2 * s, -2 * s));
+        p.setRenderHint(QPainter::Antialiasing);
+        QColor ray = m_plate.lighter(160);
+        ray.setAlpha(80);
+        const QPointF c(tile.left() + tile.width() * 0.62, tile.top() + tile.height() * 0.3);
+        const qreal radius = std::max(tile.width(), tile.height()) * 1.4;
+        for (int i = 0; i < 16; i++) {
+            const qreal a0 = qDegreesToRadians(4 + i * 22.5), a1 = qDegreesToRadians(4 + i * 22.5 + 9);
+            QPolygonF wedge;
+            wedge << c << c + QPointF(std::cos(a0), std::sin(a0)) * radius << c + QPointF(std::cos(a1), std::sin(a1)) * radius;
+            p.setPen(Qt::NoPen);
+            p.setBrush(ray);
+            p.drawPolygon(wedge);
+        }
+        p.restore();
+        // the picture, pressed to the band, its top may rise over the plate
+        const int band = m_subtitle.isEmpty() ? 30 : 44;
+        p.save();
+        p.setClipRect(QRectF(2 * s, 0, width() - 4 * s, height() - 2 * s));
+        const qreal jump = hot ? -4 : 0;
+        m_art(p, QRectF(2 * s, jump, width() - 4 * s, height() - band - 2 * s - jump));
+        p.restore();
+        // the band with the name
+        const QRectF strip(2 * s, height() - band - 2 * s, width() - 4 * s, band);
+        p.fillRect(strip, m_plate.darker(220));
+        p.fillRect(QRectF(strip.left(), strip.top(), strip.width(), 3), m_plate.darker(330));
+        QFont f = font();
+        f.setBold(true);
+        f.setPointSizeF(f.pointSizeF() * 1.12);
+        p.setFont(f);
+        p.setPen(QColor(0xfb, 0xef, 0xf1));
+        p.drawText(strip.adjusted(10, 5, -6, 0), Qt::AlignLeft | Qt::AlignTop, text());
+        if (!m_subtitle.isEmpty()) {
+            QFont small = font();
+            small.setPointSizeF(small.pointSizeF() * 0.86);
+            p.setFont(small);
+            p.setPen(QColor(0xff, 0xc2, 0xca));
+            p.drawText(strip.adjusted(10, 0, -6, -5), Qt::AlignLeft | Qt::AlignBottom, m_subtitle);
+        }
+        if (!m_ribbon.isEmpty()) {
+            QFont r = font();
+            r.setBold(true);
+            r.setPointSizeF(r.pointSizeF() * 0.8);
+            p.setFont(r);
+            const int w = QFontMetrics(r).horizontalAdvance(m_ribbon) + 14;
+            const QRectF box(width() - w - 8, over + 8, w, 20);
+            p.fillRect(box, QColor(0xe8, 0x36, 0x4f));
+            p.setPen(Qt::white);
+            p.drawText(box, Qt::AlignCenter, m_ribbon);
+        }
+        if (m_alert) {
+            const QRectF box(0, over - 6, 24, 24);
+            notched(box, 3, QColor(0x1e, 0x04, 0x08));
+            notched(box.adjusted(2, 2, -2, -2), 2, QColor(0xe8, 0x36, 0x4f));
+            p.setPen(Qt::white);
+            p.setFont(f);
+            p.drawText(box, Qt::AlignCenter, "!");
+        }
+    }
+
+   private:
+    QColor m_plate;
+    QString m_subtitle;
+    QString m_ribbon;
+    bool m_alert = false;
+    Painter m_art;
+};
+
+/// the banner on the right, like Millida's promo card: dark, with a crimson pixel edge at the bottom
+class VelloraBanner : public QFrame {
+   public:
+    using QFrame::QFrame;
+
+   protected:
+    void paintEvent(QPaintEvent*) override
+    {
+        QPainter p(this);
+        const int s = 3;
+        p.fillRect(rect().adjusted(2 * s, 0, -2 * s, 0), QColor(0x06, 0x01, 0x03));
+        p.fillRect(rect().adjusted(0, 2 * s, 0, -2 * s), QColor(0x06, 0x01, 0x03));
+        p.fillRect(rect().adjusted(s, s, -s, -s), QColor(0x14, 0x06, 0x0a));
+        const QColor reds[] = { QColor(0xe8, 0x36, 0x4f), QColor(0xb3, 0x26, 0x3a), QColor(0xff, 0x6b, 0x7d), QColor(0x8e, 0x14, 0x28),
+                                QColor(0xc8, 0x1f, 0x3a) };
+        const int step = 8;
+        for (int i = 0; i * step < width() - 2 * s; i++) {
+            const int h = 2 + ((i * 7 + 3) % 3);
+            for (int j = 0; j < h; j++) {
+                p.fillRect(QRect(s + i * step, height() - s - (j + 1) * step, step, step), reds[(i * 3 + j * 5) % 5]);
+            }
+        }
+    }
+};
+
 VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
 {
     setObjectName("velloraLobby");
     m_ambience = new SculkAmbience(this, 0);
     auto* outer = new QVBoxLayout(this);
-    outer->setContentsMargins(12, 12, 12, 12);
-    outer->setSpacing(10);
+    outer->setContentsMargins(14, 10, 14, 12);
+    outer->setSpacing(8);
 
     auto* stage = new QHBoxLayout;
     stage->setSpacing(12);
     outer->addLayout(stage, 1);
 
-    // left: big picture tiles, like Millida's lobby
+    // left: the tiles of Millida's lobby, in burgundy: the wardrobe, my skin, playing with friends
     auto* tiles = new QVBoxLayout;
-    tiles->setSpacing(10);
-    auto addTile = [&](const QString& title, const QString& subtitle, const QIcon& picture, auto signal) {
-        auto* tile = new LaunchTile(this);
-        tile->setText(title);
-        tile->setSubtitle(subtitle);
-        tile->setPicture(picture);
-        connect(tile, &QAbstractButton::clicked, this, signal);
-        tiles->addWidget(tile, 1);
-    };
-    // like Millida's lobby: the wardrobe, ready packs, friends
-    QPixmap outfit(128, 128);
-    outfit.fill(Qt::transparent);
-    {
-        QPainter p(&outfit);
-        VelloraCharacter::paintItems(p, QRectF(0, 0, 128, 128), "crown", "chain", "demon_wings", "cube_pet", QString(), "void_orbit", 1.0);
-    }
-    addTile(tr("Wardrobe"), tr("Outfits, capes, pets"), QIcon(outfit), &VelloraLobby::wardrobeRequested);
-    addTile(tr("Ready-made packs"), tr("Modrinth and CurseForge"), QIcon(":/sculk_theme/tile-packs-vellora.png"), &VelloraLobby::packsRequested);
-    addTile(tr("With friends"), tr("Lobby, server, invite code"), QIcon::fromTheme("accounts"), &VelloraLobby::friendsRequested);
-    auto* tilesBox = new QWidget(this);
-    tilesBox->setLayout(tiles);
-    tilesBox->setFixedWidth(200);
-    stage->addWidget(tilesBox);
+    tiles->setSpacing(6);
+    auto* wardrobe = new VelloraHubTile(QColor(0xb3, 0x26, 0x3a), tr("Wardrobe"), tr("56 items — all open"),
+                                        [](QPainter& p, const QRectF& r) {
+                                            VelloraCharacter::paintItems(p, r, "crown", "chain", "demon_wings", "cube_pet", QString(),
+                                                                         QString(), 1.0);
+                                        },
+                                        this);
+    wardrobe->setAlert(true);
+    connect(wardrobe, &QAbstractButton::clicked, this, [this, wardrobe] {
+        wardrobe->setAlert(false);
+        emit wardrobeRequested();
+    });
+    tiles->addWidget(wardrobe, 1);
+    m_skinTile = new VelloraHubTile(QColor(0x7a, 0x1e, 0x4e), tr("My skin"), tr("Upload your own"),
+                                    [this](QPainter& p, const QRectF& r) {
+                                        // the player's head and shoulders, big, from the skin
+                                        const QImage body = m_skin.isNull() ? silhouette() : renderBody(m_skin);
+                                        const qreal u = std::min(r.width() / 22.0, r.height() / 13.0);
+                                        const QRectF target(r.center().x() - 8 * u, r.top() + r.height() * 0.12, 16 * u, 32 * u);
+                                        p.drawImage(target, body);
+                                    },
+                                    this);
+    connect(m_skinTile, &QAbstractButton::clicked, this, &VelloraLobby::skinRequested);
+    tiles->addWidget(m_skinTile, 1);
+    auto* friends = new VelloraHubTile(QColor(0x5a, 0x1a, 0x1a), tr("Play with friends"), tr("Lobby, server, invite code"),
+                                       [](QPainter& p, const QRectF& r) {
+                                           const QRectF half(r.left(), r.top(), r.width() / 2, r.height());
+                                           VelloraCharacter::paintItems(p, half.adjusted(0, 0, 10, 0), "cat_ears", "scarf", QString(), QString(),
+                                                                        QString(), QString(), 0);
+                                           VelloraCharacter::paintItems(p, half.translated(r.width() / 2 - 10, 0), "headphones", QString(),
+                                                                        QString(), QString(), "wave", QString(), 0);
+                                       },
+                                       this);
+    friends->setRibbon(tr("Free"));
+    connect(friends, &QAbstractButton::clicked, this, &VelloraLobby::friendsRequested);
+    tiles->addWidget(friends, 1);
+    stage->addLayout(tiles);
 
-    // middle: the player
+    // middle: the player with the nametag
     auto* middle = new QVBoxLayout;
+    middle->addSpacing(24);
+    m_playerName = caption(QString(), 13, "#ffffff", this);
+    m_playerName->setStyleSheet("color: white; font-weight: bold; font-size: 12pt; background-color: rgba(0, 0, 0, 140); padding: 2px 8px;");
+    middle->addWidget(m_playerName, 0, Qt::AlignHCenter);
     m_character = new VelloraCharacter(this);
     middle->addWidget(m_character, 1);
-    m_playerName = caption(QString(), 16, "#fbeff1", this);
-    m_playerName->setAlignment(Qt::AlignHCenter);
-    middle->addWidget(m_playerName);
-    auto* buttons = new QHBoxLayout;
-    buttons->addStretch(1);
-    auto* wardrobeButton = new QPushButton(tr("Wardrobe"), this);
-    connect(wardrobeButton, &QPushButton::clicked, this, &VelloraLobby::wardrobeRequested);
-    buttons->addWidget(wardrobeButton);
-    auto* skinButton = new QPushButton(tr("My skin"), this);
-    connect(skinButton, &QPushButton::clicked, this, &VelloraLobby::skinRequested);
-    buttons->addWidget(skinButton);
-    buttons->addStretch(1);
-    middle->addLayout(buttons);
     stage->addLayout(middle, 1);
 
-    // right: Arkan the wizard
-    auto* arkan = new QFrame(this);
-    arkan->setObjectName("arkanCard");
-    arkan->setStyleSheet(
-        "QFrame#arkanCard { background-color: rgba(20, 5, 9, 225); border: 2px solid #8a3442; border-bottom: 5px solid #3a0d16; "
-        "border-radius: 2px; }");
-    arkan->setFixedWidth(230);
-    auto* arkanLayout = new QVBoxLayout(arkan);
-    arkanLayout->addWidget(caption(tr("AI WIZARD"), 9, "#ff8090", arkan));
-    arkanLayout->addStretch(1);
-    auto* wizard = new MoonyWidget(arkan);
-    wizard->setExcited(true);
-    wizard->setFixedSize(200, 200);
-    arkanLayout->addWidget(wizard, 0, Qt::AlignHCenter);
-    arkanLayout->addWidget(caption(tr("Arkan"), 16, "#fbeff1", arkan));
-    auto* text = new QLabel(tr("Describe a pack in your own words and I will build it from mods"), arkan);
-    text->setWordWrap(true);
-    text->setStyleSheet("color: #d1a3aa; background: transparent;");
-    arkanLayout->addWidget(text);
-    auto* ask = new QPushButton(tr("Build with AI"), arkan);
+    // right: the chips in the top right corner and the banner
+    auto* right = new QVBoxLayout;
+    auto* chips = new QHBoxLayout;
+    chips->addStretch(1);
+    auto* friendsChip = new QPushButton(tr("👥 Friends"), this);
+    friendsChip->setMinimumHeight(44);
+    friendsChip->setToolTip(tr("Play with friends: a lobby, a server, an invite code"));
+    connect(friendsChip, &QPushButton::clicked, this, &VelloraLobby::friendsRequested);
+    chips->addWidget(friendsChip);
+    m_accountChip = new QPushButton(this);
+    m_accountChip->setMinimumHeight(44);
+    m_accountChip->setIconSize(QSize(28, 28));
+    connect(m_accountChip, &QPushButton::clicked, this, &VelloraLobby::skinRequested);
+    chips->addWidget(m_accountChip);
+    right->addLayout(chips);
+    right->addStretch(1);
+    auto* banner = new VelloraBanner(this);
+    banner->setFixedSize(320, 200);
+    auto* bannerLayout = new QHBoxLayout(banner);
+    bannerLayout->setContentsMargins(16, 12, 6, 30);
+    auto* bannerTexts = new QVBoxLayout;
+    bannerTexts->setSpacing(0);
+    bannerTexts->addWidget(caption(tr("AI WIZARD × VELLORA"), 8, "#d1a3aa", banner));
+    bannerTexts->addSpacing(4);
+    bannerTexts->addWidget(caption(tr("BUILD"), 16, "#fbeff1", banner));
+    bannerTexts->addWidget(caption(tr("A PACK"), 16, "#fbeff1", banner));
+    bannerTexts->addWidget(caption(tr("WITH WORDS"), 16, "#ff4654", banner));
+    bannerTexts->addStretch(1);
+    auto* ask = new QPushButton(tr("▶ Build"), banner);
     ask->setObjectName("accentButton");
     connect(ask, &QPushButton::clicked, this, &VelloraLobby::agentRequested);
-    arkanLayout->addWidget(ask);
-    stage->addWidget(arkan);
+    bannerTexts->addWidget(ask, 0, Qt::AlignLeft);
+    bannerLayout->addLayout(bannerTexts, 1);
+    auto* wizard = new MoonyWidget(banner);
+    wizard->setExcited(true);
+    wizard->setFixedSize(116, 136);
+    bannerLayout->addWidget(wizard, 0, Qt::AlignTop);
+    right->addWidget(banner, 0, Qt::AlignRight);
+    right->addStretch(1);
+    stage->addLayout(right);
 
-    // bottom: what we play today
+    // bottom, in the middle: what we play today and the big Play button
+    auto* bottom = new QHBoxLayout;
+    bottom->setSpacing(4);
+    bottom->addStretch(1);
     auto* today = new QFrame(this);
     today->setObjectName("todayBar");
     today->setStyleSheet(
-        "QFrame#todayBar { background-color: rgba(28, 8, 13, 235); border: 2px solid #8a3442; border-bottom: 5px solid #3a0d16; "
+        "QFrame#todayBar { background-color: rgba(42, 10, 18, 240); border: 2px solid #8a3442; border-bottom: 5px solid #3a0d16; "
         "border-radius: 2px; }");
+    today->setCursor(Qt::PointingHandCursor);
+    today->installEventFilter(this);
+    m_today = today;
     auto* todayLayout = new QHBoxLayout(today);
-    todayLayout->setContentsMargins(12, 8, 12, 8);
+    todayLayout->setContentsMargins(10, 8, 16, 8);
     m_todayIcon = new QLabel(today);
-    m_todayIcon->setFixedSize(52, 52);
+    m_todayIcon->setFixedSize(60, 60);
+    m_todayIcon->setStyleSheet("background-color: #3a0d16; border: 2px solid #0b0305;");
+    m_todayIcon->setAlignment(Qt::AlignCenter);
     todayLayout->addWidget(m_todayIcon);
     auto* texts = new QVBoxLayout;
     texts->setSpacing(0);
@@ -192,22 +356,30 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     m_todayName = caption(QString(), 17, "#fbeff1", today);
     texts->addWidget(m_todayName);
     m_todayInfo = new QLabel(today);
-    m_todayInfo->setStyleSheet("color: #d1a3aa; background: transparent;");
+    m_todayInfo->setStyleSheet("color: #d1a3aa; background: transparent; border: none;");
     texts->addWidget(m_todayInfo);
     todayLayout->addLayout(texts, 1);
-    auto* choose = new QPushButton(tr("Change"), today);
-    choose->setMinimumHeight(44);
-    connect(choose, &QPushButton::clicked, this, &VelloraLobby::chooseRequested);
-    todayLayout->addWidget(choose);
-    m_play = new QPushButton(tr("▶  Play"), today);
+    today->setMinimumWidth(420);
+    bottom->addWidget(today, 3);
+    m_play = new QPushButton(tr("▶  Play"), this);
     m_play->setObjectName("accentButton");
-    m_play->setMinimumSize(240, 56);
-    m_play->setStyleSheet("font-size: 18pt;");
+    m_play->setMinimumSize(240, 84);
+    m_play->setStyleSheet("font-size: 22pt;");
     connect(m_play, &QPushButton::clicked, this, &VelloraLobby::playRequested);
-    todayLayout->addWidget(m_play);
-    outer->addWidget(today);
+    bottom->addWidget(m_play, 1);
+    bottom->addStretch(1);
+    outer->addLayout(bottom);
 
     setToday(QString(), QString(), QIcon(), false);
+}
+
+bool VelloraLobby::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == m_today && event->type() == QEvent::MouseButtonRelease) {
+        emit chooseRequested();  // like Millida: the card opens the packs
+        return true;
+    }
+    return QWidget::eventFilter(watched, event);
 }
 
 void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng, const QByteArray& capePng)
@@ -220,8 +392,20 @@ void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng, con
     if (!capePng.isEmpty()) {
         cape.loadFromData(capePng, "PNG");
     }
+    m_skin = skin;
     m_character->setSkin(skin);
     m_character->setCape(cape);
+    m_skinTile->update();
+    // the account chip: the head from the skin and the name, like Millida's
+    QImage head(8, 8, QImage::Format_ARGB32);
+    head.fill(QColor(0x2b, 0x0e, 0x15));
+    if (skin.width() >= 64) {
+        QPainter p(&head);
+        p.drawImage(0, 0, skin.copy(8, 8, 8, 8));
+        p.drawImage(0, 0, skin.copy(40, 8, 8, 8));
+    }
+    m_accountChip->setIcon(QIcon(QPixmap::fromImage(head.scaled(28, 28))));
+    m_accountChip->setText(name.isEmpty() ? tr("Sign in") : name + "  ˅");
 }
 
 void VelloraLobby::refreshCharacter()
@@ -234,13 +418,13 @@ void VelloraLobby::setToday(const QString& name, const QString& info, const QIco
     if (name.isEmpty()) {
         m_todayName->setText(tr("Nothing yet"));
         m_todayInfo->setText(tr("Create an instance or pick a ready-made pack"));
-        m_todayIcon->setPixmap(QIcon(":/sculk_theme/tile-plus-lunar.svg").pixmap(52, 52));
+        m_todayIcon->setPixmap(QIcon(":/sculk_theme/tile-plus-lunar.svg").pixmap(48, 48));
         m_play->setText(tr("+  New"));
         return;
     }
     m_todayName->setText(name);
     m_todayInfo->setText(info);
-    m_todayIcon->setPixmap(icon.pixmap(52, 52));
+    m_todayIcon->setPixmap(icon.pixmap(48, 48));
     m_play->setText(running ? tr("■  Playing") : tr("▶  Play"));
 }
 

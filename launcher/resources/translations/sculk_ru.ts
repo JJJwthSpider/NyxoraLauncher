@@ -869,6 +869,10 @@ In Vellora Client: Lobby → Join a friend, paste the address. In Minecraft: Mul
 <context>
     <name>MainWindow</name>
     <message>
+        <source>✚ Create</source>
+        <translation>✚ Создать</translation>
+    </message>
+    <message>
         <source>Library</source>
         <translation>Библиотека</translation>
     </message>
@@ -3077,6 +3081,50 @@ Are you sure?</source>
 <context>
     <name>VelloraLobby</name>
     <message>
+        <source>56 items — all open</source>
+        <translation>56 вещей — всё открыто</translation>
+    </message>
+    <message>
+        <source>Upload your own</source>
+        <translation>Загрузи свой</translation>
+    </message>
+    <message>
+        <source>Free</source>
+        <translation>Бесплатно</translation>
+    </message>
+    <message>
+        <source>👥 Friends</source>
+        <translation>👥 Друзья</translation>
+    </message>
+    <message>
+        <source>Play with friends: a lobby, a server, an invite code</source>
+        <translation>Играть с друзьями: лобби, сервер, код приглашения</translation>
+    </message>
+    <message>
+        <source>AI WIZARD × VELLORA</source>
+        <translation>ИИ-МАГ × VELLORA</translation>
+    </message>
+    <message>
+        <source>BUILD</source>
+        <translation>СОБЕРИ</translation>
+    </message>
+    <message>
+        <source>A PACK</source>
+        <translation>СБОРКУ</translation>
+    </message>
+    <message>
+        <source>WITH WORDS</source>
+        <translation>СЛОВАМИ</translation>
+    </message>
+    <message>
+        <source>▶ Build</source>
+        <translation>▶ Собрать</translation>
+    </message>
+    <message>
+        <source>Sign in</source>
+        <translation>Войти</translation>
+    </message>
+    <message>
         <source>Wardrobe</source>
         <translation>Гардероб</translation>
     </message>
@@ -3340,6 +3388,221 @@ Are you sure?</source>
     <message>
         <source>Click to turn around</source>
         <translation>Нажми, чтобы повернуть</translation>
+    </message>
+</context>
+<context>
+    <name>VelloraCreatePage</name>
+    <message>
+        <source>light, fast</source>
+        <translation>лёгкий, быстрый</translation>
+    </message>
+    <message>
+        <source>new mods</source>
+        <translation>новые моды</translation>
+    </message>
+    <message>
+        <source>the classic</source>
+        <translation>классика</translation>
+    </message>
+    <message>
+        <source>like Fabric</source>
+        <translation>как Fabric</translation>
+    </message>
+    <message>
+        <source>no mods</source>
+        <translation>без модов</translation>
+    </message>
+    <message>
+        <source>New instance</source>
+        <translation>Новая сборка</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Название</translation>
+    </message>
+    <message>
+        <source>Loader</source>
+        <translation>Загрузчик</translation>
+    </message>
+    <message>
+        <source>Minecraft version</source>
+        <translation>Версия Minecraft</translation>
+    </message>
+    <message>
+        <source>Find</source>
+        <translation>Найти</translation>
+    </message>
+    <message>
+        <source>Snapshots and betas</source>
+        <translation>Снапшоты и беты</translation>
+    </message>
+    <message>
+        <source>Right after creating, open the mod browser (Modrinth and CurseForge)</source>
+        <translation>Сразу после создания открыть моды (Modrinth и CurseForge)</translation>
+    </message>
+    <message>
+        <source>Build with AI</source>
+        <translation>🔮 Собрать с ИИ</translation>
+    </message>
+    <message>
+        <source>Build a pack for Minecraft %1 %2</source>
+        <translation>Собери сборку на Minecraft %1 %2</translation>
+    </message>
+    <message>
+        <source>Create</source>
+        <translation>Создать</translation>
+    </message>
+    <message>
+        <source>Ready-made packs</source>
+        <translation>Готовые сборки</translation>
+    </message>
+    <message>
+        <source>Start from an idea — Arkan builds it for your version</source>
+        <translation>Начни с идеи — Аркан соберёт под твою версию</translation>
+    </message>
+    <message>
+        <source>With friends</source>
+        <translation>🤝 С друзьями</translation>
+    </message>
+    <message>
+        <source>a survival pack to play with friends</source>
+        <translation>сборку для выживания с друзьями</translation>
+    </message>
+    <message>
+        <source>For a weak PC</source>
+        <translation>💻 Для слабого ПК</translation>
+    </message>
+    <message>
+        <source>a light pack for a weak PC with lots of FPS</source>
+        <translation>лёгкую сборку для слабого ПК, много FPS</translation>
+    </message>
+    <message>
+        <source>Tech</source>
+        <translation>⚙ Техно</translation>
+    </message>
+    <message>
+        <source>technology and automation, factories</source>
+        <translation>сборку про технологии и автоматизацию, заводы</translation>
+    </message>
+    <message>
+        <source>Magic</source>
+        <translation>🔮 Магия</translation>
+    </message>
+    <message>
+        <source>magic and spells</source>
+        <translation>сборку про магию и заклинания</translation>
+    </message>
+    <message>
+        <source>Adventure</source>
+        <translation>🗡 Приключения</translation>
+    </message>
+    <message>
+        <source>adventure, dungeons, bosses, RPG</source>
+        <translation>сборку с приключениями, данжами, боссами, RPG</translation>
+    </message>
+    <message>
+        <source>Horror</source>
+        <translation>👻 Хоррор</translation>
+    </message>
+    <message>
+        <source>a scary horror pack</source>
+        <translation>страшную хоррор сборку</translation>
+    </message>
+    <message>
+        <source>Beautiful graphics</source>
+        <translation>🌄 Красивая графика</translation>
+    </message>
+    <message>
+        <source>beautiful graphics with shaders</source>
+        <translation>сборку с красивой графикой и шейдерами</translation>
+    </message>
+    <message>
+        <source>Zombies</source>
+        <translation>🧟 Зомби</translation>
+    </message>
+    <message>
+        <source>survival in a zombie apocalypse</source>
+        <translation>сборку про выживание в зомби-апокалипсисе</translation>
+    </message>
+    <message>
+        <source>Build %1, Minecraft %2</source>
+        <translation>Собери %1, Minecraft %2</translation>
+    </message>
+    <message>
+        <source>Popular packs</source>
+        <translation>Популярные сборки</translation>
+    </message>
+    <message>
+        <source>All in the catalog ›</source>
+        <translation>Все в каталоге ›</translation>
+    </message>
+    <message>
+        <source>Loading the most popular packs from Modrinth...</source>
+        <translation>Загружаю самые популярные сборки с Modrinth...</translation>
+    </message>
+    <message>
+        <source>Loading the list of Minecraft versions...</source>
+        <translation>Загружаю список версий Minecraft...</translation>
+    </message>
+    <message>
+        <source>Could not load Minecraft versions: %1</source>
+        <translation>Не удалось загрузить версии Minecraft: %1</translation>
+    </message>
+    <message>
+        <source>not for snapshots</source>
+        <translation>не для снапшотов</translation>
+    </message>
+    <message>
+        <source>from 1.20.1</source>
+        <translation>с 1.20.1</translation>
+    </message>
+    <message>
+        <source>from 1.14</source>
+        <translation>с 1.14</translation>
+    </message>
+    <message>
+        <source>Pack %1</source>
+        <translation>Сборка %1</translation>
+    </message>
+    <message>
+        <source>Pick a Minecraft version first.</source>
+        <translation>Сначала выбери версию Minecraft.</translation>
+    </message>
+    <message>
+        <source>Loading %1 versions...</source>
+        <translation>Загружаю версии %1...</translation>
+    </message>
+    <message>
+        <source>Could not load loader versions: %1</source>
+        <translation>Не удалось загрузить версии загрузчика: %1</translation>
+    </message>
+    <message>
+        <source>%1 is not available for Minecraft %2. Pick another version or loader.</source>
+        <translation>%1 нет для Minecraft %2. Выбери другую версию или загрузчик.</translation>
+    </message>
+    <message>
+        <source>No connection to Modrinth — the packs will show up when there is internet.</source>
+        <translation>Нет связи с Modrinth — сборки появятся, когда будет интернет.</translation>
+    </message>
+    <message>
+        <source>%1M</source>
+        <translation>%1 млн</translation>
+    </message>
+    <message>
+        <source>%1K</source>
+        <translation>%1 тыс.</translation>
+    </message>
+    <message>
+        <source>Install</source>
+        <translation>Установить</translation>
+    </message>
+    <message>
+        <source>Looking for the newest version of %1...</source>
+        <translation>Ищу последнюю версию %1...</translation>
+    </message>
+    <message>
+        <source>Could not get %1 from Modrinth.</source>
+        <translation>Не удалось получить %1 с Modrinth.</translation>
     </message>
 </context>
 </TS>

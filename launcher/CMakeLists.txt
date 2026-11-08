@@ -1158,6 +1158,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/VelloraCharacter.cpp
     ui/dialogs/WardrobeDialog.h
     ui/dialogs/WardrobeDialog.cpp
+    ui/widgets/VelloraCreatePage.cpp
+    ui/widgets/VelloraCreatePage.h
     ui/widgets/VelloraLobby.cpp
     ui/widgets/LaunchPanel.h
     ui/widgets/MoonyWidget.cpp

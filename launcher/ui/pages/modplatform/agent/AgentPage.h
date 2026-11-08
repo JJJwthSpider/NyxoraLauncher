@@ -62,6 +62,9 @@ class AgentPage : public QWidget, public BasePage {
     void openedImpl() override;
     void retranslate() override;
 
+    /// a new chat that starts from these words ("Начни с идеи" in the "Create" tab)
+    void ask(const QString& text);
+
    private:
     enum class Stage { Topic, Setup, Building, Ready };
 

@@ -690,6 +690,15 @@ void AgentPage::reset()
     suggestCurrent();
 }
 
+void AgentPage::ask(const QString& text)
+{
+    if (text.trimmed().isEmpty()) {
+        return;
+    }
+    newChat();
+    userSaid(text.trimmed());
+}
+
 void AgentPage::sendInput()
 {
     const auto text = m_input->text().trimmed();

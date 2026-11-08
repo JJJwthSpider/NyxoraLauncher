@@ -58,6 +58,7 @@ class VelloraLobby : public QWidget {
 
    protected:
     void paintEvent(QPaintEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
    private:
     SculkAmbience* m_ambience = nullptr;
@@ -68,4 +69,8 @@ class VelloraLobby : public QWidget {
     QLabel* m_todayName = nullptr;
     QLabel* m_todayInfo = nullptr;
     QPushButton* m_play = nullptr;
+    QPushButton* m_accountChip = nullptr;
+    class VelloraHubTile* m_skinTile = nullptr;
+    QWidget* m_today = nullptr;
+    QImage m_skin;
 };
