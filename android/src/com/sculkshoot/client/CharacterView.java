@@ -14,7 +14,7 @@ import android.view.View;
 
 /**
  * The player in the lobby and the wardrobe, like the character of Millida Launcher: drawn from the skin with sharp
- * pixels, it breathes, its wings move, the pet hops beside it, and it plays emotes (wave, jump, dance). A tap turns it
+ * pixels, it breathes, its wings move, the pet hops beside it, and it plays emotes (wave, jump, dance, spin, bow, cheer). A tap turns it
  * around to show the back with the cape. What it wears comes from Cosmetics; `preview` overrides one slot (the wardrobe
  * shows an item before it is put on).
  */
@@ -109,6 +109,13 @@ final class CharacterView extends View {
         float breath = (float) Math.sin(time * 2) * 0.35f;
         float jump = emoting && emote.equals("jump") ? (float) Math.max(0, Math.sin(emoteTime * Math.PI / 0.6)) * 5 : 0;
         float sway = emoting && emote.equals("dance") ? (float) Math.sin(emoteTime * 9) * 1.5f : 0;
+        if (emoting && emote.equals("bow")) {
+            jump = -(float) Math.max(0, Math.sin(emoteTime * Math.PI / 1.2)) * 2;  // a nod down
+        }
+        boolean wasBack = back;
+        if (emoting && emote.equals("spin")) {
+            back = ((int) (emoteTime * 5)) % 2 == 1;  // turns round and round
+        }
         float ox = (getWidth() - GRID_W * u) / 2 + (FIGURE_X + sway) * u;
         float oy = (getHeight() - GRID_H * u) / 2 + (FIGURE_Y - jump + breath) * u;
 
@@ -122,32 +129,37 @@ final class CharacterView extends View {
         canvas.restore();
 
         Cosmetics.Pen pen = new Cosmetics.Pen(canvas, ox, oy, u);
-        float flap = (float) (0.5 + 0.5 * Math.sin(time * (worn(Cosmetics.BACK).contains("wings") ? 2.2 : 0)));
+        android.content.Context context = getContext();
+        Cosmetics.Item backItem = Cosmetics.find(context, worn(Cosmetics.BACK));
         if (!back) {
-            Cosmetics.drawBack(pen, worn(Cosmetics.BACK), flap, false);
+            Cosmetics.draw(pen, backItem, false, time);  // wings and capes behind the figure
         }
         drawFigure(canvas, pen, ox, oy, u, emoting, emoteTime);
         if (back) {
-            if (cape != null && !worn(Cosmetics.BACK).equals("crimson_cape")) {
+            if (cape != null && !"crimson_cape".equals(worn(Cosmetics.BACK)) && !"backpack".equals(worn(Cosmetics.BACK))) {
                 // the real cape: its back face is at (1, 1) of the 64x32 texture, 10x16
                 float s = cape.getWidth() / 64f;
                 canvas.drawBitmap(cape, new Rect(Math.round(1 * s), Math.round(1 * s), Math.round(11 * s), Math.round(17 * s)),
                                   new RectF(ox + 3 * u, oy + 8 * u, ox + 13 * u, oy + 24 * u), pixels);
             }
-            Cosmetics.drawBack(pen, worn(Cosmetics.BACK), flap, true);
-        } else {
-            Cosmetics.drawBody(pen, worn(Cosmetics.BODY));
-            Cosmetics.drawHead(pen, worn(Cosmetics.HEAD), time);
+            Cosmetics.draw(pen, backItem, true, time);
         }
-        Cosmetics.drawPet(pen, worn(Cosmetics.PET), time);
+        Cosmetics.draw(pen, Cosmetics.find(context, worn(Cosmetics.BODY)), back, time);
+        Cosmetics.draw(pen, Cosmetics.find(context, worn(Cosmetics.HEAD)), back, time);
+        Cosmetics.draw(pen, Cosmetics.find(context, worn(Cosmetics.PET)), back, time);
+        Cosmetics.drawParticles(pen, Cosmetics.find(context, worn(Cosmetics.EFFECT)), time);
+        if (emoting && emote.equals("spin")) {
+            back = wasBack;
+        }
         postInvalidateDelayed(40);
     }
 
     private void drawFigure(Canvas c, Cosmetics.Pen pen, float ox, float oy, float u, boolean emoting, float emoteTime) {
-        boolean wave = emoting && emote.equals("wave");
+        boolean wave = emoting && (emote.equals("wave") || emote.equals("cheer"));
+        boolean cheer = emoting && emote.equals("cheer");
         if (skin == null) {
             // no skin yet: a dark figure with a crimson rim
-            float[][] parts = { { 4, 0, 8, 8 }, { 4, 8, 8, 12 }, { 0, 8, 4, 12 }, { 12, wave ? -4 : 8, 4, 12 }, { 4, 20, 4, 12 }, { 8, 20, 4, 12 } };
+            float[][] parts = { { 4, 0, 8, 8 }, { 4, 8, 8, 12 }, { 0, cheer ? -4 : 8, 4, 12 }, { 12, wave ? -4 : 8, 4, 12 }, { 4, 20, 4, 12 }, { 8, 20, 4, 12 } };
             for (float[] r : parts) {
                 pen.rect(r[0], r[1], r[2], r[3], 0xFF8A3442);
                 pen.rect(r[0] + 0.5f, r[1] + 0.5f, r[2] - 1, r[3] - 1, 0xFF2B0E15);
@@ -167,7 +179,8 @@ final class CharacterView extends View {
                 part(c, ox, oy, u, 4, 20, 4, 12, 8, 20, true);
             }
             part(c, ox, oy, u, 20, 20, 8, 12, 4, 8, false);                                    // body
-            part(c, ox, oy, u, 44, 20, 4, 12, 0, 8, false);                                    // right arm
+            float rightArmY = cheer ? -4 + (float) Math.sin(emoteTime * 10 + 1) * 0.6f : 8;
+            part(c, ox, oy, u, 44, 20, 4, 12, 0, rightArmY, false);                            // right arm
             float leftArmY = wave ? -4 + (float) Math.sin(emoteTime * 10) * 0.6f : 8;          // waving: the arm goes up
             if (modern) {
                 part(c, ox, oy, u, 36, 52, 4, 12, 12, leftArmY, false);
@@ -179,7 +192,7 @@ final class CharacterView extends View {
                 part(c, ox, oy, u, 4, 36, 4, 12, 4, 20, false);
                 part(c, ox, oy, u, 4, 52, 4, 12, 8, 20, false);
                 part(c, ox, oy, u, 20, 36, 8, 12, 4, 8, false);
-                part(c, ox, oy, u, 44, 36, 4, 12, 0, 8, false);
+                part(c, ox, oy, u, 44, 36, 4, 12, 0, rightArmY, false);
                 part(c, ox, oy, u, 52, 52, 4, 12, 12, leftArmY, false);
             }
             part(c, ox, oy, u, 40, 8, 8, 8, 4, 0, false);                                      // hat layer

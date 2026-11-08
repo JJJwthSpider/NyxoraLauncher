@@ -26,7 +26,8 @@ import java.util.List;
  */
 final class WardrobeScreen {
     private static final String[][] TABS = { { "sets", "Образы" }, { "capes", "Плащи" }, { Cosmetics.HEAD, "Голова" }, { Cosmetics.BODY, "Тело" },
-                                             { Cosmetics.BACK, "Спина" }, { Cosmetics.PET, "Питомцы" }, { Cosmetics.EMOTE, "Эмоции" } };
+                                             { Cosmetics.BACK, "Спина" }, { Cosmetics.PET, "Питомцы" }, { Cosmetics.EFFECT, "Эффекты" },
+                                             { Cosmetics.EMOTE, "Эмоции" } };
 
     private final MainActivity activity;
     private final LinearLayout root;
@@ -59,7 +60,7 @@ final class WardrobeScreen {
         Button undress = Ui.button(activity, "Снять всё", false);
         undress.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                for (String slot : new String[] { Cosmetics.HEAD, Cosmetics.BODY, Cosmetics.BACK, Cosmetics.PET }) {
+                for (String slot : Cosmetics.WEARABLE) {
                     Cosmetics.wear(WardrobeScreen.this.activity, slot, "");
                 }
                 character.invalidate();
@@ -172,12 +173,15 @@ final class WardrobeScreen {
         grid.removeAllViews();
         character.setBack(Cosmetics.BACK.equals(id) || "capes".equals(id));
         if ("sets".equals(id)) {
-            section.setText("Образы");
-            for (final String[] set : Cosmetics.SETS) {
-                boolean on = set[1].equals(Cosmetics.worn(activity, Cosmetics.HEAD)) && set[2].equals(Cosmetics.worn(activity, Cosmetics.BACK));
-                addTile(new ItemPicture(activity, set[1], set[3], set[2], set[4]), set[0], on, new Runnable() {
+            section.setText("Образы — все открыты");
+            for (final Cosmetics.Outfit outfit : Cosmetics.outfits(activity)) {
+                boolean on = outfit.head.equals(Cosmetics.worn(activity, Cosmetics.HEAD)) && outfit.back.equals(Cosmetics.worn(activity, Cosmetics.BACK))
+                             && outfit.body.equals(Cosmetics.worn(activity, Cosmetics.BODY));
+                ItemPicture picture = new ItemPicture(activity, outfit.head, outfit.body, outfit.back, outfit.pet);
+                picture.effect = outfit.effect;
+                addTile(picture, outfit.title, "legendary", on, new Runnable() {
                     public void run() {
-                        Cosmetics.wearSet(activity, set);
+                        Cosmetics.wearOutfit(activity, outfit);
                         character.setBack(false);
                         showTab("sets");
                     }
@@ -187,14 +191,16 @@ final class WardrobeScreen {
             section.setText("Плащи Minecraft — их видно в игре");
             showCapes();
         } else {
-            section.setText(id.equals(Cosmetics.EMOTE) ? "Эмоции — нажми, чтобы персонаж сыграл" : titleOf(id));
             final String slot = id;
-            for (final Cosmetics.Item item : Cosmetics.inSlot(slot)) {
+            List<Cosmetics.Item> list = Cosmetics.inSlot(activity, slot);
+            section.setText(id.equals(Cosmetics.EMOTE) ? "Эмоции — нажми, чтобы персонаж сыграл" : titleOf(id) + " · " + list.size());
+            for (final Cosmetics.Item item : list) {
                 boolean on = item.id.equals(Cosmetics.worn(activity, slot));
                 ItemPicture picture = new ItemPicture(activity, slot.equals(Cosmetics.HEAD) ? item.id : "", slot.equals(Cosmetics.BODY) ? item.id : "",
                                                       slot.equals(Cosmetics.BACK) ? item.id : "", slot.equals(Cosmetics.PET) ? item.id : "");
+                picture.effect = slot.equals(Cosmetics.EFFECT) ? item.id : "";
                 picture.emote = slot.equals(Cosmetics.EMOTE) ? item.id : "";
-                addTile(picture, item.title, on && !slot.equals(Cosmetics.EMOTE), new Runnable() {
+                addTile(picture, item.title, item.rarity, on && !slot.equals(Cosmetics.EMOTE), new Runnable() {
                     public void run() {
                         if (slot.equals(Cosmetics.EMOTE)) {
                             character.setBack(false);
@@ -209,6 +215,13 @@ final class WardrobeScreen {
                 });
             }
         }
+        // the tiles come in one after another, like Millida's
+        for (int i = 0; i < grid.getChildCount(); i++) {
+            View tile = grid.getChildAt(i);
+            tile.setAlpha(0f);
+            tile.setTranslationY(dp(10));
+            tile.animate().alpha(1f).translationY(0).setStartDelay(i * 18L).setDuration(180).start();
+        }
     }
 
     private static String titleOf(String slot) {
@@ -220,20 +233,20 @@ final class WardrobeScreen {
         return slot;
     }
 
-    private void addTile(View picture, String name, boolean on, final Runnable action) {
+    private void addTile(View picture, String name, String rarity, boolean on, final Runnable action) {
         LinearLayout tile = new LinearLayout(activity);
         tile.setOrientation(LinearLayout.VERTICAL);
         tile.setGravity(Gravity.CENTER_HORIZONTAL);
         tile.setPadding(dp(4), dp(4), dp(4), dp(8));
-        tile.setBackground(on ? Ui.rainbowFrame(activity, 0) : PixelDrawable.plain(activity.getResources().getDisplayMetrics().density));
+        // the frame shows the rarity, like Millida's; a worn item glows crimson
+        tile.setBackground(PixelDrawable.panel(on ? 0xFF4A1420 : 0xFF1C080D, on ? 0xFFFF5A6E : Cosmetics.rarityColor(rarity),
+                                               activity.getResources().getDisplayMetrics().density));
         tile.addView(picture, new LinearLayout.LayoutParams(dp(96), dp(84)));
         TextView label = Ui.label(activity, name, 11, Ui.TEXT, true);
         label.setGravity(Gravity.CENTER);
         label.setMaxWidth(dp(100));
         tile.addView(label);
-        if (on) {
-            tile.addView(Ui.label(activity, "надето", 9, 0xFFFF8090, false));
-        }
+        tile.addView(Ui.label(activity, on ? "надето" : Cosmetics.rarityName(rarity), 9, on ? 0xFFFF8090 : Cosmetics.rarityColor(rarity), false));
         tile.setClickable(true);
         tile.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -272,7 +285,7 @@ final class WardrobeScreen {
                 for (Account.Cape cape : capes) {
                     anyActive |= cape.active;
                 }
-                addTile(new CapePicture(activity, null), "Без плаща", !anyActive, new Runnable() {
+                addTile(new CapePicture(activity, null), "Без плаща", "common", !anyActive, new Runnable() {
                     public void run() {
                         setCape(null, null);
                     }
@@ -285,7 +298,7 @@ final class WardrobeScreen {
                             picture.invalidate();
                         }
                     });
-                    addTile(picture, cape.alias.isEmpty() ? "Плащ" : cape.alias, cape.active, new Runnable() {
+                    addTile(picture, cape.alias.isEmpty() ? "Плащ" : cape.alias, "legendary", cape.active, new Runnable() {
                         public void run() {
                             setCape(cape.id, cape.url);
                         }
@@ -323,10 +336,11 @@ final class WardrobeScreen {
         });
     }
 
-    /** a small still picture of an item on a dark figure (or a whole outfit) */
+    /** a small picture of an item on a dark figure (or a whole outfit); it moves a little, like the big one */
     static final class ItemPicture extends View {
         final String head, body, back, pet;
-        String emote = "";
+        String emote = "", effect = "";
+        private final long start = android.os.SystemClock.uptimeMillis();
 
         ItemPicture(Context context, String head, String body, String back, String pet) {
             super(context);
@@ -338,23 +352,34 @@ final class WardrobeScreen {
 
         @Override
         protected void onDraw(Canvas canvas) {
-            float u = Math.min(getWidth() / 32f, getHeight() / 38f);
+            Context context = getContext();
+            float time = (android.os.SystemClock.uptimeMillis() - start) / 1000f;
+            float u = Math.min(getWidth() / 32f, getHeight() / 40f);
             float ox = (getWidth() - 32 * u) / 2 + 8 * u;
-            float oy = (getHeight() - 38 * u) / 2 + 6 * u;
+            float oy = (getHeight() - 40 * u) / 2 + 8 * u;
             Cosmetics.Pen pen = new Cosmetics.Pen(canvas, ox, oy, u);
-            Cosmetics.drawBack(pen, back, 0.5f, false);
-            boolean waving = emote.equals("wave");
-            float lift = emote.equals("jump") ? -3 : 0;
-            float[][] parts = { { 4, 0, 8, 8 }, { 4, 8, 8, 12 }, { 0, 8, 4, 12 }, { 12, waving ? -4 : 8, 4, 12 }, { 4, 20, 4, 12 }, { 8, 20, 4, 12 } };
+            Cosmetics.draw(pen, Cosmetics.find(context, back), false, time);
+            boolean waving = emote.equals("wave") || emote.equals("cheer");
+            float lift = emote.equals("jump") ? -3 : emote.equals("bow") ? 1 : 0;
+            float[][] parts = { { 4, 0, 8, 8 }, { 4, 8, 8, 12 }, { 0, emote.equals("cheer") ? -4 : 8, 4, 12 }, { 12, waving ? -4 : 8, 4, 12 },
+                                { 4, 20, 4, 12 }, { 8, 20, 4, 12 } };
             for (float[] r : parts) {
                 pen.rect(r[0], r[1] + lift, r[2], r[3], 0xFF5A1E2A);
                 pen.rect(r[0] + 0.6f, r[1] + 0.6f + lift, r[2] - 1.2f, r[3] - 1.2f, 0xFF2B0E15);
             }
             pen.rect(6, 4 + lift, 1, 1, 0xFFFF4654);
             pen.rect(9, 4 + lift, 1, 1, 0xFFFF4654);
-            Cosmetics.drawBody(pen, body);
-            Cosmetics.drawHead(pen, head, 0);
-            Cosmetics.drawPet(pen, pet, 0);
+            Cosmetics.draw(pen, Cosmetics.find(context, body), false, time);
+            Cosmetics.draw(pen, Cosmetics.find(context, head), false, time);
+            Cosmetics.draw(pen, Cosmetics.find(context, pet), false, time);
+            Cosmetics.drawParticles(pen, Cosmetics.find(context, effect), time);
+            if (!effect.isEmpty() || isAnimated()) {
+                postInvalidateDelayed(60);
+            }
+        }
+
+        private boolean isAnimated() {
+            return !pet.isEmpty() || back.contains("wings") || "halo".equals(head) || "jetpack".equals(back);
         }
     }
 

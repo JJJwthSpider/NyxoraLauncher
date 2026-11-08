@@ -3,55 +3,143 @@ package com.sculkshoot.client;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The wardrobe items of Vellora, like the cosmetics of Millida Launcher: things on the head, on the body, on the back,
- * pets and emotes. They are pixel art drawn in code on the character in the launcher (in the game only the real
- * Minecraft capes of the account are seen). The figure is 16x32 "skin pixels": the head is x 4..12, y 0..8, the body
- * x 4..12, y 8..20, the arms x 0..4 and 12..16, the legs y 20..32; items may draw outside it.
+ * The wardrobe of Vellora, like the cosmetics of Millida Launcher: head, body, back, pets, effects and emotes, every one
+ * open for free. The items are pixel art described once in assets/cosmetics.json (written by art/cosmetics.py; the
+ * desktop launcher draws the same file) and drawn on the character in the launcher. In the game only the real Minecraft
+ * capes of the account are seen.
  */
 final class Cosmetics {
     private Cosmetics() {}
 
-    static final String HEAD = "head", BODY = "body", BACK = "back", PET = "pet", EMOTE = "emote";
+    static final String HEAD = "head", BODY = "body", BACK = "back", PET = "pet", EFFECT = "effect", EMOTE = "emote";
+    static final String[] WEARABLE = { HEAD, BODY, BACK, PET, EFFECT };
+
+    static final class Layer {
+        float x, y;
+        String[] rows;
+        int[] colors = new int[128];  // by character
+        String view, anim;
+    }
 
     static final class Item {
-        final String id, slot, title;
+        final String id, slot, title, rarity;
+        final List<Layer> layers = new ArrayList<Layer>();
+        int[] particleColors;
+        int particleCount;
+        String motion = "", shape = "";
 
-        Item(String id, String slot, String title) {
+        Item(String id, String slot, String title, String rarity) {
             this.id = id;
             this.slot = slot;
             this.title = title;
+            this.rarity = rarity;
         }
     }
 
-    static final Item[] ITEMS = {
-        new Item("crown", HEAD, "Корона"), new Item("horns", HEAD, "Рога демона"), new Item("halo", HEAD, "Нимб"),
-        new Item("wizard_hat", HEAD, "Шляпа мага"), new Item("cat_ears", HEAD, "Кошачьи уши"), new Item("headphones", HEAD, "Наушники"),
-        new Item("shades", HEAD, "Тёмные очки"),
-        new Item("scarf", BODY, "Шарф"), new Item("chain", BODY, "Золотая цепь"), new Item("tie", BODY, "Галстук"),
-        new Item("bat_wings", BACK, "Крылья летучей мыши"), new Item("angel_wings", BACK, "Крылья ангела"),
-        new Item("demon_wings", BACK, "Крылья демона"), new Item("crimson_cape", BACK, "Багровая мантия"),
-        new Item("cube_pet", PET, "Тессеракт"), new Item("bat_pet", PET, "Летучая мышь"), new Item("slime_pet", PET, "Слизень"),
-        new Item("ghost_pet", PET, "Призрак"),
-        new Item("wave", EMOTE, "Помахать"), new Item("jump", EMOTE, "Прыжок"), new Item("dance", EMOTE, "Танец"),
-    };
+    static final class Outfit {
+        final String title, head, body, back, pet, effect;
 
-    /** the outfits: whole sets, like Millida's "Образы" */
-    static final String[][] SETS = {
-        { "Демон-повелитель", "horns", "demon_wings", "scarf", "" },
-        { "Падший ангел", "halo", "angel_wings", "chain", "" },
-        { "Маг тессеракта", "wizard_hat", "crimson_cape", "chain", "cube_pet" },
-        { "Тень ночи", "shades", "bat_wings", "tie", "bat_pet" },
-        { "Король", "crown", "crimson_cape", "chain", "slime_pet" },
-    };
+        Outfit(JSONObject o) {
+            title = o.optString("title");
+            head = o.optString("head");
+            body = o.optString("body");
+            back = o.optString("back");
+            pet = o.optString("pet");
+            effect = o.optString("effect");
+        }
+    }
 
-    static Item find(String id) {
-        for (Item item : ITEMS) {
+    private static List<Item> items;
+    private static List<Outfit> outfits;
+
+    private static synchronized void load(Context context) {
+        if (items != null) {
+            return;
+        }
+        items = new ArrayList<Item>();
+        outfits = new ArrayList<Outfit>();
+        try {
+            InputStream in = context.getAssets().open("cosmetics.json");
+            JSONObject data = new JSONObject(Http.read(in));
+            JSONArray list = data.getJSONArray("items");
+            for (int i = 0; i < list.length(); i++) {
+                JSONObject o = list.getJSONObject(i);
+                Item item = new Item(o.getString("id"), o.getString("slot"), o.getString("title"), o.optString("rarity", "common"));
+                JSONArray layers = o.optJSONArray("layers");
+                for (int k = 0; layers != null && k < layers.length(); k++) {
+                    JSONObject l = layers.getJSONObject(k);
+                    Layer layer = new Layer();
+                    layer.x = (float) l.getDouble("x");
+                    layer.y = (float) l.getDouble("y");
+                    JSONArray rows = l.getJSONArray("rows");
+                    layer.rows = new String[rows.length()];
+                    for (int r = 0; r < rows.length(); r++) {
+                        layer.rows[r] = rows.getString(r);
+                    }
+                    JSONObject colors = l.getJSONObject("colors");
+                    for (java.util.Iterator<String> keys = colors.keys(); keys.hasNext();) {
+                        String key = keys.next();
+                        layer.colors[key.charAt(0)] = color(colors.getString(key));
+                    }
+                    layer.view = l.optString("view", "front");
+                    layer.anim = l.optString("anim", "");
+                    item.layers.add(layer);
+                }
+                JSONObject particles = o.optJSONObject("particles");
+                if (particles != null) {
+                    JSONArray colors = particles.getJSONArray("colors");
+                    item.particleColors = new int[colors.length()];
+                    for (int c = 0; c < colors.length(); c++) {
+                        item.particleColors[c] = color(colors.getString(c));
+                    }
+                    item.particleCount = particles.optInt("count", 10);
+                    item.motion = particles.optString("motion");
+                    item.shape = particles.optString("shape");
+                }
+                items.add(item);
+            }
+            JSONArray sets = data.getJSONArray("outfits");
+            for (int i = 0; i < sets.length(); i++) {
+                outfits.add(new Outfit(sets.getJSONObject(i)));
+            }
+        } catch (Exception e) {
+            // without the file the wardrobe is just empty
+        }
+    }
+
+    /** #RRGGBB or #RRGGBBAA */
+    private static int color(String hex) {
+        int rgb = (int) Long.parseLong(hex.substring(1, 7), 16);
+        int alpha = hex.length() >= 9 ? Integer.parseInt(hex.substring(7, 9), 16) : 255;
+        return (alpha << 24) | rgb;
+    }
+
+    static List<Item> items(Context context) {
+        load(context);
+        return items;
+    }
+
+    static List<Outfit> outfits(Context context) {
+        load(context);
+        return outfits;
+    }
+
+    static Item find(Context context, String id) {
+        if (id == null || id.isEmpty()) {
+            return null;
+        }
+        for (Item item : items(context)) {
             if (item.id.equals(id)) {
                 return item;
             }
@@ -59,14 +147,41 @@ final class Cosmetics {
         return null;
     }
 
-    static List<Item> inSlot(String slot) {
+    static List<Item> inSlot(Context context, String slot) {
         List<Item> out = new ArrayList<Item>();
-        for (Item item : ITEMS) {
+        for (Item item : items(context)) {
             if (item.slot.equals(slot)) {
                 out.add(item);
             }
         }
         return out;
+    }
+
+    /** the frame colour of a rarity, like Millida's: grey, blue, purple, gold */
+    static int rarityColor(String rarity) {
+        if ("legendary".equals(rarity)) {
+            return 0xFFFFB43C;
+        }
+        if ("epic".equals(rarity)) {
+            return 0xFFB04CFF;
+        }
+        if ("rare".equals(rarity)) {
+            return 0xFF3C8CFF;
+        }
+        return 0xFF8A93A0;
+    }
+
+    static String rarityName(String rarity) {
+        if ("legendary".equals(rarity)) {
+            return "Легендарный";
+        }
+        if ("epic".equals(rarity)) {
+            return "Эпический";
+        }
+        if ("rare".equals(rarity)) {
+            return "Редкий";
+        }
+        return "Обычный";
     }
 
     /* ------------------------------------------------------------ what is worn */
@@ -83,11 +198,12 @@ final class Cosmetics {
         prefs(context).edit().putString(slot, id == null ? "" : id).apply();
     }
 
-    static void wearSet(Context context, String[] set) {
-        wear(context, HEAD, set[1]);
-        wear(context, BACK, set[2]);
-        wear(context, BODY, set[3]);
-        wear(context, PET, set[4]);
+    static void wearOutfit(Context context, Outfit outfit) {
+        wear(context, HEAD, outfit.head);
+        wear(context, BACK, outfit.back);
+        wear(context, BODY, outfit.body);
+        wear(context, PET, outfit.pet);
+        wear(context, EFFECT, outfit.effect);
     }
 
     /* ------------------------------------------------------------ drawing */
@@ -109,157 +225,94 @@ final class Cosmetics {
             paint.setColor(color);
             canvas.drawRect(ox + x * u, oy + y * u, ox + (x + w) * u, oy + (y + h) * u, paint);
         }
+    }
 
-        /** a picture from strings: every character is a pixel; ' ' and '.' are empty, the others index `colors` */
-        void sprite(float x, float y, String[] rows, String keys, int[] colors) {
-            for (int j = 0; j < rows.length; j++) {
-                for (int i = 0; i < rows[j].length(); i++) {
-                    int k = keys.indexOf(rows[j].charAt(i));
-                    if (k >= 0) {
-                        rect(x + i, y + j, 1, 1, colors[k]);
+    /**
+     * Draws the layers of an item that show from this side: `behind` true draws the layers seen from the back.
+     * time drives the animations (bob, flap, hop, float).
+     */
+    static void draw(Pen pen, Item item, boolean behind, float time) {
+        if (item == null) {
+            return;
+        }
+        for (Layer layer : item.layers) {
+            if (!"both".equals(layer.view) && !(behind ? "back" : "front").equals(layer.view)) {
+                continue;
+            }
+            float dy = 0;
+            if ("bob".equals(layer.anim)) {
+                dy = (float) Math.sin(time * 2) * 0.5f;
+            } else if ("flap".equals(layer.anim)) {
+                dy = -(float) (0.5 + 0.5 * Math.sin(time * 2.2)) * 2;
+            } else if ("hop".equals(layer.anim)) {
+                dy = -(float) Math.abs(Math.sin(time * 3)) * 2;
+            } else if ("float".equals(layer.anim)) {
+                dy = (float) Math.sin(time * 2) * 1.5f;
+            }
+            for (int j = 0; j < layer.rows.length; j++) {
+                String row = layer.rows[j];
+                for (int i = 0; i < row.length(); i++) {
+                    char c = row.charAt(i);
+                    if (c == '.' || c == ' ' || c >= 128 || layer.colors[c] == 0) {
+                        continue;
                     }
+                    pen.rect(layer.x + i, layer.y + j + dy, 1, 1, layer.colors[c]);
                 }
             }
         }
-
-        void glow(float x, float y, float radius, int color) {
-            paint.setColor(color);
-            canvas.drawCircle(ox + x * u, oy + y * u, radius * u, paint);
-        }
     }
 
-    private static final int GOLD = 0xFFE6B43C, GOLD_DARK = 0xFF9C6E1E, RUBY = 0xFFE8364F, BLACK = 0xFF120306, WHITE = 0xFFF4EEF0;
+    private static float hash(int a, int b) {
+        int h = a * 374761393 + b * 668265263 + 0x2545F491;
+        h = (h ^ (h >>> 13)) * 1274126177;
+        return ((h ^ (h >>> 16)) & 0x7fffffff) % 10000 / 10000f;
+    }
 
-    /** things behind the figure: wings and capes (`flap` 0..1 moves the wings) */
-    static void drawBack(Pen p, String id, float flap, boolean fromBehind) {
-        if (id.isEmpty()) {
+    /** the particles of an effect around the figure (rise, fall, orbit, spark) */
+    static void drawParticles(Pen pen, Item item, float time) {
+        if (item == null || item.particleColors == null) {
             return;
         }
-        if (id.equals("crimson_cape")) {
-            if (fromBehind) {
-                p.rect(3, 8, 10, 17, 0xFF7A0F22);
-                p.rect(3, 8, 10, 1, 0xFFB01C38);
-                p.rect(4, 23, 8, 2, 0xFF5A0A18);
-                p.rect(7, 12, 2, 2, GOLD);
-            } else {
-                p.rect(2, 9, 1, 15, 0xFF7A0F22);   // the edges seen beside the body
-                p.rect(13, 9, 1, 15, 0xFF7A0F22);
+        for (int i = 0; i < item.particleCount; i++) {
+            int color = item.particleColors[i % item.particleColors.length];
+            float speed = 4 + hash(i, 1) * 5;
+            float phase = hash(i, 2) * 40;
+            float x, y, alpha;
+            if ("orbit".equals(item.motion)) {
+                double angle = time * 1.4 + i * Math.PI * 2 / item.particleCount;
+                x = 8 + (float) Math.cos(angle) * 12;
+                y = 16 + (float) Math.sin(angle) * 4 + (float) Math.sin(time * 2 + i) * 6;
+                alpha = 0.6f + 0.4f * (float) Math.sin(angle);
+            } else if ("fall".equals(item.motion)) {
+                x = -6 + hash(i, 3) * 28;
+                y = -8 + (time * speed + phase) % 44;
+                alpha = 0.8f;
+            } else if ("spark".equals(item.motion)) {
+                x = -4 + hash(i, 3) * 24;
+                y = -4 + hash(i, 4) * 38;
+                alpha = (float) Math.max(0, Math.sin(time * (2 + hash(i, 5) * 3) + phase));
+            } else {  // rise
+                x = -2 + hash(i, 3) * 20;
+                float travel = (time * speed + phase) % 40;
+                y = 34 - travel;
+                alpha = Math.min(1, travel / 6) * Math.max(0, 1 - travel / 40);
             }
-            return;
-        }
-        int dark, mid, light;
-        if (id.equals("angel_wings")) {
-            dark = 0xFFC9C2C8;
-            mid = 0xFFE8E2E6;
-            light = WHITE;
-        } else if (id.equals("demon_wings")) {
-            dark = 0xFF5A0A18;
-            mid = 0xFF9E1630;
-            light = RUBY;
-        } else {
-            dark = 0xFF14070B;
-            mid = 0xFF2E1018;
-            light = 0xFF4A1A26;
-        }
-        float lift = flap * 2;
-        String[] wing = {
-            "....aa",
-            "..aabb",
-            ".abbbc",
-            "abbbcc",
-            "abbcc.",
-            "abcc..",
-            ".bc...",
-            ".c....",
-        };
-        String[] mirrored = new String[wing.length];
-        for (int i = 0; i < wing.length; i++) {
-            mirrored[i] = new StringBuilder(wing[i]).reverse().toString();
-        }
-        int[] colors = { light, mid, dark };
-        p.sprite(-5, 6 - lift, wing, "abc", colors);   // out from behind the shoulders
-        p.sprite(15, 6 - lift, mirrored, "abc", colors);
-    }
-
-    static void drawBody(Pen p, String id) {
-        if (id.equals("scarf")) {
-            p.rect(4, 8, 8, 2, 0xFFB01C38);
-            p.rect(4, 8, 8, 1, RUBY);
-            p.rect(9, 10, 2, 4, 0xFFB01C38);
-            p.rect(9, 13, 2, 1, 0xFF7A0F22);
-        } else if (id.equals("chain")) {
-            p.rect(5, 9, 1, 1, GOLD);
-            p.rect(6, 10, 1, 1, GOLD);
-            p.rect(7, 11, 2, 1, GOLD);
-            p.rect(9, 10, 1, 1, GOLD);
-            p.rect(10, 9, 1, 1, GOLD);
-            p.rect(7, 12, 2, 2, RUBY);
-        } else if (id.equals("tie")) {
-            p.rect(7, 8, 2, 1, BLACK);
-            p.rect(7, 9, 2, 5, 0xFF7A0F22);
-            p.rect(7, 14, 2, 1, BLACK);
+            int a = Math.round(((color >>> 24) & 0xFF) * Math.max(0, Math.min(1, alpha)));
+            int c = (a << 24) | (color & 0xFFFFFF);
+            if ("heart".equals(item.shape)) {
+                pen.rect(x, y, 1, 1, c);
+                pen.rect(x + 2, y, 1, 1, c);
+                pen.rect(x, y + 1, 3, 1, c);
+                pen.rect(x + 1, y + 2, 1, 1, c);
+            } else if ("drop".equals(item.shape)) {
+                pen.rect(x, y, 0.6f, 1.6f, c);
+            } else {
+                pen.rect(x, y, 0.8f, 0.8f, c);
+            }
         }
     }
 
-    static void drawHead(Pen p, String id, float time) {
-        if (id.equals("crown")) {
-            p.sprite(3, -3, new String[] { "a..a..a..a", "aaaaaaaaaa", "abaacaabaa" }, "abc", new int[] { GOLD, RUBY, 0xFF5CB6FF });
-            p.rect(3, -1, 10, 1, GOLD_DARK);
-        } else if (id.equals("horns")) {
-            int h = 0xFF2A0A12, t = 0xFF7A0F22;
-            p.sprite(1, -5, new String[] { "b.........b", "a.........a", "aa.......aa", ".aa.....aa." }, "ab", new int[] { h, t });
-            p.rect(3, -1, 2, 1, h);
-            p.rect(11, -1, 2, 1, h);
-        } else if (id.equals("halo")) {
-            float bob = (float) Math.sin(time * 2) * 0.4f;
-            p.glow(8, -3 + bob, 5, 0x33FFE08A);
-            p.rect(4, -4 + bob, 8, 1, GOLD);
-            p.rect(3, -3 + bob, 1, 1, GOLD);
-            p.rect(12, -3 + bob, 1, 1, GOLD);
-            p.rect(4, -2 + bob, 8, 1, GOLD_DARK);
-        } else if (id.equals("wizard_hat")) {
-            int a = 0xFF5A0A18, b = 0xFF8E1428;
-            p.sprite(2, -9, new String[] { "......ab....", ".....aab....", ".....aabb...", "....aaabb...", "....aaabbb..",
-                                           "...aaaabbb..", "...aaaaabbb.", "..aaaaaabbb.", "cccccccccccc", "dddddddddddd" },
-                     "abcd", new int[] { a, b, GOLD, BLACK });
-        } else if (id.equals("cat_ears")) {
-            int f = 0xFF1A0A0E, in = 0xFFE87A90;
-            p.sprite(3, -3, new String[] { "a........a", "aa......aa", "aba....aba" }, "ab", new int[] { f, in });
-        } else if (id.equals("headphones")) {
-            p.rect(3, -1, 10, 1, BLACK);
-            p.rect(3, 0, 1, 3, BLACK);
-            p.rect(12, 0, 1, 3, BLACK);
-            p.rect(2, 3, 2, 3, RUBY);
-            p.rect(12, 3, 2, 3, RUBY);
-        } else if (id.equals("shades")) {
-            p.rect(4, 3, 8, 1, BLACK);
-            p.rect(5, 4, 2, 1, BLACK);
-            p.rect(9, 4, 2, 1, BLACK);
-            p.rect(5, 4, 1, 1, 0xFF3A0D16);
-        }
-    }
-
-    /** the pet floats by the right foot */
-    static void drawPet(Pen p, String id, float time) {
-        if (id.isEmpty()) {
-            return;
-        }
-        float hop = (float) Math.abs(Math.sin(time * 3)) * 2;
-        float x = 18, y = 24 - hop;
-        if (id.equals("cube_pet")) {
-            p.glow(x + 2.5f, y + 2.5f, 4, 0x44FF283C);
-            p.sprite(x, y, new String[] { ".aaa.", "abbba", "abcba", "abbba", ".aaa." }, "abc", new int[] { RUBY, 0xFF7A0F22, 0xFFFFC8CD });
-        } else if (id.equals("bat_pet")) {
-            float flap = (float) Math.sin(time * 12);
-            y = 14 + (float) Math.sin(time * 2) * 2;
-            p.sprite(x, y, new String[] { flap > 0 ? "a.....a" : ".......", flap > 0 ? "aa.b.aa" : "aaabaaa", ".abbba.", "..bcb.." }, "abc",
-                     new int[] { 0xFF2E1018, BLACK, RUBY });
-        } else if (id.equals("slime_pet")) {
-            p.sprite(x, y + 2, new String[] { ".aaaa.", "abbbba", "abcbca", "abbbba", ".aaaa." }, "abc",
-                     new int[] { 0xFF7A0F22, 0xFFC81F3A, BLACK });
-        } else if (id.equals("ghost_pet")) {
-            y = 16 + (float) Math.sin(time * 1.5) * 1.5f;
-            p.sprite(x, y, new String[] { ".aaa.", "aaaaa", "abaab", "aaaaa", "aaaaa", "a.a.a" }, "ab", new int[] { 0xCCF4EEF0, BLACK });
-        }
+    static int parseColor(String hex) {
+        return Color.parseColor(hex);
     }
 }
