@@ -475,8 +475,18 @@ public final class PojavEngine extends GameEngine {
         // the account: a fresh Minecraft token from the Microsoft sign-in
         if (account.minecraftTokenExpires - System.currentTimeMillis() < 30 * 60 * 1000L) {
             log.log("Обновляю вход в аккаунт...");
-            account.refresh();
-            account.save(activity);
+            try {
+                account.refresh();
+                account.save(activity);
+            } catch (Account.SessionExpired e) {
+                throw e;
+            } catch (Exception e) {
+                // no internet or a busy server: the game starts with the saved sign-in (the skin comes by the player's id)
+                if (account.minecraftToken.isEmpty()) {
+                    throw e;
+                }
+                log.log("Вход не обновился (" + e.getMessage() + "), запускаю с сохранённым.");
+            }
         }
         MinecraftAccount mc = new MinecraftAccount();
         mc.username = account.name;

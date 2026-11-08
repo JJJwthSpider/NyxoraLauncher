@@ -808,8 +808,17 @@ final class HomeScreen {
         accountChip.setVisibility(View.VISIBLE);
         accountName.setText(account.ownsJava ? account.name : "Без Java Edition");
         accountSub.setText(account.ownsJava ? "Microsoft" : "нет игры");
-        Icons.loadHead(head, account.skinUrl, R.drawable.wizard);
-        WardrobeScreen.loadSkinAndCape(activity, playerBody);
+        if (SkinCache.skin(activity, account) == null) {
+            Icons.loadHead(head, account.skinUrl, R.drawable.wizard);
+        }
+        WardrobeScreen.loadSkinAndCape(activity, playerBody, new Icons.Got() {
+            public void got(android.graphics.Bitmap skin) {
+                android.graphics.Bitmap face = SkinCache.head(skin);
+                if (face != null) {
+                    head.setImageBitmap(face);  // the face of the skin kept on the phone, also offline
+                }
+            }
+        });
         WardrobeScreen.loadSkinAndCape(activity, skinTile);
         playerBody.setNametag(account.name);
     }

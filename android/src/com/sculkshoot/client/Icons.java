@@ -227,6 +227,7 @@ final class Icons {
     }
 
     private static Bitmap fetchRaw(String url) {
+        url = Account.https(url);
         try {
             HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
             c.setRequestProperty("User-Agent", Http.USER_AGENT);

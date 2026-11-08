@@ -42,6 +42,8 @@ final class WardrobeScreen {
     private final CharacterView character;
     private final FlowLayout grid;
     private final ScrollView scroll;
+    private final LinearLayout header;  // the generator above the tiles on the skins and capes tabs
+    private long seed = System.currentTimeMillis();
     private final TextView section;
     private final List<View> tabViews = new ArrayList<View>();
     private String tab = SETS;
@@ -101,7 +103,7 @@ final class WardrobeScreen {
         stage.setBackground(new StageDrawable(density));
         character = new CharacterView(activity);
         stage.addView(character, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        TextView hint = Ui.label(activity, "Нажми на персонажа, чтобы повернуть", 10, 0xB3FFD6DC, false);
+        TextView hint = Ui.label(activity, "Крути пальцем · нажми — анимация", 10, 0xB3FFD6DC, false);
         hint.setGravity(Gravity.CENTER);
         stage.addView(hint, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
         body.addView(stage, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 4));
@@ -131,9 +133,15 @@ final class WardrobeScreen {
         section.setPadding(dp(2), dp(8), 0, dp(6));
         right.addView(section);
         scroll = new ScrollView(activity);
+        LinearLayout content = new LinearLayout(activity);
+        content.setOrientation(LinearLayout.VERTICAL);
+        header = new LinearLayout(activity);
+        header.setOrientation(LinearLayout.VERTICAL);
+        content.addView(header, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         grid = new FlowLayout(activity, dp(8));
         grid.setPadding(0, 0, 0, dp(10));
-        scroll.addView(grid);
+        content.addView(grid, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        scroll.addView(content);
         right.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         body.addView(right, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 7));
 
@@ -199,15 +207,52 @@ final class WardrobeScreen {
 
     /** the account's skin and active cape on a character */
     static void loadSkinAndCape(final MainActivity activity, final CharacterView view) {
+        loadSkinAndCape(activity, view, null);
+    }
+
+    /**
+     * The skin and the cape: at once from the phone (SkinCache), then fresh from Mojang over https and kept again;
+     * `onSkin` hears about every skin shown (the account chip draws its face from it).
+     */
+    static void loadSkinAndCape(final MainActivity activity, final CharacterView view, final Icons.Got onSkin) {
         final Account account = activity.account();
-        if (account == null || account.skinUrl.isEmpty()) {
+        if (account == null || !account.signedIn()) {
             return;
         }
-        Icons.loadBitmap(account.skinUrl, new Icons.Got() {
-            public void got(Bitmap bitmap) {
-                view.setSkin(bitmap);
+        view.setSlim("SLIM".equalsIgnoreCase(account.skinVariant));
+        Bitmap cached = SkinCache.skin(activity, account);
+        if (cached != null) {
+            view.setSkin(cached);
+            if (onSkin != null) {
+                onSkin.got(cached);
             }
-        });
+        }
+        if (!account.skinUrl.isEmpty()) {
+            Icons.loadBitmap(account.skinUrl, new Icons.Got() {
+                public void got(Bitmap bitmap) {
+                    if (bitmap == null || bitmap.getWidth() < 64) {
+                        return;  // no internet: the kept skin stays
+                    }
+                    view.setSkin(bitmap);
+                    SkinCache.saveSkin(activity, account, bitmap);
+                    if (onSkin != null) {
+                        onSkin.got(bitmap);
+                    }
+                }
+            });
+        }
+        Bitmap generated = SkinCache.generatedCape(activity);
+        if (generated != null) {
+            view.setCape(generated);  // a cape from the generator, chosen in the wardrobe
+            return;
+        }
+        Bitmap cachedCape = SkinCache.cape(activity, account);
+        if (cachedCape != null) {
+            view.setCape(cachedCape);
+        }
+        if (!account.ownsJava) {
+            return;
+        }
         activity.background(new MainActivity.Job<String>() {
             public String run() throws Exception {
                 for (Account.Cape cape : account.capes()) {
@@ -219,13 +264,22 @@ final class WardrobeScreen {
             }
 
             public void done(String url, Exception error) {
-                if (url != null && !url.isEmpty()) {
-                    Icons.loadBitmap(url, new Icons.Got() {
-                        public void got(Bitmap bitmap) {
-                            view.setCape(bitmap);
-                        }
-                    });
+                if (error != null || url == null) {
+                    return;  // no internet: the kept cape stays
                 }
+                if (url.isEmpty()) {
+                    view.setCape(null);
+                    SkinCache.saveCape(activity, account, null);
+                    return;
+                }
+                Icons.loadBitmap(url, new Icons.Got() {
+                    public void got(Bitmap bitmap) {
+                        if (bitmap != null) {
+                            view.setCape(bitmap);
+                            SkinCache.saveCape(activity, account, bitmap);
+                        }
+                    }
+                });
             }
         });
     }
@@ -261,6 +315,7 @@ final class WardrobeScreen {
             b.setBackground(on ? PixelDrawable.accent(density) : PixelDrawable.plain(density));
         }
         grid.removeAllViews();
+        header.removeAllViews();
         character.setBack(Cosmetics.BACK.equals(id) || CAPES.equals(id));
         if (SETS.equals(id)) {
             section.setText("Наборы — все открыты");
@@ -427,9 +482,10 @@ final class WardrobeScreen {
     /* ------------------------------------------------------------ the skin of the account */
 
     private void showSkins() {
+        header.addView(generator(false), fullWidth());
         final Account account = activity.account();
         if (account == null || !account.ownsJava) {
-            section.setText("Скин можно сменить только на аккаунте с Minecraft: Java Edition");
+            section.setText("Генератор работает всегда; надеть скин можно на аккаунте с Minecraft: Java Edition");
             return;
         }
         float density = activity.getResources().getDisplayMetrics().density;
@@ -545,9 +601,289 @@ final class WardrobeScreen {
         });
     }
 
+
+    /* ------------------------------------------------------------ Arkan's skin and cape generator */
+
+    private LinearLayout.LayoutParams fullWidth() {
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        p.bottomMargin = dp(10);
+        return p;
+    }
+
+    private static final String[] SKIN_IDEAS = { "🛡 Рыцарь в золотых доспехах", "🥷 Ниндзя с красной повязкой", "🧙 Маг в фиолетовой мантии", "🏴 Пират",
+                                                 "👑 Принцесса", "🚀 Космонавт", "😈 Демон", "🤖 Кибер неон", "🧟 Зомби", "💀 Скелет", "🧝 Эльф",
+                                                 "🪓 Викинг", "🖤 Чёрное худи с черепом", "🍷 Бордовый костюм" };
+    private static final String[] CAPE_IDEAS = { "🌌 Галактика со звёздами", "🔥 Огненный", "❄ Ледяной", "👑 Золотой с короной", "💗 Розовый с сердцем",
+                                                 "🌈 Радуга", "🍷 Бордовый Vellora", "🌲 Лесной", "⚡ Синий с молнией", "🖤 Чёрно-красные полосы" };
+
+    /** the generator: a description, ideas, four variants; a tap tries one on, then it can be worn or saved */
+    private View generator(final boolean capes) {
+        float density = activity.getResources().getDisplayMetrics().density;
+        final LinearLayout panel = new LinearLayout(activity);
+        panel.setOrientation(LinearLayout.VERTICAL);
+        panel.setPadding(dp(12), dp(10), dp(12), dp(12));
+        panel.setBackground(PixelDrawable.panel(0xFF241018, 0xFFB3263A, density));
+        LinearLayout titleRow = new LinearLayout(activity);
+        titleRow.setGravity(Gravity.CENTER_VERTICAL);
+        WizardView wizard = new WizardView(activity);
+        titleRow.addView(wizard, new LinearLayout.LayoutParams(dp(40), dp(40)));
+        LinearLayout titles = new LinearLayout(activity);
+        titles.setOrientation(LinearLayout.VERTICAL);
+        titles.setPadding(dp(8), 0, 0, 0);
+        titles.addView(Ui.label(activity, capes ? "ИИ-генератор плащей" : "ИИ-генератор скинов", 15, Ui.TEXT, true));
+        titles.addView(Ui.label(activity, capes ? "Опиши плащ — Аркан нарисует 4 варианта" : "Опиши персонажа — Аркан нарисует 4 скина", 11, Ui.HINT, false));
+        titleRow.addView(titles, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        panel.addView(titleRow);
+
+        LinearLayout inputRow = new LinearLayout(activity);
+        inputRow.setGravity(Gravity.CENTER_VERTICAL);
+        inputRow.setPadding(0, dp(8), 0, dp(4));
+        final android.widget.EditText prompt = new android.widget.EditText(activity);
+        prompt.setHint(capes ? "Например: фиолетовая галактика со звёздами" : "Например: рыжая девушка-маг в синей мантии");
+        prompt.setHintTextColor(Ui.HINT);
+        prompt.setTextColor(Ui.TEXT);
+        prompt.setTextSize(13);
+        prompt.setSingleLine(true);
+        prompt.setBackground(Ui.rounded(activity, 0xFF0E0407, 0, 0xFF5A1E2A));
+        prompt.setPadding(dp(10), dp(7), dp(10), dp(7));
+        inputRow.addView(prompt, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button go = Ui.button(activity, "🔮 Создать", true);
+        go.setTextSize(13);
+        LinearLayout.LayoutParams gp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        gp.leftMargin = dp(6);
+        inputRow.addView(go, gp);
+        panel.addView(inputRow);
+
+        FlowLayout ideas = new FlowLayout(activity, dp(5));
+        for (final String idea : capes ? CAPE_IDEAS : SKIN_IDEAS) {
+            Button b = Ui.button(activity, idea, false);
+            b.setTextSize(11);
+            b.setMinHeight(dp(30));
+            b.setMinimumHeight(dp(30));
+            b.setPadding(dp(8), dp(3), dp(8), dp(6));
+            b.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    prompt.setText(idea.substring(idea.indexOf(' ') + 1));
+                    Sounds.play(Sounds.CLICK);
+                }
+            });
+            ideas.addView(b);
+        }
+        panel.addView(ideas);
+
+        final FlowLayout variants = new FlowLayout(activity, dp(8));
+        variants.setPadding(0, dp(10), 0, 0);
+        panel.addView(variants);
+        final LinearLayout actions = new LinearLayout(activity);
+        actions.setPadding(0, dp(8), 0, 0);
+        actions.setVisibility(View.GONE);
+        panel.addView(actions);
+
+        go.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                final String text = prompt.getText().toString().trim();
+                seed++;
+                Sounds.play(Sounds.OPEN);
+                android.view.inputmethod.InputMethodManager keyboard =
+                    (android.view.inputmethod.InputMethodManager) activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                if (keyboard != null) {
+                    keyboard.hideSoftInputFromWindow(prompt.getWindowToken(), 0);
+                }
+                final long mySeed = seed;
+                activity.background(new MainActivity.Job<Object>() {
+                    public Object run() {
+                        return capes ? SkinGenerator.capes(text, 4, mySeed) : SkinGenerator.skins(text, 4, mySeed);
+                    }
+
+                    @SuppressWarnings("unchecked")
+                    public void done(Object result, Exception error) {
+                        if (error != null || result == null) {
+                            Toast.makeText(activity, "Не получилось: " + (error == null ? "" : error.getMessage()), Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        variants.removeAllViews();
+                        actions.setVisibility(View.GONE);
+                        if (capes) {
+                            for (Bitmap cape : (List<Bitmap>) result) {
+                                variants.addView(capeVariant(cape, actions));
+                            }
+                        } else {
+                            for (SkinGenerator.Skin skin : (List<SkinGenerator.Skin>) result) {
+                                variants.addView(skinVariant(skin, actions));
+                            }
+                        }
+                        for (int i = 0; i < variants.getChildCount(); i++) {
+                            View tile = variants.getChildAt(i);
+                            tile.setAlpha(0f);
+                            tile.setScaleX(0.85f);
+                            tile.setScaleY(0.85f);
+                            tile.animate().alpha(1f).scaleX(1f).scaleY(1f).setStartDelay(i * 70L).setDuration(220).start();
+                        }
+                    }
+                });
+            }
+        });
+        return panel;
+    }
+
+    private View skinVariant(final SkinGenerator.Skin skin, final LinearLayout actions) {
+        float density = activity.getResources().getDisplayMetrics().density;
+        LinearLayout tile = new LinearLayout(activity);
+        tile.setOrientation(LinearLayout.VERTICAL);
+        tile.setGravity(Gravity.CENTER_HORIZONTAL);
+        tile.setPadding(dp(4), dp(4), dp(4), dp(6));
+        tile.setBackground(PixelDrawable.panel(0xFF1C080D, 0xFF8A3442, density));
+        CharacterView picture = new CharacterView(activity);
+        picture.setTurnable(false);
+        picture.setAnimated(false);
+        picture.setSlim(skin.slim);
+        picture.setSkin(skin.bitmap);
+        picture.turnTo(28);
+        tile.addView(picture, new LinearLayout.LayoutParams(dp(92), dp(124)));
+        TextView name = Ui.label(activity, skin.title, 10, Ui.TEXT, true);
+        name.setGravity(Gravity.CENTER);
+        tile.addView(name);
+        tile.setClickable(true);
+        tile.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // try it on the big player
+                character.setSlim(skin.slim);
+                character.setSkin(skin.bitmap);
+                character.setBack(false);
+                pop(true);
+                showSkinActions(actions, skin);
+            }
+        });
+        tile.setLayoutParams(new ViewGroup.LayoutParams(dp(104), ViewGroup.LayoutParams.WRAP_CONTENT));
+        return tile;
+    }
+
+    private void showSkinActions(LinearLayout actions, final SkinGenerator.Skin skin) {
+        actions.removeAllViews();
+        actions.setVisibility(View.VISIBLE);
+        Button wear = Ui.button(activity, "⬆ Надеть на аккаунт", true);
+        wear.setTextSize(12);
+        wear.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                uploadGenerated(skin);
+            }
+        });
+        actions.addView(wear, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button save = Ui.button(activity, "💾 PNG", false);
+        save.setTextSize(12);
+        save.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                activity.saveImage(skin.bitmap, "vellora-skin.png");
+            }
+        });
+        LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        sp.leftMargin = dp(6);
+        actions.addView(save, sp);
+        Button mine = Ui.button(activity, "↺ Мой", false);
+        mine.setTextSize(12);
+        mine.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                loadSkinAndCape(activity, character);
+                Sounds.play(Sounds.CLOSE);
+            }
+        });
+        actions.addView(mine, new LinearLayout.LayoutParams(sp));
+    }
+
+    /** puts a generated skin on the Minecraft account: everyone sees it in the game */
+    private void uploadGenerated(final SkinGenerator.Skin skin) {
+        final Account account = activity.account();
+        if (account == null || !account.ownsJava) {
+            Toast.makeText(activity, "Надеть можно на аккаунт с Minecraft: Java Edition. Сохрани PNG — его можно поставить позже.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Toast.makeText(activity, "Надеваю скин...", Toast.LENGTH_SHORT).show();
+        activity.background(new MainActivity.Job<Boolean>() {
+            public Boolean run() throws Exception {
+                java.io.ByteArrayOutputStream png = new java.io.ByteArrayOutputStream();
+                skin.bitmap.compress(Bitmap.CompressFormat.PNG, 100, png);
+                account.uploadSkin(png.toByteArray(), skin.slim);
+                return true;
+            }
+
+            public void done(Boolean ok, Exception error) {
+                if (error != null) {
+                    Toast.makeText(activity, error.getMessage(), Toast.LENGTH_LONG).show();
+                    return;
+                }
+                account.save(activity);
+                SkinCache.saveSkin(activity, account, skin.bitmap);
+                Sounds.play(Sounds.WEAR);
+                Toast.makeText(activity, "Скин надет — его видно в игре и в лобби", Toast.LENGTH_LONG).show();
+                activity.accountChanged();
+            }
+        });
+    }
+
+    private View capeVariant(final Bitmap cape, final LinearLayout actions) {
+        float density = activity.getResources().getDisplayMetrics().density;
+        LinearLayout tile = new LinearLayout(activity);
+        tile.setOrientation(LinearLayout.VERTICAL);
+        tile.setGravity(Gravity.CENTER_HORIZONTAL);
+        tile.setPadding(dp(4), dp(6), dp(4), dp(6));
+        tile.setBackground(PixelDrawable.panel(0xFF1C080D, 0xFF8A3442, density));
+        tile.addView(new CapePicture(activity, cape), new LinearLayout.LayoutParams(dp(70), dp(100)));
+        tile.setClickable(true);
+        tile.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                character.setCape(cape);
+                character.setBack(true);
+                pop(true);
+                showCapeActions(actions, cape);
+            }
+        });
+        tile.setLayoutParams(new ViewGroup.LayoutParams(dp(82), ViewGroup.LayoutParams.WRAP_CONTENT));
+        return tile;
+    }
+
+    private void showCapeActions(LinearLayout actions, final Bitmap cape) {
+        actions.removeAllViews();
+        actions.setVisibility(View.VISIBLE);
+        Button wear = Ui.button(activity, "Носить в Vellora", true);
+        wear.setTextSize(12);
+        wear.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                SkinCache.useGeneratedCape(activity, cape);
+                Sounds.play(Sounds.WEAR);
+                Toast.makeText(activity, "Плащ надет в Vellora: он виден в лобби и гардеробе. В самой игре Minecraft показывает только официальные плащи.",
+                               Toast.LENGTH_LONG).show();
+                activity.accountChanged();
+            }
+        });
+        actions.addView(wear, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button save = Ui.button(activity, "💾 PNG", false);
+        save.setTextSize(12);
+        save.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                activity.saveImage(cape, "vellora-cape.png");
+            }
+        });
+        LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        sp.leftMargin = dp(6);
+        actions.addView(save, sp);
+        Button off = Ui.button(activity, "Снять", false);
+        off.setTextSize(12);
+        off.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                SkinCache.useGeneratedCape(activity, null);
+                character.setCape(null);
+                loadSkinAndCape(activity, character);
+                activity.accountChanged();
+                Sounds.play(Sounds.CLOSE);
+            }
+        });
+        actions.addView(off, new LinearLayout.LayoutParams(sp));
+    }
+
     /* ------------------------------------------------------------ capes */
 
     private void showCapes() {
+        header.addView(generator(true), fullWidth());
         final Account account = activity.account();
         if (account == null || !account.ownsJava) {
             section.setText("Плащи есть только у аккаунта с Minecraft: Java Edition");
@@ -611,6 +947,8 @@ final class WardrobeScreen {
                     return;
                 }
                 Toast.makeText(activity, id == null ? "Плащ снят" : "Плащ надет — его видно в игре", Toast.LENGTH_SHORT).show();
+                SkinCache.useGeneratedCape(activity, null);  // a real cape replaces the generated one
+                activity.accountChanged();
                 pop(id != null);
                 if (url == null) {
                     character.setCape(null);

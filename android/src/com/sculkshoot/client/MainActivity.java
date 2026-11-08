@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
@@ -295,10 +296,16 @@ public final class MainActivity extends Activity {
             }
 
             public void done(Account fresh, Exception error) {
-                if (error instanceof Account.LoginException) {
+                // only a sign-in Microsoft no longer takes ends it; no internet, a busy server (429) or a slow step
+                // keep the saved account, its skin and its cape (before, any of them signed the player out)
+                if (error instanceof Account.SessionExpired) {
                     Account.signOut(MainActivity.this);
                     account = new Account();
                     showLogin(error.getMessage());
+                    return;
+                }
+                if (error != null) {
+                    android.util.Log.w("Vellora", "the sign-in was not renewed now: " + error.getMessage());
                     return;
                 }
                 if (fresh != null) {  // without internet the saved profile stays
@@ -506,6 +513,23 @@ public final class MainActivity extends Activity {
             startActivityForResult(pick, REQUEST_SKIN);
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, "Нет приложения для выбора файлов", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private static final int REQUEST_SAVE_IMAGE = 44;
+    private Bitmap pendingImage;
+
+    /** "💾 PNG" of the generator: the picture goes where the player chooses */
+    void saveImage(Bitmap image, String name) {
+        pendingImage = image;
+        Intent create = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        create.addCategory(Intent.CATEGORY_OPENABLE);
+        create.setType("image/png");
+        create.putExtra(Intent.EXTRA_TITLE, name);
+        try {
+            startActivityForResult(create, REQUEST_SAVE_IMAGE);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "Нет приложения для сохранения файлов", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -2395,6 +2419,23 @@ public final class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_SAVE_IMAGE) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null && pendingImage != null) {
+                try {
+                    java.io.OutputStream out = getContentResolver().openOutputStream(data.getData());
+                    try {
+                        pendingImage.compress(Bitmap.CompressFormat.PNG, 100, out);
+                    } finally {
+                        out.close();
+                    }
+                    Toast.makeText(this, "Сохранено", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(this, "Не удалось сохранить: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+            pendingImage = null;
+            return;
+        }
         if (requestCode == REQUEST_SKIN) {
             if (resultCode == RESULT_OK && data != null && data.getData() != null && wardrobe != null) {
                 wardrobe.changeSkin(data.getData());

@@ -21,10 +21,25 @@ final class Account {
     /** exactly what Prism Launcher asks for with this app id (MSADeviceCodeStep.cpp) */
     private static final String SCOPE = "XboxLive.SignIn XboxLive.offline_access";
 
-    static final class LoginException extends Exception {
+    static class LoginException extends Exception {
         LoginException(String message) {
             super(message);
         }
+    }
+
+    /** Microsoft no longer takes the saved sign-in (revoked or too old): only this sends the player back to the login */
+    static final class SessionExpired extends LoginException {
+        SessionExpired(String message) {
+            super(message);
+        }
+    }
+
+    /** Mojang gives the skin and cape addresses as http://, which Android 9 and newer refuse: the same files over https */
+    static String https(String url) {
+        if (url != null && url.startsWith("http://textures.minecraft.net/")) {
+            return "https://" + url.substring("http://".length());
+        }
+        return url == null ? "" : url;
     }
 
     /** what the player sees while signing in: open this page and type this code */
@@ -39,6 +54,7 @@ final class Account {
     String name = "";
     String uuid = "";
     String skinUrl = "";
+    String skinVariant = "CLASSIC";  // or SLIM: thin arms
     boolean ownsJava;
     String refreshToken = "";
     String minecraftToken = "";
@@ -59,7 +75,8 @@ final class Account {
         Account a = new Account();
         a.name = p.getString("name", "");
         a.uuid = p.getString("uuid", "");
-        a.skinUrl = p.getString("skinUrl", "");
+        a.skinUrl = https(p.getString("skinUrl", ""));
+        a.skinVariant = p.getString("skinVariant", "CLASSIC");
         a.ownsJava = p.getBoolean("ownsJava", false);
         a.refreshToken = p.getString("refreshToken", "");
         a.minecraftToken = p.getString("minecraftToken", "");
@@ -72,6 +89,7 @@ final class Account {
             .putString("name", name)
             .putString("uuid", uuid)
             .putString("skinUrl", skinUrl)
+            .putString("skinVariant", skinVariant)
             .putBoolean("ownsJava", ownsJava)
             .putString("refreshToken", refreshToken)
             .putString("minecraftToken", minecraftToken)
@@ -181,7 +199,7 @@ final class Account {
                                     Http.form("grant_type", "refresh_token", "client_id", CLIENT_ID, "refresh_token", refreshToken,
                                               "scope", SCOPE));
         if (r.status == 400 || r.status == 401) {
-            throw new LoginException("Вход устарел, войди в аккаунт Microsoft ещё раз.");
+            throw new SessionExpired("Вход устарел, войди в аккаунт Microsoft ещё раз.");
         }
         if (!r.ok()) {
             throw new java.io.IOException("HTTP " + r.status);
@@ -298,14 +316,18 @@ final class Account {
         ownsJava = true;
         name = o.optString("name");
         uuid = o.optString("id");
-        skinUrl = "";
+        String url = "";
+        String variant = "CLASSIC";
         JSONArray skins = o.optJSONArray("skins");
         for (int i = 0; skins != null && i < skins.length(); i++) {
             JSONObject skin = skins.getJSONObject(i);
-            if (skinUrl.isEmpty() || "ACTIVE".equals(skin.optString("state"))) {
-                skinUrl = skin.optString("url");
+            if (url.isEmpty() || "ACTIVE".equals(skin.optString("state"))) {
+                url = https(skin.optString("url"));
+                variant = skin.optString("variant", "CLASSIC");
             }
         }
+        skinUrl = url;
+        skinVariant = variant;
     }
 
     /**
@@ -381,7 +403,7 @@ final class Account {
         JSONArray capes = new JSONObject(r.body).optJSONArray("capes");
         for (int i = 0; capes != null && i < capes.length(); i++) {
             JSONObject c = capes.getJSONObject(i);
-            out.add(new Cape(c.optString("id"), c.optString("alias"), c.optString("url"), "ACTIVE".equals(c.optString("state"))));
+            out.add(new Cape(c.optString("id"), c.optString("alias"), https(c.optString("url")), "ACTIVE".equals(c.optString("state"))));
         }
         return out;
     }
