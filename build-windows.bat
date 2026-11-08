@@ -100,6 +100,29 @@ if /i not "%SRC%"=="%WORK%\src" (
     )
 )
 
+rem ---------- 2b. libnbtplusplus: подмодуль git ----------
+rem  В zip, сделанный git archive или кнопкой GitHub "Download ZIP", подмодули не попадают:
+rem  папка libraries\libnbtplusplus приходит пустой. Тогда скачиваем её сами, ровно того
+rem  коммита, на который указывает репозиторий: git submodule status.
+set "NBT_COMMIT=687e43031df0dc641984b4256bcca50d5b3f7de3"
+set "NBT=%WORK%\deps\libnbtplusplus"
+if exist "%WORK%\src\libraries\libnbtplusplus\CMakeLists.txt" goto :have_nbt
+echo  Докачиваю библиотеку libnbtplusplus ...
+if exist "%NBT%\CMakeLists.txt" goto :copy_nbt
+if not exist "%WORK%\deps" mkdir "%WORK%\deps"
+if exist "%NBT%" rmdir /s /q "%NBT%"
+git clone -q https://github.com/PrismLauncher/libnbtplusplus.git "%NBT%" && git -C "%NBT%" checkout -q %NBT_COMMIT%
+if exist "%NBT%\CMakeLists.txt" goto :copy_nbt
+echo  git не смог скачать, пробую через PowerShell ...
+powershell -NoProfile -Command "$ErrorActionPreference='Stop'; $z=Join-Path $env:TEMP 'libnbtplusplus.zip'; $d=Join-Path $env:TEMP 'libnbtplusplus-unzip'; Invoke-WebRequest -UseBasicParsing 'https://github.com/PrismLauncher/libnbtplusplus/archive/%NBT_COMMIT%.zip' -OutFile $z; if (Test-Path $d) { Remove-Item -Recurse -Force $d }; Expand-Archive $z $d; if (Test-Path '%NBT%') { Remove-Item -Recurse -Force '%NBT%' }; Move-Item (Join-Path $d 'libnbtplusplus-%NBT_COMMIT%') '%NBT%'"
+if exist "%NBT%\CMakeLists.txt" goto :copy_nbt
+echo  [x] Не удалось скачать libnbtplusplus. Проверь интернет и запусти файл снова.
+goto :fail
+:copy_nbt
+robocopy "%NBT%" "%WORK%\src\libraries\libnbtplusplus" /MIR /XD .git /NFL /NDL /NJH /NJS /NP >nul
+if errorlevel 8 goto :fail
+:have_nbt
+
 rem ---------- 3. Qt ----------
 echo.
 echo  [3/6] Qt %QT_VERSION% ...
