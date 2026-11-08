@@ -56,7 +56,7 @@ final class HomeScreen {
     private LinearLayout library;  // and the library of installations
     private Button lobbyTab;
     private Button libraryTab;
-    private ImageView playerBody;
+    private CharacterView playerBody;  // the player with what they wear, alive
     private LinearLayout recommendations;
     private TextView playerName;
 
@@ -148,19 +148,21 @@ final class HomeScreen {
         LinearLayout tiles = new LinearLayout(activity);
         tiles.setOrientation(LinearLayout.VERTICAL);
         tiles.setPadding(dp(10), dp(10), dp(4), dp(6));
+        // like Millida's lobby: the wardrobe, ready packs and playing with friends
+        WardrobeScreen.ItemPicture outfit = new WardrobeScreen.ItemPicture(activity, "crown", "chain", "demon_wings", "cube_pet");
+        tiles.addView(tile(outfit, "Гардероб", "Образы, плащи, питомцы", new Runnable() {
+            public void run() {
+                HomeScreen.this.activity.openWardrobe();
+            }
+        }), tileParams());
         tiles.addView(tile(R.drawable.tile_packs, "Готовые сборки", "Modrinth и CurseForge", new Runnable() {
             public void run() {
                 HomeScreen.this.activity.openBrowser(null, BrowserScreen.MODPACK);
             }
         }), tileParams());
-        tiles.addView(tile(R.drawable.tile_new, "Новая сборка", "Версия, загрузчик, моды", new Runnable() {
+        tiles.addView(tile(R.drawable.install_default, "С друзьями", "Сервер друга по коду", new Runnable() {
             public void run() {
-                newInstallation();
-            }
-        }), tileParams());
-        tiles.addView(tile(R.drawable.install_default, "Мой скин", "Скин и ник", new Runnable() {
-            public void run() {
-                HomeScreen.this.activity.showAccount();
+                HomeScreen.this.activity.showInviteCode();
             }
         }), tileParams());
         stage.addView(tiles, new LinearLayout.LayoutParams(dp(170), ViewGroup.LayoutParams.MATCH_PARENT));
@@ -169,8 +171,7 @@ final class HomeScreen {
         LinearLayout middle = new LinearLayout(activity);
         middle.setOrientation(LinearLayout.VERTICAL);
         middle.setGravity(Gravity.CENTER);
-        playerBody = new ImageView(activity);
-        playerBody.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        playerBody = new CharacterView(activity);
         middle.addView(playerBody, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         playerName = Ui.label(activity, "", 16, Ui.TEXT, true);
         playerName.setGravity(Gravity.CENTER);
@@ -461,14 +462,18 @@ final class HomeScreen {
         return p;
     }
 
-    /** a big picture tile with its name on a dark strip over the bottom of the picture, like the tiles in Millida's lobby */
     private View tile(int picture, String title, String subtitle, final Runnable action) {
-        android.widget.FrameLayout tile = new android.widget.FrameLayout(activity);
-        tile.setPadding(dp(4), dp(4), dp(4), dp(7));
-        tile.setBackground(PixelDrawable.plain(activity.getResources().getDisplayMetrics().density));
         ImageView image = new ImageView(activity);
         image.setImageResource(picture);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        return tile(image, title, subtitle, action);
+    }
+
+    /** a big picture tile with its name on a dark strip over the bottom of the picture, like the tiles in Millida's lobby */
+    private View tile(View image, String title, String subtitle, final Runnable action) {
+        android.widget.FrameLayout tile = new android.widget.FrameLayout(activity);
+        tile.setPadding(dp(4), dp(4), dp(4), dp(7));
+        tile.setBackground(PixelDrawable.plain(activity.getResources().getDisplayMetrics().density));
         image.setBackgroundColor(0xFF1E070D);
         tile.addView(image, new android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         LinearLayout strip = new LinearLayout(activity);
@@ -501,7 +506,7 @@ final class HomeScreen {
         accountChip.setVisibility(View.VISIBLE);
         accountName.setText(account.ownsJava ? account.name : "Без Java Edition");
         Icons.loadHead(head, account.skinUrl, R.drawable.wizard);
-        Icons.loadBody(playerBody, account.skinUrl, R.drawable.install_default);
+        WardrobeScreen.loadSkinAndCape(activity, playerBody);
         playerName.setText(account.name);
     }
 

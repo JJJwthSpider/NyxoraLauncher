@@ -62,9 +62,9 @@ final class RainDrawable extends Drawable {
         if (shaderWidth != bounds.width() || shaderHeight != bounds.height()) {
             shaderWidth = bounds.width();
             shaderHeight = bounds.height();
-            sky = new LinearGradient(0, 0, 0, h, new int[] { 0xFF070204, 0xFF16050A, 0xFF2A0912 }, new float[] { 0, 0.55f, 1 },
+            sky = new LinearGradient(0, 0, 0, h, new int[] { 0xFF030102, 0xFF0B0305, 0xFF1A050B }, new float[] { 0, 0.55f, 1 },
                                      Shader.TileMode.CLAMP);
-            glow = new RadialGradient(w * 0.5f, h * 1.15f, Math.max(w, h) * 0.75f, new int[] { 0x66C8102E, 0x22800A1E, 0x00000000 },
+            glow = new RadialGradient(w * 0.5f, h * 1.15f, Math.max(w, h) * 0.75f, new int[] { 0x40C8102E, 0x16800A1E, 0x00000000 },
                                       new float[] { 0, 0.5f, 1 }, Shader.TileMode.CLAMP);
         }
         float t = (SystemClock.uptimeMillis() - start) / 1000f;
@@ -85,7 +85,7 @@ final class RainDrawable extends Drawable {
         }
 
         // the rain: far drops thin and dim, near drops long and bright
-        int drops = (int) Math.min(420, w * h / (900 * density * density));
+        int drops = (int) Math.min(300, w * h / (1300 * density * density));
         paint.setStyle(Paint.Style.STROKE);
         for (int i = 0; i < drops; i++) {
             boolean near = hash(i, 1) % 100 < 30;
@@ -94,7 +94,7 @@ final class RainDrawable extends Drawable {
             float span = h + length;
             float y = (t * speed + unit(i, 4) * span) % span - length;
             float x = unit(i, 5) * (w + h * WIND) - h * WIND + y * WIND;
-            int alpha = near ? 150 + hash(i, 6) % 90 : 60 + hash(i, 6) % 70;
+            int alpha = near ? 90 + hash(i, 6) % 70 : 35 + hash(i, 6) % 45;  // black-burgundy: a calm rain
             paint.setStrokeWidth((near ? 1.8f : 1.0f) * density);
             paint.setColor(Color.argb(alpha, 255, near ? 52 : 70, near ? 70 : 88));
             canvas.drawLine(x, y, x + length * WIND, y + length, paint);

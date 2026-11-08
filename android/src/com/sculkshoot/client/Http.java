@@ -41,6 +41,15 @@ final class Http {
         return request("POST", url, contentType, body, headers);
     }
 
+    /** a PUT with a JSON body (Minecraft services: the active cape) */
+    static Response put(String url, String json, String... headers) throws IOException {
+        return request("PUT", url, "application/json", json, headers);
+    }
+
+    static Response delete(String url, String... headers) throws IOException {
+        return request("DELETE", url, null, null, headers);
+    }
+
     /** an application/x-www-form-urlencoded body: name, value, name, value... */
     static String form(String... pairs) {
         StringBuilder out = new StringBuilder();

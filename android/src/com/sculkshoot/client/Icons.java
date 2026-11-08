@@ -191,6 +191,36 @@ final class Icons {
         canvas.drawBitmap(piece, null, new android.graphics.Rect(toX * scale, toY * scale, (toX + w) * scale, (toY + h) * scale), paint);
     }
 
+    interface Got {
+        void got(Bitmap bitmap);
+    }
+
+    /** any picture as it is (a skin or a cape texture), in the background; null when it could not be loaded */
+    static void loadBitmap(final String url, final Got done) {
+        if (url == null || url.isEmpty()) {
+            done.got(null);
+            return;
+        }
+        Bitmap cached = CACHE.get("raw:" + url);
+        if (cached != null) {
+            done.got(cached);
+            return;
+        }
+        POOL.execute(new Runnable() {
+            public void run() {
+                final Bitmap bitmap = fetchRaw(url);
+                if (bitmap != null) {
+                    CACHE.put("raw:" + url, bitmap);
+                }
+                MAIN.post(new Runnable() {
+                    public void run() {
+                        done.got(bitmap);
+                    }
+                });
+            }
+        });
+    }
+
     private static Bitmap fetch(String url) {
         Bitmap full = fetchRaw(url);
         return full == null ? null : rounded(full);

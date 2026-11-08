@@ -308,6 +308,44 @@ final class Account {
         }
     }
 
+    /** a real Minecraft cape of the account (seen in the game by everyone) */
+    static final class Cape {
+        final String id, alias, url;
+        final boolean active;
+
+        Cape(String id, String alias, String url, boolean active) {
+            this.id = id;
+            this.alias = alias;
+            this.url = url;
+            this.active = active;
+        }
+    }
+
+    /** the capes this account owns, from the Minecraft profile */
+    java.util.List<Cape> capes() throws Exception {
+        Http.Response r = Http.get(MINECRAFT + "/minecraft/profile", "Authorization", "Bearer " + minecraftToken);
+        if (!r.ok()) {
+            throw new LoginException("Не удалось загрузить плащи (" + answer(r) + ")");
+        }
+        java.util.List<Cape> out = new java.util.ArrayList<Cape>();
+        JSONArray capes = new JSONObject(r.body).optJSONArray("capes");
+        for (int i = 0; capes != null && i < capes.length(); i++) {
+            JSONObject c = capes.getJSONObject(i);
+            out.add(new Cape(c.optString("id"), c.optString("alias"), c.optString("url"), "ACTIVE".equals(c.optString("state"))));
+        }
+        return out;
+    }
+
+    /** puts a cape on (null: takes it off); it shows in the game */
+    void wearCape(String capeId) throws Exception {
+        Http.Response r = capeId == null
+            ? Http.delete(MINECRAFT + "/minecraft/profile/capes/active", "Authorization", "Bearer " + minecraftToken)
+            : Http.put(MINECRAFT + "/minecraft/profile/capes/active", "{\"capeId\":\"" + capeId + "\"}", "Authorization", "Bearer " + minecraftToken);
+        if (!r.ok()) {
+            throw new LoginException("Не удалось сменить плащ (" + answer(r) + ")");
+        }
+    }
+
     /** the start of the app: renews everything from the saved refresh token */
     void refresh() throws Exception {
         finish(refreshMicrosoft());

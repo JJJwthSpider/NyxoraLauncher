@@ -419,6 +419,11 @@ public final class MainActivity extends Activity {
         show(browser.view());
     }
 
+    /** the wardrobe: outfits, capes and accessories on the player (like Millida Launcher's) */
+    void openWardrobe() {
+        show(new WardrobeScreen(this).view());
+    }
+
     /** the modpack catalog with this pack already found */
     void openCatalog(String text) {
         openBrowser(null, BrowserScreen.MODPACK);
@@ -1409,7 +1414,7 @@ public final class MainActivity extends Activity {
             .show();
     }
 
-    private void showInviteCode() {
+    void showInviteCode() {
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(20), dp(8), dp(20), 0);
