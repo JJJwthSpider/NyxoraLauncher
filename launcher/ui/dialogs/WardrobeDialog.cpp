@@ -666,24 +666,35 @@ QWidget* WardrobeDialog::generator(bool capes)
         }
         line->addStretch(1);
     };
-    auto textRow = [this, addRow, custom, draw](const QString& title, const QList<std::pair<QString, QString>>& choices, const QString& chosen,
-                                                std::function<void(const QString&)> set) {
-        auto [line, group] = addRow(title);
+    auto textRow = [this, rows, custom, draw](const QString& title, const QList<std::pair<QString, QString>>& choices, const QString& chosen,
+                                              std::function<void(const QString&)> set) {
+        // the words do not shrink: six in a line, the rest on the next one (the patterns of a cape are eleven)
+        const int row = rows->rowCount();
+        auto* label = new QLabel(title, custom);
+        label->setStyleSheet("color: #d1a3aa;");
+        rows->addWidget(label, row, 0, Qt::AlignTop);
+        auto* grid = new QGridLayout;
+        grid->setSpacing(4);
+        rows->addLayout(grid, row, 1);
+        auto* group = new QButtonGroup(custom);
+        group->setExclusive(true);
         QList<std::pair<QString, QString>> all = choices;
         all.prepend({ QString(), tr("Auto") });
-        for (const auto& [id, name] : all) {
+        for (int i = 0; i < all.size(); i++) {
+            const auto [id, name] = all.at(i);
             auto* b = new QPushButton(name, custom);
             b->setCheckable(true);
             b->setChecked(id == chosen);
+            b->setMinimumWidth(b->sizeHint().width());
             group->addButton(b);
             connect(b, &QPushButton::clicked, this, [id, set, draw] {
                 set(id);
                 VelloraSound::play("click");
                 (*draw)(false);
             });
-            line->addWidget(b);
+            grid->addWidget(b, i / 6, i % 6);
         }
-        line->addStretch(1);
+        grid->setColumnStretch(6, 1);
     };
     const QList<QRgb> cloth = { 0xFFC62828, 0xFF6E1423, 0xFFEF7C1E, 0xFFE0A526, 0xFFF2C230, 0xFF3E9B47, 0xFF8BD13B, 0xFF23B5B5,
                                 0xFF5AB4F0, 0xFF2C5BD6, 0xFF7B3FC4, 0xFFEC6FA8, 0xFF1E1E24, 0xFF8A8F98, 0xFFECECEC, 0xFF6B4423 };
