@@ -152,6 +152,7 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
+        Sounds.init(this);
         store = new ChatStore(getFilesDir());
         try {
             pixel = Typeface.createFromAsset(getAssets(), "Tiny5-Regular.ttf");
@@ -360,17 +361,51 @@ public final class MainActivity extends Activity {
         }, "lullaby-job").start();
     }
 
+    private android.widget.FrameLayout screens;  // holds the screen; the one leaving fades out above it, in its overlay
+
     private void show(View view) {
         if (current == view) {
             return;
         }
-        // like Millida's screens: the new one slides in and fades up; back to the lobby it comes from the left
-        boolean backwards = home != null && view == home.view();
+        if (screens == null) {
+            screens = new android.widget.FrameLayout(this);
+            screens.setBackgroundColor(BG);
+            setContentView(screens);
+        }
+        // like Millida's screens: the new one slides in and fades up while the old one slides away and fades out;
+        // back to the lobby they move the other way
+        final boolean backwards = home != null && view == home.view();
+        final View old = current;
         current = view;
-        setContentView(view);
+        final float shift = Ui.dp(this, 36) * (backwards ? -1 : 1);
+        view.animate().cancel();
+        screens.getOverlay().remove(view);
+        if (view.getParent() instanceof ViewGroup) {
+            ((ViewGroup) view.getParent()).removeView(view);
+        }
+        view.setClickable(true);  // a tap on an empty place of the new screen never reaches the old one
+        screens.addView(view, new android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        if (old == null) {
+            return;  // the first screen: no animation, no sound
+        }
+        Sounds.play(backwards ? Sounds.CLOSE : Sounds.OPEN);
         view.setAlpha(0f);
-        view.setTranslationX(Ui.dp(this, 36) * (backwards ? -1 : 1));
-        view.animate().alpha(1f).translationX(0).setDuration(260).setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f)).start();
+        view.setTranslationX(shift);
+        view.animate().alpha(1f).translationX(0).setDuration(280).setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f)).start();
+        if (old.getParent() == screens) {
+            // the old screen leaves into the overlay: still drawn while it fades, but no longer touched or found
+            screens.getOverlay().add(old);
+            old.animate().cancel();
+            old.animate().alpha(0f).translationX(-shift * 0.6f).setDuration(220).setInterpolator(new android.view.animation.AccelerateInterpolator())
+                .withEndAction(new Runnable() {
+                    public void run() {
+                        screens.getOverlay().remove(old);
+                        old.setAlpha(1f);
+                        old.setTranslationX(0);
+                    }
+                })
+                .start();
+        }
     }
 
     void showHome() {
@@ -1846,6 +1881,7 @@ public final class MainActivity extends Activity {
 
     /** "Play" on the main screen or in the editor */
     void playInstallation(final Installation inst) {
+        Sounds.play(Sounds.LAUNCH);
         if (GameEngine.get() != null) {
             playHere(inst);
             return;

@@ -92,7 +92,11 @@ if "Theme.AppCompat.NoActionBar" not in styles:
 with open(os.path.join(res, "values", "lullaby_styles.xml"), "w", encoding="utf-8") as f:
     f.write(styles)
 for name in os.listdir(os.path.join(ANDROID, "assets")):
-    shutil.copy(os.path.join(ANDROID, "assets", name), os.path.join(MAIN, "assets", name))
+    source = os.path.join(ANDROID, "assets", name)
+    if os.path.isdir(source):  # the sounds
+        shutil.copytree(source, os.path.join(MAIN, "assets", name), dirs_exist_ok=True)
+    else:
+        shutil.copy(source, os.path.join(MAIN, "assets", name))
 
 # --- the manifest: Lullaby's menu, its file provider, the apps whose Java it can take ---------------------
 edit(os.path.join(MAIN, "AndroidManifest.xml"),

@@ -148,6 +148,14 @@ final class EditorScreen {
     }
 
     void showTab(String newKind) {
+        if (kind != null && !kind.equals(newKind) && list != null) {
+            // another tab: the list slides in with a blip, like Millida's tabs
+            Sounds.play(Sounds.NAV);
+            list.animate().cancel();
+            list.setAlpha(0f);
+            list.setTranslationX(Ui.dp(activity, 24));
+            list.animate().alpha(1f).translationX(0).setDuration(240).setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f)).start();
+        }
         kind = newKind;
         tabs.removeAllViews();
         for (final String[] tab : TABS) {

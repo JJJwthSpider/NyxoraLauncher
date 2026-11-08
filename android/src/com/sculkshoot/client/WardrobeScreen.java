@@ -73,6 +73,7 @@ final class WardrobeScreen {
                 for (String slot : Cosmetics.WEARABLE) {
                     Cosmetics.wear(WardrobeScreen.this.activity, slot, "");
                 }
+                Sounds.play(Sounds.CLOSE);
                 character.invalidate();
                 showTab(tab);
             }
@@ -229,8 +230,30 @@ final class WardrobeScreen {
         });
     }
 
+    private static int indexOf(String id) {
+        for (int i = 0; i < TABS.length; i++) {
+            if (TABS[i][0].equals(id)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    /** the player pops a little when something is put on, with a sparkle sound */
+    private void pop(boolean on) {
+        Sounds.play(on ? Sounds.WEAR : Sounds.CLICK);
+        if (!on) {
+            return;
+        }
+        character.animate().cancel();
+        character.setScaleX(0.94f);
+        character.setScaleY(0.94f);
+        character.animate().scaleX(1f).scaleY(1f).setDuration(260).setInterpolator(new android.view.animation.OvershootInterpolator(3f)).start();
+    }
+
     void showTab(String id) {
         boolean changed = !id.equals(tab);
+        final int direction = indexOf(id) >= indexOf(tab) ? 1 : -1;
         tab = id;
         float density = activity.getResources().getDisplayMetrics().density;
         for (View b : tabViews) {
@@ -267,12 +290,14 @@ final class WardrobeScreen {
                 addTile(picture, item.title, item.rarity, on && !slot.equals(Cosmetics.EMOTE), new Runnable() {
                     public void run() {
                         if (slot.equals(Cosmetics.EMOTE)) {
+                            Sounds.play(Sounds.TOGGLE);
                             character.setBack(false);
                             character.playEmote(item.id);
                             return;
                         }
                         boolean wearing = item.id.equals(Cosmetics.worn(activity, slot));
                         Cosmetics.wear(activity, slot, wearing ? "" : item.id);
+                        pop(!wearing);
                         character.preview(null, null);
                         character.invalidate();
                         showTab(slot);
@@ -281,7 +306,15 @@ final class WardrobeScreen {
             }
         }
         if (changed) {
+            // like Millida's tabs: the content slides in from the side of the new tab, with a blip
+            Sounds.play(Sounds.NAV);
             scroll.scrollTo(0, 0);
+            scroll.animate().cancel();
+            scroll.setAlpha(0f);
+            scroll.setTranslationX(dp(26) * direction);
+            scroll.animate().alpha(1f).translationX(0).setDuration(240).setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f)).start();
+            section.setAlpha(0f);
+            section.animate().alpha(1f).setDuration(200).start();
             // the tiles come in one after another, like Millida's
             for (int i = 0; i < grid.getChildCount(); i++) {
                 View tile = grid.getChildAt(i);
@@ -358,6 +391,7 @@ final class WardrobeScreen {
                 Cosmetics.wearOutfit(activity, outfit);
                 character.setBack(false);
                 character.invalidate();
+                pop(true);
                 showTab(SETS);
             }
         });
@@ -577,6 +611,7 @@ final class WardrobeScreen {
                     return;
                 }
                 Toast.makeText(activity, id == null ? "Плащ снят" : "Плащ надет — его видно в игре", Toast.LENGTH_SHORT).show();
+                pop(id != null);
                 if (url == null) {
                     character.setCape(null);
                 } else {

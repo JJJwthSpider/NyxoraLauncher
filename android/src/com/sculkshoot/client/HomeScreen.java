@@ -68,6 +68,8 @@ final class HomeScreen {
     private LinearLayout recommendations;
     private LinearLayout mine;       // "Мои сборки": the cards in a row, like Millida's library
     private View buildPanel;         // the page of the chosen installation, slides in from the right
+    private android.widget.FrameLayout pagesBox;  // the pages; the one leaving fades out in its overlay
+    private Button soundButton;
 
     HomeScreen(MainActivity activity) {
         this.activity = activity;
@@ -122,6 +124,7 @@ final class HomeScreen {
         root.addView(libraryBar);
 
         android.widget.FrameLayout pages = new android.widget.FrameLayout(activity);
+        pagesBox = pages;
         root.addView(pages, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
 
         /* ---------------- the lobby, laid out like Millida's: tiles on the left, the player in the middle, the buttons in
@@ -227,6 +230,16 @@ final class HomeScreen {
         LinearLayout.LayoutParams chipParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         chipParams.leftMargin = dp(6);
         lobbyBar.addView(accountChip, chipParams);
+        soundButton = square(Sounds.enabled(activity) ? "🔊" : "🔇", "Звуки интерфейса", new Runnable() {
+            public void run() {
+                boolean on = !Sounds.enabled(HomeScreen.this.activity);
+                Sounds.setEnabled(HomeScreen.this.activity, on);
+                soundButton.setText(on ? "🔊" : "🔇");
+                Sounds.play(Sounds.TOGGLE);
+                android.widget.Toast.makeText(HomeScreen.this.activity, on ? "Звуки включены" : "Звуки выключены", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+        lobbyBar.addView(soundButton);
         lobbyBar.addView(square("📦", "Мои сборки", new Runnable() {
             public void run() {
                 showPage(LIBRARY);
@@ -604,13 +617,12 @@ final class HomeScreen {
         showPage(lobbyPage ? LOBBY : LIBRARY);
     }
 
-    /** the lobby, the library or "Создать": they slide and fade into each other, like Millida's screens */
+    /** the lobby, the library or "Создать": they slide and fade into each other, like Millida's screens, with a blip */
     void showPage(int next) {
         View[] views = { lobby, library, createView };
         for (Button b : pageTabs) {
             Ui.styleButton(activity, b, ((Integer) b.getTag()) == next);
         }
-        libraryBar.setVisibility(next == LOBBY ? View.GONE : View.VISIBLE);
         if (next == CREATE && page != CREATE) {
             createPage.reset();
         }
@@ -620,22 +632,64 @@ final class HomeScreen {
         if (next == page) {
             return;
         }
-        int before = page;
+        final int before = page;
         page = next;
+        final View in = views[next];
+        attach(in);
         for (int i = 0; i < views.length; i++) {
-            views[i].setVisibility(i == next ? View.VISIBLE : View.GONE);
+            if (i != next && i != before) {
+                views[i].setVisibility(View.GONE);
+            }
         }
-        if (before < 0 || views[next].getWidth() == 0 && before == next) {
-            return;  // the first time: no animation
+        in.setVisibility(View.VISIBLE);
+        boolean barBefore = libraryBar.getVisibility() == View.VISIBLE;
+        libraryBar.setVisibility(next == LOBBY ? View.GONE : View.VISIBLE);
+        if (before < 0) {
+            return;  // the first time: no animation, no sound
         }
-        View in = views[next];
+        Sounds.play(Sounds.NAV);
+        final float direction = next < before ? -1 : 1;
         in.setAlpha(0f);
-        in.setTranslationX(dp(28) * (next < before ? -1 : 1));
-        in.animate().alpha(1f).translationX(0).setDuration(240).setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
-        if (next != LOBBY) {
-            libraryBar.setAlpha(before == LOBBY ? 0f : 1f);
-            libraryBar.animate().alpha(1f).setDuration(200).start();
+        in.setTranslationX(dp(32) * direction);
+        in.animate().alpha(1f).translationX(0).setDuration(260).setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f)).start();
+        if (next != LOBBY && !barBefore) {
+            libraryBar.setAlpha(0f);
+            libraryBar.setTranslationY(-dp(12));
+            libraryBar.animate().alpha(1f).translationY(0).setDuration(220).start();
         }
+        final View out = views[before];
+        if (out.getParent() == pagesBox && out.getWidth() > 0) {
+            // the old page leaves into the overlay: drawn while it fades, no longer touched
+            pagesBox.getOverlay().add(out);
+            out.animate().cancel();
+            out.animate().alpha(0f).translationX(-dp(22) * direction).setDuration(200)
+                .setInterpolator(new android.view.animation.AccelerateInterpolator())
+                .withEndAction(new Runnable() {
+                    public void run() {
+                        pagesBox.getOverlay().remove(out);
+                        out.setVisibility(View.GONE);
+                        out.setAlpha(1f);
+                        out.setTranslationX(0);
+                        if (out.getParent() == null) {
+                            pagesBox.addView(out);
+                        }
+                    }
+                })
+                .start();
+        } else {
+            out.setVisibility(View.GONE);
+        }
+    }
+
+    /** a page back in its place (it may still be fading out in the overlay) */
+    private void attach(View view) {
+        view.animate().cancel();
+        pagesBox.getOverlay().remove(view);
+        if (view.getParent() == null) {
+            pagesBox.addView(view);
+        }
+        view.setAlpha(1f);
+        view.setTranslationX(0);
     }
 
     /** the page of the chosen installation, sliding in from the right */
@@ -643,12 +697,24 @@ final class HomeScreen {
         if (open == (buildPanel.getVisibility() == View.VISIBLE)) {
             return;
         }
+        buildPanel.animate().cancel();
         if (open) {
+            Sounds.play(Sounds.OPEN);
             buildPanel.setVisibility(View.VISIBLE);
+            buildPanel.setAlpha(0.4f);
             buildPanel.setTranslationX(dp(250));
-            buildPanel.animate().translationX(0).setDuration(220).setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
+            buildPanel.animate().translationX(0).alpha(1f).setDuration(240).setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f)).start();
         } else {
-            buildPanel.setVisibility(View.GONE);
+            Sounds.play(Sounds.CLOSE);
+            buildPanel.animate().translationX(dp(250)).alpha(0.4f).setDuration(200).setInterpolator(new android.view.animation.AccelerateInterpolator())
+                .withEndAction(new Runnable() {
+                    public void run() {
+                        buildPanel.setVisibility(View.GONE);
+                        buildPanel.setTranslationX(0);
+                        buildPanel.setAlpha(1f);
+                    }
+                })
+                .start();
         }
     }
 

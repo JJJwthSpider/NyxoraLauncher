@@ -236,6 +236,7 @@ final class BrowserScreen {
             chip.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     goal = choice[0];
+                    Sounds.play(Sounds.CLICK);
                     for (Button other : goalButtons) {
                         Ui.styleButton(BrowserScreen.this.activity, other, other == chip);
                     }
@@ -333,6 +334,7 @@ final class BrowserScreen {
             return;
         }
         curseForge = useCurseForge;
+        Sounds.play(Sounds.NAV);
         Ui.styleButton(activity, modrinthTab, !curseForge);
         Ui.styleButton(activity, curseForgeTab, curseForge);
         search(true);
@@ -409,6 +411,10 @@ final class BrowserScreen {
         if (fresh) {
             offset = 0;
         }
+        if (fresh) {
+            list.animate().cancel();
+            list.animate().alpha(0.35f).setDuration(150).start();
+        }
         final boolean cf = curseForge;
         final String site = cf ? "CurseForge" : "Modrinth";
         status.setText("Ищу на " + site + "...");
@@ -432,6 +438,11 @@ final class BrowserScreen {
                     return;
                 }
                 loading = false;
+                list.animate().cancel();
+                if (fresh) {
+                    list.setTranslationY(Ui.dp(activity, 10));
+                }
+                list.animate().alpha(1f).translationY(0).setDuration(220).start();
                 if (error != null) {
                     status.setText("Нет связи с " + site + ": " + error.getMessage());
                     return;

@@ -138,8 +138,12 @@ final class CreatePage {
             tile.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     if (why(l[0], version) == null) {
+                        Sounds.play(Sounds.CLICK);
                         loader = l[0];
                         update();
+                        v.setScaleX(0.92f);
+                        v.setScaleY(0.92f);
+                        v.animate().scaleX(1f).scaleY(1f).setDuration(220).setInterpolator(new android.view.animation.OvershootInterpolator(3f)).start();
                     }
                 }
             });
@@ -181,6 +185,7 @@ final class CreatePage {
         snapshots.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 showSnapshots = !showSnapshots;
+                Sounds.play(Sounds.TOGGLE);
                 Ui.styleButton(CreatePage.this.activity, snapshots, showSnapshots);
                 fillVersions();
             }
@@ -200,6 +205,7 @@ final class CreatePage {
         fps.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 fpsOn = !fpsOn;
+                Sounds.play(Sounds.TOGGLE);
                 update();
             }
         });
@@ -209,6 +215,7 @@ final class CreatePage {
         essentials.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 essentialsOn = !essentialsOn;
+                Sounds.play(Sounds.TOGGLE);
                 update();
             }
         });
@@ -433,6 +440,7 @@ final class CreatePage {
             b.setMinimumHeight(0);
             b.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
+                    Sounds.play(Sounds.CLICK);
                     version = v[0];
                     update();
                 }
