@@ -11,9 +11,9 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,7 +56,7 @@ final class BrowserScreen {
     private final LinearLayout root;
     private final EditText query;
     private final Spinner sort;
-    private final ListView list;
+    private final GridView list;  // the results as cards, like Millida's catalog
     private final TextView status;
     private final Button more;
     private final List<JSONObject> results = new ArrayList<JSONObject>();
@@ -75,42 +75,115 @@ final class BrowserScreen {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackground(new RainDrawable(activity.getResources().getDisplayMetrics().density));
 
+        // the top bar like Millida's: for the packs catalog "‹ Лобби", the tabs, import and a new pack
         LinearLayout bar = new LinearLayout(activity);
         bar.setGravity(Gravity.CENTER_VERTICAL);
-        bar.setPadding(dp(8), dp(6), dp(8), dp(6));
-        bar.setBackgroundColor(0xCC140509);
-        Button back = Ui.button(activity, "← Назад", false);
+        bar.setPadding(dp(10), dp(6), dp(10), dp(6));
+        bar.setBackgroundColor(0xF0080204);
+        Button back = Ui.button(activity, inst == null ? "‹ Лобби" : "‹ Назад", false);
         back.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 goBack();
             }
         });
         bar.addView(back);
-        TextView title = Ui.label(activity, title(), 15, Ui.ACCENT, true);
-        title.setPadding(dp(12), 0, dp(12), 0);
-        bar.addView(title);
+        bar.addView(new View(activity), new LinearLayout.LayoutParams(0, 1, 1));
+        if (inst == null) {
+            Button library = Ui.button(activity, "📦 Библиотека", false);
+            library.setTextSize(14);
+            library.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    BrowserScreen.this.activity.showLibrary();
+                }
+            });
+            bar.addView(library);
+            Button catalog = Ui.button(activity, "📖 Каталог", true);
+            catalog.setTextSize(14);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            cp.leftMargin = dp(4);
+            bar.addView(catalog, cp);
+        } else {
+            bar.addView(Ui.label(activity, title(), 16, Ui.TEXT, true));
+        }
+        bar.addView(new View(activity), new LinearLayout.LayoutParams(0, 1, 1));
+        if (inst == null) {
+            Button fromFile = Ui.button(activity, "⭳ Импорт", false);
+            fromFile.setTextSize(13);
+            fromFile.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    BrowserScreen.this.activity.pickPackFile();
+                }
+            });
+            bar.addView(fromFile);
+        }
+        root.addView(bar);
+
+        // the heading and the search, like Millida's "Сборки модов для Minecraft  23 588 материалов"
+        LinearLayout heading = new LinearLayout(activity);
+        heading.setGravity(Gravity.BOTTOM);
+        heading.setPadding(dp(14), dp(10), dp(14), dp(4));
+        heading.addView(Ui.label(activity, inst == null ? "Сборки модов для Minecraft" : title(), 20, Ui.TEXT, true));
+        status = Ui.label(activity, "", 12, Ui.HINT, false);
+        status.setPadding(dp(10), 0, 0, dp(2));
+        heading.addView(status);
+        root.addView(heading);
+        LinearLayout searchRow = new LinearLayout(activity);
+        searchRow.setGravity(Gravity.CENTER_VERTICAL);
+        searchRow.setPadding(dp(10), dp(4), dp(10), dp(4));
         query = new EditText(activity);
-        query.setHint("Название или тема, например: zombie, магия...");
+        query.setHint(inst == null ? "Сборка, тема или просьба к ИИ..." : "Название или тема, например: zombie, магия...");
         query.setHintTextColor(Ui.HINT);
         query.setTextColor(Ui.TEXT);
         query.setTextSize(14);
         query.setSingleLine(true);
         query.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
-        query.setBackground(Ui.rounded(activity, Ui.GLASS, 18, Ui.LINE));
-        query.setPadding(dp(12), dp(6), dp(12), dp(6));
+        query.setBackground(Ui.rounded(activity, 0xE6140509, 0, 0xFF5A1E2A));
+        query.setPadding(dp(12), dp(8), dp(12), dp(8));
         query.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 search(true);
                 return true;
             }
         });
-        bar.addView(query, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        searchRow.addView(query, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button find = Ui.button(activity, "Найти", true);
+        find.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                search(true);
+            }
+        });
+        LinearLayout.LayoutParams fp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        fp.leftMargin = dp(6);
+        searchRow.addView(find, fp);
+        if (inst == null) {
+            // like Millida's "Собрать с ИИ": the words of the search go to Arkan, who assembles such a pack
+            Button wizard = Ui.button(activity, "🔮 Собрать с ИИ", false);
+            wizard.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    BrowserScreen.this.activity.askWizard(query.getText().toString());
+                }
+            });
+            searchRow.addView(wizard, new LinearLayout.LayoutParams(fp));
+        }
+        root.addView(searchRow);
+
+        LinearLayout body = new LinearLayout(activity);
+        root.addView(body, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+
+        // left: the filters, like Millida's catalog
+        android.widget.ScrollView filtersScroll = new android.widget.ScrollView(activity);
+        LinearLayout filters = new LinearLayout(activity);
+        filters.setOrientation(LinearLayout.VERTICAL);
+        filters.setPadding(dp(10), dp(8), dp(10), dp(10));
+        filters.setBackground(Ui.rounded(activity, 0xD9100406, 0, 0xFF2B0E15));
+        filters.addView(filterTitle("Сортировка"));
         sort = new Spinner(activity);
         String[] names = new String[SORTS.length];
         for (int i = 0; i < SORTS.length; i++) {
             names[i] = SORTS[i][1];
         }
         sort.setAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, names));
+        sort.setBackground(Ui.rounded(activity, 0xFF2B0E15, 0, 0xFF5A1E2A));
         sort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             boolean first = true;
 
@@ -124,78 +197,34 @@ final class BrowserScreen {
 
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-        bar.addView(sort);
-        Button find = Ui.button(activity, "Найти", true);
-        find.setOnClickListener(new View.OnClickListener() {
+        filters.addView(sort);
+        filters.addView(filterTitle("Площадка"));
+        // the same two sites as the desktop launcher, for mods and for whole modpacks
+        modrinthTab = Ui.button(activity, "Modrinth", true);
+        curseForgeTab = Ui.button(activity, "CurseForge", false);
+        modrinthTab.setTextSize(13);
+        curseForgeTab.setTextSize(13);
+        modrinthTab.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                search(true);
+                setSource(false);
             }
         });
-        bar.addView(find);
-        root.addView(bar);
-
-        LinearLayout info = new LinearLayout(activity);
-        info.setGravity(Gravity.CENTER_VERTICAL);
-        info.setPadding(dp(10), dp(6), dp(10), 0);
-        {
-            // the same two sites as the desktop launcher, for mods and for whole modpacks
-            modrinthTab = Ui.button(activity, "Modrinth", true);
-            curseForgeTab = Ui.button(activity, "CurseForge", false);
-            modrinthTab.setTextSize(13);
-            curseForgeTab.setTextSize(13);
-            modrinthTab.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    setSource(false);
-                }
-            });
-            curseForgeTab.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    setSource(true);
-                }
-            });
-            LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            tp.rightMargin = dp(6);
-            info.addView(modrinthTab, tp);
-            info.addView(curseForgeTab, new LinearLayout.LayoutParams(tp));
-            if (inst == null) {
-                // a pack file already on the phone: .mrpack (Modrinth) or .zip (CurseForge)
-                Button fromFile = Ui.button(activity, "Из файла", false);
-                fromFile.setTextSize(13);
-                fromFile.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        BrowserScreen.this.activity.pickPackFile();
-                    }
-                });
-                info.addView(fromFile, new LinearLayout.LayoutParams(tp));
+        curseForgeTab.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                setSource(true);
             }
-        }
-        if (inst == null) {
-            // like Millida's "Собрать с ИИ": the words of the search go to Arkan, who assembles such a pack
-            Button wizard = Ui.button(activity, "Собрать с ИИ", false);
-            wizard.setTextSize(13);
-            wizard.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    BrowserScreen.this.activity.askWizard(query.getText().toString());
-                }
-            });
-            info.addView(wizard, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        }
-        status = Ui.label(activity, "", 12, Ui.HINT, false);
-        status.setPadding(dp(8), 0, dp(8), 0);
-        info.addView(status);
-        root.addView(info);
-
-        // "Для чего": quick filters by category (Modrinth)
-        android.widget.HorizontalScrollView goalsScroll = new android.widget.HorizontalScrollView(activity);
-        goalsScroll.setHorizontalScrollBarEnabled(false);
-        LinearLayout goals = new LinearLayout(activity);
-        goals.setPadding(dp(10), dp(6), dp(10), 0);
+        });
+        LinearLayout.LayoutParams full = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        full.bottomMargin = dp(4);
+        filters.addView(modrinthTab, full);
+        filters.addView(curseForgeTab, new LinearLayout.LayoutParams(full));
+        filters.addView(filterTitle("Для чего"));
         String[][] choices = inst == null ? PACK_GOALS : Mod.SHADER.equals(kind) ? SHADER_GOALS : Mod.RESOURCE_PACK.equals(kind) ? PACK_STYLE_GOALS : MOD_GOALS;
         for (final String[] choice : choices) {
             final Button chip = Ui.button(activity, choice[1], choice[0].isEmpty());
             chip.setTextSize(12);
-            chip.setMinHeight(dp(32));
-            chip.setMinimumHeight(dp(32));
+            chip.setMinHeight(dp(34));
+            chip.setMinimumHeight(dp(34));
             chip.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     goal = choice[0];
@@ -210,26 +239,48 @@ final class BrowserScreen {
                 }
             });
             goalButtons.add(chip);
-            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            cp.rightMargin = dp(6);
-            goals.addView(chip, cp);
+            filters.addView(chip, new LinearLayout.LayoutParams(full));
         }
-        goalsScroll.addView(goals);
-        root.addView(goalsScroll);
-        list = new ListView(activity);
-        list.setDividerHeight(dp(6));
-        list.setDivider(new android.graphics.drawable.ColorDrawable(0));
-        list.setPadding(dp(10), dp(6), dp(10), dp(10));
+        filtersScroll.addView(filters);
+        LinearLayout.LayoutParams filtersParams = new LinearLayout.LayoutParams(dp(200), ViewGroup.LayoutParams.MATCH_PARENT);
+        filtersParams.setMargins(dp(10), dp(4), 0, dp(10));
+        body.addView(filtersScroll, filtersParams);
+
+        // right: the results as cards in a grid
+        LinearLayout right = new LinearLayout(activity);
+        right.setOrientation(LinearLayout.VERTICAL);
+        list = new GridView(activity);
+        list.setNumColumns(GridView.AUTO_FIT);
+        list.setColumnWidth(dp(220));
+        list.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+        list.setHorizontalSpacing(dp(8));
+        list.setVerticalSpacing(dp(8));
+        list.setPadding(dp(10), dp(4), dp(10), dp(10));
         list.setClipToPadding(false);
+        list.setSelector(new android.graphics.drawable.ColorDrawable(0));
+        list.setAdapter(adapter);
+        list.setOnScrollListener(new android.widget.AbsListView.OnScrollListener() {
+            public void onScrollStateChanged(android.widget.AbsListView view, int state) {}
+
+            public void onScroll(android.widget.AbsListView view, int first, int visible, int total) {
+                // like Millida's catalog: more come by themselves at the end
+                if (total > 0 && first + visible >= total - 2 && more.getVisibility() == View.VISIBLE && !loading) {
+                    search(false);
+                }
+            }
+        });
+        right.addView(list, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         more = Ui.button(activity, "Показать ещё", false);
         more.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 search(false);
             }
         });
-        list.addFooterView(more);
-        list.setAdapter(adapter);
-        root.addView(list, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        more.setVisibility(View.GONE);
+        LinearLayout.LayoutParams moreParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        moreParams.setMargins(dp(10), 0, dp(10), dp(6));
+        right.addView(more, moreParams);
+        body.addView(right, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
         search(true);
     }
 
@@ -241,6 +292,12 @@ final class BrowserScreen {
 
     View view() {
         return root;
+    }
+
+    private TextView filterTitle(String text) {
+        TextView t = Ui.label(activity, text, 12, 0xFFFF8090, true);
+        t.setPadding(dp(2), dp(10), 0, dp(4));
+        return t;
     }
 
     private int dp(float v) {
@@ -257,7 +314,7 @@ final class BrowserScreen {
 
     void goBack() {
         if (inst == null) {
-            activity.showHome();
+            activity.showLobby();
         } else {
             activity.openEditor(inst);
         }
@@ -404,27 +461,48 @@ final class BrowserScreen {
 
         public View getView(int position, View convertView, ViewGroup parent) {
             final JSONObject hit = results.get(position);
-            LinearLayout row = new LinearLayout(activity);
-            row.setGravity(Gravity.CENTER_VERTICAL);
-            row.setPadding(dp(10), dp(8), dp(10), dp(8));
-            row.setBackground(Ui.rounded(activity, Ui.GLASS, 10, Ui.LINE));
+            // a card like Millida's: the picture on top, the name, downloads and author, the description, the buttons
+            LinearLayout card = new LinearLayout(activity);
+            card.setOrientation(LinearLayout.VERTICAL);
+            card.setPadding(dp(6), dp(6), dp(6), dp(9));
+            card.setBackground(PixelDrawable.plain(activity.getResources().getDisplayMetrics().density));
+            android.widget.FrameLayout banner = new android.widget.FrameLayout(activity);
+            banner.setBackgroundColor(0xFF2B0E15);
             ImageView icon = new ImageView(activity);
             Icons.load(icon, hit.isNull("icon_url") ? "" : hit.optString("icon_url"));
-            row.addView(icon, new LinearLayout.LayoutParams(dp(48), dp(48)));
-            LinearLayout text = new LinearLayout(activity);
-            text.setOrientation(LinearLayout.VERTICAL);
-            text.setPadding(dp(12), 0, dp(8), 0);
-            text.addView(Ui.label(activity, hit.optString("title"), 15, Ui.TEXT, false));
-            TextView desc = Ui.label(activity, hit.optString("description"), 12, Ui.HINT, false);
+            banner.addView(icon, new android.widget.FrameLayout.LayoutParams(dp(64), dp(64), Gravity.CENTER));
+            card.addView(banner, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(84)));
+            TextView name = Ui.label(activity, hit.optString("title"), 14, Ui.TEXT, true);
+            name.setSingleLine(true);
+            name.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            name.setPadding(dp(2), dp(6), dp(2), 0);
+            card.addView(name);
+            TextView meta = Ui.label(activity, "⬇ " + Ui.downloads(hit.optLong("downloads")) + " · " + hit.optString("author")
+                                                   + (CurseForge.isCurseForge(hit.optString("project_id")) ? " · CurseForge" : ""), 11, Ui.HINT, false);
+            meta.setSingleLine(true);
+            meta.setPadding(dp(2), 0, dp(2), 0);
+            card.addView(meta);
+            TextView desc = Ui.label(activity, hit.optString("description"), 12, 0xFFCFB4B9, false);
             desc.setMaxLines(2);
-            text.addView(desc);
-            text.addView(Ui.label(activity, "автор: " + hit.optString("author") + " · скачиваний: " + Ui.downloads(hit.optLong("downloads"))
-                                  + (CurseForge.isCurseForge(hit.optString("project_id")) ? " · CurseForge" : ""),
-                                  11, Ui.ACCENT_DARK, false));
-            row.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+            desc.setMinLines(2);
+            desc.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            desc.setPadding(dp(2), dp(4), dp(2), dp(6));
+            card.addView(desc);
+            LinearLayout buttons = new LinearLayout(activity);
+            final boolean installed = inst != null && (inst.find(hit.optString("project_id")) != null
+                                                       || (!hit.optString("slug").isEmpty() && Installer.findBySlug(inst, hit.optString("slug")) != null));
+            Button install = Ui.button(activity, installed ? "Установлено" : "Установить", !installed);
+            install.setTextSize(13);
+            install.setEnabled(!installed);
+            install.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    install(hit);
+                }
+            });
+            buttons.addView(install, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
             final boolean favorite = isFavorite(hit);
             Button star = Ui.button(activity, favorite ? "★" : "☆", favorite);
-            star.setTextSize(18);
+            star.setTextSize(17);
             star.setContentDescription(favorite ? "Убрать из избранного" : "В избранное");
             star.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -432,19 +510,10 @@ final class BrowserScreen {
                 }
             });
             LinearLayout.LayoutParams starParams = new LinearLayout.LayoutParams(dp(48), ViewGroup.LayoutParams.WRAP_CONTENT);
-            starParams.rightMargin = dp(6);
-            row.addView(star, starParams);
-            final boolean installed = inst != null && (inst.find(hit.optString("project_id")) != null
-                                                       || (!hit.optString("slug").isEmpty() && Installer.findBySlug(inst, hit.optString("slug")) != null));
-            Button install = Ui.button(activity, installed ? "Установлено" : "Установить", !installed);
-            install.setEnabled(!installed);
-            install.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    install(hit);
-                }
-            });
-            row.addView(install);
-            return row;
+            starParams.leftMargin = dp(6);
+            buttons.addView(star, starParams);
+            card.addView(buttons);
+            return card;
         }
     };
 

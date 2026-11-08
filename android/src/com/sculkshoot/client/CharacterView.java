@@ -31,12 +31,17 @@ final class CharacterView extends View {
     private String emote = "";
     private long emoteStart;
     private String previewSlot, previewId;
+    private boolean turnable = true;
+    private boolean closeUp;  // in a lobby tile: the head and shoulders, big
 
     CharacterView(Context context) {
         super(context);
         pixels.setFilterBitmap(false);
         setOnTouchListener(new OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
+                if (!turnable) {
+                    return false;  // inside a tile: the tile gets the tap
+                }
                 if (event.getAction() == MotionEvent.ACTION_UP) {
                     back = !back;  // a tap turns the player around
                     invalidate();
@@ -44,6 +49,14 @@ final class CharacterView extends View {
                 return true;
             }
         });
+    }
+
+    void setTurnable(boolean turnable) {
+        this.turnable = turnable;
+    }
+
+    void setCloseUp(boolean closeUp) {
+        this.closeUp = closeUp;
     }
 
     void setSkin(Bitmap skin) {
@@ -118,6 +131,12 @@ final class CharacterView extends View {
         }
         float ox = (getWidth() - GRID_W * u) / 2 + (FIGURE_X + sway) * u;
         float oy = (getHeight() - GRID_H * u) / 2 + (FIGURE_Y - jump + breath) * u;
+        if (closeUp) {
+            // the head and shoulders fill the picture
+            u = Math.min(getWidth() / 34f, getHeight() / 24f);
+            ox = (getWidth() - 16 * u) / 2 + sway * u;
+            oy = getHeight() * 0.08f + (7 - jump + breath) * u;
+        }
 
         // the red glow on the floor under the feet
         float floorY = (getHeight() - GRID_H * u) / 2 + (FIGURE_Y + 32) * u;

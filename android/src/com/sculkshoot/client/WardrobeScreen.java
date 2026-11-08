@@ -340,6 +340,7 @@ final class WardrobeScreen {
     static final class ItemPicture extends View {
         final String head, body, back, pet;
         String emote = "", effect = "";
+        boolean closeUp;  // in a lobby tile: the head and shoulders, big
         private final long start = android.os.SystemClock.uptimeMillis();
 
         ItemPicture(Context context, String head, String body, String back, String pet) {
@@ -354,9 +355,9 @@ final class WardrobeScreen {
         protected void onDraw(Canvas canvas) {
             Context context = getContext();
             float time = (android.os.SystemClock.uptimeMillis() - start) / 1000f;
-            float u = Math.min(getWidth() / 32f, getHeight() / 40f);
-            float ox = (getWidth() - 32 * u) / 2 + 8 * u;
-            float oy = (getHeight() - 40 * u) / 2 + 8 * u;
+            float u = closeUp ? Math.min(getWidth() / 34f, getHeight() / 24f) : Math.min(getWidth() / 32f, getHeight() / 40f);
+            float ox = closeUp ? (getWidth() - 16 * u) / 2 : (getWidth() - 32 * u) / 2 + 8 * u;
+            float oy = closeUp ? getHeight() * 0.08f + 7 * u : (getHeight() - 40 * u) / 2 + 8 * u;
             Cosmetics.Pen pen = new Cosmetics.Pen(canvas, ox, oy, u);
             Cosmetics.draw(pen, Cosmetics.find(context, back), false, time);
             boolean waving = emote.equals("wave") || emote.equals("cheer");

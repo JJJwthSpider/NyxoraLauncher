@@ -364,10 +364,13 @@ public final class MainActivity extends Activity {
         if (current == view) {
             return;
         }
+        // like Millida's screens: the new one slides in and fades up; back to the lobby it comes from the left
+        boolean backwards = home != null && view == home.view();
         current = view;
         setContentView(view);
         view.setAlpha(0f);
-        view.animate().alpha(1f).setDuration(180).start();
+        view.setTranslationX(Ui.dp(this, 36) * (backwards ? -1 : 1));
+        view.animate().alpha(1f).translationX(0).setDuration(260).setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f)).start();
     }
 
     void showHome() {
@@ -417,6 +420,22 @@ public final class MainActivity extends Activity {
     void openBrowser(Installation inst, String kind) {
         browser = new BrowserScreen(this, inst, kind);
         show(browser.view());
+    }
+
+    /** the library of installations (the catalog's "Библиотека" tab) */
+    void showLibrary() {
+        showHome();
+        if (home != null) {
+            home.showPage(false);
+        }
+    }
+
+    /** the lobby (the catalog's "‹ Лобби") */
+    void showLobby() {
+        showHome();
+        if (home != null) {
+            home.showPage(true);
+        }
     }
 
     /** the wardrobe: outfits, capes and accessories on the player (like Millida Launcher's) */
