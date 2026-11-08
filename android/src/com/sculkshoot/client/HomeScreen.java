@@ -56,6 +56,7 @@ final class HomeScreen {
     private final List<Installation> all = new ArrayList<Installation>();
     private final List<Installation> shown = new ArrayList<Installation>();
     private String selectedId;
+    private TextView playChange;  // "Сменить сборку ›" under the name
     private LinearLayout playBar;  // "Сегодня играем": the chosen installation and a big Play button, like Millida's lobby
     private ImageView playIcon;
     private TextView playName;
@@ -198,7 +199,9 @@ final class HomeScreen {
         friendsChip.setGravity(Gravity.CENTER_VERTICAL);
         friendsChip.setPadding(dp(8), dp(3), dp(10), dp(6));
         friendsChip.setBackground(PixelDrawable.plain(density));
-        friendsChip.addView(Ui.label(activity, "👥", 17, Ui.TEXT, false));
+        View people = new View(activity);
+        people.setBackground(new PixelGlyph(null, PixelGlyph.PEOPLE, density));
+        friendsChip.addView(people, new LinearLayout.LayoutParams(dp(28), dp(26)));
         LinearLayout friendsTexts = new LinearLayout(activity);
         friendsTexts.setOrientation(LinearLayout.VERTICAL);
         friendsTexts.setPadding(dp(6), 0, 0, 0);
@@ -238,42 +241,42 @@ final class HomeScreen {
         LinearLayout.LayoutParams chipParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         chipParams.leftMargin = dp(6);
         lobbyBar.addView(accountChip, chipParams);
-        soundButton = square(Sounds.enabled(activity) ? "🔊" : "🔇", "Звуки интерфейса", new Runnable() {
+        soundButton = square(Sounds.enabled(activity) ? PixelGlyph.SPEAKER : PixelGlyph.SPEAKER_OFF, "Звуки интерфейса", new Runnable() {
             public void run() {
                 boolean on = !Sounds.enabled(HomeScreen.this.activity);
                 Sounds.setEnabled(HomeScreen.this.activity, on);
-                soundButton.setText(on ? "🔊" : "🔇");
+                ((PixelGlyph) soundButton.getBackground()).setRows(on ? PixelGlyph.SPEAKER : PixelGlyph.SPEAKER_OFF);
                 Sounds.play(Sounds.TOGGLE);
                 android.widget.Toast.makeText(HomeScreen.this.activity, on ? "Звуки включены" : "Звуки выключены", android.widget.Toast.LENGTH_SHORT).show();
             }
         });
         lobbyBar.addView(soundButton);
-        musicButton = square(Sounds.musicEnabled(activity) ? "🎵" : "🔕", "Музыка", new Runnable() {
+        musicButton = square(Sounds.musicEnabled(activity) ? PixelGlyph.NOTE : PixelGlyph.NOTE_OFF, "Музыка", new Runnable() {
             public void run() {
                 boolean on = !Sounds.musicEnabled(HomeScreen.this.activity);
                 Sounds.setMusicEnabled(HomeScreen.this.activity, on);
-                musicButton.setText(on ? "🎵" : "🔕");
+                ((PixelGlyph) musicButton.getBackground()).setRows(on ? PixelGlyph.NOTE : PixelGlyph.NOTE_OFF);
                 Sounds.play(Sounds.TOGGLE);
                 android.widget.Toast.makeText(HomeScreen.this.activity, on ? "Музыка включена" : "Музыка выключена", android.widget.Toast.LENGTH_SHORT).show();
             }
         });
         lobbyBar.addView(musicButton);
-        lobbyBar.addView(square("📦", "Мои сборки", new Runnable() {
+        lobbyBar.addView(square(PixelGlyph.CHEST, "Мои сборки", new Runnable() {
             public void run() {
                 showPage(LIBRARY);
             }
         }));
-        lobbyBar.addView(square("💬", "Чаты с Арканом", new Runnable() {
+        lobbyBar.addView(square(PixelGlyph.CHAT, "Чаты с Арканом", new Runnable() {
             public void run() {
                 HomeScreen.this.activity.showChatList();
             }
         }));
-        lobbyBar.addView(square("🎮", "Управление", new Runnable() {
+        lobbyBar.addView(square(PixelGlyph.PAD, "Управление", new Runnable() {
             public void run() {
                 HomeScreen.this.activity.openControls();
             }
         }));
-        lobbyBar.addView(square("⚙", "Настройки", new Runnable() {
+        lobbyBar.addView(square(PixelGlyph.GEAR, "Настройки", new Runnable() {
             public void run() {
                 HomeScreen.this.activity.showAppMenu();
             }
@@ -319,7 +322,12 @@ final class HomeScreen {
         playInfo = Ui.label(activity, "", 11, Ui.HINT, false);
         playInfo.setSingleLine(true);
         texts.addView(playInfo);
+
         today.addView(texts, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        // like Millida's card: it says it opens the packs
+        playChange = Ui.label(activity, "Сменить\nсборку ›", 10, 0xFFFF8090, true);
+        playChange.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+        today.addView(playChange);
         today.setClickable(true);
         today.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -756,9 +764,10 @@ final class HomeScreen {
     }
 
     /** a square icon button of the top bar */
-    private Button square(String icon, final String what, final Runnable action) {
-        Button b = Ui.button(activity, icon, false);
-        b.setTextSize(18);
+    /** a square button of the lobby's corner with a white pixel picture, like Millida's */
+    private Button square(String[] icon, final String what, final Runnable action) {
+        Button b = Ui.button(activity, "", false);
+        b.setBackground(new PixelGlyph(b.getBackground(), icon, activity.getResources().getDisplayMetrics().density));
         b.setPadding(0, 0, 0, dp(3));
         b.setContentDescription(what);
         b.setOnClickListener(new View.OnClickListener() {
@@ -786,11 +795,27 @@ final class HomeScreen {
         if (inst == null) {
             playName.setText("Пока ничего");
             playInfo.setText("Создай сборку или выбери готовую");
+            playChange.setText("Выбрать\nсборку ›");
             playIcon.setImageResource(R.drawable.install_default);
             play.setText("+ Новая");
             return;
         }
-        play.setText("▶  Играть");
+        playChange.setText("Сменить\nсборку ›");
+        // the hours played in all the packs, small under "Играть", like Millida's button
+        long total = 0;
+        for (Installation i : all) {
+            total += i.playedMillis;
+        }
+        String played = Installation.playTime(total);
+        if (played.isEmpty()) {
+            play.setText("▶  Играть");
+        } else {
+            android.text.SpannableString text = new android.text.SpannableString("▶  Играть\nнаиграно " + played);
+            int cut = text.toString().indexOf('\n');
+            text.setSpan(new android.text.style.RelativeSizeSpan(0.42f), cut, text.length(), android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            text.setSpan(new android.text.style.ForegroundColorSpan(0xD0FFFFFF), cut, text.length(), android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            play.setText(text);
+        }
         playName.setText(inst.name);
         playInfo.setText(inst.minecraftVersion + " · " + ("vanilla".equals(inst.loader) || inst.loader.isEmpty() ? "без модов" : Plan.loaderName(inst.loader)));
         Icons.load(playIcon, inst.iconUrl, inst.chatId.isEmpty() ? R.drawable.install_default : R.drawable.wizard);
