@@ -138,6 +138,7 @@ class VelloraCharacter : public QWidget {
     int m_bufW = 0, m_bufH = 0;
     std::vector<QRgb> m_color;
     std::vector<float> m_depth;
+    QRect m_dirty;  // the part of the frame drawn in the last frame: only it is cleared and shown
     float m_scale = 1, m_cx = 0, m_cy = 0;
     std::array<Mat, 10> m_mats;
 };

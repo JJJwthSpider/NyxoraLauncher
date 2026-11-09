@@ -263,8 +263,11 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
         return;
     }
     const bool closeUp = std::min(area.width(), area.height()) < 80;  // a small place: the head and shoulders
-    const int k = std::max(1, static_cast<int>(std::ceil(area.height() / 240.0)));
-    const int bufW = std::max(1, area.width() / k), bufH = std::max(1, area.height() / k);
+    // the frame in the screen's own pixels (Windows scaling included): sharp edges and even texture pixels
+    const double density = devicePixelRatioF();
+    const int bufW = std::max(1, static_cast<int>(std::lround(area.width() * density)));
+    const int bufH = std::max(1, static_cast<int>(std::lround(area.height() * density)));
+    const double k = 1.0 / density;  // frame pixels -> widget pixels
     if (m_frame.width() != bufW || m_frame.height() != bufH) {
         m_frame = QImage(bufW, bufH, QImage::Format_ARGB32_Premultiplied);
         m_depth.assign(static_cast<size_t>(bufW) * bufH, 0);
@@ -348,7 +351,8 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
         p.restore();
     }
     p.setRenderHint(QPainter::SmoothPixmapTransform, false);
-    p.drawImage(QRect(area.left(), area.top(), bufW * k, bufH * k), m_frame);
+    m_frame.setDevicePixelRatio(density);  // one frame pixel = one screen pixel
+    p.drawImage(QPointF(area.topLeft()), m_frame);
 
     // the glow of the eyes: brighter when he is awake or working
     if (!m_blink) {

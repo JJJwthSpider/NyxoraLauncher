@@ -585,15 +585,46 @@ void VelloraCharacter::face(const Mat& m, float ax, float ay, float az, float bx
     const float minY = std::min({ sAy, sAy + e1y, sAy + e2y, sAy + e1y + e2y }), maxY = std::max({ sAy, sAy + e1y, sAy + e2y, sAy + e1y + e2y });
     const int x0 = std::max(0, int(std::floor(minX))), x1 = std::min(m_bufW - 1, int(std::ceil(maxX)));
     const int y0 = std::max(0, int(std::floor(minY))), y1 = std::min(m_bufH - 1, int(std::ceil(maxY)));
+    if (x0 > x1 || y0 > y1) {
+        return;
+    }
+    m_dirty |= QRect(QPoint(x0, y0), QPoint(x1, y1));
     const float dsdx = e2y / det, dsdy = -e2x / det, dtdx = -e1y / det, dtdy = e1x / det;
     const float dz1 = BZ - AZ, dz2 = CZ - AZ;
-    const float eps = 0.02f;
+    constexpr float eps = 0.02f;
     const int tw = tex ? tex->width() : 0, th = tex ? tex->height() : 0;
+    const QRgb* texels = tex ? reinterpret_cast<const QRgb*>(tex->constBits()) : nullptr;
+    const int texStride = tex ? int(tex->bytesPerLine() / 4) : 0;
+    // on each row only the pixels where the face can be (0 <= s, t < 1 within eps) are visited: the box around a turned
+    // face is mostly empty, and the frame is in the screen's own pixels
+    const auto narrow = [](float f, float df, float& from, float& to) {
+        if (std::abs(df) < 1e-9f) {
+            if (f < -eps || f >= 1 + eps) {
+                from = 1, to = 0;
+            }
+            return;
+        }
+        float a = (-eps - f) / df, b = (1 + eps - f) / df;
+        if (a > b) {
+            std::swap(a, b);
+        }
+        from = std::max(from, a);
+        to = std::min(to, b);
+    };
     for (int py = y0; py <= y1; py++) {
         const float ry = py + 0.5f - sAy, rx = x0 + 0.5f - sAx;
-        float s = rx * dsdx + ry * dsdy, t = rx * dtdx + ry * dtdy;
+        const float s0 = rx * dsdx + ry * dsdy, t0 = rx * dtdx + ry * dtdy;
+        float from = 0, to = float(x1 - x0);
+        narrow(s0, dsdx, from, to);
+        narrow(t0, dtdx, from, to);
+        if (from > to + 1) {
+            continue;
+        }
+        // one pixel more on each side: the exact test below decides
+        const int start = std::max(x0, x0 + int(std::floor(from)) - 1), end = std::min(x1, x0 + int(std::ceil(to)) + 1);
+        float s = s0 + (start - x0) * dsdx, t = t0 + (start - x0) * dtdx;
         const int row = py * m_bufW;
-        for (int px = x0; px <= x1; px++, s += dsdx, t += dtdx) {
+        for (int px = start; px <= end; px++, s += dsdx, t += dtdx) {
             if (s < -eps || s >= 1 + eps || t < -eps || t >= 1 + eps) {
                 continue;
             }
@@ -612,7 +643,7 @@ void VelloraCharacter::face(const Mat& m, float ax, float ay, float az, float bx
                 if (ux < 0 || vy < 0 || ux >= tw || vy >= th) {
                     continue;
                 }
-                c = reinterpret_cast<const QRgb*>(tex->constScanLine(vy))[ux];
+                c = texels[vy * texStride + ux];
             } else {
                 c = solid;
             }
@@ -781,6 +812,7 @@ void VelloraCharacter::dot(float sx, float sy, float z, int size, QColor color, 
 {
     const int a = qRound(color.alpha() * std::min(1.0, alpha));
     const int x0 = qRound(sx - size / 2.0), y0 = qRound(sy - size / 2.0);
+    m_dirty |= QRect(x0, y0, size, size) & QRect(0, 0, m_bufW, m_bufH);
     for (int y = y0; y < y0 + size; y++) {
         for (int x = x0; x < x0 + size; x++) {
             if (x < 0 || y < 0 || x >= m_bufW || y >= m_bufH) {
@@ -923,19 +955,33 @@ void VelloraCharacter::paintIcon(QPainter& painter, const QRectF& target, const 
 }
 
 
+namespace {
+// the biggest 3D frame drawn in full screen pixels (a 1050x1400 player: 1440p at 100%, 1080p at 150%): about 4-8 ms a
+// frame; a bigger player (4K at 150-200%) is drawn at this size and scaled up smoothly, so the lobby stays light
+constexpr double s_maxFramePixels = 1.5e6;
+}  // namespace
+
 void VelloraCharacter::paintEvent(QPaintEvent*)
 {
     const int w = width(), h = height();
     if (w <= 0 || h <= 0) {
         return;
     }
-    const int k = std::max(1, int(std::ceil(h / 360.0)));
-    const int bw = std::max(1, w / k), bh = std::max(1, h / k);
+    // the frame in the screen's own pixels (Windows scaling included): sharp edges and even skin pixels at any size;
+    // only a very big window gets a frame a little smaller, scaled up smoothly
+    const double dpr = devicePixelRatioF();
+    double density = dpr;
+    if (double(w) * h * density * density > s_maxFramePixels) {
+        density = std::sqrt(s_maxFramePixels / (double(w) * h));
+    }
+    const int bw = std::max(1, int(std::lround(w * density))), bh = std::max(1, int(std::lround(h * density)));
+    const double k = 1.0 / density;  // frame pixels -> widget pixels
     if (bw != m_bufW || bh != m_bufH) {
         m_bufW = bw;
         m_bufH = bh;
         m_color.assign(size_t(bw) * bh, 0);
         m_depth.assign(size_t(bw) * bh, -1e9f);
+        m_dirty = QRect();
     }
     const qint64 now = m_clock.elapsed();
     const double time = now / 1000.0;
@@ -1087,8 +1133,13 @@ void VelloraCharacter::paintEvent(QPaintEvent*)
         m_cx = m_bufW / 2.f;
         m_cy = m_bufH * 0.5f + 15 * m_scale;
     }
-    std::fill(m_color.begin(), m_color.end(), 0u);
-    std::fill(m_depth.begin(), m_depth.end(), -1e9f);
+    // only the part drawn last time is cleared: the player covers a small part of a big frame
+    for (int y = m_dirty.top(); y <= m_dirty.bottom() && !m_dirty.isEmpty(); y++) {
+        const size_t row = size_t(y) * m_bufW + m_dirty.left();
+        std::fill_n(m_color.begin() + row, m_dirty.width(), 0u);
+        std::fill_n(m_depth.begin() + row, m_dirty.width(), -1e9f);
+    }
+    m_dirty = QRect();
 
     const QImage& tex = m_skin.isNull() ? shadowSkin() : m_skin;
     const bool modern = tex.height() >= 64;
@@ -1138,6 +1189,13 @@ void VelloraCharacter::paintEvent(QPaintEvent*)
     painter.setBrush(glow);
     painter.drawEllipse(foot, radius, radius);
     painter.restore();
-    const QImage frame(reinterpret_cast<const uchar*>(m_color.data()), m_bufW, m_bufH, m_bufW * 4, QImage::Format_ARGB32);
-    painter.drawImage(QRect(0, 0, m_bufW * k, m_bufH * k), frame);
+    if (m_dirty.isEmpty()) {
+        return;
+    }
+    // only the part with the player is shown; one frame pixel = one screen pixel
+    QImage frame(reinterpret_cast<const uchar*>(m_color.data() + size_t(m_dirty.top()) * m_bufW + m_dirty.left()), m_dirty.width(),
+                 m_dirty.height(), m_bufW * 4, QImage::Format_ARGB32);
+    frame.setDevicePixelRatio(density);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, std::abs(density - dpr) > 1e-3);
+    painter.drawImage(QPointF(m_dirty.left() * k, m_dirty.top() * k), frame);
 }

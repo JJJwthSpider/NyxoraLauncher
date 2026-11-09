@@ -72,3 +72,6 @@ ecm_add_test(MoonyWidget_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_M
 
 ecm_add_test(GuestDemo_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
     TEST_NAME GuestDemo)
+
+ecm_add_test(VelloraCharacter_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+    TEST_NAME VelloraCharacter)
