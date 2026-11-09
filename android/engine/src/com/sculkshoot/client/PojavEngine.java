@@ -455,31 +455,18 @@ public final class PojavEngine extends GameEngine {
         return new File(Tools.DIR_GAME_HOME, "custom_instances/lullaby-" + inst.id);
     }
 
-    /**
-     * The guest's game: the official Minecraft demo (Mojang's free trial: a world for five game days, about 100 minutes,
-     * then a new one), which the engine starts for a Microsoft account without the game. The demo is plain Minecraft
-     * (the engine starts it only for plain versions): the version of the pack without its mods, in a folder of its own
-     * for each version. The full game and the mods come with the account that bought Minecraft.
-     */
-    static Installation demoOf(Installation pack) {
-        Installation demo = new Installation();
-        demo.id = UUID.nameUUIDFromBytes(("vellora-demo:" + pack.minecraftVersion).getBytes()).toString();
-        demo.name = "Демо Minecraft " + pack.minecraftVersion;
-        demo.minecraftVersion = pack.minecraftVersion;
-        demo.loader = "vanilla";
-        demo.fpsBoost = pack.fpsBoost;
-        return demo;
-    }
-
     /** everything before the engine takes over; returns a message for the user when the game cannot start yet */
-    private String prepare(final MainActivity activity, Installation pack, Account account, final Builder.Listener log, final Done done) throws Exception {
+    private String prepare(final MainActivity activity, final Installation inst, Account account, final Builder.Listener log, final Done done) throws Exception {
         final boolean demo = account.guest;
-        final Installation inst = demo ? demoOf(pack) : pack;
         if (!demo && !account.ownsJava) {
             return "На этом аккаунте Microsoft нет Minecraft: Java Edition, поэтому игра не запустится. Её можно купить на minecraft.net.";
         }
+        if (demo && !demoWorks(inst.minecraftVersion)) {
+            return "В Minecraft " + inst.minecraftVersion + " нет демо-режима (он появился в 1.3.1), поэтому гостю эта версия не запускается. "
+                + "Выбери сборку на версии новее или войди аккаунтом, на котором куплен Minecraft.";
+        }
         if (demo) {
-            log.log("Гость: демо-версия Minecraft " + inst.minecraftVersion + " (без модов).");
+            log.log("Гость: демо-режим Minecraft, сборка с модами как есть.");
         }
         // the Java this Minecraft version needs: downloaded once, then used for every installation of such versions
         int java = javaFor(inst.minecraftVersion);

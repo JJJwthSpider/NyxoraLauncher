@@ -91,6 +91,10 @@
 #include <QCommandLineParser>
 #include <QDebug>
 #include <QDir>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QFileInfo>
 #include <QFileOpenEvent>
 #include <QIcon>
@@ -107,6 +111,8 @@
 #include "MTPixmapCache.h"
 
 #include <minecraft/auth/AccountList.h>
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 #include "icons/IconList.h"
 #include "net/HttpMetaCache.h"
 
@@ -1543,8 +1549,31 @@ bool Application::launch(BaseInstance* instance,
 {
     QString offlineName = givenOfflineName;
     if (mode == LaunchMode::Normal && !accountToUse && instance->canLaunch() && !m_updateRunning && VelloraGuest::playsDemo()) {
-        // a guest plays the official demo with the guest's nickname, as Prism does for a player without an account that
-        // owns the game, but at once (no "no accounts" and "play the demo?" questions); the full game wants the purchase
+        // a guest plays the official demo with the guest's nickname, the instance as it is (mods included), as Prism does
+        // for a player without an account that owns the game, but at once (no "no accounts" and "play the demo?"
+        // questions); the full game wants the purchase
+        auto* minecraft = dynamic_cast<MinecraftInstance*>(instance);
+        QString version;
+        if (minecraft) {
+            auto profile = minecraft->getPackProfile();
+            version = profile->getComponentVersion("net.minecraft");  // the resolved version, when the components are loaded
+            if (version.isEmpty()) {
+                // not loaded yet: the instance's own list of components says it
+                QFile pack(FS::PathCombine(minecraft->instanceRoot(), "mmc-pack.json"));
+                if (pack.open(QIODevice::ReadOnly)) {
+                    for (const auto& value : QJsonDocument::fromJson(pack.readAll()).object().value("components").toArray()) {
+                        const QJsonObject component = value.toObject();
+                        if (component.value("uid").toString() == "net.minecraft") {
+                            version = component.value("cachedVersion").toString(component.value("version").toString());
+                        }
+                    }
+                }
+            }
+        }
+        if (!VelloraGuest::demoWorks(version)) {
+            VelloraGuest::noDemo(m_mainWindow, version);
+            return false;
+        }
         if (!VelloraGuest::confirmDemo(m_mainWindow)) {
             return false;
         }

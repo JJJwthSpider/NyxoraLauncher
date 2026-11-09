@@ -140,6 +140,30 @@ bool playsDemo()
     return true;
 }
 
+bool demoWorks(const QString& version)
+{
+    if (version.startsWith("1.")) {
+        // 1.3.1 and newer, pre-releases included ("1.20.1-pre1")
+        const QStringList parts = version.section('-', 0, 0).split('.');
+        const int minor = parts.value(1).toInt(), patch = parts.value(2).toInt();
+        return minor > 3 || (minor == 3 && patch >= 1);
+    }
+    static const QRegularExpression snapshot("^(\\d\\d)w\\d\\d[a-z]$");
+    if (const auto match = snapshot.match(version); match.hasMatch()) {
+        return match.captured(1).toInt() >= 13;
+    }
+    static const QRegularExpression yearBased("^\\d{2}\\.\\d+");  // 26.1 and newer
+    return yearBased.match(version).hasMatch();
+}
+
+void noDemo(QWidget* parent, const QString& version)
+{
+    QMessageBox::information(parent, QObject::tr("No demo in this version"),
+                             QObject::tr("Minecraft %1 has no demo mode (it came in 1.3.1), so a guest cannot start it. Choose an instance "
+                                         "on a newer version or sign in with the Microsoft account that bought Minecraft.")
+                                 .arg(version));
+}
+
 bool confirmDemo(QWidget* parent)
 {
     if (settings().value("guestDemoExplained", false).toBool()) {
@@ -149,7 +173,8 @@ bool confirmDemo(QWidget* parent)
     QMessageBox box(parent);
     box.setWindowTitle(QObject::tr("A guest plays the demo"));
     box.setText(QObject::tr("Without a Microsoft account there is the demo of Minecraft: Java Edition, the official free trial from Mojang: "
-                            "a world for 5 game days (about 100 minutes), then a new one can be started. You play with your nickname, %1.\n\n"
+                            "a world for 5 game days (about 100 minutes), then a new one can be started. The instance starts as it is, with "
+                            "its mods, in the demo mode and with your nickname, %1.\n\n"
                             "The full game comes after signing in with the Microsoft account that bought Minecraft.")
                     .arg(name()));
     auto* play = box.addButton(QObject::tr("Play the demo"), QMessageBox::AcceptRole);

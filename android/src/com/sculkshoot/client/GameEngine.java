@@ -97,6 +97,22 @@ abstract class GameEngine {
         return Math.max(1024, mb / 256 * 256);
     }
 
+    /**
+     * The guest's game is the official Minecraft demo (Mojang's free trial: a world for five game days, about 100 minutes,
+     * then a new one), with the pack as it is, mods and loader included, like the demo of Prism Launcher on a computer.
+     * The demo came in Minecraft 1.3.1: older versions would ignore "--demo" and run the full game, so they get no demo.
+     */
+    static boolean demoWorks(String version) {
+        if (version.startsWith("1.")) {
+            return Plan.compareVersions(version, "1.3.1") >= 0;
+        }
+        java.util.regex.Matcher snapshot = java.util.regex.Pattern.compile("^(\\d\\d)w\\d\\d[a-z]$").matcher(version);
+        if (snapshot.find()) {
+            return Integer.parseInt(snapshot.group(1)) >= 13;
+        }
+        return version.matches("^\\d{2}\\.\\d+.*");  // the year-based versions (26.1 and newer)
+    }
+
     /** the game folder of an installation (saves, screenshots, options.txt) */
     abstract java.io.File gameDir(Installation inst);
 

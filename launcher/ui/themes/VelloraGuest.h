@@ -43,6 +43,10 @@ bool askName(QWidget* parent);
 bool requireAi(QWidget* parent);
 /// a guest's "Play" is the demo: a guest with a nickname and no account in the list owns Minecraft
 bool playsDemo();
+/// the demo came in Minecraft 1.3.1: older versions would ignore "--demo" and run the full game, so they get no demo
+bool demoWorks(const QString& minecraftVersion);
+/// a guest's instance whose Minecraft has no demo: says so; the instance is not started
+void noDemo(QWidget* parent, const QString& minecraftVersion);
 /// the first time a guest plays: what the demo is and how to get the full game; true to start the demo
 bool confirmDemo(QWidget* parent);
 }  // namespace VelloraGuest

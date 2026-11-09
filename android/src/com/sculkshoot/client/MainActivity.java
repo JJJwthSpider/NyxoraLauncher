@@ -376,8 +376,8 @@ public final class MainActivity extends Activity {
             new AlertDialog.Builder(this)
                 .setTitle("Гость: " + account.name)
                 .setMessage("Ты вошёл без аккаунта Microsoft. Можно собирать установки, ставить моды, наряжаться в гардеробе "
-                            + "и играть в демо-версию Minecraft (официальная пробная от Mojang, без модов). ИИ (Аркан, генераторы "
-                            + "скинов и плащей) и вся игра со сборками — после входа через Microsoft с купленной Minecraft: Java Edition."
+                            + "и играть со сборками в демо-версию Minecraft (официальная пробная от Mojang). ИИ (Аркан, генераторы "
+                            + "скинов и плащей) и вся игра — после входа через Microsoft с купленной Minecraft: Java Edition."
                             + "\n\nНик гостя:")
                 .setView(nick)
                 .setPositiveButton("Войти через Microsoft", new android.content.DialogInterface.OnClickListener() {
@@ -2020,7 +2020,7 @@ public final class MainActivity extends Activity {
                 return;
             }
             if (GameEngine.get() != null) {
-                Toast.makeText(this, "Демо: Minecraft " + inst.minecraftVersion + " без модов", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Демо-режим: «" + inst.name + "»", Toast.LENGTH_SHORT).show();
             }
         }
         Sounds.play(Sounds.LAUNCH);
@@ -2045,16 +2045,18 @@ public final class MainActivity extends Activity {
     }
 
     /** the full build: Minecraft starts inside Lullaby on the built-in engine */
-    /** what a guest plays: the demo here, or the one PojavLauncher offers */
+    /** what a guest plays: the demo with the pack here, or the one PojavLauncher offers */
     String guestPlayText(Installation inst) {
         if (GameEngine.get() == null) {
             return "Игру запускает PojavLauncher: он попросит войти своим аккаунтом Microsoft, а без покупки предложит "
-                + "демо-версию Minecraft.\n\nВся игра с модами — после входа аккаунтом, на котором куплен Minecraft: Java Edition.";
+                + "демо-версию Minecraft — но только без модов. Демо со сборкой с модами есть в полной версии Vellora "
+                + "(VelloraClient-full), где игра запускается прямо в приложении.\n\n"
+                + "Вся игра — после входа аккаунтом, на котором куплен Minecraft: Java Edition.";
         }
         return "Без аккаунта Microsoft доступна демо-версия Minecraft: Java Edition — официальная бесплатная пробная версия "
             + "от Mojang. Мир на 5 игровых дней (около 100 минут), потом можно начать новый.\n\n"
-            + "Демо идёт без модов: запустится Minecraft " + inst.minecraftVersion + " из сборки «" + inst.name + "», "
-            + "с твоим ником. Сборка с модами и вся игра — после входа аккаунтом, на котором куплен Minecraft.";
+            + "Сборка «" + inst.name + "» запустится как есть — с модами, в демо-режиме и с твоим ником. "
+            + "Вся игра — после входа аккаунтом, на котором куплен Minecraft.";
     }
 
     private void playHere(final Installation inst) {

@@ -1817,12 +1817,20 @@ A guest has instances, mods, the catalog, the wardrobe and the demo of the game;
         <translation>Гость играет в демо</translation>
     </message>
     <message>
-        <source>Without a Microsoft account there is the demo of Minecraft: Java Edition, the official free trial from Mojang: a world for 5 game days (about 100 minutes), then a new one can be started. You play with your nickname, %1.
+        <source>Without a Microsoft account there is the demo of Minecraft: Java Edition, the official free trial from Mojang: a world for 5 game days (about 100 minutes), then a new one can be started. The instance starts as it is, with its mods, in the demo mode and with your nickname, %1.
 
 The full game comes after signing in with the Microsoft account that bought Minecraft.</source>
-        <translation>Без аккаунта Microsoft доступна демо-версия Minecraft: Java Edition — официальная бесплатная пробная версия от Mojang: мир на 5 игровых дней (около 100 минут), потом можно начать новый. Играешь со своим ником, %1.
+        <translation>Без аккаунта Microsoft доступна демо-версия Minecraft: Java Edition — официальная бесплатная пробная версия от Mojang: мир на 5 игровых дней (около 100 минут), потом можно начать новый. Сборка запустится как есть — с модами, в демо-режиме и с твоим ником, %1.
 
 Вся игра — после входа аккаунтом Microsoft, на котором куплен Minecraft.</translation>
+    </message>
+    <message>
+        <source>No demo in this version</source>
+        <translation>В этой версии нет демо</translation>
+    </message>
+    <message>
+        <source>Minecraft %1 has no demo mode (it came in 1.3.1), so a guest cannot start it. Choose an instance on a newer version or sign in with the Microsoft account that bought Minecraft.</source>
+        <translation>В Minecraft %1 нет демо-режима (он появился в 1.3.1), поэтому гостю эта версия не запускается. Выбери сборку на версии новее или войди аккаунтом Microsoft, на котором куплен Minecraft.</translation>
     </message>
     <message>
         <source>Play the demo</source>
