@@ -28,16 +28,19 @@
 #include <cmath>
 
 namespace {
-enum Part { Head, Body, RightArm, LeftArm, Staff, Skirt, PartCount };
-const char* const s_parts[] = { "head", "body", "rarm", "larm", "staff" };
+enum Part { Head, Body, RightArm, LeftArm, Skirt, PartCount };
+constexpr int s_namedParts = 4;
+const char* const s_parts[s_namedParts] = { "head", "body", "rarm", "larm" };
 constexpr float s_pi = 3.14159265f;
 
 /// Arkan's model (resources/sculk_theme/arkan_model.json and arkan.png, made by android/art/arkan3d.py), loaded once
 struct ArkanModel {
     QImage texture;  // ARGB32, not premultiplied: the pixels with alpha 254 glow
-    float pivots[5][3] = {};
-    float rightHand[3] = {}, leftHand[3] = {};
+    float pivots[s_namedParts][3] = {};
+    float hands[s_namedParts][3] = {};
+    int magic = RightArm;  // the raised hand under the tesseract
     std::vector<std::array<float, 3>> eyes;
+    std::vector<std::array<float, 5>> glows;  // part, x, y, z, radius: soft lights over the model (the ruby)
     std::vector<std::array<float, 10>> boxes;  // part, x, y, z, w, h, d, u, v, inflate
 };
 
@@ -59,11 +62,29 @@ const ArkanModel& arkan()
         }
         const QJsonObject json = QJsonDocument::fromJson(file.readAll()).object();
         const QJsonObject pivots = json.value("pivots").toObject();
-        for (int i = 0; i < 5; i++) {
+        const auto partOf = [](const QJsonValue& name) {
+            for (int i = 0; i < s_namedParts; i++) {
+                if (name.toString() == QLatin1String(s_parts[i])) {
+                    return i;
+                }
+            }
+            return -1;
+        };
+        for (int i = 0; i < s_namedParts; i++) {
             readPoint(pivots.value(s_parts[i]), m.pivots[i]);
         }
-        readPoint(json.value("hands").toObject().value("rarm"), m.rightHand);
-        readPoint(json.value("hands").toObject().value("larm"), m.leftHand);
+        readPoint(json.value("hands").toObject().value("rarm"), m.hands[RightArm]);
+        readPoint(json.value("hands").toObject().value("larm"), m.hands[LeftArm]);
+        m.magic = json.value("magicHand").toString() == QLatin1String("larm") ? LeftArm : RightArm;
+        for (const auto& value : json.value("glows").toArray()) {
+            const QJsonObject g = value.toObject();
+            const int part = partOf(g.value("part"));
+            float at[3];
+            readPoint(g.value("at"), at);
+            if (part >= 0) {
+                m.glows.push_back({ float(part), at[0], at[1], at[2], float(g.value("radius").toDouble(2)) });
+            }
+        }
         for (const auto& eye : json.value("eyes").toArray()) {
             std::array<float, 3> e{};
             readPoint(eye, e.data());
@@ -71,12 +92,7 @@ const ArkanModel& arkan()
         }
         for (const auto& value : json.value("boxes").toArray()) {
             const QJsonObject b = value.toObject();
-            int part = -1;
-            for (int i = 0; i < 5; i++) {
-                if (b.value("part").toString() == QLatin1String(s_parts[i])) {
-                    part = i;
-                }
-            }
+            int part = partOf(b.value("part"));
             if (part < 0) {
                 continue;
             }
@@ -137,7 +153,7 @@ Matrix translate(float x, float y, float z)
     return { 1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z };
 }
 
-std::array<float, 3> apply(const Matrix& m, const float* p)
+std::array<float, 3> transformPoint(const Matrix& m, const float* p)
 {
     return { m[0] * p[0] + m[1] * p[1] + m[2] * p[2] + m[3], m[4] * p[0] + m[5] * p[1] + m[6] * p[2] + m[7],
              m[8] * p[0] + m[9] * p[1] + m[10] * p[2] + m[11] };
@@ -233,7 +249,7 @@ void MoonyWidget::paintEvent(QPaintEvent*)
 QPointF MoonyWidget::project(const Matrix& m, float x, float y, float z, float* depth) const
 {
     const float p[3] = { x, y, z };
-    const auto q = apply(m, p);
+    const auto q = transformPoint(m, p);
     if (depth) {
         *depth = q[2];
     }
@@ -255,14 +271,18 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
     }
     const float time = static_cast<float>(m_time), phase = static_cast<float>(m_phase), busy = static_cast<float>(m_busy);
 
-    // the pose: floating, turning a little, looking around, the right hand up with the tesseract, the staff
+    // the pose: floating, turning a little towards the raised hand, looking around, the hand up with the tesseract
+    const int magic = m.magic, other = magic == RightArm ? LeftArm : RightArm;
+    const float side = m.pivots[magic][0] > 0 ? 1.0f : -1.0f;  // +1: the raised hand is on the right of the picture
     const float bob = 2.2f + std::sin(time * 1.6f) * 0.7f;
-    const float yaw = 0.38f + std::sin(time * 0.45f) * 0.32f;
-    const float headYaw = std::sin(time * 0.7f) * 0.28f, headPitch = std::sin(time * 0.5f) * 0.08f - 0.04f;
-    // the right hand out to his side, the palm up, the tesseract over it (the face stays in sight)
-    const float rPitch = -0.55f + std::sin(phase * 1.6f) * (0.05f + 0.13f * busy);
-    const float rRoll = -1.2f + std::sin(phase * 1.1f) * (0.05f + 0.1f * busy);
-    const float lPitch = -0.42f + std::sin(time * 1.3f) * 0.05f, lRoll = 0.14f + std::sin(time * 5.0f) * 0.08f * busy;
+    // turned a little towards the raised hand; in a close-up he looks at you
+    const float yaw = closeUp ? -side * 0.12f + std::sin(time * 0.45f) * 0.12f : -side * 0.38f + std::sin(time * 0.45f) * 0.32f;
+    const float headYaw = std::sin(time * 0.7f) * (closeUp ? 0.15f : 0.28f), headPitch = std::sin(time * 0.5f) * 0.08f - 0.04f;
+    // the hand out to his side, the palm up, the tesseract over it (the face stays in sight)
+    const float mPitch = -0.55f + std::sin(phase * 1.6f) * (0.05f + 0.13f * busy);
+    const float mRoll = side * (1.2f + std::sin(phase * 1.1f) * (0.05f + 0.1f * busy));
+    // the other hand hangs by his side
+    const float oPitch = -0.12f + std::sin(time * 1.3f) * 0.05f, oRoll = -side * (0.08f + std::sin(time * 5.0f) * 0.05f * busy);
     const float skirtSway = std::sin(time * 1.6f + 1.0f) * 0.045f;
     m_blink = std::fmod(time, 4.7f) > 4.55f;
 
@@ -272,22 +292,24 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
     Matrix mats[PartCount];
     mats[Body] = camera;
     mats[Head] = mul(camera, rot(m.pivots[Head][0], m.pivots[Head][1], m.pivots[Head][2], headPitch, headYaw, 0));
-    const Matrix rArm = rot(m.pivots[RightArm][0], m.pivots[RightArm][1], m.pivots[RightArm][2], rPitch, 0, rRoll);
-    const Matrix lArm = rot(m.pivots[LeftArm][0], m.pivots[LeftArm][1], m.pivots[LeftArm][2], lPitch, 0, lRoll);
-    mats[RightArm] = mul(camera, rArm);
-    mats[LeftArm] = mul(camera, lArm);
+    const Matrix magicArm = rot(m.pivots[magic][0], m.pivots[magic][1], m.pivots[magic][2], mPitch, 0, mRoll);
+    mats[magic] = mul(camera, magicArm);
+    mats[other] = mul(camera, rot(m.pivots[other][0], m.pivots[other][1], m.pivots[other][2], oPitch, 0, oRoll));
     mats[Skirt] = mul(camera, rot(0, 12, 0, skirtSway, 0, 0));
-    // the staff stands in the left hand, upright, a little tilted
-    const auto hand = apply(lArm, m.leftHand);
-    mats[Staff] = mul(mul(camera, translate(hand[0], hand[1] - 11, hand[2] + 0.4f)), rot(0, 11, 0, -0.1f, 0, 0.08f));
+    // the tesseract over the raised palm; its red light falls on the cloth near it
+    const double pulse = 0.75 + 0.25 * std::sin(time * (3.0 + 4.0 * busy));
+    auto palm = transformPoint(magicArm, m.hands[magic]);
+    palm[1] += 6.5f;
+    m_tesseract = transformPoint(camera, palm.data());
+    m_tesseractLight = static_cast<float>((0.8 + 0.2 * busy) * (0.85 + 0.15 * pulse));
 
     if (closeUp) {
-        m_scale = std::min(bufW / 19.0f, bufH / 17.0f);
+        m_scale = std::min(bufW / 20.0f, bufH / 19.0f);
         m_centerX = bufW / 2.0f;
-        m_centerY = bufH * 0.52f + (27 + bob) * m_scale;
+        m_centerY = bufH * 0.5f + (28 + bob) * m_scale;
     } else {
         m_scale = std::min(bufW / 38.0f, bufH / 46.0f);
-        m_centerX = bufW * 0.55f;  // the raised hand and its tesseract are on the left
+        m_centerX = bufW * (0.5f - side * 0.05f);  // room for the raised hand and its tesseract
         m_centerY = bufH * 0.5f + 20 * m_scale;
     }
     m_frame.fill(Qt::transparent);
@@ -307,7 +329,7 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
     }
     // the model
     for (const auto& box : m.boxes) {
-        drawBox(mats[static_cast<int>(box[0])], box.data());
+        drawBox(mats[static_cast<int>(box[0])], box.data(), static_cast<int>(box[0]) == Head);
     }
 
     // everything below is in widget pixels: the area's corner plus k widget pixels per frame pixel
@@ -335,14 +357,15 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
             glowAt(p, at(project(mats[Head], e[0], e[1], e[2])), unit * 2.2, QColor(255, 40, 64), (0.4 + 0.25 * m_wake) * shine);
         }
     }
-    // the ruby of the staff glows
-    glowAt(p, at(project(mats[Staff], 0, 32.5f, 0)), unit * (3.0 + 1.5 * busy) * (0.85 + 0.15 * std::sin(time * 3.0)),
-           QColor(255, 40, 64), 0.44);
+    // the ruby glows
+    for (const auto& g : m.glows) {
+        glowAt(p, at(project(mats[static_cast<int>(g[0])], g[1], g[2], g[3])), unit * g[4] * (1.0 + 0.4 * busy) * (0.85 + 0.15 * std::sin(time * 3.0)),
+               QColor(255, 40, 64), 0.44);
+    }
 
-    // the tesseract over the raised right hand, turning in four dimensions
-    const auto palm = apply(rArm, m.rightHand);
-    const QPointF c = at(project(camera, palm[0], palm[1] + 6.5f, palm[2])) + QPointF(0, std::sin(time * 2.0) * unit * 0.4);
-    const double pulse = 0.75 + 0.25 * std::sin(time * (3.0 + 4.0 * busy));
+    // the tesseract over the raised hand, turning in four dimensions
+    const QPointF c = at(QPointF(m_centerX + m_tesseract[0] * m_scale, m_centerY - m_tesseract[1] * m_scale)) +
+                      QPointF(0, std::sin(time * 2.0) * unit * 0.4);
     glowAt(p, c, unit * 7 * (1.0 + 0.3 * std::max<double>(busy, m_wake)), QColor(255, 40, 60), (0.3 + 0.15 * m_wake) * pulse);
     QPointF corners[16];
     const double size = unit * 15, turn = phase * 0.7;
@@ -414,7 +437,7 @@ void MoonyWidget::runeDot(const Matrix& m, float x, float y, float z, QRgb color
 }
 
 /// a box with the Minecraft texture layout at (u, v): top and bottom on the first row, then right, front, left, back
-void MoonyWidget::drawBox(const Matrix& m, const float* b)
+void MoonyWidget::drawBox(const Matrix& m, const float* b, bool head)
 {
     const float inflate = b[9];
     const float x0 = b[1] - inflate, x1 = b[1] + b[4] + inflate, y0 = b[2] - inflate, y1 = b[2] + b[5] + inflate;
@@ -423,7 +446,7 @@ void MoonyWidget::drawBox(const Matrix& m, const float* b)
     const int iw = static_cast<int>(std::lround(b[4])), ih = static_cast<int>(std::lround(b[5])), id = static_cast<int>(std::lround(b[6]));
     const auto f = [&](float ax, float ay, float az, float bx, float by, float bz, float cx, float cy, float cz, int su, int sv, int sw, int sh) {
         const float a[3] = { ax, ay, az }, bb[3] = { bx, by, bz }, c[3] = { cx, cy, cz };
-        face(m, a, bb, c, su, sv, sw, sh);
+        face(m, a, bb, c, su, sv, sw, sh, head);
     };
     f(x0, y1, z1, x1, y1, z1, x0, y0, z1, u + id, v + id, iw, ih);
     f(x1, y1, z0, x0, y1, z0, x1, y0, z0, u + 2 * id + iw, v + id, iw, ih);
@@ -433,10 +456,11 @@ void MoonyWidget::drawBox(const Matrix& m, const float* b)
     f(x0, y0, z1, x1, y0, z1, x0, y0, z0, u + id + iw, v, iw, id);
 }
 
-/// one face, a textured parallelogram, shaded like Minecraft; the pixels with alpha 254 glow (not shaded)
-void MoonyWidget::face(const Matrix& m, const float* a, const float* b, const float* c, int su, int sv, int sw, int sh)
+/// one face, a textured parallelogram, shaded like Minecraft and lit red by the tesseract when it is near and turned to
+/// it; the pixels with alpha 254 glow (not shaded), those of the head are the eyes and close when he blinks
+void MoonyWidget::face(const Matrix& m, const float* a, const float* b, const float* c, int su, int sv, int sw, int sh, bool head)
 {
-    const auto A = apply(m, a), B = apply(m, b), C = apply(m, c);
+    const auto A = transformPoint(m, a), B = transformPoint(m, b), C = transformPoint(m, c);
     const float ex = B[0] - A[0], ey = B[1] - A[1], ez = B[2] - A[2], fx = C[0] - A[0], fy = C[1] - A[1], fz = C[2] - A[2];
     const float nx = fy * ez - fz * ey, ny = fz * ex - fx * ez, nz = fx * ey - fy * ex;
     const float len = std::sqrt(nx * nx + ny * ny + nz * nz);
@@ -448,7 +472,14 @@ void MoonyWidget::face(const Matrix& m, const float* a, const float* b, const fl
     if (ny / len < -0.5f) {
         bright *= 0.85f;
     }
+    // the red light of the tesseract
+    const float dx = m_tesseract[0] - (A[0] + (ex + fx) / 2), dy = m_tesseract[1] - (A[1] + (ey + fy) / 2),
+                dz = m_tesseract[2] - (A[2] + (ez + fz) / 2);
+    const float dist = std::sqrt(dx * dx + dy * dy + dz * dz) + 1e-3f;
+    const float red = std::max(0.0f, (nx * dx + ny * dy + nz * dz) / (len * dist)) * std::clamp(1.1f - dist / 13, 0.0f, 1.0f) * m_tesseractLight;
     const int b256 = static_cast<int>(std::lround(std::min(1.08f, bright) * 256));
+    const int r256 = static_cast<int>(std::lround(std::min(1.4f, bright + 0.7f * red) * 256));
+    const int redAdd = static_cast<int>(std::lround(red * 22));
     const float sAx = m_centerX + A[0] * m_scale, sAy = m_centerY - A[1] * m_scale;
     const float e1x = ex * m_scale, e1y = -ey * m_scale, e2x = fx * m_scale, e2y = -fy * m_scale;
     const float det = e1x * e2y - e1y * e2x;
@@ -487,11 +518,11 @@ void MoonyWidget::face(const Matrix& m, const float* a, const float* b, const fl
                 continue;
             }
             if (alpha == 254) {
-                // a glowing pixel: the eyes (closed while he blinks), the rubies
-                row[px] = m_blink && vy < 16 ? 0xFF2A0A12 : (0xFF000000 | (texel & 0xFFFFFF));
+                // a glowing pixel: the eyes (closed while he blinks), the ruby
+                row[px] = m_blink && head ? 0xFF12040A : (0xFF000000 | (texel & 0xFFFFFF));
             } else {
-                row[px] = qRgb(std::min(255, (qRed(texel) * b256) >> 8), std::min(255, (qGreen(texel) * b256) >> 8),
-                               std::min(255, (qBlue(texel) * b256) >> 8));
+                row[px] = qRgb(std::min(255, ((qRed(texel) * r256) >> 8) + redAdd), std::min(255, ((qGreen(texel) * b256) >> 8) + redAdd / 8),
+                               std::min(255, ((qBlue(texel) * b256) >> 8) + redAdd / 4));
             }
             depthRow[px] = z;
         }

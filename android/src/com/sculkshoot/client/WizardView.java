@@ -20,25 +20,28 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Arkan, Vellora's AI pack builder, as a 3D mob in the style of a Minecraft mod: a model of boxes with a pixel texture
- * (assets/arkan_model.json and arkan.png, made by art/arkan3d.py), drawn here with the same software renderer as the
- * player (CharacterView): the hood with a gold-stitched rim and a pointed top, glowing eyes, a nose and a silver beard,
- * the robe down to the ground, a mantle, a belt with a ruby, the right hand raised with the red tesseract turning in four
- * dimensions over it, a staff with a glowing ruby in the left. He floats over a turning magic circle, turns a little,
- * looks around and blinks; while he works the tesseract spins faster and the sparks fly. In a small place (a chat
- * avatar) only his head and shoulders are shown.
+ * Arkan, Vellora's AI pack builder, as a 3D mob in the style of a Minecraft mod: the old hooded wizard made of boxes
+ * with a pixel texture (assets/arkan_model.json and arkan.png, made by art/arkan3d.py), drawn here with the same
+ * software renderer as the player (CharacterView): a deep burgundy hood with a crimson rim stitched with gold and its
+ * top falling back, the face lost in its shadow with only the red eyes glowing, a silver beard, a cloak with gold edges,
+ * runes and a ruby brooch, a black belt with a gold buckle, one hand raised with the red tesseract turning in four
+ * dimensions over it. The tesseract lights the cloth near it red. He floats over a turning magic circle, turns a
+ * little, looks around and blinks; while he works the tesseract spins faster and the sparks fly. In a small place (a
+ * chat avatar) only his head and shoulders are shown.
  */
 final class WizardView extends View {
-    private static final int HEAD = 0, BODY = 1, RARM = 2, LARM = 3, STAFF = 4, SKIRT = 5;
-    private static final String[] PARTS = { "head", "body", "rarm", "larm", "staff" };
+    private static final int HEAD = 0, BODY = 1, RARM = 2, LARM = 3, SKIRT = 4;
+    private static final String[] PARTS = { "head", "body", "rarm", "larm" };
 
     /** the model, loaded once */
     private static final class Model {
         int tw, th;
         int[] tex;
-        float[][] pivots = new float[5][];
-        float[] rHand, lHand;
+        float[][] pivots = new float[4][];
+        float[][] hands = new float[4][];
+        int magic = RARM;  // the raised hand under the tesseract
         float[][] eyes;
+        final List<float[]> glows = new ArrayList<float[]>();  // part, x, y, z, radius: soft lights over the model
         final List<float[]> boxes = new ArrayList<float[]>();  // part, x, y, z, w, h, d, u, v, inflate
     }
 
@@ -59,6 +62,8 @@ final class WizardView extends View {
     private Bitmap frame;
     private float scale, centerX, centerY;
     private boolean blink;
+    private final float[] tesseract = new float[3];  // where the tesseract is, before the projection: it lights the cloth
+    private float tesseractLight;
 
     WizardView(Context context) {
         super(context);
@@ -101,8 +106,15 @@ final class WizardView extends View {
             for (int i = 0; i < PARTS.length; i++) {
                 m.pivots[i] = floats(pivots.getJSONArray(PARTS[i]));
             }
-            m.rHand = floats(json.getJSONObject("hands").getJSONArray("rarm"));
-            m.lHand = floats(json.getJSONObject("hands").getJSONArray("larm"));
+            m.hands[RARM] = floats(json.getJSONObject("hands").getJSONArray("rarm"));
+            m.hands[LARM] = floats(json.getJSONObject("hands").getJSONArray("larm"));
+            m.magic = "larm".equals(json.optString("magicHand", "rarm")) ? LARM : RARM;
+            JSONArray glows = json.optJSONArray("glows");
+            for (int i = 0; glows != null && i < glows.length(); i++) {
+                JSONObject g = glows.getJSONObject(i);
+                float[] at = floats(g.getJSONArray("at"));
+                m.glows.add(new float[] { Arrays.asList(PARTS).indexOf(g.getString("part")), at[0], at[1], at[2], (float) g.optDouble("radius", 2) });
+            }
             JSONArray eyes = json.getJSONArray("eyes");
             m.eyes = new float[eyes.length()][];
             for (int i = 0; i < eyes.length(); i++) {
@@ -112,6 +124,9 @@ final class WizardView extends View {
             for (int i = 0; i < boxes.length(); i++) {
                 JSONObject b = boxes.getJSONObject(i);
                 int part = Arrays.asList(PARTS).indexOf(b.getString("part"));
+                if (part < 0) {
+                    continue;
+                }
                 float[] from = floats(b.getJSONArray("from")), size = floats(b.getJSONArray("size")), uv = floats(b.getJSONArray("uv"));
                 if (part == BODY && from[1] < 1) {
                     part = SKIRT;  // the robe below the belt sways on its own
@@ -213,14 +228,19 @@ final class WizardView extends View {
         float time = (SystemClock.uptimeMillis() - start) / 1000f;
         float speed = busy ? 2.2f : 1f;
 
-        // the pose: floating, turning a little, looking around, the right hand up with the tesseract, the staff
+        // the pose: floating, turning a little towards the raised hand, looking around, the hand up with the tesseract
+        Model m = model;
+        int magic = m.magic, other = magic == RARM ? LARM : RARM;
+        float side = m.pivots[magic][0] > 0 ? 1 : -1;  // +1: the raised hand is on the right of the picture
         float bob = 2.2f + (float) Math.sin(time * 1.6) * 0.7f;
-        float yaw = 0.38f + (float) Math.sin(time * 0.45) * 0.32f;
-        float headYaw = (float) Math.sin(time * 0.7) * 0.28f, headPitch = (float) Math.sin(time * 0.5) * 0.08f - 0.04f;
-        // the right hand out to his side, the palm up, the tesseract over it (the face stays in sight)
-        float rPitch = -0.55f + (float) Math.sin(time * 1.6 * speed) * (busy ? 0.18f : 0.05f);
-        float rRoll = -1.2f + (float) Math.sin(time * 1.1 * speed) * (busy ? 0.15f : 0.05f);
-        float lPitch = -0.42f + (float) Math.sin(time * 1.3) * 0.05f, lRoll = 0.14f + (busy ? (float) Math.sin(time * 5) * 0.08f : 0);
+        // turned a little towards the raised hand; in a close-up he looks at you
+        float yaw = closeUp ? -side * 0.12f + (float) Math.sin(time * 0.45) * 0.12f : -side * 0.38f + (float) Math.sin(time * 0.45) * 0.32f;
+        float headYaw = (float) Math.sin(time * 0.7) * (closeUp ? 0.15f : 0.28f), headPitch = (float) Math.sin(time * 0.5) * 0.08f - 0.04f;
+        // the hand out to his side, the palm up, the tesseract over it (the face stays in sight)
+        float mPitch = -0.55f + (float) Math.sin(time * 1.6 * speed) * (busy ? 0.18f : 0.05f);
+        float mRoll = side * (1.2f + (float) Math.sin(time * 1.1 * speed) * (busy ? 0.15f : 0.05f));
+        // the other hand hangs by his side
+        float oPitch = -0.12f + (float) Math.sin(time * 1.3) * 0.05f, oRoll = -side * (0.08f + (busy ? (float) Math.sin(time * 5) * 0.05f : 0));
         float skirtSway = (float) Math.sin(time * 1.6 + 1) * 0.045f;
         blink = (time % 4.7f) > 4.55f;
 
@@ -228,27 +248,27 @@ final class WizardView extends View {
         mul(camera, rot(0, 0, 0, 0, yaw, 0), camera);
         float[] ground = camera.clone();
         mul(camera, translate(0, bob, 0), camera);
-        Model m = model;
-        float[][] mats = new float[6][12];
+        float[][] mats = new float[5][12];
         System.arraycopy(camera, 0, mats[BODY], 0, 12);
         mul(camera, rot(m.pivots[HEAD][0], m.pivots[HEAD][1], m.pivots[HEAD][2], headPitch, headYaw, 0), mats[HEAD]);
-        float[] rArm = rot(m.pivots[RARM][0], m.pivots[RARM][1], m.pivots[RARM][2], rPitch, 0, rRoll);
-        float[] lArm = rot(m.pivots[LARM][0], m.pivots[LARM][1], m.pivots[LARM][2], lPitch, 0, lRoll);
-        mul(camera, rArm, mats[RARM]);
-        mul(camera, lArm, mats[LARM]);
+        float[] magicArm = rot(m.pivots[magic][0], m.pivots[magic][1], m.pivots[magic][2], mPitch, 0, mRoll);
+        mul(camera, magicArm, mats[magic]);
+        mul(camera, rot(m.pivots[other][0], m.pivots[other][1], m.pivots[other][2], oPitch, 0, oRoll), mats[other]);
         mul(camera, rot(0, 12, 0, skirtSway, 0, 0), mats[SKIRT]);
-        // the staff stands in the left hand, upright, a little tilted
-        float[] hand = apply(lArm, m.lHand);
-        mul(camera, translate(hand[0], hand[1] - 11, hand[2] + 0.4f), mats[STAFF]);
-        mul(mats[STAFF], rot(0, 11, 0, -0.1f, 0, 0.08f), mats[STAFF]);
+        // the tesseract over the raised palm; its red light falls on the cloth near it
+        float pulse = 0.75f + 0.25f * (float) Math.sin(time * (busy ? 7 : 3));
+        float[] palm = apply(magicArm, m.hands[magic]);
+        palm[1] += 6.5f;
+        System.arraycopy(apply(camera, palm), 0, tesseract, 0, 3);
+        tesseractLight = (busy ? 1f : 0.8f) * (0.85f + 0.15f * pulse);
 
         if (closeUp) {
-            scale = Math.min(bufW / 19f, bufH / 17f);
+            scale = Math.min(bufW / 20f, bufH / 19f);
             centerX = bufW / 2f;
-            centerY = bufH * 0.52f + (27 + bob) * scale;
+            centerY = bufH * 0.5f + (28 + bob) * scale;
         } else {
             scale = Math.min(bufW / 38f, bufH / 46f);
-            centerX = bufW * 0.55f;  // the raised hand and its tesseract are on the left
+            centerX = bufW * (0.5f - side * 0.05f);  // room for the raised hand and its tesseract
             centerY = bufH * 0.5f + 20 * scale;
         }
         Arrays.fill(color, 0);
@@ -269,7 +289,7 @@ final class WizardView extends View {
 
         // the model
         for (float[] b : m.boxes) {
-            drawBox(mats[(int) b[0]], b[1], b[2], b[3], b[4], b[5], b[6], (int) b[7], (int) b[8], b[9]);
+            drawBox(mats[(int) b[0]], b[1], b[2], b[3], b[4], b[5], b[6], (int) b[7], (int) b[8], b[9], b[0] == HEAD);
         }
 
         // the light under him, then the frame, sharp
@@ -297,17 +317,17 @@ final class WizardView extends View {
                 canvas.drawCircle(p[0] * k2, p[1] * k2, r, glow);
             }
         }
-        // the ruby of the staff glows
-        float[] gem = project(mats[STAFF], new float[] { 0, 32.5f, 0 });
-        float gr = scale * k2 * (busy ? 4.5f : 3f) * (0.85f + 0.15f * (float) Math.sin(time * 3));
-        glow.setShader(new RadialGradient(gem[0] * k2, gem[1] * k2, gr, new int[] { 0x70FF2840, 0x00FF2840 }, null, Shader.TileMode.CLAMP));
-        canvas.drawCircle(gem[0] * k2, gem[1] * k2, gr, glow);
+        // the rubies glow
+        for (float[] g : m.glows) {
+            float[] at = project(mats[(int) g[0]], new float[] { g[1], g[2], g[3] });
+            float gr = scale * k2 * g[4] * (busy ? 1.4f : 1f) * (0.85f + 0.15f * (float) Math.sin(time * 3));
+            glow.setShader(new RadialGradient(at[0] * k2, at[1] * k2, gr, new int[] { 0x70FF2840, 0x00FF2840 }, null, Shader.TileMode.CLAMP));
+            canvas.drawCircle(at[0] * k2, at[1] * k2, gr, glow);
+        }
 
-        // the tesseract over the raised right hand, turning in four dimensions
-        float[] palm = apply(rArm, m.rHand);
-        float[] c = project(camera, new float[] { palm[0], palm[1] + 6.5f, palm[2] });
-        float cx = c[0] * k2, cy = c[1] * k2 + (float) Math.sin(time * 2) * scale * k2 * 0.4f;
-        float pulse = 0.75f + 0.25f * (float) Math.sin(time * (busy ? 7 : 3));
+        // the tesseract over the raised hand, turning in four dimensions
+        float cx = (centerX + tesseract[0] * scale) * k2;
+        float cy = (centerY - tesseract[1] * scale) * k2 + (float) Math.sin(time * 2) * scale * k2 * 0.4f;
         float glowRadius = scale * k2 * 7 * (busy ? 1.3f : 1f);
         glow.setShader(new RadialGradient(cx, cy, glowRadius, new int[] { ((int) (110 * pulse) << 24) | 0xFF283C, 0x00FF283C }, null,
                                           Shader.TileMode.CLAMP));
@@ -375,19 +395,23 @@ final class WizardView extends View {
     }
 
     /** a box with the Minecraft texture layout at (u, v): top and bottom on the first row, then right, front, left, back */
-    private void drawBox(float[] m, float x, float y, float z, float w, float h, float d, int u, int v, float inflate) {
+    private void drawBox(float[] m, float x, float y, float z, float w, float h, float d, int u, int v, float inflate, boolean head) {
         float x0 = x - inflate, x1 = x + w + inflate, y0 = y - inflate, y1 = y + h + inflate, z0 = z - inflate, z1 = z + d + inflate;
         int iw = Math.round(w), ih = Math.round(h), id = Math.round(d);
-        face(m, x0, y1, z1, x1, y1, z1, x0, y0, z1, u + id, v + id, iw, ih);
-        face(m, x1, y1, z0, x0, y1, z0, x1, y0, z0, u + 2 * id + iw, v + id, iw, ih);
-        face(m, x0, y1, z0, x0, y1, z1, x0, y0, z0, u, v + id, id, ih);
-        face(m, x1, y1, z1, x1, y1, z0, x1, y0, z1, u + id + iw, v + id, id, ih);
-        face(m, x0, y1, z0, x1, y1, z0, x0, y1, z1, u + id, v, iw, id);
-        face(m, x0, y0, z1, x1, y0, z1, x0, y0, z0, u + id + iw, v, iw, id);
+        face(m, x0, y1, z1, x1, y1, z1, x0, y0, z1, u + id, v + id, iw, ih, head);
+        face(m, x1, y1, z0, x0, y1, z0, x1, y0, z0, u + 2 * id + iw, v + id, iw, ih, head);
+        face(m, x0, y1, z0, x0, y1, z1, x0, y0, z0, u, v + id, id, ih, head);
+        face(m, x1, y1, z1, x1, y1, z0, x1, y0, z1, u + id + iw, v + id, id, ih, head);
+        face(m, x0, y1, z0, x1, y1, z0, x0, y1, z1, u + id, v, iw, id, head);
+        face(m, x0, y0, z1, x1, y0, z1, x0, y0, z0, u + id + iw, v, iw, id, head);
     }
 
-    /** one face, a textured parallelogram, shaded like Minecraft; the pixels with alpha 254 glow (not shaded) */
-    private void face(float[] m, float ax, float ay, float az, float bx, float by, float bz, float cx, float cy, float cz, int su, int sv, int sw, int sh) {
+    /**
+     * one face, a textured parallelogram, shaded like Minecraft and lit red by the tesseract when it is near and turned to
+     * it; the pixels with alpha 254 glow (not shaded), those of the head are the eyes and close when he blinks
+     */
+    private void face(float[] m, float ax, float ay, float az, float bx, float by, float bz, float cx, float cy, float cz, int su, int sv, int sw, int sh,
+                      boolean head) {
         float AX = m[0] * ax + m[1] * ay + m[2] * az + m[3], AY = m[4] * ax + m[5] * ay + m[6] * az + m[7], AZ = m[8] * ax + m[9] * ay + m[10] * az + m[11];
         float BX = m[0] * bx + m[1] * by + m[2] * bz + m[3], BY = m[4] * bx + m[5] * by + m[6] * bz + m[7], BZ = m[8] * bx + m[9] * by + m[10] * bz + m[11];
         float CX = m[0] * cx + m[1] * cy + m[2] * cz + m[3], CY = m[4] * cx + m[5] * cy + m[6] * cz + m[7], CZ = m[8] * cx + m[9] * cy + m[10] * cz + m[11];
@@ -402,7 +426,13 @@ final class WizardView extends View {
         if (ny / len < -0.5f) {
             bright *= 0.85f;
         }
+        // the red light of the tesseract
+        float dx = tesseract[0] - (AX + (ex + fx) / 2), dy = tesseract[1] - (AY + (ey + fy) / 2), dz = tesseract[2] - (AZ + (ez + fz) / 2);
+        float dist = (float) Math.sqrt(dx * dx + dy * dy + dz * dz) + 1e-3f;
+        float red = Math.max(0, (nx * dx + ny * dy + nz * dz) / (len * dist)) * Math.max(0, Math.min(1, 1.1f - dist / 13)) * tesseractLight;
         int b256 = Math.round(Math.min(1.08f, bright) * 256);
+        int r256 = Math.round(Math.min(1.4f, bright + 0.7f * red) * 256);
+        int redAdd = Math.round(red * 22);
         float sAx = centerX + AX * scale, sAy = centerY - AY * scale;
         float e1x = ex * scale, e1y = -ey * scale, e2x = fx * scale, e2y = -fy * scale;
         float det = e1x * e2y - e1y * e2x;
@@ -443,12 +473,12 @@ final class WizardView extends View {
                     continue;
                 }
                 if (alpha == 254) {
-                    // a glowing pixel: the eyes (closed while he blinks), the rubies
-                    color[i] = blink && vy < 16 ? 0xFF2A0A12 : 0xFF000000 | (c & 0xFFFFFF);
+                    // a glowing pixel: the eyes (closed while he blinks), the ruby
+                    color[i] = blink && head ? 0xFF12040A : 0xFF000000 | (c & 0xFFFFFF);
                 } else {
-                    int r = Math.min(255, (((c >> 16) & 0xFF) * b256) >> 8);
-                    int g = Math.min(255, (((c >> 8) & 0xFF) * b256) >> 8);
-                    int bl = Math.min(255, ((c & 0xFF) * b256) >> 8);
+                    int r = Math.min(255, ((((c >> 16) & 0xFF) * r256) >> 8) + redAdd);
+                    int g = Math.min(255, ((((c >> 8) & 0xFF) * b256) >> 8) + redAdd / 8);
+                    int bl = Math.min(255, (((c & 0xFF) * b256) >> 8) + redAdd / 4);
                     color[i] = 0xFF000000 | (r << 16) | (g << 8) | bl;
                 }
                 depth[i] = z;

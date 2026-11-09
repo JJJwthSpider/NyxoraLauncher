@@ -25,13 +25,14 @@
 
 class QPainter;
 
-/// The face of the mod pack agent: Arkan the wizard as a 3D mob in the style of a Minecraft mod, a model of boxes
-/// with a pixel texture (resources/sculk_theme/arkan_model.json and arkan.png, made by android/art/arkan3d.py) drawn
-/// by a small software renderer, the same as the phone's WizardView: he floats over a turning magic circle, looks
-/// around and blinks, holds a staff with a glowing ruby and the red tesseract turning in four dimensions over his
-/// raised palm. His eyes glow brighter when the mouse comes near; while the agent works the tesseract spins faster
-/// and the sparks fly. In a small place only his head and shoulders are shown. (The class keeps its old name, Moony,
-/// so nothing else has to change.)
+/// The face of the mod pack agent: Arkan, the old hooded wizard, as a 3D mob in the style of a Minecraft mod, a model
+/// of boxes with a pixel texture (resources/sculk_theme/arkan_model.json and arkan.png, made by android/art/arkan3d.py)
+/// drawn by a small software renderer, the same as the phone's WizardView: the face lost in the shadow of the hood with
+/// only the red eyes glowing, the crimson rim stitched with gold, the silver beard, the ruby brooch; he floats over a
+/// turning magic circle, looks around and blinks, and the red tesseract turns in four dimensions over his raised palm
+/// and lights the cloth near it. His eyes glow brighter when the mouse comes near; while the agent works the tesseract
+/// spins faster and the sparks fly. In a small place only his head and shoulders are shown, looking at you. (The class
+/// keeps its old name, Moony, so nothing else has to change.)
 class MoonyWidget : public QWidget {
     Q_OBJECT
    public:
@@ -59,8 +60,8 @@ class MoonyWidget : public QWidget {
     using Matrix = std::array<float, 12>;
     QPointF project(const Matrix& m, float x, float y, float z, float* depth = nullptr) const;
     void runeDot(const Matrix& m, float x, float y, float z, QRgb color);
-    void drawBox(const Matrix& m, const float* box);
-    void face(const Matrix& m, const float* a, const float* b, const float* c, int su, int sv, int sw, int sh);
+    void drawBox(const Matrix& m, const float* box, bool head);
+    void face(const Matrix& m, const float* a, const float* b, const float* c, int su, int sv, int sw, int sh, bool head);
 
     QTimer m_timer;
     QElapsedTimer m_clock;
@@ -78,4 +79,6 @@ class MoonyWidget : public QWidget {
     std::vector<float> m_depth;
     float m_scale = 1, m_centerX = 0, m_centerY = 0;
     bool m_blink = false;
+    std::array<float, 3> m_tesseract{};  // where the tesseract is, before the projection: it lights the cloth
+    float m_tesseractLight = 0;
 };

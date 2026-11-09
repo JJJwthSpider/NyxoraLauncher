@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
 """Arkan, Vellora's AI wizard, as a 3D mob in the style of a Minecraft mod: a model of boxes and its texture.
 
+It is the old pixel-art Arkan made of boxes: a deep burgundy hood with its pointed top falling back to the left (a gold
+tip at the end) and a crimson rim stitched with gold around the opening, the face lost in the shadow of the hood with
+only the red eyes glowing in it, a silver beard falling to a point, a cloak with gold edges, gold runes and a ruby
+brooch, a black belt with a gold buckle, a gold hem, and the right hand of the picture raised, the palm up, under the
+red tesseract.
+
 The model (arkan_model.json) is a list of boxes in Minecraft units (y up, the feet at 0, the face towards +z), each
-with its part (head, body, rarm, larm, staff), its place and size and its texture corner (u, v) in the usual Minecraft
-box layout: top and bottom on the first row, then right, front, left and back. The texture (arkan.png, 128x64) is
-painted here pixel by pixel. Pixels with alpha 254 glow (the eyes, the ruby of the staff and the belt): the views draw
-them at full brightness.
+with its part (head, body, rarm, larm), its place and size and its texture corner (u, v) in the usual Minecraft box
+layout: top and bottom on the first row, then right, front, left and back. The texture (arkan.png) is painted here
+pixel by pixel and the boxes are packed on it in rows. Pixels with alpha 254 glow (the eyes, the ruby): the views draw
+them at full brightness; the glowing pixels of the head are the eyes, they close when he blinks. "magicHand" is the
+hand under the tesseract, "glows" are the soft lights the views draw over the model (the ruby).
 
 WizardView.java (phone) and MoonyWidget.cpp (PC) draw it in 3D: he floats over a magic circle, turns a little, looks
-around, holds the red tesseract over his right hand and a staff in the left. The small pictures of him
-(res/drawable-nodpi/wizard.png and launcher/resources/sculk_theme/wizard.png: chat avatars, list icons) are stills of
-that render, a close-up of his head and shoulders.
+around, holds the red tesseract over his raised hand, and the tesseract lights the cloth near it red. The small
+pictures of him (res/drawable-nodpi/wizard.png and launcher/resources/sculk_theme/wizard.png: chat avatars, list icons)
+are stills of that render, a close-up of his head and shoulders.
 
 Run:  python3 art/arkan3d.py   (from android/)
 """
@@ -23,23 +30,27 @@ from PIL import Image
 HERE = pathlib.Path(__file__).resolve().parent
 ANDROID = HERE.parent / "assets"
 DESKTOP = HERE.parent.parent / "launcher" / "resources" / "sculk_theme"
-TW, TH = 128, 64
+TW = 128
 
-# the palette: burgundy cloth, gold trim, a pale face in the shadow of the hood, a silver beard, dark wood
-CLOTH = [(40, 6, 14), (54, 8, 19), (68, 11, 24), (84, 14, 30), (104, 18, 36)]
+# the palette of the old Arkan, a little lighter: the 3D views shade the faces and the cloth must not turn black
+HOOD = [(30, 5, 11), (46, 8, 17), (60, 10, 22), (76, 13, 28), (94, 16, 33)]
+ROBE = [(22, 3, 8), (36, 6, 13), (50, 8, 18), (66, 11, 24), (82, 14, 29)]
+RIM_D, RIM, RIM_L = (116, 22, 40), (150, 30, 50), (176, 40, 62)
 GOLD_D, GOLD, GOLD_L = (120, 82, 30), (192, 142, 56), (240, 202, 112)
-SKIN_D, SKIN, SKIN_L = (150, 98, 80), (190, 132, 108), (214, 160, 134)
-BEARD = [(120, 116, 124), (170, 166, 172), (210, 206, 210), (238, 234, 234)]
-WOOD_D, WOOD, WOOD_L = (58, 34, 20), (86, 52, 30), (112, 72, 42)
-SHADOW = (14, 3, 7)
+BEARD_S, BEARD_D, BEARD, BEARD_L = (96, 90, 102), (146, 140, 150), (200, 196, 200), (238, 234, 232)
+SKIN_D, SKIN, SKIN_L = (104, 52, 48), (150, 82, 70), (196, 112, 98)
+SHADOW, SHADOW_2 = (7, 1, 4), (18, 4, 9)
+LEATHER, LEATHER_L = (14, 6, 8), (30, 14, 14)
 EYE, EYE_CORE = (255, 54, 70, 254), (255, 214, 218, 254)
-GEM_D, GEM, GEM_L = (150, 10, 30, 254), (232, 34, 56, 254), (255, 150, 160, 254)
+GEM_D, GEM, GEM_L = (150, 10, 30, 254), (220, 28, 48, 254), (255, 150, 160, 254)
+CLEAR = (0, 0, 0, 0)
 
 rnd = random.Random(7)
-img = Image.new("RGBA", (TW, TH), (0, 0, 0, 0))
+img = Image.new("RGBA", (TW, 128), CLEAR)
 px = img.load()
 
 BOXES = []  # the model
+shelf = {"x": 0, "y": 0, "h": 0}  # the packing of the boxes on the texture, row by row
 
 
 def faces(u, v, w, h, d):
@@ -49,18 +60,26 @@ def faces(u, v, w, h, d):
 
 
 def put(x, y, c):
-    if 0 <= x < TW and 0 <= y < TH:
+    if 0 <= x < TW and 0 <= y < img.height:
         px[x, y] = c if len(c) == 4 else c + (255,)
 
 
-def cloth(x, y, shade=2):
-    """burgundy cloth with a little grain"""
-    return CLOTH[max(0, min(4, shade + rnd.choice((-1, 0, 0, 0, 1))))]
+def shade(palette, s):
+    """a cloth colour with a little grain"""
+    return palette[max(0, min(len(palette) - 1, s + rnd.choice((-1, 0, 0, 0, 1))))]
 
 
-def box(part, frm, size, uv, inflate=0.0):
+def box(part, frm, size, inflate=0.0):
+    """a box of the model; its place on the texture is the next free one"""
+    w, h, d = (int(v) for v in size)
+    fw, fh = 2 * (d + w), d + h
+    if shelf["x"] + fw > TW:
+        shelf["x"], shelf["y"], shelf["h"] = 0, shelf["y"] + shelf["h"], 0
+    uv = [shelf["x"], shelf["y"]]
+    shelf["x"] += fw
+    shelf["h"] = max(shelf["h"], fh)
     BOXES.append({"part": part, "from": frm, "size": size, "uv": uv, "inflate": inflate})
-    return faces(uv[0], uv[1], int(size[0]), int(size[1]), int(size[2]))
+    return faces(uv[0], uv[1], w, h, d)
 
 
 def fill(rect, painter):
@@ -72,131 +91,179 @@ def fill(rect, painter):
                 put(x0 + i, y0 + j, c)
 
 
-def robe_face(shade=2, hem=False, folds=True):
-    def p(i, j, w, h):
-        s = shade - (1 if j > h * 0.7 else 0)
-        if folds and i % 3 == 2:
-            s -= 1
-        if hem and j == h - 1:
-            return GOLD if i % 2 == 0 else GOLD_D
-        return cloth(i, j, s)
+def paint_all(b, painter, skip=()):
+    for name, r in b.items():
+        if name not in skip:
+            fill(r, lambda i, j, w, h, name=name: painter(name, i, j, w, h))
+
+
+def stud(k):
+    """the gold stitches on the crimson rim, every other pixel"""
+    return (GOLD if k % 4 == 0 else GOLD_D) if k % 2 == 0 else None
+
+
+# ---------------------------------------------------------------- the head: no face, only the shadow and the red eyes
+head = box("head", [-4, 24, -4], [8, 8, 8])
+paint_all(head, lambda n, i, j, w, h: SHADOW)
+
+
+def face_paint(i, j, w, h):
+    if 2 <= j <= 4 and 1 <= i <= 6:
+        return SHADOW_2  # the eyes catch a little light
+    if j == 5 and i in (3, 4):
+        return (44, 16, 18)  # a hint of the nose
+    return SHADOW
+
+
+fill(head["front"], face_paint)
+for x, c in ((1, EYE_CORE), (2, EYE), (5, EYE_CORE), (6, EYE)):  # the eyes, two pixels each, as in the old picture
+    put(head["front"][0] + x, head["front"][1] + 3, c)
+
+# ---------------------------------------------------------------- the hood: deep, with the opening for the shadow
+hood = box("head", [-4, 24, -4], [8, 9, 8], inflate=0.6)
+
+
+def hood_paint(n, i, j, w, h):
+    if n == "front":
+        if 1 <= i <= 6 and j >= 2:
+            return CLEAR  # the opening
+        return RIM if j == 1 or i in (0, 7) else shade(HOOD, 3)
+    if n == "bottom":
+        return CLEAR if 1 <= i <= 6 and j >= 3 else shade(HOOD, 1)
+    if n == "top":
+        return shade(HOOD, 3 if j > 3 else 2)
+    if n == "back":
+        return shade(HOOD, 1 if i % 3 == 0 else 2)
+    # the sides: folds; the left of the picture (the right side of the hood) is in shadow
+    base = 1 if n == "right" else 3
+    return shade(HOOD, base - (1 if j % 4 == 3 else 0))
+
+
+paint_all(hood, hood_paint)
+# the brim: the crimson rim stitched with gold stands out around the opening, so the shadow inside is deep
+brim_top = box("head", [-4.5, 30.6, 4], [9, 2, 2])
+paint_all(brim_top, lambda n, i, j, w, h: (stud(i) or RIM) if n == "front" and j == 1 else
+          (RIM_L if j == 0 else RIM) if n == "front" else SHADOW_2 if n == "bottom" else shade(HOOD, 3) if n == "top" else RIM_D)
+for side, x in (("r", -4.5), ("l", 3.5)):
+    brim = box("head", [x, 24.6, 4], [1, 6, 2])
+    inner = "left" if side == "r" else "right"
+    paint_all(brim, lambda n, i, j, w, h, inner=inner: (stud(j + 1) or RIM) if n == "front" else SHADOW_2 if n == inner else
+              RIM_D if n in ("top", "bottom") else shade(HOOD, 2))
+# the pointed top falling back to the left, a gold tip at the end
+for frm, size in (([-2.5, 33.6, -3], [5, 2, 5]), ([-4.2, 35.2, -2.6], [3, 2, 3]), ([-6.2, 35.8, -2.2], [2, 2, 2])):
+    tip = box("head", frm, size)
+    paint_all(tip, lambda n, i, j, w, h: shade(HOOD, 3 if n in ("top", "left", "front") else 1 if n == "bottom" else 2))
+gold_tip = box("head", [-7.2, 35.2, -1.7], [1, 1, 1])
+paint_all(gold_tip, lambda n, i, j, w, h: GOLD_L if n == "top" else GOLD)
+
+# ---------------------------------------------------------------- the silver beard, falling to a point
+beard_parts = (([-3, 19, 3.5], [6, 7, 2]), ([-2.5, 15, 3.2], [5, 4, 2]), ([-1.5, 12, 3.4], [3, 3, 1]), ([-0.5, 10, 3.3], [1, 2, 1]))
+for k, (frm, size) in enumerate(beard_parts):
+    beard = box("head", frm, size)
+
+    def beard_paint(n, i, j, w, h, k=k):
+        if n != "front":
+            return BEARD_D if n in ("right", "bottom") else BEARD
+        if k == 0 and j == 0:
+            return BEARD_L if i not in (2, 3) else BEARD  # the moustache
+        if k == 0 and j == 1 and i in (2, 3):
+            return BEARD_S  # the mouth under it
+        if k == 0 and j == h - 1 and i in (0, w - 1):
+            return CLEAR
+        if i == 0:
+            return BEARD_D  # the left of the beard in shadow, the right lit
+        if i == w - 1 and w > 2:
+            return BEARD_L
+        return BEARD_D if (i + k) % 2 == 1 and j % 3 == 1 else BEARD  # strands
+    paint_all(beard, beard_paint)
+
+# ---------------------------------------------------------------- the cloak: the hood falls on the shoulders, gold edges
+cowl = box("body", [-6, 20, -3.5], [12, 4, 7])
+
+
+def cowl_paint(n, i, j, w, h):
+    if n == "front" and i in (2, 9):
+        return stud(j + i) or RIM  # the rim goes on down around the beard
+    if n in ("front", "right", "left", "back") and j == h - 1:
+        return shade(HOOD, 0)
+    return shade(HOOD, 3 if n in ("top", "front", "left") else 2)
+
+
+paint_all(cowl, cowl_paint)
+
+
+def robe_paint(edges, hem):
+    def p(n, i, j, w, h):
+        if hem and j == h - 1 and n not in ("top", "bottom"):
+            return GOLD if i % 2 == 0 else GOLD_D  # the gold hem
+        if n == "front":
+            if i in edges:
+                return GOLD  # the gold edges of the cloak
+            if edges[0] < i < edges[1]:
+                return shade(ROBE, 1)  # the robe under the cloak, darker
+            return shade(ROBE, 3 - (1 if i % 3 == 2 else 0))
+        if n == "top":
+            return shade(ROBE, 2)
+        if n == "bottom":
+            return SHADOW
+        return shade(ROBE, (3 if n == "left" else 2) - (1 if i % 3 == 2 else 0))  # folds
     return p
 
 
-# ---------------------------------------------------------------- the head: the face in the shadow of the hood
-head = box("head", [-4, 24, -4], [8, 8, 8], [0, 0])
-fill(head["front"], lambda i, j, w, h: SHADOW if j < 2 else SKIN_D if j < 3 or i in (0, 7) else SKIN)
-for x, y, c in ((1, 3, EYE_CORE), (2, 3, EYE), (5, 3, EYE), (6, 3, EYE_CORE)):  # glowing eyes
-    put(head["front"][0] + x, head["front"][1] + y, c)
-for x in (1, 2, 5, 6):  # bushy grey brows
-    put(head["front"][0] + x, head["front"][1] + 2, BEARD[1])
-for name in ("right", "left", "back", "top", "bottom"):
-    fill(head[name], lambda i, j, w, h: SHADOW)
-
-# ---------------------------------------------------------------- the hood: an opening for the face with a gold-stitched rim
-hood = box("head", [-4, 24, -4], [8, 9, 8], [32, 0], inflate=0.6)
-
-
-def hood_front(i, j, w, h):
-    if 1 <= i <= 6 and 2 <= j <= 8:
-        return (0, 0, 0, 0)  # the face shows through
-    if (i in (0, 7) and j >= 2) or j == 1:
-        return GOLD if (i + j) % 2 == 0 else GOLD_D
-    return cloth(i, j, 3)
-
-
-fill(hood["front"], hood_front)
-fill(hood["top"], lambda i, j, w, h: cloth(i, j, 3 if j < 4 else 2))
-fill(hood["back"], lambda i, j, w, h: cloth(i, j, 1 if i % 3 == 0 else 2))
-fill(hood["right"], lambda i, j, w, h: GOLD_D if i == w - 1 and j > 1 else cloth(i, j, 2 if j % 4 else 1))
-fill(hood["left"], lambda i, j, w, h: GOLD_D if i == 0 and j > 1 else cloth(i, j, 3 if j % 4 else 2))
-fill(hood["bottom"], lambda i, j, w, h: (0, 0, 0, 0) if 1 <= i <= 6 and j >= 4 else cloth(i, j, 1))
-# the pointed top of the hood, falling back in two steps
-tip1 = box("head", [-2.5, 32.4, -3.5], [5, 3, 5], [64, 0])
-for r in tip1.values():
-    fill(r, lambda i, j, w, h: cloth(i, j, 2 if j else 3))
-tip2 = box("head", [-1, 35, -5], [2, 2, 3], [84, 0])
-for r in tip2.values():
-    fill(r, lambda i, j, w, h: GOLD if (i + j) % 3 == 0 else cloth(i, j, 2))
-# the nose
-nose = box("head", [-1, 25, 4], [2, 3, 1], [96, 0])
-for r in nose.values():
-    fill(r, lambda i, j, w, h: SKIN_L if j == 0 else SKIN if j == 1 else SKIN_D)
-# the moustache and the long silver beard
-moustache = box("head", [-3.5, 24, 4], [7, 2, 1], [104, 0])
-for r in moustache.values():
-    fill(r, lambda i, j, w, h: BEARD[3] if j == 0 and 1 <= i <= w - 2 else BEARD[2])
-beard = box("head", [-3, 15, 3.6], [6, 9, 1], [64, 8])
-fill(beard["front"], lambda i, j, w, h: (0, 0, 0, 0) if j >= h - 2 and i in (0, w - 1) else
-     (0, 0, 0, 0) if j == h - 1 and i in (1, w - 2) else BEARD[3 if i in (2, 3) and j < 5 else 2 if (i + j) % 3 else 1])
-for name in ("right", "left", "top", "bottom", "back"):
-    fill(beard[name], lambda i, j, w, h: BEARD[1])
-
-# ---------------------------------------------------------------- the body: the robe down to the ground, a mantle, a belt
-torso = box("body", [-4, 12, -3], [8, 12, 6], [0, 18])
-fill(torso["front"], lambda i, j, w, h: GOLD if i in (3, 4) and j % 3 == 1 else robe_face(3, folds=False)(i, j, w, h))
-fill(torso["back"], robe_face(2))
-fill(torso["right"], robe_face(2))
-fill(torso["left"], robe_face(3))
-fill(torso["top"], lambda i, j, w, h: cloth(i, j, 2))
-fill(torso["bottom"], lambda i, j, w, h: cloth(i, j, 1))
-mantle = box("body", [-5, 21, -3.5], [10, 3, 7], [28, 18])
-for name, r in mantle.items():
-    fill(r, lambda i, j, w, h, name=name: GOLD if (name not in ("top", "bottom") and j == h - 1 and i % 2 == 0) else
-         GOLD_D if (name not in ("top", "bottom") and j == h - 1) else cloth(i, j, 1 if name == "back" else 2))
-skirt = box("body", [-4.5, 0, -3.5], [9, 12, 7], [0, 36])
-fill(skirt["front"], lambda i, j, w, h: GOLD if i in (3, 5) else (40, 6, 14) if i == 4 else robe_face(3, hem=True)(i, j, w, h))
-fill(skirt["back"], robe_face(2, hem=True))
-fill(skirt["right"], robe_face(2, hem=True))
-fill(skirt["left"], robe_face(3, hem=True))
-fill(skirt["top"], lambda i, j, w, h: cloth(i, j, 2))
-fill(skirt["bottom"], lambda i, j, w, h: SHADOW)
-# runes stitched on the skirt, gold
-for (x, y) in ((1, 4), (1, 5), (2, 6), (7, 3), (6, 4), (7, 5), (1, 9), (2, 8), (7, 8), (6, 9)):
+torso = box("body", [-4, 12, -3], [8, 12, 6])
+paint_all(torso, robe_paint((1, 6), False))
+skirt = box("body", [-4.5, 0, -3.5], [9, 12, 7])
+paint_all(skirt, robe_paint((1, 7), True))
+# runes stitched in gold on the left of the robe, as in the old picture
+for (x, y) in ((0, 3), (0, 4), (0, 6), (0, 9)):
     put(skirt["front"][0] + x, skirt["front"][1] + y, GOLD_D)
-belt = box("body", [-4, 11, -3], [8, 2, 6], [32, 28], inflate=0.3)
-for name, r in belt.items():
-    fill(r, lambda i, j, w, h: GOLD_D if j == 0 else WOOD)
-fill((belt["front"][0] + 3, belt["front"][1], 2, 2), lambda i, j, w, h: GEM_L if (i, j) == (0, 0) else GEM)
+for (x, y) in ((1, 2), (2, 2), (1, 3), (2, 4), (4, 5), (5, 5), (4, 6), (5, 7), (1, 8), (2, 9), (1, 10), (4, 9), (5, 10)):
+    put(skirt["right"][0] + x, skirt["right"][1] + y, GOLD_D)
+# the black belt with the gold buckle
+belt = box("body", [-4, 11, -3], [8, 2, 6], inflate=0.3)
+paint_all(belt, lambda n, i, j, w, h: LEATHER_L if j == 0 else LEATHER)
+fill((belt["front"][0] + 3, belt["front"][1], 2, 2), lambda i, j, w, h: GOLD_L if (i, j) == (0, 0) else GOLD)
+# the brooch that holds the cloak: a ruby in gold, on the left of the chest
+brooch = box("body", [-6, 19.5, 3.3], [3, 3, 1])
+paint_all(brooch, lambda n, i, j, w, h: (GOLD_D if (i in (0, 2) and j in (0, 2)) else GEM_L if (i, j) == (1, 1) else GEM)
+          if n == "front" else GOLD)
 
 # ---------------------------------------------------------------- the arms: wide sleeves, gold cuffs, the hands
-def sleeve(part, frm, uv, cuff_uv, cuff_x):
-    arm = box(part, frm, [4, 12, 4], uv)
-    for name, r in arm.items():
-        if name == "bottom":
-            fill(r, lambda i, j, w, h: SKIN)  # the palm
-        elif name == "top":
-            fill(r, lambda i, j, w, h: cloth(i, j, 2))
-        else:
-            fill(r, lambda i, j, w, h, name=name: SKIN_L if j == h - 2 else SKIN if j == h - 1 else
-                 cloth(i, j, 3 if name in ("front", "left") else 2))
-    cuff = box(part, [cuff_x, 14, frm[2] - 0.5], [5, 3, 5], cuff_uv)
-    for name, r in cuff.items():
-        fill(r, lambda i, j, w, h, name=name: (0, 0, 0, 0) if name in ("top", "bottom") and 1 <= i <= 3 and 1 <= j <= 3 else
-             GOLD if j == h - 1 or name in ("top", "bottom") else cloth(i, j, 3))
+def sleeve(part, x, cuff_x):
+    arm = box(part, [x, 12, -2], [4, 12, 4])
+
+    def p(n, i, j, w, h):
+        if n == "bottom":
+            return SKIN if (i + j) % 3 else SKIN_L  # the palm
+        if n == "top":
+            return shade(ROBE, 2)
+        if j == h - 1:
+            return SKIN_D if n == "back" else SKIN
+        if j == h - 2:
+            return SKIN_L if n == "front" else SKIN
+        return shade(ROBE, (3 if n in ("front", "left") else 2) - (1 if i == 0 else 0))
+    paint_all(arm, p)
+    cuff = box(part, [cuff_x, 14, -2.5], [5, 3, 5])
+    paint_all(cuff, lambda n, i, j, w, h: CLEAR if n in ("top", "bottom") and 1 <= i <= 3 and 1 <= j <= 3 else
+              GOLD if j == h - 1 or n in ("top", "bottom") else GOLD_D if j == 0 else shade(ROBE, 3))
 
 
-sleeve("rarm", [-8, 12, -2], [64, 20], [80, 20], -8.5)
-sleeve("larm", [4, 12, -2], [64, 40], [80, 40], 3.5)
+sleeve("rarm", -8, -8.5)
+sleeve("larm", 4, 3.5)
 
-# ---------------------------------------------------------------- the staff: dark wood, a gold cap, a glowing ruby
-staff = box("staff", [-1, -2, -1], [2, 32, 2], [104, 18])
-for name, r in staff.items():
-    fill(r, lambda i, j, w, h: GOLD_D if (j + i) % 7 == 0 else WOOD_L if i == 0 else WOOD if (j // 2) % 2 else WOOD_D)
-cap = box("staff", [-2, 30, -2], [4, 1, 4], [112, 18])
-for r in cap.values():
-    fill(r, lambda i, j, w, h: GOLD_L if (i + j) % 2 else GOLD)
-gem = box("staff", [-1.5, 31, -1.5], [3, 3, 3], [112, 24])
-for r in gem.values():
-    fill(r, lambda i, j, w, h: GEM_L if (i, j) == (0, 0) else GEM_D if j == h - 1 else GEM)
+TH = shelf["y"] + shelf["h"]
+TH = (TH + 15) // 16 * 16
+img = img.crop((0, 0, TW, TH))
 
 model = {
     "texture": [TW, TH],
-    # the pivots of the parts (the head turns about the neck, the arms about the shoulders); the staff is placed in the
-    # left hand by the views
-    "pivots": {"head": [0, 24, 0], "body": [0, 0, 0], "rarm": [-6, 22, 0], "larm": [6, 22, 0], "staff": [0, 0, 0]},
+    # the pivots of the parts: the head turns about the neck, the arms about the shoulders
+    "pivots": {"head": [0, 24, 0], "body": [0, 0, 0], "rarm": [-6, 22, 0], "larm": [6, 22, 0]},
     "hands": {"rarm": [-6, 11, 0], "larm": [6, 11, 0]},
-    "eyes": [[-2.5, 28.5, 4.1], [2.5, 28.5, 4.1]],
+    # the raised hand under the tesseract: the one on the right of the picture, as in the old Arkan
+    "magicHand": "larm",
+    "eyes": [[-2, 28.5, 4.1], [2, 28.5, 4.1]],
+    "glows": [{"part": "body", "at": [-4.5, 21, 4.4], "radius": 1.5}],
     "boxes": BOXES,
 }
 for target in (ANDROID, DESKTOP):
@@ -204,4 +271,4 @@ for target in (ANDROID, DESKTOP):
         img.save(target / "arkan.png")
         (target / "arkan_model.json").write_text(json.dumps(model, indent=1), encoding="utf-8")
 img.resize((TW * 6, TH * 6), Image.NEAREST).save(HERE / "arkan_texture_preview.png")
-print(f"{len(BOXES)} boxes")
+print(f"{len(BOXES)} boxes, texture {TW}x{TH}")
