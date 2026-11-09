@@ -537,7 +537,7 @@ bool VelloraLobby::eventFilter(QObject* watched, QEvent* event)
     return QWidget::eventFilter(watched, event);
 }
 
-void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng, const QByteArray& capePng, bool slim)
+void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng, const QByteArray& capePng, bool slim, bool guest)
 {
     m_character->setSlim(slim);
     m_playerName->setText(name.isEmpty() ? tr("Sign in to play") : name);
@@ -561,7 +561,9 @@ void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng, con
         p.drawImage(0, 0, skin.copy(40, 8, 8, 8));
     }
     m_accountChip->setIcon(QIcon(QPixmap::fromImage(head.scaled(28, 28))));
-    m_accountChip->setText(name.isEmpty() ? tr("Sign in") : name + "  ˅");
+    m_accountChip->setText(name.isEmpty() ? tr("Sign in") : guest ? name + "  ˅\n" + tr("Guest") : name + "  ˅");
+    m_accountChip->setToolTip(guest ? tr("A guest: instances, mods and the wardrobe; the AI and the game itself need a Microsoft account")
+                                    : QString());
 }
 
 void VelloraLobby::refreshCharacter()

@@ -61,6 +61,7 @@
 #include "ui/pages/modplatform/ImportPage.h"
 #include "ui/pages/modplatform/QuickPage.h"
 #include "ui/pages/modplatform/agent/AgentPage.h"
+#include "ui/themes/VelloraGuest.h"
 #include "ui/pages/modplatform/atlauncher/AtlPage.h"
 #include "ui/pages/modplatform/flame/FlamePage.h"
 #include "ui/pages/modplatform/ftb/FtbPage.h"
@@ -180,8 +181,11 @@ QList<BasePage*> NewInstanceDialog::getPages()
 
     // the simple ways first: two-click creation, the AI pack agent and ready packs, then the detailed pages
     pages.append(quickPage);
-    agentPage = new AgentPage(this);
-    pages.append(agentPage);
+    // Arkan is AI: only with a Microsoft account (a guest has the other pages)
+    if (VelloraGuest::aiAllowed()) {
+        agentPage = new AgentPage(this);
+        pages.append(agentPage);
+    }
     pages.append(new ModrinthPage(this));
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(new FlamePage(this));

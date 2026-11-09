@@ -178,7 +178,9 @@ public final class MainActivity extends Activity {
         account = Account.load(this);
         if (account.signedIn()) {
             showHome();
-            refreshAccount();
+            if (account.microsoft()) {
+                refreshAccount();  // a guest has nothing to renew
+            }
         } else {
             showLogin(null);
         }
@@ -269,6 +271,48 @@ public final class MainActivity extends Activity {
         show(login.view());
     }
 
+    /** "Войти как гость": a nickname, the menu, everything but the AI and the game itself */
+    void signedInAsGuest(String name) {
+        account = Account.guest(name);
+        account.save(this);
+        Account.clearPending(this);
+        login = null;
+        showHome();
+        Toast.makeText(this, "Привет, " + name + "! Ты гость: ИИ и запуск игры — после входа через Microsoft.", Toast.LENGTH_LONG).show();
+    }
+
+    /** the AI (Arkan's chats and builds, the AI skin and cape generators) needs a Microsoft account */
+    boolean aiAllowed() {
+        return account != null && account.microsoft();
+    }
+
+    /** true when the AI may be used; for a guest it explains why not and offers the Microsoft sign-in */
+    boolean requireAi() {
+        if (aiAllowed()) {
+            return true;
+        }
+        Sounds.play(Sounds.OPEN);
+        new AlertDialog.Builder(this)
+            .setTitle("🔒 ИИ — после входа")
+            .setMessage("Аркан и ИИ-генераторы скинов и плащей работают с аккаунтом Microsoft. Гостю доступно всё остальное: "
+                        + "сборки, версии, моды, каталог и гардероб.")
+            .setPositiveButton("Войти через Microsoft", new android.content.DialogInterface.OnClickListener() {
+                public void onClick(android.content.DialogInterface d, int w) {
+                    leaveGuest();
+                }
+            })
+            .setNegativeButton("Позже", null)
+            .show();
+        return false;
+    }
+
+    /** the guest goes to the Microsoft sign-in; the packs and the wardrobe stay */
+    void leaveGuest() {
+        Account.signOut(this);
+        account = new Account();
+        showLogin(null);
+    }
+
     /** the sign-in on the login screen worked */
     void signedIn(Account signed) {
         account = signed;
@@ -325,6 +369,37 @@ public final class MainActivity extends Activity {
     }
 
     void showAccount() {
+        if (account != null && account.guest) {
+            final android.widget.EditText nick = new android.widget.EditText(this);
+            nick.setText(account.name);
+            nick.setSingleLine(true);
+            new AlertDialog.Builder(this)
+                .setTitle("Гость: " + account.name)
+                .setMessage("Ты вошёл без аккаунта Microsoft. Можно собирать установки, ставить моды и наряжаться в гардеробе. "
+                            + "ИИ (Аркан, генераторы скинов и плащей) и запуск игры — после входа через Microsoft "
+                            + "с купленной Minecraft: Java Edition.\n\nНик гостя:")
+                .setView(nick)
+                .setPositiveButton("Войти через Microsoft", new android.content.DialogInterface.OnClickListener() {
+                    public void onClick(android.content.DialogInterface d, int w) {
+                        leaveGuest();
+                    }
+                })
+                .setNeutralButton("Сохранить ник", new android.content.DialogInterface.OnClickListener() {
+                    public void onClick(android.content.DialogInterface d, int w) {
+                        String name = nick.getText().toString().trim();
+                        if (!Account.validName(name)) {
+                            Toast.makeText(MainActivity.this, "Ник: 3–16 латинских букв, цифр или _", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        account.name = name;
+                        account.save(MainActivity.this);
+                        home.updateAccount();
+                    }
+                })
+                .setNegativeButton("Закрыть", null)
+                .show();
+            return;
+        }
         String text = account.ownsJava ? "Ник: " + account.name + "\nMinecraft: Java Edition есть на аккаунте."
                                        : "На этом аккаунте нет Minecraft: Java Edition.";
         new AlertDialog.Builder(this)
@@ -438,6 +513,9 @@ public final class MainActivity extends Activity {
     }
 
     void openChat(String id) {
+        if (!requireAi()) {
+            return;
+        }
         if (id != null && !id.equals(chatId)) {
             loadChat(id);
         }
@@ -447,6 +525,9 @@ public final class MainActivity extends Activity {
 
     /** "Собрать с ИИ" in the catalog: a new chat with Arkan that starts from these words */
     void askWizard(String text) {
+        if (!requireAi()) {
+            return;
+        }
         newChat();
         show(chatRoot);
         if (text != null && !text.trim().isEmpty()) {
@@ -584,6 +665,9 @@ public final class MainActivity extends Activity {
     }
 
     void showChatList() {
+        if (!requireAi()) {
+            return;
+        }
         showChats();
     }
 
@@ -1907,6 +1991,22 @@ public final class MainActivity extends Activity {
 
     /** "Play" on the main screen or in the editor */
     void playInstallation(final Installation inst) {
+        if (account != null && account.guest) {
+            // the game checks the purchase through the Microsoft account: a guest builds, a signed-in player plays
+            Sounds.play(Sounds.OPEN);
+            new AlertDialog.Builder(this)
+                .setTitle("Играть — после входа")
+                .setMessage("Minecraft: Java Edition проверяет покупку через аккаунт Microsoft. Войди тем аккаунтом, на котором "
+                            + "куплена игра, — сборка «" + inst.name + "» и всё, что ты собрал, останется.")
+                .setPositiveButton("Войти через Microsoft", new android.content.DialogInterface.OnClickListener() {
+                    public void onClick(android.content.DialogInterface d, int w) {
+                        leaveGuest();
+                    }
+                })
+                .setNegativeButton("Позже", null)
+                .show();
+            return;
+        }
         Sounds.play(Sounds.LAUNCH);
         if (GameEngine.get() != null) {
             playHere(inst);

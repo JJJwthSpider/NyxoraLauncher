@@ -869,6 +869,22 @@ In Vellora Client: Lobby → Join a friend, paste the address. In Minecraft: Mul
 <context>
     <name>MainWindow</name>
     <message>
+        <source>Sign in with Microsoft...</source>
+        <translation>Войти через Microsoft...</translation>
+    </message>
+    <message>
+        <source>Play as a guest...</source>
+        <translation>Войти как гость...</translation>
+    </message>
+    <message>
+        <source>Change the guest&apos;s nickname...</source>
+        <translation>Сменить ник гостя...</translation>
+    </message>
+    <message>
+        <source>Stop being a guest</source>
+        <translation>Выйти из гостя</translation>
+    </message>
+    <message>
         <source>‹ Lobby</source>
         <translation>‹ Лобби</translation>
     </message>
@@ -1766,6 +1782,36 @@ Are you sure?</source>
 </context>
 <context>
     <name>QObject</name>
+    <message>
+        <source>Guest</source>
+        <translation>Гость</translation>
+    </message>
+    <message>
+        <source>The guest&apos;s nickname: 3 to 16 Latin letters, digits or _.
+A guest has instances, mods, the catalog and the wardrobe; the AI and the game itself come with a Microsoft account.</source>
+        <translation>Ник гостя: 3–16 латинских букв, цифр или _.
+Гостю доступны сборки, моды, каталог и гардероб; ИИ и запуск игры — с аккаунтом Microsoft.</translation>
+    </message>
+    <message>
+        <source>A nickname is 3 to 16 Latin letters, digits or _.</source>
+        <translation>Ник — это 3–16 латинских букв, цифр или _.</translation>
+    </message>
+    <message>
+        <source>The AI needs a sign-in</source>
+        <translation>ИИ — после входа</translation>
+    </message>
+    <message>
+        <source>Arkan and the AI skin and cape generators work with a Microsoft account. A guest has everything else: instances, versions, mods, the catalog and the wardrobe.</source>
+        <translation>Аркан и ИИ-генераторы скинов и плащей работают с аккаунтом Microsoft. Гостю доступно всё остальное: сборки, версии, моды, каталог и гардероб.</translation>
+    </message>
+    <message>
+        <source>Sign in with Microsoft</source>
+        <translation>Войти через Microsoft</translation>
+    </message>
+    <message>
+        <source>Later</source>
+        <translation>Позже</translation>
+    </message>
     <message>
         <source>worn</source>
         <translation>надето</translation>
@@ -3121,6 +3167,14 @@ Are you sure?</source>
 <context>
     <name>VelloraLobby</name>
     <message>
+        <source>Guest</source>
+        <translation>Гость</translation>
+    </message>
+    <message>
+        <source>A guest: instances, mods and the wardrobe; the AI and the game itself need a Microsoft account</source>
+        <translation>Гость: сборки, моды и гардероб; для ИИ и запуска игры нужен аккаунт Microsoft</translation>
+    </message>
+    <message>
         <source>Friends</source>
         <translation>Друзья</translation>
     </message>
@@ -3402,6 +3456,22 @@ Are you sure?</source>
 </context>
 <context>
     <name>WardrobeDialog</name>
+    <message>
+        <source>The AI cape generator</source>
+        <translation>ИИ-генератор плащей</translation>
+    </message>
+    <message>
+        <source>The AI skin generator</source>
+        <translation>ИИ-генератор скинов</translation>
+    </message>
+    <message>
+        <source>Arkan draws for a Microsoft account. A guest has the ready-made things of the wardrobe.</source>
+        <translation>Аркан рисует для аккаунта Microsoft. Гостю доступны готовые вещи гардероба.</translation>
+    </message>
+    <message>
+        <source>Sign in with Microsoft</source>
+        <translation>Войти через Microsoft</translation>
+    </message>
     <message>
         <source>‹ Lobby</source>
         <translation>‹ Лобби</translation>

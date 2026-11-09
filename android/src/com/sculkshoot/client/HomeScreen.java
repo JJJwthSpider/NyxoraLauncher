@@ -849,8 +849,8 @@ final class HomeScreen {
             return;
         }
         accountChip.setVisibility(View.VISIBLE);
-        accountName.setText(account.ownsJava ? account.name : "Без Java Edition");
-        accountSub.setText(account.ownsJava ? "Microsoft" : "нет игры");
+        accountName.setText(account.ownsJava || account.guest ? account.name : "Без Java Edition");
+        accountSub.setText(account.guest ? "Гость" : account.ownsJava ? "Microsoft" : "нет игры");
         if (SkinCache.skin(activity, account) == null) {
             Icons.loadHead(head, account.skinUrl, R.drawable.wizard);
         }

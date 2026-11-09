@@ -886,6 +886,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/SculkAmbience.h
     ui/themes/SculkAmbience.cpp
     ui/themes/VelloraSound.cpp
+    ui/themes/VelloraGuest.h
+    ui/themes/VelloraGuest.cpp
     ui/themes/VelloraSound.h
     ui/themes/SculkTheme.h
     ui/themes/ITheme.cpp

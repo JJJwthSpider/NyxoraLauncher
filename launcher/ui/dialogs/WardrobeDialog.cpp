@@ -19,7 +19,9 @@
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
 
+#include "ui/themes/VelloraGuest.h"
 #include "ui/themes/VelloraSound.h"
+#include "ui/widgets/MoonyWidget.h"
 
 #include <QAbstractButton>
 #include <QCoreApplication>
@@ -404,6 +406,30 @@ void WardrobeDialog::showTab(const QString& tab)
 /// variants, the variants with the first tried on the 3D player at once, and "More variants".
 QWidget* WardrobeDialog::generator(bool capes)
 {
+    if (!VelloraGuest::aiAllowed()) {
+        // a guest: the generator is AI, it opens with a Microsoft account
+        auto* locked = new QFrame(this);
+        locked->setObjectName("generatorPanel");
+        locked->setStyleSheet("QFrame#generatorPanel { background-color: #1c080d; border: 2px solid #5a1e2a; border-bottom: 5px solid #3a0d16; }");
+        auto* row = new QHBoxLayout(locked);
+        auto* wizard = new MoonyWidget(locked);
+        wizard->setFixedSize(84, 84);
+        row->addWidget(wizard);
+        auto* texts = new QVBoxLayout;
+        auto* title = new QLabel(capes ? tr("The AI cape generator") : tr("The AI skin generator"), locked);
+        title->setStyleSheet("font-weight: bold; font-size: 12pt; color: #fbeff1;");
+        texts->addWidget(title);
+        auto* note = new QLabel(tr("Arkan draws for a Microsoft account. A guest has the ready-made things of the wardrobe."), locked);
+        note->setWordWrap(true);
+        note->setStyleSheet("color: #d1a3aa;");
+        texts->addWidget(note);
+        row->addLayout(texts, 1);
+        auto* signIn = new QPushButton(tr("Sign in with Microsoft"), locked);
+        signIn->setObjectName("accentButton");
+        connect(signIn, &QPushButton::clicked, this, [this] { APPLICATION->ShowGlobalSettings(this, "accounts"); });
+        row->addWidget(signIn);
+        return locked;
+    }
     GenState& st = capes ? m_capeGen : m_skinGen;
     QSettings ui(QDir(APPLICATION->dataRoot()).filePath("vellora-ui.ini"), QSettings::IniFormat);
     auto* panel = new QFrame(this);

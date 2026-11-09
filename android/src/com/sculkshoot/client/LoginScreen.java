@@ -16,8 +16,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * The door to the launcher: the menu opens only after signing in with a Microsoft account. The player opens
- * microsoft.com/link (in any browser, on the phone or a computer) and types the code shown here.
+ * The door to the launcher: signing in with a Microsoft account (the player opens microsoft.com/link, in any browser, on
+ * the phone or a computer, and types the code shown here), or "Войти как гость" with a nickname: a guest gets the menu
+ * without the AI and without starting the game itself.
  */
 final class LoginScreen {
     private final MainActivity activity;
@@ -113,6 +114,20 @@ final class LoginScreen {
         row.topMargin = dp(14);
         row.bottomMargin = dp(4);
         card.addView(buttons, row);
+        // like Millida's guest: a nickname and the menu at once; the AI and the game itself wait for the Microsoft sign-in
+        Button guest = Ui.button(activity, "Войти как гость", false);
+        guest.setTextSize(13);
+        guest.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                askGuestName();
+            }
+        });
+        LinearLayout.LayoutParams guestParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        guestParams.topMargin = dp(6);
+        card.addView(guest, guestParams);
+        TextView guestNote = Ui.label(activity, "Гостю доступны сборки, моды и гардероб. ИИ и запуск игры — после входа.", 11, Ui.HINT, false);
+        guestNote.setGravity(Gravity.CENTER);
+        card.addView(guestNote);
 
         FrameLayout.LayoutParams center = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
                                                                        Gravity.CENTER);
@@ -129,6 +144,31 @@ final class LoginScreen {
 
     View view() {
         return root;
+    }
+
+    /** the guest's nickname: typed, or one made up like "Player2773" */
+    private void askGuestName() {
+        final android.widget.EditText nick = new android.widget.EditText(activity);
+        nick.setText(Account.randomGuestName());
+        nick.setSingleLine(true);
+        nick.selectAll();
+        new android.app.AlertDialog.Builder(activity)
+            .setTitle("Ник гостя")
+            .setMessage("3–16 латинских букв, цифр или _. Его видно в лобби.")
+            .setView(nick)
+            .setPositiveButton("Войти", new android.content.DialogInterface.OnClickListener() {
+                public void onClick(android.content.DialogInterface d, int w) {
+                    String name = nick.getText().toString().trim();
+                    if (!Account.validName(name)) {
+                        Toast.makeText(activity, "Ник: 3–16 латинских букв, цифр или _", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    Sounds.play(Sounds.OPEN);
+                    activity.signedInAsGuest(name);
+                }
+            })
+            .setNegativeButton("Отмена", null)
+            .show();
     }
 
     /** shown instead of the code when the saved sign-in no longer works */

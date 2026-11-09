@@ -222,6 +222,20 @@ final class WardrobeScreen {
             return;
         }
         view.setSlim("SLIM".equalsIgnoreCase(account.skinVariant));
+        if (account.guest) {
+            // a guest has no skin of an account: a look of its own, made from the nickname (the same every time)
+            SkinGenerator.Skin own = SkinGenerator.skins("", 1, account.name.hashCode()).get(0);
+            view.setSlim(own.slim);
+            view.setSkin(own.bitmap);
+            if (onSkin != null) {
+                onSkin.got(own.bitmap);
+            }
+            Bitmap generated = SkinCache.generatedCape(activity);
+            if (generated != null) {
+                view.setCape(generated);
+            }
+            return;
+        }
         Bitmap cached = SkinCache.skin(activity, account);
         if (cached != null) {
             view.setSkin(cached);
@@ -682,6 +696,9 @@ final class WardrobeScreen {
      * "↻ Ещё" gives four new ones.
      */
     private View generator(final boolean capes) {
+        if (!activity.aiAllowed()) {
+            return lockedGenerator(capes);
+        }
         final GenState st = capes ? capeGen : skinGen;
         float density = activity.getResources().getDisplayMetrics().density;
         final LinearLayout panel = new LinearLayout(activity);
@@ -911,6 +928,32 @@ final class WardrobeScreen {
             TextView hint = Ui.label(activity, "Напиши, кого нарисовать, нажми идею или 🎲 — варианты появятся здесь", 11, Ui.HINT, false);
             variants.addView(hint);
         }
+        return panel;
+    }
+
+    /** for a guest: the generator is AI, it opens after the Microsoft sign-in */
+    private View lockedGenerator(boolean capes) {
+        float density = activity.getResources().getDisplayMetrics().density;
+        LinearLayout panel = new LinearLayout(activity);
+        panel.setGravity(Gravity.CENTER_VERTICAL);
+        panel.setPadding(dp(12), dp(10), dp(12), dp(12));
+        panel.setBackground(PixelDrawable.panel(0xFF1C080D, 0xFF5A1E2A, density));
+        WizardView wizard = new WizardView(activity);
+        panel.addView(wizard, new LinearLayout.LayoutParams(dp(56), dp(56)));
+        LinearLayout texts = new LinearLayout(activity);
+        texts.setOrientation(LinearLayout.VERTICAL);
+        texts.setPadding(dp(10), 0, dp(8), 0);
+        texts.addView(Ui.label(activity, "🔒 " + (capes ? "ИИ-генератор плащей" : "ИИ-генератор скинов"), 14, Ui.TEXT, true));
+        texts.addView(Ui.label(activity, "Аркан рисует после входа через Microsoft. Гостю доступны готовые вещи гардероба.", 11, Ui.HINT, false));
+        panel.addView(texts, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button signIn = Ui.button(activity, "Войти через Microsoft", true);
+        signIn.setTextSize(12);
+        signIn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                activity.leaveGuest();
+            }
+        });
+        panel.addView(signIn);
         return panel;
     }
 

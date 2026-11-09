@@ -126,6 +126,7 @@
 #include "ui/pages/instance/ModFolderPage.h"
 #include "ui/widgets/LabeledToolButton.h"
 #include "ui/widgets/LaunchPanel.h"
+#include "ui/themes/VelloraGuest.h"
 #include "ui/themes/VelloraSound.h"
 #include "ui/widgets/VelloraCreatePage.h"
 #include "ui/widgets/VelloraLobby.h"
@@ -463,12 +464,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(m_lobby, &VelloraLobby::wardrobeRequested, this, [this] {
             const auto account = APPLICATION->accounts()->defaultAccount();
             QImage skin, cape;
+            bool guestSlim = false;
             if (account) {
                 const auto& profile = account->accountData()->minecraftProfile;
                 skin.loadFromData(profile.skin.data, "PNG");
                 cape.loadFromData(profile.capes.value(profile.currentCape).data, "PNG");
+            } else {
+                skin = VelloraGuest::skin(&guestSlim);  // a guest wears the look made from the nickname
             }
-            const bool slim = account && account->accountData()->minecraftProfile.skin.variant.compare("slim", Qt::CaseInsensitive) == 0;
+            const bool slim = account ? account->accountData()->minecraftProfile.skin.variant.compare("slim", Qt::CaseInsensitive) == 0 : guestSlim;
             WardrobeDialog dialog(
                 skin, cape,
                 [this, account] {
@@ -1255,6 +1259,9 @@ void MainWindow::on_actionCopyInstance_triggered()
 
 void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& extra_info, const QString& pageId)
 {
+    if (pageId == "agent" && !VelloraGuest::requireAi(this)) {
+        return;  // Arkan, the AI, needs a Microsoft account; a guest is told why
+    }
     QString groupName;
     do {
         QObject* obj = sender();
@@ -1345,9 +1352,34 @@ void MainWindow::updateLaunchPanelProfile()
 {
     const auto account = APPLICATION->accounts()->defaultAccount();
     if (!account) {
-        m_launchPanel->setProfile(QString(), QPixmap());
+        // a guest: the nickname and a look made from it (no account, no skin of an account)
+        const QString guest = VelloraGuest::name();
+        bool slim = false;
+        const QImage skin = VelloraGuest::skin(&slim);
+        QByteArray skinPng, capePng;
+        if (!skin.isNull()) {
+            QBuffer buffer(&skinPng);
+            buffer.open(QIODevice::WriteOnly);
+            skin.save(&buffer, "PNG");
+        }
+        const QImage generated = WardrobeDialog::generatedCape();
+        if (!generated.isNull() && !guest.isEmpty()) {
+            QBuffer buffer(&capePng);
+            buffer.open(QIODevice::WriteOnly);
+            generated.save(&buffer, "PNG");
+        }
+        QPixmap face;
+        if (!skin.isNull()) {
+            QImage head(8, 8, QImage::Format_ARGB32);
+            QPainter painter(&head);
+            painter.drawImage(0, 0, skin.copy(8, 8, 8, 8));
+            painter.drawImage(0, 0, skin.copy(40, 8, 8, 8));
+            painter.end();
+            face = QPixmap::fromImage(head.scaled(32, 32));
+        }
+        m_launchPanel->setProfile(guest, face);
         if (m_lobby) {
-            m_lobby->setPlayer(QString(), QByteArray());
+            m_lobby->setPlayer(guest, skinPng, capePng, slim, !guest.isEmpty());
         }
         return;
     }
@@ -1470,8 +1502,23 @@ void MainWindow::showProfileMenu()
     const auto account = APPLICATION->accounts()->defaultAccount();
     QMenu menu(this);
     if (!account) {
-        menu.addAction(QIcon::fromTheme("accounts"), tr("Add a Microsoft account..."), this,
+        // like Millida: a Microsoft account, or a guest with a nickname (no AI, and the game wants the Microsoft account)
+        menu.addAction(QIcon::fromTheme("accounts"), tr("Sign in with Microsoft..."), this,
                        [this] { APPLICATION->ShowGlobalSettings(this, "accounts"); });
+        const QString guest = VelloraGuest::name();
+        menu.addAction(QIcon::fromTheme("rename"), guest.isEmpty() ? tr("Play as a guest...") : tr("Change the guest's nickname..."), this,
+                       [this] {
+                           if (VelloraGuest::askName(this)) {
+                               updateLaunchPanelProfile();
+                           }
+                       });
+        if (!guest.isEmpty()) {
+            menu.addAction(tr("Stop being a guest"), this, [this] {
+                VelloraGuest::setName(QString());
+                updateLaunchPanelProfile();
+            });
+        }
+        menu.addSeparator();
     } else {
         const bool microsoft = account->accountType() == AccountType::MSA;
         auto* skins = menu.addAction(QIcon::fromTheme("skins"), tr("Skins and capes..."), this, [this, account] {
@@ -1497,7 +1544,8 @@ void MainWindow::showProfileMenu()
     }
     menu.addAction(QIcon::fromTheme("accounts"), tr("Accounts..."), this, [this] { APPLICATION->ShowGlobalSettings(this, "accounts"); });
     auto* button = m_launchPanel->profileButton();
-    menu.exec(button->mapToGlobal(QPoint(0, button->height())));
+    // from the lobby's chip the menu opens where the click was; from the library under its profile button
+    menu.exec(m_pages->currentIndex() == 0 || !button->isVisible() ? QCursor::pos() : button->mapToGlobal(QPoint(0, button->height())));
 }
 
 void MainWindow::openModBrowser(const QString& instanceId)

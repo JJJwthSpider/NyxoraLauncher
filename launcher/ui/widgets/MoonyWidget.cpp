@@ -26,7 +26,9 @@
 namespace {
 // Arkan, the wizard of Vellora Client: the picture is pixel art (resources/sculk_theme/wizard_body.png, drawn by
 // android/art/wizard.py), the tesseract above his hand is drawn every frame. HAND and SIZE are in parts of the picture.
-constexpr double s_handX = 53.0 / 64, s_handY = 16.0 / 64, s_tesseractSize = 30.0 / 64, s_glowSize = 10.0 / 64;
+constexpr double s_handX = 53.5 / 64, s_handY = 19.0 / 64, s_tesseractSize = 28.0 / 64, s_glowSize = 10.0 / 64;
+// the eyes in the 64x64 picture (android/art/wizard.py EYES), two pixels each: drawn here so they glow and blink
+constexpr int s_eyes[2][2] = { { 26, 24 }, { 35, 24 } };
 const QColor s_crimson(255, 70, 84);
 const QColor s_corner(255, 200, 205);
 
@@ -110,6 +112,28 @@ void MoonyWidget::paintMoon(QPainter& p, const QRectF& square, double time, doub
     const QRectF body(square.left(), square.top() + std::sin(time * 1.2) * side * 0.012, side, side);
     p.setRenderHint(QPainter::SmoothPixmapTransform, false);
     p.drawPixmap(body, wizardBody(), QRectF(wizardBody().rect()));
+    const double cell = side / 64.0;
+    const double energyEyes = std::clamp(0.35 + 0.65 * std::max(wake, talk), 0.0, 1.0);
+
+    // the eyes glow (brighter when he is awake or working) and blink now and then
+    if (std::fmod(time, 5.3) < 5.12) {
+        const double shine = 0.7 + 0.3 * std::sin(time * (2.2 + 4.0 * energyEyes));
+        p.setPen(Qt::NoPen);
+        for (const auto& e : s_eyes) {
+            const QPointF at(body.left() + e[0] * cell, body.top() + e[1] * cell);
+            QRadialGradient eyeGlow(at + QPointF(cell, cell / 2), cell * 3.2);
+            QColor inner(255, 40, 64);
+            inner.setAlphaF(std::clamp(0.6 * shine, 0.0, 1.0));
+            QColor outer(255, 40, 64);
+            outer.setAlphaF(0.0);
+            eyeGlow.setColorAt(0, inner);
+            eyeGlow.setColorAt(1, outer);
+            p.setBrush(eyeGlow);
+            p.drawEllipse(at + QPointF(cell, cell / 2), cell * 3.2, cell * 3.2);
+            p.fillRect(QRectF(at, QSizeF(2 * cell, cell)), QColor(255, 54, 70));
+            p.fillRect(QRectF(at, QSizeF(cell, cell)), QColor(255, 214, 218));
+        }
+    }
 
     // the red tesseract: it turns faster and glows brighter when Arkan is awake or working
     p.setRenderHint(QPainter::Antialiasing, true);
@@ -146,6 +170,18 @@ void MoonyWidget::paintMoon(QPainter& p, const QRectF& square, double time, doub
     const double dot = std::max(1.0, side / 110.0);
     for (const auto& corner : corners) {
         p.drawEllipse(c + corner, dot, dot);
+    }
+    // sparks rise from the tesseract and fade: crimson and gold, one picture pixel each
+    const int count = energy > 0.7 ? 10 : 6;
+    const double period = energy > 0.7 ? 1.6 : 2.6;
+    for (int i = 0; i < count; i++) {
+        const double t = std::fmod(time + i * period / count, period) / period;
+        const double sx = c.x() + std::sin(i * 12.9 + t * 3) * side * 0.07;
+        const double sy = c.y() - side * 0.03 - t * side * 0.22;
+        QColor color = i % 3 == 0 ? QColor(244, 204, 116) : QColor(255, 70, 84);
+        color.setAlphaF(std::clamp(1.0 - t, 0.0, 1.0));
+        const double k = cell * (t < 0.5 ? 1.0 : 0.7);
+        p.fillRect(QRectF(sx, sy, k, k), color);
     }
     p.restore();
 }

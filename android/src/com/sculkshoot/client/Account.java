@@ -60,8 +60,33 @@ final class Account {
     String minecraftToken = "";
     long minecraftTokenExpires;
 
+    /** a guest: a nickname without a Microsoft account; the menu opens, but not the AI (Arkan) and not the game itself */
+    boolean guest;
+
     boolean signedIn() {
+        return !refreshToken.isEmpty() || guest;
+    }
+
+    /** signed in with Microsoft (not a guest): the AI works */
+    boolean microsoft() {
         return !refreshToken.isEmpty();
+    }
+
+    static Account guest(String name) {
+        Account a = new Account();
+        a.guest = true;
+        a.name = name;
+        return a;
+    }
+
+    /** a nickname for a guest who did not type one, like Millida's "Player2773" */
+    static String randomGuestName() {
+        return "Player" + (1000 + new java.util.Random().nextInt(9000));
+    }
+
+    /** a Minecraft nickname: 3 to 16 letters, digits or "_" */
+    static boolean validName(String name) {
+        return name != null && name.matches("[A-Za-z0-9_]{3,16}");
     }
 
     /* ------------------------------------------------------------ storage */
@@ -81,6 +106,7 @@ final class Account {
         a.refreshToken = p.getString("refreshToken", "");
         a.minecraftToken = p.getString("minecraftToken", "");
         a.minecraftTokenExpires = p.getLong("minecraftTokenExpires", 0);
+        a.guest = p.getBoolean("guest", false) && a.refreshToken.isEmpty();
         return a;
     }
 
@@ -94,6 +120,7 @@ final class Account {
             .putString("refreshToken", refreshToken)
             .putString("minecraftToken", minecraftToken)
             .putLong("minecraftTokenExpires", minecraftTokenExpires)
+            .putBoolean("guest", guest && refreshToken.isEmpty())
             .apply();
     }
 
