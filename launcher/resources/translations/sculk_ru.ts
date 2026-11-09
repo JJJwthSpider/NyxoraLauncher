@@ -3167,6 +3167,18 @@ Are you sure?</source>
 <context>
     <name>VelloraLobby</name>
     <message>
+        <source>✚  Create an instance</source>
+        <translation>✚  Создать установку</translation>
+    </message>
+    <message>
+        <source>version · loader · mods</source>
+        <translation>версия · загрузчик · моды</translation>
+    </message>
+    <message>
+        <source>Pick the Minecraft version, the loader and the mods on one screen</source>
+        <translation>Версия Minecraft, загрузчик и моды — на одном экране</translation>
+    </message>
+    <message>
         <source>Guest</source>
         <translation>Гость</translation>
     </message>
@@ -3896,6 +3908,118 @@ variants</source>
 </context>
 <context>
     <name>VelloraCreatePage</name>
+    <message>
+        <source>None of the chosen mods was found: no connection to Modrinth, or they are not made for Minecraft %1 with %2. Nothing was created.</source>
+        <translation>Ни один из выбранных модов не нашёлся: нет связи с Modrinth или их нет для Minecraft %1 с %2. Сборка не создана.</translation>
+    </message>
+    <message>
+        <source>shaders</source>
+        <translation>шейдеры</translation>
+    </message>
+    <message>
+        <source>recipes</source>
+        <translation>рецепты</translation>
+    </message>
+    <message>
+        <source>a minimap</source>
+        <translation>мини-карта</translation>
+    </message>
+    <message>
+        <source>a world map</source>
+        <translation>карта мира</translation>
+    </message>
+    <message>
+        <source>hunger shown</source>
+        <translation>сытость</translation>
+    </message>
+    <message>
+        <source>what that block is</source>
+        <translation>что за блок</translation>
+    </message>
+    <message>
+        <source>teleports</source>
+        <translation>телепорты</translation>
+    </message>
+    <message>
+        <source>machines</source>
+        <translation>механизмы</translation>
+    </message>
+    <message>
+        <source>food and cooking</source>
+        <translation>еда и готовка</translation>
+    </message>
+    <message>
+        <source>new biomes</source>
+        <translation>новые биомы</translation>
+    </message>
+    <message>
+        <source>voice chat</source>
+        <translation>голосовой чат</translation>
+    </message>
+    <message>
+        <source>backpacks</source>
+        <translation>рюкзаки</translation>
+    </message>
+    <message>
+        <source>a handier inventory</source>
+        <translation>удобный инвентарь</translation>
+    </message>
+    <message>
+        <source>found</source>
+        <translation>найден</translation>
+    </message>
+    <message>
+        <source>Find a mod on Modrinth (Create, Waystones...)</source>
+        <translation>Найти мод на Modrinth (Create, Waystones...)</translation>
+    </message>
+    <message>
+        <source>Click a mod to add it</source>
+        <translation>Нажми на мод, чтобы добавить</translation>
+    </message>
+    <message>
+        <source>Mods — Vanilla has none</source>
+        <translation>Моды — у Vanilla их нет</translation>
+    </message>
+    <message>
+        <source>Mods — tick what to put in right away</source>
+        <translation>Моды — отметь, что поставить сразу</translation>
+    </message>
+    <message>
+        <source>Mods — tick what to put in right away · chosen: %1</source>
+        <translation>Моды — отметь, что поставить сразу · выбрано: %1</translation>
+    </message>
+    <message>
+        <source>Searching Modrinth...</source>
+        <translation>Ищу на Modrinth...</translation>
+    </message>
+    <message>
+        <source>No connection to Modrinth</source>
+        <translation>Нет связи с Modrinth</translation>
+    </message>
+    <message>
+        <source>Nothing found for this version and loader</source>
+        <translation>Для этой версии и загрузчика ничего не нашлось</translation>
+    </message>
+    <message>
+        <source>Chosen</source>
+        <translation>Выбранные</translation>
+    </message>
+    <message>
+        <source>Mods chosen on &quot;Create&quot;: %1.</source>
+        <translation>Моды, выбранные на «Создать»: %1.</translation>
+    </message>
+    <message>
+        <source>Could not put the mods together: %1</source>
+        <translation>Не получилось собрать моды: %1</translation>
+    </message>
+    <message>
+        <source>Not for this version, left out: %1</source>
+        <translation>Нет для этой версии, пропущены: %1</translation>
+    </message>
+    <message>
+        <source>Finding the mods and what they need on Modrinth...</source>
+        <translation>Ищу моды и их зависимости на Modrinth...</translation>
+    </message>
     <message>
         <source>light, fast</source>
         <translation>лёгкий</translation>

@@ -500,6 +500,10 @@ final class WardrobeScreen {
     private void showSkins() {
         header.addView(generator(false), fullWidth());
         final Account account = activity.account();
+        if (account != null && account.guest) {
+            section.setText("Гость носит облик по своему нику; свои скины и ИИ-генератор — после входа через Microsoft");
+            return;
+        }
         if (account == null || !account.ownsJava) {
             section.setText("Генератор работает всегда; надеть скин можно на аккаунте с Minecraft: Java Edition");
             return;

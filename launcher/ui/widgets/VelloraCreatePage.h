@@ -25,6 +25,10 @@
 
 class InstanceTask;
 class QButtonGroup;
+class QGridLayout;
+namespace ModpackAgent {
+class ModpackBuilder;
+}
 class QCheckBox;
 class QLabel;
 class QLineEdit;
@@ -68,6 +72,13 @@ class VelloraCreatePage : public QWidget {
     void loadPacks();
     QWidget* packRow(const QJsonObject& hit);
     void installPack(const QString& projectId, const QString& title);
+    /// the mods to put in right away: the popular ones as switches, the found ones after them
+    void fillModChips();
+    void toggleMod(const QString& slug, const QString& title);
+    void searchMods();
+    /// a new instance with the chosen mods: the mods and what they need are found on Modrinth (no AI), then the pack is
+    /// created like a downloaded modpack
+    void createWithMods(const Meta::Version::Ptr& minecraft, const Loader& loader);
     static QIcon loaderSign(const QString& key);
 
     QList<Loader> m_loaders;
@@ -89,4 +100,12 @@ class VelloraCreatePage : public QWidget {
     QVBoxLayout* m_packs = nullptr;
     QLabel* m_packsStatus = nullptr;
     bool m_packsLoaded = false;
+    QList<QPair<QString, QString>> m_chosenMods;  // slug, title
+    QLabel* m_modsTitle = nullptr;
+    QListWidget* m_modList = nullptr;  // the mods as wrapping tiles; a selected one is chosen
+    bool m_fillingMods = false;
+    QWidget* m_modBox = nullptr;
+    QLineEdit* m_modSearch = nullptr;
+    QListWidget* m_modResults = nullptr;
+    ModpackAgent::ModpackBuilder* m_builder = nullptr;
 };

@@ -43,11 +43,36 @@
 #include "BaseInstance.h"
 #include "meta/Index.h"
 #include "minecraft/VanillaInstanceCreationTask.h"
+#include "modplatform/agent/AgentImportTask.h"
+#include "modplatform/agent/ModpackBuilder.h"
 #include "settings/SettingsObject.h"
 #include "ui/themes/VelloraSound.h"
 
 namespace {
 const char* MODRINTH = "https://api.modrinth.com/v2";
+
+/// popular mods to put in right away: the Modrinth slug, the name (as on Modrinth), what it is for
+struct PopularMod {
+    const char* slug;
+    const char* title;
+    const char* what;
+};
+const PopularMod POPULAR_MODS[] = {
+    { "iris", "Iris Shaders", QT_TRANSLATE_NOOP("VelloraCreatePage", "shaders") },
+    { "jei", "JEI", QT_TRANSLATE_NOOP("VelloraCreatePage", "recipes") },
+    { "xaeros-minimap", "Xaero's Minimap", QT_TRANSLATE_NOOP("VelloraCreatePage", "a minimap") },
+    { "journeymap", "JourneyMap", QT_TRANSLATE_NOOP("VelloraCreatePage", "a world map") },
+    { "appleskin", "AppleSkin", QT_TRANSLATE_NOOP("VelloraCreatePage", "hunger shown") },
+    { "jade", "Jade", QT_TRANSLATE_NOOP("VelloraCreatePage", "what that block is") },
+    { "waystones", "Waystones", QT_TRANSLATE_NOOP("VelloraCreatePage", "teleports") },
+    { "create", "Create", QT_TRANSLATE_NOOP("VelloraCreatePage", "machines") },
+    { "farmers-delight", "Farmer's Delight", QT_TRANSLATE_NOOP("VelloraCreatePage", "food and cooking") },
+    { "terralith", "Terralith", QT_TRANSLATE_NOOP("VelloraCreatePage", "new biomes") },
+    { "simple-voice-chat", "Simple Voice Chat", QT_TRANSLATE_NOOP("VelloraCreatePage", "voice chat") },
+    { "travelersbackpack", "Traveler's Backpack", QT_TRANSLATE_NOOP("VelloraCreatePage", "backpacks") },
+    { "mouse-tweaks", "Mouse Tweaks", QT_TRANSLATE_NOOP("VelloraCreatePage", "a handier inventory") },
+    { "sophisticated-backpacks", "Sophisticated Backpacks", QT_TRANSLATE_NOOP("VelloraCreatePage", "backpacks") },
+};
 
 QLabel* caption(const QString& text, QWidget* parent)
 {
@@ -234,6 +259,73 @@ VelloraCreatePage::VelloraCreatePage(QWidget* parent) : QWidget(parent)
         updateLoaders();
         updateName();
     });
+
+    // the mods: popular ones as switches and a search on Modrinth; they are put in right when the instance is made
+    m_modBox = new QWidget(left);
+    auto* modLayout = new QVBoxLayout(m_modBox);
+    modLayout->setContentsMargins(0, 0, 0, 0);
+    modLayout->setSpacing(4);
+    m_modsTitle = caption(QString(), m_modBox);
+    modLayout->addWidget(m_modsTitle);
+    // like the version grid: tiles that wrap; a click picks or drops a mod
+    m_modList = new QListWidget(m_modBox);
+    m_modList->setObjectName("modGrid");
+    m_modList->setViewMode(QListView::IconMode);
+    m_modList->setFlow(QListView::LeftToRight);
+    m_modList->setWrapping(true);
+    m_modList->setResizeMode(QListView::Adjust);
+    m_modList->setMovement(QListView::Static);
+    m_modList->setSpacing(2);
+    m_modList->setSelectionMode(QAbstractItemView::MultiSelection);
+    m_modList->setMaximumHeight(116);
+    m_modList->setStyleSheet(
+        "QListWidget#modGrid { background: transparent; border: none; }"
+        "QListWidget#modGrid::item { background-color: #2b0e15; border: 2px solid #060103; border-bottom: 4px solid #12040a; "
+        "color: #fbeff1; padding: 3px 8px; }"
+        "QListWidget#modGrid::item:selected { background-color: #e8364f; color: white; border-bottom-color: #8e1428; }");
+    modLayout->addWidget(m_modList);
+    connect(m_modList, &QListWidget::itemSelectionChanged, this, [this] {
+        if (m_fillingMods) {
+            return;
+        }
+        QList<QPair<QString, QString>> chosen;
+        for (auto* item : m_modList->selectedItems()) {
+            chosen.append({ item->data(Qt::UserRole).toString(), item->data(Qt::UserRole + 1).toString() });
+        }
+        VelloraSound::play(chosen.size() > m_chosenMods.size() ? "toggle" : "click");
+        m_chosenMods = chosen;
+        m_modsTitle->setText(m_chosenMods.isEmpty() ? tr("Mods — tick what to put in right away")
+                                                    : tr("Mods — tick what to put in right away · chosen: %1").arg(m_chosenMods.size()));
+    });
+    auto* searchRow = new QHBoxLayout;
+    m_modSearch = new QLineEdit(m_modBox);
+    m_modSearch->setPlaceholderText(tr("Find a mod on Modrinth (Create, Waystones...)"));
+    m_modSearch->setClearButtonEnabled(true);
+    searchRow->addWidget(m_modSearch, 1);
+    auto* find = new QPushButton(tr("Find"), m_modBox);
+    searchRow->addWidget(find);
+    modLayout->addLayout(searchRow);
+    m_modResults = new QListWidget(m_modBox);
+    m_modResults->setMaximumHeight(110);
+    m_modResults->setToolTip(tr("Click a mod to add it"));
+    m_modResults->hide();
+    modLayout->addWidget(m_modResults);
+    form->addWidget(m_modBox);
+    connect(find, &QPushButton::clicked, this, &VelloraCreatePage::searchMods);
+    connect(m_modSearch, &QLineEdit::returnPressed, this, &VelloraCreatePage::searchMods);
+    connect(m_modResults, &QListWidget::itemClicked, this, [this](QListWidgetItem* item) {
+        const QString slug = item->data(Qt::UserRole).toString();
+        const QString title = item->data(Qt::UserRole + 1).toString();
+        bool chosen = false;
+        for (const auto& m : m_chosenMods) {
+            chosen |= m.first == slug;
+        }
+        if (!chosen) {
+            toggleMod(slug, title);
+        }
+        item->setText(QString::fromUtf8("✓ ") + title);
+    });
+    fillModChips();
 
     m_openMods = new QCheckBox(tr("Right after creating, open the mod browser (Modrinth and CurseForge)"), left);
     m_openMods->setChecked(true);
@@ -434,6 +526,9 @@ void VelloraCreatePage::updateLoaders()
         tile->setChecked(loader.key == m_loader);
     }
     m_openMods->setVisible(m_loader != "vanilla");
+    if (m_modBox) {
+        fillModChips();
+    }
 }
 
 QString VelloraCreatePage::autoName() const
@@ -502,6 +597,10 @@ void VelloraCreatePage::create()
 
 void VelloraCreatePage::createWith(const Meta::Version::Ptr& minecraft, const Loader& loader)
 {
+    if (loader.key != "vanilla" && !m_chosenMods.isEmpty()) {
+        createWithMods(minecraft, loader);
+        return;
+    }
     InstanceTask* task = nullptr;
     if (loader.key == "vanilla") {
         task = new VanillaCreationTask(minecraft);
@@ -544,6 +643,171 @@ void VelloraCreatePage::createWith(const Meta::Version::Ptr& minecraft, const Lo
     m_name->clear();
     emit taskReady(task, loader.key != "vanilla" && m_openMods->isChecked());
     updateName();
+}
+
+void VelloraCreatePage::fillModChips()
+{
+    const bool vanilla = m_loader == "vanilla";
+    m_modsTitle->setText(vanilla ? tr("Mods — Vanilla has none")
+                                 : m_chosenMods.isEmpty() ? tr("Mods — tick what to put in right away")
+                                                          : tr("Mods — tick what to put in right away · chosen: %1").arg(m_chosenMods.size()));
+    m_fillingMods = true;
+    m_modList->clear();
+    m_modSearch->setEnabled(!vanilla);
+    m_modList->setVisible(!vanilla);
+    if (vanilla) {
+        m_modResults->hide();
+        m_fillingMods = false;
+        return;
+    }
+    QList<QPair<QString, QString>> all;
+    QHash<QString, QString> what;
+    for (const auto& mod : POPULAR_MODS) {
+        all.append({ QString::fromUtf8(mod.slug), QString::fromUtf8(mod.title) });
+        what.insert(QString::fromUtf8(mod.slug), tr(mod.what));
+    }
+    for (const auto& chosen : m_chosenMods) {
+        if (!what.contains(chosen.first)) {
+            all.append(chosen);
+            what.insert(chosen.first, tr("found"));
+        }
+    }
+    for (const auto& [slug, title] : all) {
+        auto* item = new QListWidgetItem(title, m_modList);
+        item->setData(Qt::UserRole, slug);
+        item->setData(Qt::UserRole + 1, title);
+        item->setToolTip(title + " — " + what.value(slug));
+        bool on = false;
+        for (const auto& chosen : m_chosenMods) {
+            on |= chosen.first == slug;
+        }
+        item->setSelected(on);
+    }
+    m_fillingMods = false;
+}
+
+void VelloraCreatePage::toggleMod(const QString& slug, const QString& title)
+{
+    for (int i = 0; i < m_chosenMods.size(); i++) {
+        if (m_chosenMods.at(i).first == slug) {
+            m_chosenMods.removeAt(i);
+            VelloraSound::play("click");
+            fillModChips();
+            return;
+        }
+    }
+    m_chosenMods.append({ slug, title });
+    VelloraSound::play("toggle");
+    fillModChips();
+}
+
+void VelloraCreatePage::searchMods()
+{
+    const QString text = m_modSearch->text().trimmed();
+    if (text.isEmpty() || m_loader == "vanilla") {
+        return;
+    }
+    const QString loaders = m_loader == "quilt" ? "[\"categories:quilt\",\"categories:fabric\"]" : QString("[\"categories:%1\"]").arg(m_loader);
+    QUrl url(QString(MODRINTH) + "/search");
+    QUrlQuery query;
+    query.addQueryItem("query", text);
+    query.addQueryItem("facets", QString("[[\"project_type:mod\"],%1,[\"versions:%2\"]]").arg(loaders, selectedVersion()));
+    query.addQueryItem("limit", "8");
+    url.setQuery(query);
+    m_modResults->clear();
+    m_modResults->addItem(tr("Searching Modrinth..."));
+    m_modResults->show();
+    auto* reply = APPLICATION->network()->get(request(url));
+    connect(reply, &QNetworkReply::finished, this, [this, reply] {
+        reply->deleteLater();
+        m_modResults->clear();
+        if (reply->error() != QNetworkReply::NoError) {
+            m_modResults->addItem(tr("No connection to Modrinth"));
+            return;
+        }
+        const auto hits = QJsonDocument::fromJson(reply->readAll()).object().value("hits").toArray();
+        if (hits.isEmpty()) {
+            m_modResults->addItem(tr("Nothing found for this version and loader"));
+            return;
+        }
+        for (const auto& value : hits) {
+            const auto hit = value.toObject();
+            const QString title = hit.value("title").toString();
+            auto* item = new QListWidgetItem(QString("+ %1 — %2").arg(title, hit.value("description").toString().left(80)));
+            item->setData(Qt::UserRole, hit.value("slug").toString());
+            item->setData(Qt::UserRole + 1, title);
+            m_modResults->addItem(item);
+        }
+    });
+}
+
+void VelloraCreatePage::createWithMods(const Meta::Version::Ptr& minecraft, const Loader& loader)
+{
+    ModpackAgent::Plan plan;
+    plan.name = m_name->text().trimmed().isEmpty() ? autoName() : m_name->text().trimmed();
+    plan.minecraftVersion = minecraft->version();
+    plan.loader = loader.key;
+    plan.versionGiven = true;
+    plan.loaderGiven = true;
+    for (const auto& [slug, title] : m_chosenMods) {
+        ModpackAgent::CuratedMod mod;
+        mod.alternatives = { slug };
+        mod.group = tr("Chosen");
+        plan.curated.append(mod);
+    }
+    // the name the player typed (describePlan would make one up), and a summary of the chosen mods
+    const QString chosenName = plan.name;
+    ModpackAgent::describePlan(plan);
+    plan.name = chosenName;
+    QStringList titles;
+    for (const auto& chosen : m_chosenMods) {
+        titles << chosen.second;
+    }
+    plan.summary = tr("Mods chosen on \"Create\": %1.").arg(titles.join(", "));
+    if (!m_builder) {
+        m_builder = new ModpackAgent::ModpackBuilder(this);
+        connect(m_builder, &ModpackAgent::ModpackBuilder::log, this, [this](const QString& line) { m_status->setText(line); });
+        connect(m_builder, &ModpackAgent::ModpackBuilder::failed, this, [this](const QString& reason) {
+            m_create->setEnabled(true);
+            m_status->setText(tr("Could not put the mods together: %1").arg(reason));
+        });
+        connect(m_builder, &ModpackAgent::ModpackBuilder::finished, this, [this] {
+            m_create->setEnabled(true);
+            // what was chosen but has no file for this version and loader
+            QStringList missing;
+            for (const auto& [slug, title] : m_chosenMods) {
+                bool found = false;
+                for (const auto& mod : m_builder->mods()) {
+                    found |= mod.slug == slug;
+                }
+                if (!found) {
+                    missing << title;
+                }
+            }
+            if (missing.size() == m_chosenMods.size() || m_builder->loaderVersion().isEmpty()) {
+                // nothing found at all: no internet, or none of them is made for this version and loader
+                m_status->setText(tr("None of the chosen mods was found: no connection to Modrinth, or they are not made for Minecraft %1 "
+                                     "with %2. Nothing was created.")
+                                      .arg(m_builder->plan().minecraftVersion, ModpackAgent::loaderDisplayName(m_builder->plan().loader)));
+                return;
+            }
+            const auto& plan = m_builder->plan();
+            auto* task = new ModpackAgent::AgentImportTask(m_builder->makeIndex(), this);
+            InstanceName instName(plan.name, plan.minecraftVersion);
+            instName.setName(plan.name);
+            task->setName(instName);
+            task->setGroup(APPLICATION->settings()->get("LastUsedGroupForNewInstance").toString());
+            task->setIcon("default");
+            m_status->setText(missing.isEmpty() ? QString()
+                                                : tr("Not for this version, left out: %1").arg(missing.join(", ")));
+            m_name->clear();
+            emit taskReady(task, false);
+            updateName();
+        });
+    }
+    m_create->setEnabled(false);
+    m_status->setText(tr("Finding the mods and what they need on Modrinth..."));
+    m_builder->build(plan, true, false);
 }
 
 void VelloraCreatePage::loadPacks()

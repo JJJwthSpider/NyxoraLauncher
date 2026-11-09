@@ -513,7 +513,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         m_libraryLayout->addWidget(m_launchPanel);
         connect(m_launchPanel, &LaunchPanel::agentRequested, this, [this] { addInstance(QString(), {}, "agent"); });
         connect(m_launchPanel, &LaunchPanel::packsRequested, this, [this] { addInstance(QString(), {}, "modrinth"); });
-        connect(m_launchPanel, &LaunchPanel::newInstanceRequested, this, [this] { addInstance(QString(), {}, "quick"); });
+        // "New instance" opens "Create": the version, the loader and the mods on one screen
+        connect(m_launchPanel, &LaunchPanel::newInstanceRequested, this, [this] { showPage(2); });
         connect(m_launchPanel, &LaunchPanel::profileRequested, this, &MainWindow::showProfileMenu);
         connect(APPLICATION->accounts(), &AccountList::defaultAccountChanged, this, &MainWindow::updateLaunchPanelProfile);
         connect(APPLICATION->accounts(), &AccountList::listChanged, this, &MainWindow::updateLaunchPanelProfile);
@@ -1545,7 +1546,9 @@ void MainWindow::showProfileMenu()
     menu.addAction(QIcon::fromTheme("accounts"), tr("Accounts..."), this, [this] { APPLICATION->ShowGlobalSettings(this, "accounts"); });
     auto* button = m_launchPanel->profileButton();
     // from the lobby's chip the menu opens where the click was; from the library under its profile button
-    menu.exec(m_pages->currentIndex() == 0 || !button->isVisible() ? QCursor::pos() : button->mapToGlobal(QPoint(0, button->height())));
+    // (the lobby's chip is in the top right corner: the menu opens to the left of the click)
+    menu.exec(m_pages->currentIndex() == 0 || !button->isVisible() ? QCursor::pos() - QPoint(menu.sizeHint().width() - 24, -12)
+                                                                   : button->mapToGlobal(QPoint(0, button->height())));
 }
 
 void MainWindow::openModBrowser(const QString& instanceId)

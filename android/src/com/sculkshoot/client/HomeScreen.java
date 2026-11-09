@@ -287,11 +287,32 @@ final class HomeScreen {
         barParams.setMargins(0, dp(8), dp(10), 0);
         lobby.addView(lobbyBar, barParams);
 
-        // the banner on the right, like Millida's promo card: Arkan the wizard assembles a pack from words
-        android.widget.FrameLayout.LayoutParams bannerParams = new android.widget.FrameLayout.LayoutParams(dp(236), dp(158),
+        // on the right: the banner (Arkan the wizard assembles a pack from words, like Millida's promo card) and under it
+        // the big button that makes an installation by hand: the version, the loader and the mods
+        LinearLayout rightColumn = new LinearLayout(activity);
+        rightColumn.setOrientation(LinearLayout.VERTICAL);
+        rightColumn.addView(banner(), new LinearLayout.LayoutParams(dp(236), dp(142)));
+        Button bigCreate = Ui.button(activity, "", true);
+        android.text.SpannableString createText = new android.text.SpannableString("✚  Создать установку\nверсия · загрузчик · моды");
+        int cut = createText.toString().indexOf('\n');
+        createText.setSpan(new android.text.style.RelativeSizeSpan(0.62f), cut, createText.length(), android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        createText.setSpan(new android.text.style.ForegroundColorSpan(0xE6FFFFFF), cut, createText.length(), android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        bigCreate.setText(createText);
+        bigCreate.setTextSize(16);
+        bigCreate.setContentDescription("Создать установку");
+        bigCreate.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                showPage(CREATE);
+            }
+        });
+        LinearLayout.LayoutParams bigParams = new LinearLayout.LayoutParams(dp(236), dp(62));
+        bigParams.topMargin = dp(8);
+        rightColumn.addView(bigCreate, bigParams);
+        android.widget.FrameLayout.LayoutParams columnParams = new android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                                                                                                           ViewGroup.LayoutParams.WRAP_CONTENT,
                                                                                                            Gravity.END | Gravity.CENTER_VERTICAL);
-        bannerParams.setMargins(0, dp(10), dp(10), 0);
-        lobby.addView(banner(), bannerParams);
+        columnParams.setMargins(0, dp(14), dp(10), 0);
+        lobby.addView(rightColumn, columnParams);
 
         // the bottom: what we play today and the big Play button
         playBar = new LinearLayout(activity);
@@ -1155,11 +1176,28 @@ final class HomeScreen {
     }
 
     void create(final String name, final String mc, final String loader, final boolean essentials, final boolean fpsBoost) {
+        create(name, mc, loader, essentials, fpsBoost, new ArrayList<String>());
+    }
+
+    /** a new installation with the mods chosen on "Создать" put in at once (with what they need); a mod without a file
+        for this version is left out and named */
+    void create(final String name, final String mc, final String loader, final boolean essentials, final boolean fpsBoost, final List<String> mods) {
         final Progress progress = new Progress(activity, "Создаю «" + name + "»");
+        final List<String> missing = new ArrayList<String>();
         activity.background(new MainActivity.Job<Installation>() {
             public Installation run() throws Exception {
                 Installation inst = Installer.create(name, mc, loader, essentials, progress);
                 inst.fpsBoost = fpsBoost;
+                for (String slug : mods) {
+                    progress.log("Ставлю " + slug + "...");
+                    try {
+                        Installer.install(inst, slug, Mod.MOD);
+                    } catch (Exception e) {
+                        if (!String.valueOf(e.getMessage()).contains("уже установлен")) {
+                            missing.add(slug + ": " + e.getMessage());
+                        }
+                    }
+                }
                 activity.store().save(inst);
                 return inst;
             }
@@ -1173,7 +1211,16 @@ final class HomeScreen {
                 selectedId = inst.id;
                 refresh();
                 select(inst.id);  // the new installation opens in the library, with its actions
-                Toast.makeText(activity, "Установка «" + inst.name + "» готова. Добавь моды в «Моды и ресурсы».", Toast.LENGTH_LONG).show();
+                if (!missing.isEmpty()) {
+                    new AlertDialog.Builder(activity)
+                        .setTitle("Готово, но не всё")
+                        .setMessage("«" + inst.name + "» создана. Эти моды не поставились:\n\n" + android.text.TextUtils.join("\n", missing))
+                        .setPositiveButton("OK", null)
+                        .show();
+                } else {
+                    Toast.makeText(activity, "Установка «" + inst.name + "» готова" + (mods.isEmpty() ? ". Добавь моды в «Моды и ресурсы»." : " — с модами!"),
+                                   Toast.LENGTH_LONG).show();
+                }
             }
         });
     }

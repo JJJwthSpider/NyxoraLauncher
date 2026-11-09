@@ -469,6 +469,16 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     wizard->setFixedSize(116, 136);
     bannerLayout->addWidget(wizard, 0, Qt::AlignTop);
     right->addWidget(banner, 0, Qt::AlignRight);
+    // under the banner: the big button that makes an instance by hand, with the version, the loader and the mods
+    auto* create = new QPushButton(tr("✚  Create an instance") + "\n" + tr("version · loader · mods"), this);
+    create->setObjectName("accentButton");
+    create->setFixedSize(320, 72);
+    create->setStyleSheet("font-size: 13pt;");
+    create->setCursor(Qt::PointingHandCursor);
+    create->setToolTip(tr("Pick the Minecraft version, the loader and the mods on one screen"));
+    connect(create, &QPushButton::clicked, this, &VelloraLobby::newInstanceRequested);
+    right->addSpacing(8);
+    right->addWidget(create, 0, Qt::AlignRight);
     right->addStretch(1);
     stage->addLayout(right);
 
@@ -562,6 +572,7 @@ void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng, con
     }
     m_accountChip->setIcon(QIcon(QPixmap::fromImage(head.scaled(28, 28))));
     m_accountChip->setText(name.isEmpty() ? tr("Sign in") : guest ? name + "  ˅\n" + tr("Guest") : name + "  ˅");
+    m_accountChip->setMinimumHeight(guest ? 56 : 44);  // two lines for a guest, like Millida's "Гость"
     m_accountChip->setToolTip(guest ? tr("A guest: instances, mods and the wardrobe; the AI and the game itself need a Microsoft account")
                                     : QString());
 }

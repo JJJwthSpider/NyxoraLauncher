@@ -58,6 +58,20 @@ final class CreatePage {
     private boolean nameTouched;
     private boolean settingName;
     private boolean fpsOn = true;
+    /** popular mods to put in right away: Modrinth slug, the name (as on Modrinth), what it is for */
+    private static final String[][] POPULAR_MODS = { { "iris", "Iris Shaders", "шейдеры" }, { "jei", "JEI", "рецепты" },
+                                                     { "xaeros-minimap", "Xaero's Minimap", "мини-карта" }, { "journeymap", "JourneyMap", "карта мира" },
+                                                     { "appleskin", "AppleSkin", "сытость" }, { "jade", "Jade", "что за блок" },
+                                                     { "waystones", "Waystones", "телепорты" }, { "create", "Create", "механизмы" },
+                                                     { "farmers-delight", "Farmer's Delight", "еда и готовка" }, { "terralith", "Terralith", "новые биомы" },
+                                                     { "simple-voice-chat", "Simple Voice Chat", "голосовой чат" }, { "travelersbackpack", "Traveler's Backpack", "рюкзаки" },
+                                                     { "mouse-tweaks", "Mouse Tweaks", "удобный инвентарь" }, { "sophisticated-backpacks", "Sophisticated Backpacks", "рюкзаки" } };
+    /** the mods chosen for the new installation: slug, name */
+    private final List<String[]> chosenMods = new ArrayList<String[]>();
+    private TextView modsTitle;
+    private FlowLayout modChips;
+    private FlowLayout modResults;
+    private EditText modSearch;
     private boolean essentialsOn = true;
     private String version = "1.21.1";
     private String loader = "fabric";
@@ -224,6 +238,46 @@ final class CreatePage {
         options.addView(essentials, ep);
         left.addView(options);
 
+        // the mods: popular ones as switches and a search on Modrinth; they are put in right when it is created
+        modsTitle = caption("");
+        left.addView(modsTitle);
+        modChips = new FlowLayout(activity, dp(5));
+        left.addView(modChips);
+        LinearLayout searchRow = new LinearLayout(activity);
+        searchRow.setGravity(Gravity.CENTER_VERTICAL);
+        searchRow.setPadding(0, dp(6), 0, 0);
+        modSearch = new EditText(activity);
+        modSearch.setHint("🔍 Найти мод на Modrinth (Create, Waystones...)");
+        modSearch.setHintTextColor(Ui.HINT);
+        modSearch.setTextColor(Ui.TEXT);
+        modSearch.setTextSize(12);
+        modSearch.setSingleLine(true);
+        modSearch.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
+        modSearch.setBackground(Ui.rounded(activity, 0xFF0E0407, 0, 0xFF5A1E2A));
+        modSearch.setPadding(dp(10), dp(6), dp(10), dp(6));
+        searchRow.addView(modSearch, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        Button find = Ui.button(activity, "Найти", false);
+        find.setTextSize(12);
+        find.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                searchMods();
+            }
+        });
+        modSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView v, int actionId, android.view.KeyEvent event) {
+                searchMods();
+                return true;
+            }
+        });
+        LinearLayout.LayoutParams fp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        fp.leftMargin = dp(6);
+        searchRow.addView(find, fp);
+        left.addView(searchRow);
+        modResults = new FlowLayout(activity, dp(5));
+        modResults.setPadding(0, dp(4), 0, dp(4));
+        left.addView(modResults);
+        fillModChips();
+
         // the foot: "Собрать с ИИ" and "Создать"
         LinearLayout foot = new LinearLayout(activity);
         foot.setPadding(dp(12), dp(6), dp(12), dp(10));
@@ -240,8 +294,14 @@ final class CreatePage {
         create.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String title = name.getText().toString().trim();
-                CreatePage.this.home.create(title.isEmpty() ? autoName() : title, version, loader, essentialsOn && !"vanilla".equals(loader),
-                                            fpsOn && !"vanilla".equals(loader));
+                boolean vanilla = "vanilla".equals(loader);
+                List<String> mods = new ArrayList<String>();
+                if (!vanilla) {
+                    for (String[] m : chosenMods) {
+                        mods.add(m[0]);
+                    }
+                }
+                CreatePage.this.home.create(title.isEmpty() ? autoName() : title, version, loader, essentialsOn && !vanilla, fpsOn && !vanilla, mods);
             }
         });
         LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(52), 1);
@@ -312,6 +372,131 @@ final class CreatePage {
 
     private int dp(float v) {
         return Ui.dp(activity, v);
+    }
+
+    /* ---------------- the mods of the new installation */
+
+    private boolean chosen(String slug) {
+        for (String[] m : chosenMods) {
+            if (m[0].equals(slug)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void toggleMod(String slug, String title) {
+        for (int i = 0; i < chosenMods.size(); i++) {
+            if (chosenMods.get(i)[0].equals(slug)) {
+                chosenMods.remove(i);
+                Sounds.play(Sounds.CLICK);
+                fillModChips();
+                return;
+            }
+        }
+        chosenMods.add(new String[] { slug, title });
+        Sounds.play(Sounds.TOGGLE);
+        fillModChips();
+    }
+
+    /** the popular mods and the ones found, each a switch; the chosen ones lit */
+    private void fillModChips() {
+        boolean vanilla = "vanilla".equals(loader);
+        modsTitle.setText(vanilla ? "Моды — у Vanilla их нет" : "Моды — отметь, что поставить сразу" + (chosenMods.isEmpty() ? "" : " · выбрано: " + chosenMods.size()));
+        modChips.removeAllViews();
+        if (vanilla) {
+            return;
+        }
+        List<String[]> all = new ArrayList<String[]>();
+        for (String[] m : POPULAR_MODS) {
+            all.add(m);
+        }
+        for (String[] m : chosenMods) {
+            boolean popular = false;
+            for (String[] p : POPULAR_MODS) {
+                popular |= p[0].equals(m[0]);
+            }
+            if (!popular) {
+                all.add(new String[] { m[0], m[1], "найден" });
+            }
+        }
+        for (final String[] m : all) {
+            boolean on = chosen(m[0]);
+            Button b = Ui.button(activity, (on ? "✓ " : "+ ") + m[1], on);
+            b.setTextSize(11);
+            b.setMinHeight(dp(30));
+            b.setMinimumHeight(dp(30));
+            b.setPadding(dp(8), dp(3), dp(8), dp(6));
+            b.setContentDescription(m[1] + " — " + m[2]);
+            b.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    toggleMod(m[0], m[1]);
+                }
+            });
+            b.setOnLongClickListener(new View.OnLongClickListener() {
+                public boolean onLongClick(View v) {
+                    android.widget.Toast.makeText(activity, m[1] + " — " + m[2], android.widget.Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
+            modChips.addView(b);
+        }
+    }
+
+    /** a search on Modrinth for the chosen version and loader; a found mod is added with a tap */
+    private void searchMods() {
+        final String query = modSearch.getText().toString().trim();
+        if (query.isEmpty() || "vanilla".equals(loader)) {
+            return;
+        }
+        android.view.inputmethod.InputMethodManager keyboard =
+            (android.view.inputmethod.InputMethodManager) activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (keyboard != null) {
+            keyboard.hideSoftInputFromWindow(modSearch.getWindowToken(), 0);
+        }
+        modResults.removeAllViews();
+        modResults.addView(Ui.label(activity, "Ищу на Modrinth...", 11, Ui.HINT, false));
+        final Installation probe = new Installation();
+        probe.minecraftVersion = version;
+        probe.loader = loader;
+        activity.background(new MainActivity.Job<org.json.JSONArray>() {
+            public org.json.JSONArray run() throws Exception {
+                return Modrinth.search(query, Installer.facetsFor(probe, Mod.MOD), "relevance", 0, 8);
+            }
+
+            public void done(org.json.JSONArray hits, Exception error) {
+                modResults.removeAllViews();
+                if (error != null || hits == null) {
+                    modResults.addView(Ui.label(activity, "Нет связи с Modrinth", 11, Ui.HINT, false));
+                    return;
+                }
+                if (hits.length() == 0) {
+                    modResults.addView(Ui.label(activity, "Для " + version + " · " + Plan.loaderName(loader) + " ничего не нашлось", 11, Ui.HINT, false));
+                    return;
+                }
+                for (int i = 0; i < hits.length(); i++) {
+                    final org.json.JSONObject hit = hits.optJSONObject(i);
+                    if (hit == null) {
+                        continue;
+                    }
+                    final String slug = hit.optString("slug"), title = hit.optString("title");
+                    Button b = Ui.button(activity, (chosen(slug) ? "✓ " : "+ ") + title, false);
+                    b.setTextSize(11);
+                    b.setMinHeight(dp(30));
+                    b.setMinimumHeight(dp(30));
+                    b.setPadding(dp(8), dp(3), dp(8), dp(6));
+                    b.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            if (!chosen(slug)) {
+                                toggleMod(slug, title);
+                            }
+                            ((Button) v).setText("✓ " + title);
+                        }
+                    });
+                    modResults.addView(b);
+                }
+            }
+        });
     }
 
     private TextView caption(String text) {
@@ -406,6 +591,9 @@ final class CreatePage {
         essentials.setText("🧰 Оптимизация и удобство: " + (essentialsOn && !vanilla ? "вкл" : "выкл"));
         Ui.styleButton(activity, essentials, essentialsOn && !vanilla);
         essentials.setEnabled(!vanilla);
+        if (modChips != null) {
+            fillModChips();
+        }
         if (!nameTouched) {
             settingName = true;
             name.setText("");
