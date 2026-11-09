@@ -35,9 +35,17 @@ python3 "$HERE/engine/prepare.py" "$SRC" "$HERE" "$KEY"
 
 # LTW (LGPL-3.0, github.com/PojavLauncherTeam/LTW): OpenGL 3 on OpenGL ES 3 for Minecraft 1.17+, which
 # PojavLauncher's own CI adds the same way
-mkdir -p app_pojavlauncher/libs
-curl -fsSL -o app_pojavlauncher/libs/ltw-release.aar https://github.com/PojavLauncherTeam/LTW/releases/latest/download/ltw-release.aar \
-    || echo "warning: LTW not downloaded; the game uses GL4ES or Zink"
+# (a copy is kept in build/cache: a failed download falls back to it instead of a build without LTW)
+mkdir -p app_pojavlauncher/libs "$HERE/build/cache"
+LTW_CACHE="$HERE/build/cache/ltw-release.aar"
+if curl -fsSL --retry 3 -o app_pojavlauncher/libs/ltw-release.aar https://github.com/PojavLauncherTeam/LTW/releases/latest/download/ltw-release.aar; then
+    cp app_pojavlauncher/libs/ltw-release.aar "$LTW_CACHE"
+elif [ -f "$LTW_CACHE" ]; then
+    echo "warning: LTW not downloaded now; using the copy from $LTW_CACHE"
+    cp "$LTW_CACHE" app_pojavlauncher/libs/ltw-release.aar
+else
+    echo "warning: LTW not downloaded; the game uses GL4ES or Zink"
+fi
 
 ./gradlew --no-daemon -Porg.gradle.java.installations.paths="$JDK8" -Porg.gradle.java.installations.auto-detect=false \
     :app_pojavlauncher:assembleDebug -x lint
