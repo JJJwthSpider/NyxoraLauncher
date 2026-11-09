@@ -17,29 +17,33 @@
 #pragma once
 
 #include <QElapsedTimer>
+#include <QImage>
 #include <QTimer>
 #include <QWidget>
+#include <array>
+#include <vector>
 
 class QPainter;
 
-/// The face of the mod pack agent: Arkan, a burgundy wizard in a hood (pixel art) with a red tesseract turning in
-/// four dimensions above his hand. It turns faster and glows brighter when the mouse comes near and while the agent
-/// is working. (The class keeps its old name, Moony, so nothing else has to change.)
+/// The face of the mod pack agent: Arkan the wizard as a 3D mob in the style of a Minecraft mod, a model of boxes
+/// with a pixel texture (resources/sculk_theme/arkan_model.json and arkan.png, made by android/art/arkan3d.py) drawn
+/// by a small software renderer, the same as the phone's WizardView: he floats over a turning magic circle, looks
+/// around and blinks, holds a staff with a glowing ruby and the red tesseract turning in four dimensions over his
+/// raised palm. His eyes glow brighter when the mouse comes near; while the agent works the tesseract spins faster
+/// and the sparks fly. In a small place only his head and shoulders are shown. (The class keeps its old name, Moony,
+/// so nothing else has to change.)
 class MoonyWidget : public QWidget {
     Q_OBJECT
    public:
     explicit MoonyWidget(QWidget* parent = nullptr);
 
-    /// the mouse is over the tile: Moony wakes up and glows brighter
+    /// the mouse is over the tile: Arkan wakes up and his eyes glow brighter
     void setExcited(bool excited);
-    /// a speech bubble next to the moon: the agent is a chat
+    /// a speech bubble next to him: the agent is a chat
     void setBubbleVisible(bool visible);
-    /// the dots in the bubble jump and the mouth moves while the agent is thinking or answering
+    /// the dots in the bubble jump and the tesseract spins faster while the agent is thinking or answering
     void setTalking(bool talking);
     QSize sizeHint() const override { return { 96, 96 }; }
-
-    /// paints Arkan into a square (also used for the static agent icon)
-    static void paintMoon(QPainter& painter, const QRectF& square, double time, double wake, double talk);
 
    protected:
     void paintEvent(QPaintEvent* event) override;
@@ -48,15 +52,30 @@ class MoonyWidget : public QWidget {
 
    private:
     void tick();
+    void paintArkan(QPainter& painter, const QRect& area);
     void paintBubble(QPainter& painter, const QRectF& box);
+
+    // the software renderer: a small frame with a depth buffer, scaled up with sharp pixels
+    using Matrix = std::array<float, 12>;
+    QPointF project(const Matrix& m, float x, float y, float z, float* depth = nullptr) const;
+    void runeDot(const Matrix& m, float x, float y, float z, QRgb color);
+    void drawBox(const Matrix& m, const float* box);
+    void face(const Matrix& m, const float* a, const float* b, const float* c, int su, int sv, int sw, int sh);
 
     QTimer m_timer;
     QElapsedTimer m_clock;
     double m_time = 0;
     double m_lastFrame = 0;
-    double m_wake = 0;  // 0 asleep .. 1 eyes open, eases towards the target
+    double m_phase = 0;  // the time of the movements that go faster while he works
+    double m_wake = 0;   // 0 calm .. 1 eyes bright, eases towards the target
+    double m_busy = 0;   // 0 calm .. 1 working, eases towards the target
     double m_talk = 0;
     bool m_excited = false;
     bool m_bubble = false;
     bool m_talking = false;
+
+    QImage m_frame;
+    std::vector<float> m_depth;
+    float m_scale = 1, m_centerX = 0, m_centerY = 0;
+    bool m_blink = false;
 };

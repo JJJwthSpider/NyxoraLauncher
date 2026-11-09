@@ -273,7 +273,7 @@ final class WizardView extends View {
         }
 
         // the light under him, then the frame, sharp
-        float k2 = (float) w / bufW;
+        float k2 = k;  // buffer pixels -> view pixels, the same as the frame below
         if (!closeUp) {
             float[] foot = project(ground, new float[] { 0, 0, 0 });
             float fx = foot[0] * k2, fy = foot[1] * k2, radius = 15 * scale * k2;
