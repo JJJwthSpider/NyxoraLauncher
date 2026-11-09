@@ -16,6 +16,8 @@
  */
 #include "VelloraCharacter.h"
 
+#include <algorithm>
+
 #include <QCoreApplication>
 #include <QMouseEvent>
 #include <QRandomGenerator>
@@ -76,8 +78,12 @@ const Data& data()
                 Layer layer;
                 layer.x = l.value("x").toDouble();
                 layer.y = l.value("y").toDouble();
+                layer.res = std::max(1, l.value("res").toInt(1));
                 for (const auto& row : l.value("rows").toArray()) {
                     layer.rows << row.toString();
+                }
+                for (const auto& row : l.value("relief").toArray()) {
+                    layer.relief << row.toString();
                 }
                 const auto colors = l.value("colors").toObject();
                 for (auto it = colors.begin(); it != colors.end(); ++it) {
@@ -173,7 +179,10 @@ const QList<Outfit>& outfits()
 
 static QSettings& store()
 {
-    static QSettings s_settings(FS::PathCombine(APPLICATION->dataRoot(), "wardrobe.ini"), QSettings::IniFormat);
+    // the launcher's data folder; without the launcher (the tests draw the wardrobe too) a file of its own
+    auto* launcher = dynamic_cast<Application*>(QCoreApplication::instance());
+    static QSettings s_settings(launcher ? FS::PathCombine(launcher->dataRoot(), "wardrobe.ini") : QDir::temp().filePath("vellora-wardrobe-test.ini"),
+                                QSettings::IniFormat);
     return s_settings;
 }
 
@@ -227,12 +236,13 @@ void drawFlatItem(const Pen& p, const Cosmetics::Item* item, bool behind, double
         } else if (layer.anim == "float") {
             dy = std::sin(time * 2) * 1.5;
         }
+        const double cell = 1.0 / layer.res;
         for (int j = 0; j < layer.rows.size(); j++) {
             const auto& row = layer.rows[j];
             for (int i = 0; i < row.size(); i++) {
                 const auto it = layer.colors.constFind(row[i]);
                 if (it != layer.colors.constEnd()) {
-                    p.rect(layer.x + i, layer.y + j + dy, 1, 1, *it);
+                    p.rect(layer.x + i * cell, layer.y + j * cell + dy, cell, cell, *it);
                 }
             }
         }
@@ -671,7 +681,9 @@ void VelloraCharacter::solidBox(const Mat& m, const Box3& b)
 QList<VelloraCharacter::Box3> VelloraCharacter::build(const Cosmetics::Item& item, const QString& slot)
 {
     QList<Box3> out;
-    const bool ring = item.id == "crown" || item.id == "devil_crown" || item.id == "flower_crown" || item.id == "halo";
+    // crowns, halos, tiaras and wreaths go round the head
+    const bool ring = item.id.contains("crown") || item.id.contains("halo") || item.id.contains("tiara") || item.id.contains("wreath");
+    const bool ears = item.id.endsWith("_ears");
     bool hasFront = false, hasBack = false;
     for (const auto& l : item.layers) {
         hasFront |= l.view != "back";
@@ -680,8 +692,11 @@ QList<VelloraCharacter::Box3> VelloraCharacter::build(const Cosmetics::Item& ite
     auto add = [&out](int part, float x0, float y0, float z0, float x1, float y1, float z1, QRgb c) { out.append({ part, x0, y0, z0, x1, y1, z1, c }); };
     for (const auto& layer : item.layers) {
         const bool backView = layer.view == "back";
+        const float px = 1.0f / float(layer.res);  // one row character, in skin pixels
         for (int j = 0; j < layer.rows.size(); j++) {
             const QString& row = layer.rows[j];
+            const QString relief = j < layer.relief.size() ? layer.relief[j] : QString();
+            const auto bumpAt = [&relief](int i) { return i < relief.size() && relief[i].isDigit() ? relief[i].digitValue() : 0; };
             int i = 0;
             while (i < row.size()) {
                 const QChar ch = row[i];
@@ -689,8 +704,10 @@ QList<VelloraCharacter::Box3> VelloraCharacter::build(const Cosmetics::Item& ite
                     i++;
                     continue;
                 }
+                // a run of one colour and one relief becomes one box
+                const int bump = bumpAt(i);
                 int end = i;
-                while (end < row.size() && row[end] == ch) {
+                while (end < row.size() && row[end] == ch && bumpAt(end) == bump) {
                     end++;
                 }
                 int segStart = i, segEnd = end;
@@ -701,40 +718,41 @@ QList<VelloraCharacter::Box3> VelloraCharacter::build(const Cosmetics::Item& ite
                     segEnd++;
                 }
                 const QRgb c = layer.colors.value(ch).rgba();
-                const float gx0 = float(layer.x + i), gx1 = float(layer.x + end), gy = float(layer.y + j);
-                const int segWidth = segEnd - segStart;
+                const float gx0 = float(layer.x) + i * px, gx1 = float(layer.x) + end * px, gy = float(layer.y) + j * px;
+                const float segWidth = (segEnd - segStart) * px;
                 const bool segLeft = segStart == i, segRight = segEnd == end;
+                // thicker in the middle of the shape than at its edges: rounded, not a flat plate
+                const float bulge = bump * 0.12f;
                 float x0 = gx0 - 8, x1 = gx1 - 8, frontGx = (gx0 + gx1) / 2;
                 if (backView) {
                     x0 = 8 - gx1;
                     x1 = 8 - gx0;
                     frontGx = 16 - frontGx;
                 }
-                const float y1 = 32 - gy, y0 = y1 - 1;
+                const float y1 = 32 - gy, y0 = y1 - px;
                 if (slot == Cosmetics::Head) {
                     const bool onFace = frontGx >= 4 && frontGx < 12 && gy >= 0 && gy < 8;
                     if (onFace || gy >= 8) {
                         if (backView) {
-                            add(HEAD, x0, y0, -4.65f, x1, y1, -4.05f, c);
+                            add(HEAD, x0, y0, -4.65f - bulge, x1, y1, -4.05f, c);
                         } else {
-                            add(HEAD, x0, y0, 4.05f, x1, y1, 4.65f, c);
+                            add(HEAD, x0, y0, 4.05f, x1, y1, 4.65f + bulge, c);
                         }
                     } else if (!backView) {
-                        if (segWidth >= 6) {
-                            if (ring) {
-                                add(HEAD, x0, y0, -4.7f, x1, y1, -3.7f, c);
-                                add(HEAD, x0, y0, 3.7f, x1, y1, 4.7f, c);
-                                if (segLeft) {
-                                    add(HEAD, x0, y0, -4.7f, x0 + 1, y1, 4.7f, c);
-                                }
-                                if (segRight) {
-                                    add(HEAD, x1 - 1, y0, -4.7f, x1, y1, 4.7f, c);
-                                }
-                            } else {
-                                add(HEAD, x0, y0, -4.7f, x1, y1, 4.7f, c);
+                        if (ring) {
+                            // crowns and halos: everything on a ring round the head, the points of a crown too
+                            add(HEAD, x0, y0, -4.7f, x1, y1, -3.7f, c);
+                            add(HEAD, x0, y0, 3.7f, x1, y1, 4.7f, c);
+                            if (segWidth >= 6 && segLeft) {
+                                add(HEAD, x0, y0, -4.7f, x0 + 1, y1, 4.7f, c);
+                            }
+                            if (segWidth >= 6 && segRight) {
+                                add(HEAD, x1 - 1, y0, -4.7f, x1, y1, 4.7f, c);
                             }
                         } else {
-                            add(HEAD, x0, y0, -1.2f, x1, y1, 1.2f, c);
+                            // hats, helmets and horns: as deep as they are wide (a cone stays round), a brim all the way round; ears flat
+                            const float half = ears ? 0.7f + bulge / 2 : std::min(4.7f, std::max(1.2f, segWidth / 2) + bulge / 2);
+                            add(HEAD, x0, y0, -half, x1, y1, half, c);
                         }
                     }
                 } else if (slot == Cosmetics::Body) {
@@ -752,30 +770,31 @@ QList<VelloraCharacter::Box3> VelloraCharacter::build(const Cosmetics::Item& ite
                         part = LARM;
                     }
                     if (backView) {
-                        add(part, x0, y0, -zb, x1, y1, -zf, c);
+                        add(part, x0, y0, -zb - bulge, x1, y1, -zf, c);
                     } else {
-                        add(part, x0, y0, zf, x1, y1, zb, c);
+                        add(part, x0, y0, zf, x1, y1, zb + bulge, c);
                     }
                 } else if (slot == Cosmetics::Back) {
                     if (item.id.contains("wings")) {
                         if (!(backView && hasFront)) {
-                            add((x0 + x1) / 2 < 0 ? RWING : LWING, x0, y0, -3.2f, x1, y1, -2.5f, c);
+                            add((x0 + x1) / 2 < 0 ? RWING : LWING, x0, y0, -3.2f - bulge, x1, y1, -2.5f, c);
                         }
                     } else if (item.id.contains("pack")) {
                         if (backView || !hasBack || frontGx < 4 || frontGx >= 12) {
-                            add(BODY, x0, y0, -5.2f, x1, y1, -2.05f, c);
+                            add(BODY, x0, y0, -5.2f - bulge, x1, y1, -2.05f, c);
                         }
                     } else if (item.id.contains("cape")) {
                         if (backView || !hasBack) {
-                            add(CAPE, x0, y0, -3.1f, x1, y1, -2.5f, c);
+                            add(CAPE, x0, y0, -3.1f - bulge / 2, x1, y1, -2.5f, c);
                         }
                     } else if (backView || !hasBack || frontGx < 4 || frontGx >= 12) {
-                        add(BODY, x0, y0, -3.2f, x1, y1, -2.3f, c);
+                        add(BODY, x0, y0, -3.2f - bulge, x1, y1, -2.3f, c);
                     }
                 } else if (slot == Cosmetics::Hand && !backView) {
-                    add(RARM, x0, y0, 2.1f, x1, y1, 2.9f, c);  // held in the right hand, in front of it: it moves with the arm
+                    // held in the right hand, in front of it: it moves with the arm
+                    add(RARM, x0, y0, 2.1f - bulge / 2, x1, y1, 2.9f + bulge / 2, c);
                 } else if (slot == Cosmetics::Pet && !backView) {
-                    add(WORLD, x0 + 1, y0, 1.5f, x1 + 1, y1, 4.5f, c);
+                    add(WORLD, x0 + 1, y0, 1.5f - bulge / 2, x1 + 1, y1, 4.5f + bulge / 2, c);
                 }
                 i = end;
             }
@@ -1037,8 +1056,8 @@ void VelloraCharacter::paintIcon(QPainter& painter, const QRectF& target, const 
         }
         x0 = std::min(x0, layer.x);
         y0 = std::min(y0, layer.y);
-        x1 = std::max(x1, layer.x + double(width));
-        y1 = std::max(y1, layer.y + double(layer.rows.size()));
+        x1 = std::max(x1, layer.x + double(width) / layer.res);
+        y1 = std::max(y1, layer.y + double(layer.rows.size()) / layer.res);
     }
     if (x1 <= x0 || y1 <= y0) {
         return;

@@ -4,6 +4,7 @@
 // Set VELLORA_SHOTS to a folder to save the pictures.
 
 #include <QApplication>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -152,6 +153,94 @@ class VelloraCharacterTest : public QObject {
         QVERIFY(!VelloraLook::fits({ { "net.minecraft", "1.20.1" }, { "net.minecraftforge", "47.3.0" } }));
         QVERIFY(!VelloraLook::fits({ { "net.minecraft", "1.21.1" }, { "net.fabricmc.fabric-loader", "0.16.14" } }));
         QVERIFY(!VelloraLook::fits({ { "net.minecraft", "1.20.1" } }));
+    }
+
+    /// VELLORA_LOOK_SETS + VELLORA_LOOK_DIR: the look of each set (head,body,back;...) exported to DIR/setN, to compare with the phone's
+    void exportSets()
+    {
+        const QString folder = qEnvironmentVariable("VELLORA_LOOK_DIR");
+        if (folder.isEmpty()) {
+            QSKIP("set VELLORA_LOOK_DIR and VELLORA_LOOK_SETS to export looks");
+        }
+        const QStringList sets = qEnvironmentVariable("VELLORA_LOOK_SETS").split(';', Qt::SkipEmptyParts);
+        for (int n = 0; n < sets.size(); n++) {
+            const QStringList ids = sets[n].split(',');
+            QVERIFY(VelloraCharacter::exportLook(QDir(folder).filePath(QString("set%1").arg(n)), QImage(), false, QImage(), ids.value(0), ids.value(1),
+                                                 ids.value(2)));
+        }
+    }
+
+    /// VELLORA_BENCH: how long one frame of the heaviest set takes (wings, a mantle, a crown, an amulet, a sword)
+    void bench()
+    {
+        if (qEnvironmentVariableIsEmpty("VELLORA_BENCH")) {
+            QSKIP("set VELLORA_BENCH to time the drawing");
+        }
+        Cosmetics::wear(Cosmetics::Head, qEnvironmentVariable("VELLORA_BENCH_HEAD", "royal_crown"));
+        Cosmetics::wear(Cosmetics::Body, qEnvironmentVariable("VELLORA_BENCH_BODY", "dragon_amulet"));
+        Cosmetics::wear(Cosmetics::Back, qEnvironmentVariable("VELLORA_BENCH"));
+        Cosmetics::wear(Cosmetics::Pet, QString());
+        Cosmetics::wear(Cosmetics::Hand, qEnvironmentVariable("VELLORA_BENCH_HAND", "excalibur"));
+        Cosmetics::wear(Cosmetics::Effect, QString());
+        VelloraCharacter player;
+        player.resize(360, 460);
+        player.show();
+        QImage image(player.size() * player.devicePixelRatio(), QImage::Format_ARGB32);
+        image.setDevicePixelRatio(player.devicePixelRatio());
+        player.render(&image);  // the first frame builds the boxes
+        QElapsedTimer timer;
+        timer.start();
+        const int frames = 30;
+        for (int i = 0; i < frames; i++) {
+            player.update();
+            player.render(&image);
+        }
+        qInfo("one frame: %.1f ms", double(timer.elapsed()) / frames);
+    }
+
+    /// VELLORA_GALLERY: the player wearing sets of accessories, drawn as in the lobby (for a look at the wardrobe)
+    void gallery()
+    {
+        const QString folder = qEnvironmentVariable("VELLORA_GALLERY");
+        if (folder.isEmpty()) {
+            QSKIP("set VELLORA_GALLERY to a folder to draw the gallery");
+        }
+        const QStringList sets = qEnvironmentVariable("VELLORA_GALLERY_SETS",
+                                                      "crown,chain,angel_wings;wizard_hat,scarf,crimson_cape;viking_helmet,armor,dragon_wings;"
+                                                      "top_hat,bow_tie,backpack;halo,heart_necklace,butterfly_wings;horns,thick_chain,demon_wings")
+                                     .split(';');
+        QImage skin(64, 64, QImage::Format_ARGB32);
+        skin.fill(qRgb(150, 110, 90));
+        for (int y = 16; y < 32; y++) {
+            for (int x = 16; x < 40; x++) {
+                skin.setPixel(x, y, qRgb(60, 60, 70));
+            }
+        }
+        int n = 0;
+        for (const QString& set : sets) {
+            const QStringList ids = set.split(',');
+            Cosmetics::wear(Cosmetics::Head, ids.value(0));
+            Cosmetics::wear(Cosmetics::Body, ids.value(1));
+            Cosmetics::wear(Cosmetics::Back, ids.value(2));
+            Cosmetics::wear(Cosmetics::Pet, ids.value(3));
+            Cosmetics::wear(Cosmetics::Hand, ids.value(4));
+            Cosmetics::wear(Cosmetics::Effect, QString());
+            for (const bool back : { false, true }) {
+                VelloraCharacter player;
+                player.setAnimated(back);  // the turn to the back is animated
+                player.setSkin(skin);
+                player.setBack(back);
+                player.resize(360, 460);
+                player.show();
+                QTest::qWait(back ? 1300 : 50);  // the turn to the back takes a moment
+                QImage image(player.size() * player.devicePixelRatio(), QImage::Format_ARGB32);
+                image.setDevicePixelRatio(player.devicePixelRatio());
+                image.fill(QColor(32, 10, 16));
+                player.render(&image, QPoint(), QRegion(), QWidget::DrawChildren);
+                image.save(QDir(folder).filePath(QString("set%1_%2.png").arg(n).arg(back ? "back" : "front")));
+            }
+            n++;
+        }
     }
 
     /// nothing worn and no skin: an empty look, the game keeps its own

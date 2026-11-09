@@ -34,7 +34,11 @@ inline const QString Head = "head", Body = "body", Back = "back", Pet = "pet", H
 
 struct Layer {
     double x = 0, y = 0;
+    /// row characters per skin pixel: 3 for the finished wardrobe (android/art/hd.py), 1 for a plain drawing
+    int res = 1;
     QStringList rows;
+    /// per character, how far it is from the edge of the shape (0..4): the 3D views make the middle thicker
+    QStringList relief;
     QHash<QChar, QColor> colors;
     QString view, anim;
 };

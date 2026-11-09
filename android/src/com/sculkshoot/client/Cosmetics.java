@@ -27,7 +27,11 @@ final class Cosmetics {
 
     static final class Layer {
         float x, y;
+        /** row characters per skin pixel: 3 for the finished wardrobe (art/hd.py), 1 for a plain drawing */
+        int res = 1;
         String[] rows;
+        /** per character, how far it is from the edge of the shape (0..4): the 3D view makes the middle thicker */
+        String[] relief;
         int[] colors = new int[128];  // by character
         String view, anim;
     }
@@ -83,10 +87,18 @@ final class Cosmetics {
                     Layer layer = new Layer();
                     layer.x = (float) l.getDouble("x");
                     layer.y = (float) l.getDouble("y");
+                    layer.res = Math.max(1, l.optInt("res", 1));
                     JSONArray rows = l.getJSONArray("rows");
                     layer.rows = new String[rows.length()];
                     for (int r = 0; r < rows.length(); r++) {
                         layer.rows[r] = rows.getString(r);
+                    }
+                    JSONArray relief = l.optJSONArray("relief");
+                    if (relief != null) {
+                        layer.relief = new String[relief.length()];
+                        for (int r = 0; r < relief.length(); r++) {
+                            layer.relief[r] = relief.getString(r);
+                        }
                     }
                     JSONObject colors = l.getJSONObject("colors");
                     for (java.util.Iterator<String> keys = colors.keys(); keys.hasNext();) {
@@ -251,6 +263,7 @@ final class Cosmetics {
             } else if ("float".equals(layer.anim)) {
                 dy = (float) Math.sin(time * 2) * 1.5f;
             }
+            float cell = 1f / layer.res;
             for (int j = 0; j < layer.rows.length; j++) {
                 String row = layer.rows[j];
                 for (int i = 0; i < row.length(); i++) {
@@ -258,7 +271,7 @@ final class Cosmetics {
                     if (c == '.' || c == ' ' || c >= 128 || layer.colors[c] == 0) {
                         continue;
                     }
-                    pen.rect(layer.x + i, layer.y + j + dy, 1, 1, layer.colors[c]);
+                    pen.rect(layer.x + i * cell, layer.y + j * cell + dy, cell, cell, layer.colors[c]);
                 }
             }
         }
@@ -275,7 +288,7 @@ final class Cosmetics {
             for (String row : layer.rows) {
                 width = Math.max(width, row.length());
             }
-            float r = layer.x + width, b = layer.y + layer.rows.length;
+            float r = layer.x + (float) width / layer.res, b = layer.y + (float) layer.rows.length / layer.res;
             if (box == null) {
                 box = new float[] { layer.x, layer.y, r, b };
             } else {

@@ -42,24 +42,50 @@ def mirror(rows):
     return [r[::-1] for r in rows]
 
 
-def wings(id, ru, en, rarity, light, mid, dark, shape=None):
-    shape = shape or ["....aa", "..aabb", ".abbbc", "abbbcc", "abbcc.", "abcc..", ".bc...", ".c...."]
-    colors = {"a": light, "b": mid, "c": dark}
-    item(id, "back", ru, en, rarity, [L(-5, 6, shape, colors, "both", "flap"), L(15, 6, mirror(shape), colors, "both", "flap")])
+import sys as _sys  # noqa: E402
+_sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import shapes  # noqa: E402
+import designs  # noqa: E402
+
+
+def darker(hex_color, k=0.7):
+    h = hex_color.lstrip("#")
+    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+    return "#%02X%02X%02X" % (int(r * k), int(g * k), int(b * k)) + h[6:8]
+
+
+# the kinds of wings: feathers (angels, phoenixes), membranes on bones (bats, demons, dragons), insects
+MEMBRANE = {"bat_wings": False, "demon_wings": True, "dragon_wings": False, "shadow_wings": True, "void_wings": True, "ember_dragon_wings": False}
+INSECT = {"butterfly_wings": "butterfly", "fairy_wings": "fairy", "bee_wings": "bee", "dragonfly_wings": "dragonfly", "crystal_wings": "fairy"}
+
+
+def wings(id, ru, en, rarity, light, mid, dark, shape=None, tip=None, claw="#E8DCC8", spot=None):
+    """a pair of wings drawn with shapes (art/shapes.py): the right one and its mirror, rising over the shoulders"""
+    if id in MEMBRANE:
+        # light, mid, dark: the membrane, the membrane in shade near the arm, the bones
+        sprite = shapes.membrane_wing(mid, light, dark, claw, torn=MEMBRANE[id])
+        x, y = -6.0, 2.0
+    elif id in INSECT:
+        kind = INSECT[id]
+        sprite = shapes.insect_wing(dark, light, mid, kind, vein=light if kind != "butterfly" else darker(dark, 0.8), spot=spot)
+        x, y = 6.0 - sprite.width, {"butterfly": 5.0, "fairy": 4.0, "bee": 7.0, "dragonfly": 7.0}[kind]
+    else:
+        sprite = shapes.feather_wing(light, mid, dark, edge=darker(dark, 0.72), tip_color=tip)
+        x, y = 6.0 - sprite.width, 1.5
+    if id in MEMBRANE:
+        x = 6.0 - sprite.width
+    right = sprite.layer(x, y, "both", "flap")
+    left = sprite.layer(10.0, y, "both", "flap", mirror=True)
+    item(id, "back", ru, en, rarity, [right, left])
 
 
 # ---------------------------------------------------------------- head
-item("crown", "head", "Корона", "Crown", "legendary",
-     [L(3, -3, ["a..a..a..a", "aaaaaaaaaa", "abaacaabaa", "dddddddddd"], {"a": GOLD, "b": RUBY, "c": "#5CB6FF", "d": GOLD_D})])
-item("horns", "head", "Рога демона", "Demon horns", "epic",
-     [L(1, -5, ["b.........b", "a.........a", "aa.......aa", ".aa.....aa."], {"a": "#2A0A12", "b": "#7A0F22"}, "both")])
-item("halo", "head", "Нимб", "Halo", "legendary",
-     [L(3, -5, [".aaaaaaaa.", "a........a", ".bbbbbbbb."], {"a": GOLD, "b": GOLD_D}, "both", "bob")])
-item("wizard_hat", "head", "Шляпа мага", "Wizard hat", "epic",
-     [L(2, -9, ["......ab....", ".....aab....", ".....aabb...", "....aaabb...", "....aaabbb..", "...aaaabbb..", "...aaaaabbb.",
-                "..aaaaaabbb.", "cccccccccccc", "dddddddddddd"], {"a": "#5A0A18", "b": "#8E1428", "c": GOLD, "d": BLACK}, "both")])
-item("cat_ears", "head", "Кошачьи уши", "Cat ears", "rare",
-     [L(3, -3, ["a........a", "aa......aa", "aba....aba"], {"a": "#1A0A0E", "b": "#E87A90"}, "both")])
+# the pieces with fine detail are drawn with shapes at three times the resolution (art/designs.py)
+item("crown", "head", "Корона", "Crown", "legendary", [designs.crown().layer(3, -4.4, "both")])
+item("horns", "head", "Рога демона", "Demon horns", "epic", [designs.horns("#3A1A20", "#C81F3A", "#1A0A0E").layer(1, -6.2, "both")])
+item("halo", "head", "Нимб", "Halo", "legendary", [designs.halo().layer(3, -5.6, "both", "bob")])
+item("wizard_hat", "head", "Шляпа мага", "Wizard hat", "epic", [designs.wizard_hat("#8E1428", "#5A0A18", BLACK).layer(1, -10.2, "both")])
+item("cat_ears", "head", "Кошачьи уши", "Cat ears", "rare", [designs.pointy_ears("#1A0A0E", "#E87A90", tall=5.2).layer(3, -5.2, "both")])
 item("bunny_ears", "head", "Заячьи уши", "Bunny ears", "rare",
      [L(4, -7, [".a....a.", ".ab..ab.", ".ab..ab.", ".ab..ab.", ".ab..ab.", ".aa..aa.", "..a..a.."], {"a": WHITE, "b": "#F2A7B8"}, "both")])
 item("headphones", "head", "Наушники", "Headphones", "rare",
@@ -85,15 +111,14 @@ item("beanie", "head", "Шапка", "Beanie", "common",
 item("cap", "head", "Кепка", "Cap", "common",
      [L(3, -2, [".aaaaaaaa.", "aaaaaaaaaa", "bbbbbbbbbbbbb"], {"a": RUBY, "b": "#7A0F22"}, "both")])
 item("devil_crown", "head", "Корона тьмы", "Crown of darkness", "legendary",
-     [L(3, -4, ["a...a...a.", "aa.aaa.aa.", "aaaaaaaaaa", "abaaabaaab"], {"a": "#1A0A0E", "b": RUBY}, "both")])
+     [designs.crown("#2A1A22", "#120306", RUBY, RUBY, spikes=True).layer(3, -4.4, "both")])
 item("mask", "head", "Маска", "Mask", "epic",
      [L(4, 2, ["aaaaaaaa", "abbaabba", "aaaaaaaa", ".aaaaaa."], {"a": "#E9E1E3", "b": BLACK})])
 
 # ---------------------------------------------------------------- body
 item("scarf", "body", "Шарф", "Scarf", "common",
      [L(4, 8, ["aaaaaaaa", "bbbbbbbb", ".....bb.", ".....bb.", ".....cc."], {"a": RUBY, "b": "#B01C38", "c": "#7A0F22"})])
-item("chain", "body", "Золотая цепь", "Gold chain", "rare",
-     [L(5, 9, ["a....a", ".a..a.", "..aa..", "..bb..", "..bb.."], {"a": GOLD, "b": RUBY})])
+item("chain", "body", "Золотая цепь", "Gold chain", "rare", [designs.amulet(GOLD, GOLD_D, GOLD, RUBY, "drop").layer(4.5, 8, "front")])
 item("tie", "body", "Галстук", "Tie", "common", [L(7, 8, ["aa", "bb", "bb", "bb", "bb", "bb", "aa"], {"a": BLACK, "b": "#7A0F22"})])
 item("heart_necklace", "body", "Сердце на цепочке", "Heart necklace", "rare",
      [L(5, 9, ["a....a", ".a..a.", "..aa..", ".b.b..", "bbbbb.", ".bbb..", "..b..."], {"a": "#C9C2C8", "b": RUBY})])
@@ -108,22 +133,23 @@ wings("angel_wings", "Крылья ангела", "Angel wings", "legendary", WH
 wings("demon_wings", "Крылья демона", "Demon wings", "epic", RUBY, "#9E1630", "#5A0A18")
 wings("dragon_wings", "Крылья дракона", "Dragon wings", "legendary", "#3A0D16", "#7A0F22", "#B01C38",
       ["...aaa", "..abbb", ".abbbc", "abbccc", "abbcc.", "abc.c.", "ab.c..", "a....."])
-wings("butterfly_wings", "Крылья бабочки", "Butterfly wings", "epic", "#FF7AA2", "#B98CFF", "#5CB6FF",
+wings("butterfly_wings", "Крылья бабочки", "Butterfly wings", "epic", "#FF7AA2", "#B98CFF", "#3A1A40", spot="#5CB6FF", shape=
       [".aa...", "abba..", "abbba.", ".abbb.", "..cc..", ".cccc.", ".cc...", "......"])
 wings("fairy_wings", "Крылья феи", "Fairy wings", "rare", "#DDEFFF99", "#BCDCFF88", "#9AC0EE88")
-item("crimson_cape", "back", "Багровая мантия", "Crimson mantle", "epic",
-     [L(3, 8, ["cccccccccc", "aaaaaaaaaa", "aaaaaaaaaa", "aaaaabaaaa", "aaaabbaaaa", "aaaaaaaaaa", "aaaaaaaaaa", "aaaaaaaaaa", "aaaaaaaaaa",
-               "aaaaaaaaaa", "aaaaaaaaaa", "aaaaaaaaaa", "aaaaaaaaaa", "aaaaaaaaaa", "aaaaaaaaaa", "dddddddddd", ".dddddddd."],
-        {"a": "#7A0F22", "b": GOLD, "c": "#B01C38", "d": "#5A0A18"}, "back"),
-      L(2, 9, ["a" + "." * 10 + "a"] * 15, {"a": "#7A0F22"}, "front")])
+def cape(id, ru, en, rarity, main, trim, dark, emblem=None, emblem_color=GOLD, ermine=False):
+    """a cape (art/designs.py) on the back, and its edges beside the arms seen from the front"""
+    item(id, "back", ru, en, rarity, [designs.cape(main, trim, dark, emblem, emblem_color, ermine).layer(2.5, 8, "back"),
+                                       L(2, 9, ["a" + "." * 10 + "a"] * 15, {"a": main}, "front")])
+
+
+cape("crimson_cape", "Багровая мантия", "Crimson mantle", "epic", "#7A0F22", "#B01C38", "#5A0A18", "diamond", GOLD)
 item("jetpack", "back", "Реактивный ранец", "Jetpack", "epic",
      [L(3, 9, ["aa....aa", "ab....ba", "ab....ba", "ab....ba", "aa....aa", "cc....cc", ".d....d."], {"a": "#5A626C", "b": "#9AA4AE", "c": "#FF8A3C", "d": "#FFE08A"}, "both", "bob")])
 item("backpack", "back", "Рюкзак", "Backpack", "common",
      [L(4, 9, [".aaaaaa.", "abbbbbba", "abbccbba", "abbbbbba", "abbbbbba", ".aaaaaa."], {"a": "#3A1A10", "b": "#6E3A1E", "c": GOLD}, "back"),
       L(3, 9, ["a" + "......" + ".." + "a"] * 4, {"a": "#3A1A10"}, "front")])
 item("sword_back", "back", "Меч за спиной", "Sword on the back", "rare",
-     [L(2, 4, ["...........a", "..........ab", ".........ab.", "........ab..", ".......ab...", "......ab....", ".cc.ab......", "..cc........", ".c.cc.......", "c..........."],
-        {"a": "#C9D4DE", "b": "#7C8794", "c": GOLD}, "both")])
+     [designs.sword("#E8EEF4", "#9AA4AE", "#3A1A10", GOLD).layer(4, 4.6, "both")])
 
 # ---------------------------------------------------------------- pets (by the right foot, x 17..23)
 item("cube_pet", "pet", "Тессеракт", "Tesseract", "legendary",
@@ -218,16 +244,15 @@ item("bandana_head", "head", "Бандана", "Bandana", "common",
 item("ninja_headband", "head", "Повязка ниндзя", "Ninja headband", "rare",
      [L(3, 1, ["aaaaaaaaaa", "abbbbbbbba"], {"a": "#1A1A22", "b": "#C62828"}, "front"),
       L(3, 1, ["aaaaaaaaaa", "aaaabbaaaa", "....aa....", "...a..a..."], {"a": "#C62828", "b": "#7A0F22"}, "back")])
-item("fox_ears", "head", "Лисьи уши", "Fox ears", "rare", [L(3, -3, ["a........a", "ab......ba", "abb....bba"], {"a": "#E06A1E", "b": WHITE}, "both")])
-item("wolf_ears", "head", "Волчьи уши", "Wolf ears", "rare", [L(3, -3, ["a........a", "aa......aa", "aba....aba"], {"a": "#7C8794", "b": "#3A3F48"}, "both")])
+item("fox_ears", "head", "Лисьи уши", "Fox ears", "rare", [designs.pointy_ears("#E06A1E", "#FFE6D0", "#2A1A18", tall=5.2).layer(3, -5.2, "both")])
+item("wolf_ears", "head", "Волчьи уши", "Wolf ears", "rare", [designs.pointy_ears("#7C8794", "#C9C2C8", "#3A3F48", tall=5.2).layer(3, -5.2, "both")])
 item("bear_ears", "head", "Медвежьи ушки", "Bear ears", "common", [L(3, -2, ["aa......aa", "ab......ba"], {"a": "#6E3A1E", "b": "#C08A5A"}, "both")])
 item("antlers", "head", "Рога оленя", "Antlers", "epic",
      [L(1, -6, ["a.a......a.a", "aaa......aaa", ".a.a....a.a.", ".aa......aa.", "..a......a..", "..a......a.."], {"a": "#8A5A2E"}, "both")])
 item("unicorn_horn", "head", "Рог единорога", "Unicorn horn", "legendary",
      [L(7, -5, ["..a", ".ab", ".ba", "bac", "abc"], {"a": "#FFE08A", "b": "#FF9AD5", "c": "#B98CFF"}, "both", "bob")])
-item("ram_horns", "head", "Рога барана", "Ram horns", "epic",
-     [L(2, -2, [".aa........aa.", "a..a......a..a", "a.a........a.a", ".a..........a."], {"a": "#D8C29D"}, "both")])
-item("laurel_wreath", "head", "Лавровый венок", "Laurel wreath", "rare", [L(3, -1, ["a.a.a..a.a.a", "aaaaaaaaaa"], {"a": "#6BAA3E"}, "both")])
+item("ram_horns", "head", "Рога барана", "Ram horns", "epic", [designs.ram_horns("#D8C29D", "#9C8A6A").layer(0, -2.2, "both")])
+item("laurel_wreath", "head", "Лавровый венок", "Laurel wreath", "rare", [designs.laurel().layer(3, -3.0, "both")])
 item("mushroom_hat", "head", "Шляпка гриба", "Mushroom cap", "rare",
      [L(2, -4, ["...aaaaaa...", "..abaaabaa..", ".aaaaaaaaaa.", "abaaaabaaaba"], {"a": "#D6283A", "b": WHITE}, "both")])
 item("frog_hat", "head", "Шапка-лягушка", "Frog hat", "rare",
@@ -270,7 +295,7 @@ recolor("bow_tie", "black_bow_tie", "Чёрная бабочка", "Black bow ti
 recolor("armor", "gold_armor", "Золотой нагрудник", "Gold chestplate", "legendary", {"#5A626C": GOLD_D, "#9AA4AE": GOLD})
 
 # ---------------------------------------------------------------- back: wings, capes, tails, things on the back
-wings("phoenix_wings", "Крылья феникса", "Phoenix wings", "legendary", "#FFD23C", "#FF8A3C", "#E8364F",
+wings("phoenix_wings", "Крылья феникса", "Phoenix wings", "legendary", "#FFD23C", "#FF8A3C", "#E8364F", tip="#E8364F", shape=
       ["...aab", "..aabc", ".aabbc", "aabbcc", "abbcc.", "abcc..", "bc....", "c....."])
 wings("ice_wings", "Ледяные крылья", "Ice wings", "legendary", WHITE, "#BFE6FF", "#5CB6FF",
       ["....ab", "...abb", "..abbc", ".abbcc", "abbcc.", "abc...", ".bc...", "..c..."])
@@ -284,23 +309,11 @@ wings("shadow_wings", "Крылья тени", "Shadow wings", "epic", "#3A2A4A"
       ["...aaa", "..abbb", ".abbbc", "abbccc", "abbcc.", "abc.c.", "ab.c..", "a....."])
 wings("emerald_wings", "Изумрудные крылья", "Emerald wings", "epic", "#7FE6A0", "#3EC27A", "#1E7A48")
 
-def cape(id, ru, en, rarity, main, trim, dark, mark=None, mark_color=GOLD):
-    rows = ["cccccccccc"] + ["aaaaaaaaaa"] * 14 + ["dddddddddd", ".dddddddd."]
-    if mark:
-        for j, r in enumerate(mark):
-            row = list(rows[3 + j])
-            for i, ch in enumerate(r):
-                if ch != ".":
-                    row[3 + i] = "b"
-            rows[3 + j] = "".join(row)
-    item(id, "back", ru, en, rarity, [L(3, 8, rows, {"a": main, "b": mark_color, "c": trim, "d": dark}, "back"),
-                                       L(2, 9, ["a" + "." * 10 + "a"] * 15, {"a": main}, "front")])
-
-cape("royal_cape", "Королевская мантия", "Royal mantle", "legendary", "#2C3E9E", GOLD, "#1E2A6A", ["#.#.", "####", "####"])
-cape("forest_cape", "Лесной плащ", "Forest cloak", "rare", "#2E6B32", "#5BB04E", "#1E4A22", [".#..", "###.", ".#.."], "#8A5A2E")
-cape("shadow_cape", "Плащ тени", "Shadow cloak", "epic", "#16101C", RUBY, "#0A060E", ["#..#", ".##.", "#..#"], RUBY)
-cape("snow_cape", "Снежный плащ", "Snow cloak", "rare", WHITE, "#5CB6FF", "#BFE6FF", [".#.", "###", ".#."], "#5CB6FF")
-cape("vellora_cape", "Плащ Vellora", "Vellora cloak", "legendary", "#5A0A18", RUBY, "#2A0A12", ["#..#", "#..#", ".##."], RUBY)
+cape("royal_cape", "Королевская мантия", "Royal mantle", "legendary", "#2C3E9E", GOLD, "#1E2A6A", "crown")
+cape("forest_cape", "Лесной плащ", "Forest cloak", "rare", "#2E6B32", "#5BB04E", "#1E4A22", "leaf", "#8A5A2E")
+cape("shadow_cape", "Плащ тени", "Shadow cloak", "epic", "#16101C", RUBY, "#0A060E", "eye", RUBY)
+cape("snow_cape", "Снежный плащ", "Snow cloak", "rare", WHITE, "#5CB6FF", "#BFE6FF", "snow", "#5CB6FF")
+cape("vellora_cape", "Плащ Vellora", "Vellora cloak", "legendary", "#5A0A18", RUBY, "#2A0A12", "v", RUBY)
 item("quiver", "back", "Колчан со стрелами", "Quiver", "rare",
      [L(8, 5, ["a.a.", "bbbb", "cccc", "cddc", "cccc", "cddc", "cccc", "cccc", ".cc."], {"a": WHITE, "b": "#8A5A2E", "c": "#6E3A1E", "d": GOLD}, "back")])
 item("guitar_back", "back", "Гитара за спиной", "Guitar", "epic",
@@ -310,7 +323,8 @@ item("surfboard", "back", "Доска для серфинга", "Surfboard", "ra
 item("shield_back", "back", "Щит за спиной", "Shield", "epic",
      [L(4, 9, ["aaaaaaaa", "abbbbbba", "abbccbba", "abccccba", "abbccbba", "abbbbbba", ".abbbba.", "..aaaa.."], {"a": "#9AA4AE", "b": "#7A0F22", "c": GOLD}, "back")])
 item("crossed_swords", "back", "Скрещённые мечи", "Crossed swords", "legendary",
-     [L(2, 4, ["a..........a", ".a........a.", "..a......a..", "...a....a...", "....a..a....", ".....aa.....", ".....aa.....", "....b..b....", "...c....c...", "..b......b.."], {"a": "#C9D4DE", "b": GOLD, "c": "#3A1A10"}, "both")])
+     [designs.sword("#E8EEF4", "#9AA4AE", "#3A1A10", GOLD, gem=RUBY).layer(0, 5.5, "both"),
+      designs.sword("#E8EEF4", "#9AA4AE", "#3A1A10", GOLD, gem=RUBY).layer(4, 5.5, "both", mirror=True)])
 item("turtle_shell", "back", "Панцирь черепахи", "Turtle shell", "rare",
      [L(4, 9, [".aaaaaa.", "abbabbaa", "abaabbba", "aabbaaba", "abbaabba", "abaabbaa", ".aaaaaa."], {"a": "#3E9B47", "b": "#2E6B32"}, "back")])
 item("fox_tail", "back", "Лисий хвост", "Fox tail", "epic", [L(7, 17, [".aa.", "aaaa", "aaaa", "aaaa", ".aa.", ".ab.", "..b."], {"a": "#E06A1E", "b": WHITE}, "back", "bob")])
@@ -322,16 +336,15 @@ recolor("jetpack", "rocket_pack", "Ракетный ранец", "Rocket pack", 
 recolor("backpack", "blue_backpack", "Синий рюкзак", "Blue backpack", "common", {"#3A1A10": "#1E2A6A", "#6E3A1E": "#3C4CB0"})
 
 # ---------------------------------------------------------------- in the hand: the right hand is at x 0..4, y 18..20
-def blade(id, ru, en, rarity, edge, mid, hilt, guard):
-    item(id, "hand", ru, en, rarity,
-         [L(-3, 7, [".......ab", "......aba", ".....aba.", "....aba..", "...aba...", "..aba....", "d.ba.....", ".dd......", ".cd......", "c..d....."],
-            {"a": edge, "b": mid, "c": hilt, "d": guard})])
+def blade(id, ru, en, rarity, edge, mid, hilt, guard, gem=None, curved=False):
+    """a sword in the right hand (art/designs.py): the grip in the fist, the blade up and forward"""
+    item(id, "hand", ru, en, rarity, [designs.sword(edge, mid, hilt, guard, gem=gem, curved=curved).layer(-2.8, 7.8)])
 
 blade("diamond_sword", "Алмазный меч", "Diamond sword", "epic", "#BFFFF4", "#39C2B0", "#3A1A10", "#1E7A6A")
 blade("iron_sword", "Железный меч", "Iron sword", "common", WHITE, "#C9D4DE", "#3A1A10", "#7C8794")
-blade("gold_sword", "Золотой меч", "Gold sword", "rare", "#FFF2B0", GOLD, "#3A1A10", GOLD_D)
+blade("gold_sword", "Золотой меч", "Gold sword", "rare", "#FFF2B0", GOLD, "#3A1A10", GOLD_D, gem=RUBY)
 blade("netherite_sword", "Незеритовый меч", "Netherite sword", "legendary", "#6A5A62", "#3A2E36", "#1A1218", "#2A2228")
-blade("crimson_blade", "Багровый клинок", "Crimson blade", "legendary", "#FFC8CD", RUBY, "#2A0A12", GOLD)
+blade("crimson_blade", "Багровый клинок", "Crimson blade", "legendary", "#FFC8CD", RUBY, "#2A0A12", GOLD, gem=RUBY, curved=True)
 item("pickaxe", "hand", "Кирка", "Pickaxe", "common",
      [L(-3, 9, [".aaaa..", "a...ba.", "...b..a", "..b....", ".b.....", "b......"], {"a": "#5CE0D0", "b": "#8A5A2E"})])
 item("axe", "hand", "Топор", "Axe", "common", [L(-2, 9, ["..aa.", ".aaab", "..a.b", "...b.", "..b..", ".b..."], {"a": "#C9D4DE", "b": "#8A5A2E"})])
@@ -391,6 +404,35 @@ for id, ru, en in [("clap", "Хлопать", "Clap"), ("salute", "Честь", 
                    ("dab", "Дэб", "Dab"), ("flip", "Сальто", "Backflip"), ("think", "Думать", "Think"), ("punch", "Бокс", "Punch")]:
     item(id, "emote", ru, en, "rare")
 
+# ================================================================ the designer's collection: drawn with shapes (art/designs.py)
+# head
+item("royal_crown", "head", "Императорская корона", "Imperial crown", "legendary",
+     [designs.crown(points=7, pearl=WHITE, side_gem="#5CB6FF", mid_gem=RUBY).layer(3, -4.4, "both")])
+item("star_tiara", "head", "Звёздная тиара", "Star tiara", "epic", [designs.tiara().layer(3, -3.4, "both")])
+item("golden_wreath", "head", "Золотой венок", "Golden wreath", "legendary", [designs.laurel("#FFD86A", "#C08A1E", stem="#9C6E1E").layer(3, -3.0, "both")])
+item("oni_mask", "head", "Маска они", "Oni mask", "legendary", [designs.oni_mask().layer(4, 0), designs.mask_horns().layer(2, -3.6, "both")])
+item("witch_hat", "head", "Шляпа ведьмы", "Witch hat", "epic", [designs.wizard_hat("#3A1A4A", "#22102E", "#5BB04E", stars=None).layer(1, -10.2, "both")])
+item("bone_horns", "head", "Костяные рога", "Bone horns", "epic",
+     [designs.horns("#E8DCC8", "#8A7A5A", "#9C8A6A", spread=4.2, back=0.4).layer(1, -6.2, "both")])
+# body
+item("dragon_amulet", "body", "Амулет дракона", "Dragon amulet", "legendary", [designs.dragon_amulet().layer(4.5, 8)])
+item("crystal_necklace", "body", "Кристалл на цепочке", "Crystal pendant", "epic",
+     [designs.amulet("#D8DEE6", "#7C8794", "#D8DEE6", "#7FD6FF", "crystal").layer(4.5, 8)])
+item("cyber_core", "body", "Кибер-ядро", "Cyber core", "epic", [designs.core().layer(5, 10.5)])
+# back
+wings("archangel_wings", "Крылья архангела", "Archangel wings", "legendary", WHITE, "#FFF2D0", GOLD, tip=GOLD)
+wings("void_wings", "Крылья бездны", "Void wings", "legendary", "#3A1A5A", "#22103A", "#0E0818", claw="#B98CFF")
+wings("ember_dragon_wings", "Крылья огненного дракона", "Ember dragon wings", "legendary", "#FF8A3C", "#C8401E", "#3A0D16", claw=GOLD)
+wings("crystal_wings", "Хрустальные крылья", "Crystal wings", "epic", "#BFFFF4AA", "#7FE6FFAA", "#39C2B0CC")
+cape("ermine_mantle", "Горностаевая мантия", "Ermine mantle", "legendary", "#7A0F22", WHITE, "#5A0A18", "crown", GOLD, ermine=True)
+item("great_sword_back", "back", "Обсидиановый двуручник", "Obsidian greatsword", "legendary",
+     [designs.sword("#B98CFF", "#3A1A5A", "#120306", "#7C8794", gem="#B98CFF", length=15, width=2.2).layer(4, 4.6, "both")])
+# in the hand
+blade("excalibur", "Экскалибур", "Excalibur", "legendary", "#F4FBFF", "#9AB8D6", "#2C3E9E", GOLD, gem="#5CB6FF")
+blade("frost_blade", "Морозный клинок", "Frost blade", "epic", "#E8FFFF", "#7FD6FF", "#1E2A6A", "#BFE6FF", gem="#5CB6FF", curved=True)
+item("reaper_scythe", "hand", "Коса жнеца", "Reaper scythe", "legendary", [designs.scythe().layer(-2.4, 4.9)])
+item("crystal_staff", "hand", "Хрустальный посох", "Crystal staff", "epic", [designs.staff().layer(-2.1, 4.9)])
+
 OUTFITS = [
     {"title": "Демон-повелитель", "titleEn": "Demon lord", "head": "horns", "back": "demon_wings", "body": "scarf", "pet": "", "effect": "flames"},
     {"title": "Падший ангел", "titleEn": "Fallen angel", "head": "halo", "back": "angel_wings", "body": "heart_necklace", "pet": "", "effect": "sparkles"},
@@ -416,9 +458,22 @@ OUTFITS = [
     {"title": "Повелитель Vellora", "titleEn": "Vellora lord", "head": "devil_crown", "back": "vellora_cape", "body": "v_badge", "pet": "sculk_pet", "effect": "crimson_aura", "hand": "talisman"},
     {"title": "Морской волк", "titleEn": "Sea wolf", "head": "bandana_head", "back": "surfboard", "body": "bandolier", "pet": "turtle_pet", "effect": "bubbles", "hand": "trident"},
     {"title": "Единорог", "titleEn": "Unicorn", "head": "unicorn_horn", "back": "butterfly_wings", "body": "heart_badge", "pet": "jelly_pet", "effect": "sparkles", "hand": "lollipop"},
+    {"title": "Архангел", "titleEn": "Archangel", "head": "halo", "back": "archangel_wings", "body": "crystal_necklace", "pet": "spirit_pet", "effect": "sparkles", "hand": "excalibur"},
+    {"title": "Жнец", "titleEn": "Reaper", "head": "oni_mask", "back": "void_wings", "body": "fur_collar", "pet": "ghost_pet", "effect": "ghost_wisps", "hand": "reaper_scythe"},
+    {"title": "Император", "titleEn": "Emperor", "head": "royal_crown", "back": "ermine_mantle", "body": "dragon_amulet", "pet": "wolf_pet", "effect": "sparkles", "hand": "crystal_staff"},
+    {"title": "Ледяная принцесса", "titleEn": "Frost princess", "head": "star_tiara", "back": "crystal_wings", "body": "crystal_necklace", "pet": "penguin_pet", "effect": "snow", "hand": "frost_blade"},
+    {"title": "Киберпанк", "titleEn": "Cyberpunk", "head": "vr_goggles", "back": "mech_wings", "body": "cyber_core", "pet": "drone_pet", "effect": "", "hand": ""},
 ]
+
+# the finishing: three times the resolution, light and shade, outlines, glints and relief (art/hd.py)
+import sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import hd  # noqa: E402
+
+for it in ITEMS:
+    it["layers"] = [hd.finish(layer, it["slot"]) for layer in it["layers"]]
 
 data = {"items": ITEMS, "outfits": OUTFITS}
 for target in (ROOT / "android" / "assets" / "cosmetics.json", ROOT / "launcher" / "resources" / "sculk_theme" / "cosmetics.json"):
-    target.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+    target.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 print(len(ITEMS), "items,", len(OUTFITS), "outfits")

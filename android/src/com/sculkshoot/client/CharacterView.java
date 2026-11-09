@@ -851,7 +851,8 @@ final class CharacterView extends View {
      */
     private static List<Box> build(Cosmetics.Item item, String slot) {
         List<Box> out = new ArrayList<Box>();
-        boolean ring = item.id.equals("crown") || item.id.equals("devil_crown") || item.id.equals("flower_crown") || item.id.equals("halo");
+        // crowns, halos, tiaras and wreaths go round the head
+        boolean ring = item.id.contains("crown") || item.id.contains("halo") || item.id.contains("tiara") || item.id.contains("wreath");
         boolean hasFront = false, hasBack = false;
         for (Cosmetics.Layer l : item.layers) {
             hasFront |= !"back".equals(l.view);
@@ -859,8 +860,10 @@ final class CharacterView extends View {
         }
         for (Cosmetics.Layer layer : item.layers) {
             boolean backView = "back".equals(layer.view);
+            float px = 1f / layer.res;  // one row character, in skin pixels
             for (int j = 0; j < layer.rows.length; j++) {
                 String row = layer.rows[j];
+                String relief = layer.relief != null && j < layer.relief.length ? layer.relief[j] : "";
                 int i = 0;
                 while (i < row.length()) {
                     char ch = row.charAt(i);
@@ -868,9 +871,10 @@ final class CharacterView extends View {
                         i++;
                         continue;
                     }
-                    // a run of one colour; and how wide the whole filled stretch of this row is
+                    // a run of one colour and one relief; and how wide the whole filled stretch of this row is
+                    int bump = bumpAt(relief, i);
                     int end = i;
-                    while (end < row.length() && row.charAt(end) == ch) {
+                    while (end < row.length() && row.charAt(end) == ch && bumpAt(relief, end) == bump) {
                         end++;
                     }
                     int segStart = i, segEnd = end;
@@ -880,14 +884,25 @@ final class CharacterView extends View {
                     while (segEnd < row.length() && isFilled(layer, row.charAt(segEnd))) {
                         segEnd++;
                     }
-                    float gx0 = layer.x + i, gx1 = layer.x + end, gy = layer.y + j;
+                    float gx0 = layer.x + i * px, gx1 = layer.x + end * px, gy = layer.y + j * px;
                     int c = layer.colors[ch];
-                    place(out, item, slot, backView, hasFront, hasBack, ring, gx0, gx1, gy, segEnd - segStart, segStart == i, segEnd == end, c);
+                    // thicker in the middle of the shape than at its edges: rounded, not a flat plate
+                    float bulge = bump * 0.12f;
+                    place(out, item, slot, backView, hasFront, hasBack, ring, gx0, gx1, gy, (segEnd - segStart) * px, segStart == i, segEnd == end, c, px, bulge);
                     i = end;
                 }
             }
         }
         return out;
+    }
+
+    /** how far a character of a finished layer is from the edge of its shape (0..4; 0 without relief) */
+    private static int bumpAt(String relief, int i) {
+        if (i >= relief.length()) {
+            return 0;
+        }
+        char d = relief.charAt(i);
+        return d >= '0' && d <= '9' ? d - '0' : 0;
     }
 
     private static boolean isFilled(Cosmetics.Layer layer, char ch) {
@@ -900,7 +915,7 @@ final class CharacterView extends View {
 
     /** where one run of pixels goes in 3D (grid: the 16x32 figure of the pictures, its top left at 0,0) */
     private static void place(List<Box> out, Cosmetics.Item item, String slot, boolean backView, boolean hasFront, boolean hasBack, boolean ring,
-                              float gx0, float gx1, float gy, int segWidth, boolean segLeft, boolean segRight, int c) {
+                              float gx0, float gx1, float gy, float segWidth, boolean segLeft, boolean segRight, int c, float px, float bulge) {
         // the model: x from the player's right (-8) to the left (+8), y up from the feet (32 at the top of the head)
         float x0 = gx0 - 8, x1 = gx1 - 8;
         float frontGx = (gx0 + gx1) / 2;  // to tell which part the pixels are on
@@ -909,32 +924,31 @@ final class CharacterView extends View {
             x1 = 8 - gx0;
             frontGx = 16 - frontGx;
         }
-        float y1 = 32 - gy, y0 = y1 - 1;
+        float y1 = 32 - gy, y0 = y1 - px;
         if (Cosmetics.HEAD.equals(slot)) {
             boolean onFace = frontGx >= 4 && frontGx < 12 && gy >= 0 && gy < 8;
             if (onFace || gy >= 8) {
                 if (backView) {
-                    add(out, HEAD, x0, y0, -4.65f, x1, y1, -4.05f, c);
+                    add(out, HEAD, x0, y0, -4.65f - bulge, x1, y1, -4.05f, c);
                 } else {
-                    add(out, HEAD, x0, y0, 4.05f, x1, y1, 4.65f, c);  // glasses, a mask: on the face
+                    add(out, HEAD, x0, y0, 4.05f, x1, y1, 4.65f + bulge, c);  // glasses, a mask: on the face
                 }
             } else if (backView) {
                 return;  // the front picture already went all the way round
-            } else if (segWidth >= 6) {
-                if (ring) {  // crowns and halos: a ring round the head
-                    add(out, HEAD, x0, y0, -4.7f, x1, y1, -3.7f, c);
-                    add(out, HEAD, x0, y0, 3.7f, x1, y1, 4.7f, c);
-                    if (segLeft) {
-                        add(out, HEAD, x0, y0, -4.7f, x0 + 1, y1, 4.7f, c);
-                    }
-                    if (segRight) {
-                        add(out, HEAD, x1 - 1, y0, -4.7f, x1, y1, 4.7f, c);
-                    }
-                } else {  // hats and helmets: solid all the way round
-                    add(out, HEAD, x0, y0, -4.7f, x1, y1, 4.7f, c);
+            } else if (ring) {  // crowns and halos: everything on a ring round the head, the points of a crown too
+                add(out, HEAD, x0, y0, -4.7f, x1, y1, -3.7f, c);
+                add(out, HEAD, x0, y0, 3.7f, x1, y1, 4.7f, c);
+                if (segWidth >= 6 && segLeft) {
+                    add(out, HEAD, x0, y0, -4.7f, x0 + 1, y1, 4.7f, c);
                 }
-            } else {  // ears, horns, headphone cups: thin
-                add(out, HEAD, x0, y0, -1.2f, x1, y1, 1.2f, c);
+                if (segWidth >= 6 && segRight) {
+                    add(out, HEAD, x1 - 1, y0, -4.7f, x1, y1, 4.7f, c);
+                }
+            } else {
+                // hats, helmets and horns: as deep as they are wide (a cone stays round), a brim all the way round; ears flat
+                boolean ears = item.id.endsWith("_ears");
+                float half = ears ? 0.7f + bulge / 2 : Math.min(4.7f, Math.max(1.2f, segWidth / 2) + bulge / 2);
+                add(out, HEAD, x0, y0, -half, x1, y1, half, c);
             }
         } else if (Cosmetics.BODY.equals(slot)) {
             int part = BODY;
@@ -951,9 +965,9 @@ final class CharacterView extends View {
                 part = LARM;
             }
             if (backView) {
-                add(out, part, x0, y0, -zb, x1, y1, -zf, c);
+                add(out, part, x0, y0, -zb - bulge, x1, y1, -zf, c);
             } else {
-                add(out, part, x0, y0, zf, x1, y1, zb, c);
+                add(out, part, x0, y0, zf, x1, y1, zb + bulge, c);
             }
         } else if (Cosmetics.BACK.equals(slot)) {
             boolean wings = item.id.contains("wings");
@@ -964,33 +978,33 @@ final class CharacterView extends View {
                     return;
                 }
                 float mid = (x0 + x1) / 2;
-                add(out, mid < 0 ? RWING : LWING, x0, y0, -3.2f, x1, y1, -2.5f, c);
+                add(out, mid < 0 ? RWING : LWING, x0, y0, -3.2f - bulge, x1, y1, -2.5f, c);
             } else if (pack) {
                 if (!backView && hasBack && frontGx >= 4 && frontGx < 12) {
                     return;  // the back picture shows it better
                 }
-                add(out, BODY, x0, y0, -5.2f, x1, y1, -2.05f, c);
+                add(out, BODY, x0, y0, -5.2f - bulge, x1, y1, -2.05f, c);
             } else if (capeItem) {
                 if (!backView && hasBack) {
                     return;
                 }
-                add(out, CAPE, x0, y0, -3.1f, x1, y1, -2.5f, c);
+                add(out, CAPE, x0, y0, -3.1f - bulge / 2, x1, y1, -2.5f, c);
             } else {
                 if (!backView && hasBack && frontGx >= 4 && frontGx < 12) {
                     return;
                 }
-                add(out, BODY, x0, y0, -3.2f, x1, y1, -2.3f, c);
+                add(out, BODY, x0, y0, -3.2f - bulge, x1, y1, -2.3f, c);
             }
         } else if (Cosmetics.HAND.equals(slot)) {
             if (backView) {
                 return;
             }
-            add(out, RARM, x0, y0, 2.1f, x1, y1, 2.9f, c);  // held in the right hand, in front of it: it moves with the arm
+            add(out, RARM, x0, y0, 2.1f - bulge / 2, x1, y1, 2.9f + bulge / 2, c);  // held in the right hand, in front of it: it moves with the arm
         } else if (Cosmetics.PET.equals(slot)) {
             if (backView) {
                 return;
             }
-            add(out, WORLD, x0 + 1, y0, 1.5f, x1 + 1, y1, 4.5f, c);  // beside the player, a little in front
+            add(out, WORLD, x0 + 1, y0, 1.5f - bulge / 2, x1 + 1, y1, 4.5f + bulge / 2, c);  // beside the player, a little in front
         }
     }
 
