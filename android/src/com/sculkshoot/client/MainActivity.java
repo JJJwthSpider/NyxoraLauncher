@@ -278,7 +278,7 @@ public final class MainActivity extends Activity {
         Account.clearPending(this);
         login = null;
         showHome();
-        Toast.makeText(this, "Привет, " + name + "! Ты гость: можно играть в демо-версию. ИИ и вся игра — после входа через Microsoft.", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Привет, " + name + "! Ты гость: сколько угодно установок, любые моды и версии, игра в демо-режиме. ИИ и вся игра — после входа через Microsoft.", Toast.LENGTH_LONG).show();
     }
 
     /** the AI (Arkan's chats and builds, the AI skin and cape generators) needs a Microsoft account */
@@ -375,8 +375,8 @@ public final class MainActivity extends Activity {
             nick.setSingleLine(true);
             new AlertDialog.Builder(this)
                 .setTitle("Гость: " + account.name)
-                .setMessage("Ты вошёл без аккаунта Microsoft. Можно собирать установки, ставить моды, наряжаться в гардеробе "
-                            + "и играть со сборками в демо-версию Minecraft (официальная пробная от Mojang). ИИ (Аркан, генераторы "
+                .setMessage("Ты вошёл без аккаунта Microsoft. Бесплатно и без лимитов: сколько угодно установок, любые моды и версии, "
+                            + "гардероб и игра со сборками в демо-режиме Minecraft (официальная пробная версия от Mojang). ИИ (Аркан, генераторы "
                             + "скинов и плащей) и вся игра — после входа через Microsoft с купленной Minecraft: Java Edition."
                             + "\n\nНик гостя:")
                 .setView(nick)

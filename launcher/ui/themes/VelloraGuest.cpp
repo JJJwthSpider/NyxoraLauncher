@@ -91,8 +91,9 @@ bool askName(QWidget* parent)
     const QString current = name().isEmpty() ? randomName() : name();
     const QString typed = QInputDialog::getText(parent, QObject::tr("Guest"),
                                                 QObject::tr("The guest's nickname: 3 to 16 Latin letters, digits or _.\n"
-                                                            "A guest has instances, mods, the catalog, the wardrobe and the demo of the "
-                                                            "game; the AI and the full game come with a Microsoft account."),
+                                                            "A guest has any number of instances, any mods and versions, the wardrobe "
+                                                            "and the demo of the game, for free; the AI and the full game come with a "
+                                                            "Microsoft account."),
                                                 QLineEdit::Normal, current, &ok)
                               .trimmed();
     if (!ok) {

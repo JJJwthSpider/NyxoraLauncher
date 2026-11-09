@@ -573,8 +573,8 @@ void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng, con
     m_accountChip->setIcon(QIcon(QPixmap::fromImage(head.scaled(28, 28))));
     m_accountChip->setText(name.isEmpty() ? tr("Sign in") : guest ? name + "  ˅\n" + tr("Guest") : name + "  ˅");
     m_accountChip->setMinimumHeight(guest ? 56 : 44);  // two lines for a guest, like Millida's "Гость"
-    m_accountChip->setToolTip(guest ? tr("A guest: instances, mods, the wardrobe and the demo of the game; the AI and the full game need a "
-                                         "Microsoft account")
+    m_accountChip->setToolTip(guest ? tr("A guest, for free: any number of instances, any mods and versions, the wardrobe and the demo of the "
+                                         "game; the AI and the full game need a Microsoft account")
                                     : QString());
     m_guest = guest;
     updatePlayButton();

@@ -1788,9 +1788,9 @@ Are you sure?</source>
     </message>
     <message>
         <source>The guest&apos;s nickname: 3 to 16 Latin letters, digits or _.
-A guest has instances, mods, the catalog, the wardrobe and the demo of the game; the AI and the full game come with a Microsoft account.</source>
+A guest has any number of instances, any mods and versions, the wardrobe and the demo of the game, for free; the AI and the full game come with a Microsoft account.</source>
         <translation>Ник гостя: 3–16 латинских букв, цифр или _.
-Гостю доступны сборки, моды, каталог, гардероб и демо-версия игры; ИИ и вся игра — с аккаунтом Microsoft.</translation>
+Гостю бесплатно: сколько угодно установок, любые моды и версии, гардероб и игра в демо-режиме; ИИ и вся игра — с аккаунтом Microsoft.</translation>
     </message>
     <message>
         <source>A nickname is 3 to 16 Latin letters, digits or _.</source>
@@ -3211,8 +3211,8 @@ Are you sure?</source>
         <translation>Гость</translation>
     </message>
     <message>
-        <source>A guest: instances, mods, the wardrobe and the demo of the game; the AI and the full game need a Microsoft account</source>
-        <translation>Гость: сборки, моды, гардероб и демо-версия игры; для ИИ и всей игры нужен аккаунт Microsoft</translation>
+        <source>A guest, for free: any number of instances, any mods and versions, the wardrobe and the demo of the game; the AI and the full game need a Microsoft account</source>
+        <translation>Гость, бесплатно: сколько угодно установок, любые моды и версии, гардероб и игра в демо-режиме; для ИИ и всей игры нужен аккаунт Microsoft</translation>
     </message>
     <message>
         <source>demo version</source>

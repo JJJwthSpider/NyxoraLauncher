@@ -126,7 +126,7 @@ final class LoginScreen {
         LinearLayout.LayoutParams guestParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         guestParams.topMargin = dp(6);
         card.addView(guest, guestParams);
-        TextView guestNote = Ui.label(activity, "Гостю доступны сборки, моды, гардероб и демо-версия игры. ИИ и вся игра — после входа.", 11, Ui.HINT, false);
+        TextView guestNote = Ui.label(activity, "Гостю бесплатно: сколько угодно установок, любые моды и версии, игра в демо-режиме. ИИ и вся игра — после входа.", 11, Ui.HINT, false);
         guestNote.setGravity(Gravity.CENTER);
         card.addView(guestNote);
 
