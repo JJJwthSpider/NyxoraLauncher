@@ -3827,8 +3827,8 @@ variants</source>
         <translation>Носить в Vellora</translation>
     </message>
     <message>
-        <source>The cape is on in Vellora: you see it in the lobby and the wardrobe. In the game itself Minecraft shows only official capes.</source>
-        <translation>Плащ надет в Vellora: он виден в лобби и гардеробе. В самой игре Minecraft показывает только официальные плащи.</translation>
+        <source>The cape is on: in the lobby, in the wardrobe and in the game on Fabric and Quilt 1.20.1 (Vellora puts its mod in), where you see it on yourself.</source>
+        <translation>Плащ надет: он виден в лобби, в гардеробе и в игре на Fabric и Quilt 1.20.1 (Vellora сама ставит свой мод) — на тебе.</translation>
     </message>
     <message>
         <source>Save PNG...</source>

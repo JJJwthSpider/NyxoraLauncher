@@ -81,6 +81,7 @@
 
 #include "ui/themes/ThemeManager.h"
 #include "ui/themes/VelloraGuest.h"
+#include "ui/themes/VelloraLook.h"
 
 #include "ApplicationMessage.h"
 
@@ -1552,24 +1553,7 @@ bool Application::launch(BaseInstance* instance,
         // a guest plays the official demo with the guest's nickname, the instance as it is (mods included), as Prism does
         // for a player without an account that owns the game, but at once (no "no accounts" and "play the demo?"
         // questions); the full game wants the purchase
-        auto* minecraft = dynamic_cast<MinecraftInstance*>(instance);
-        QString version;
-        if (minecraft) {
-            auto profile = minecraft->getPackProfile();
-            version = profile->getComponentVersion("net.minecraft");  // the resolved version, when the components are loaded
-            if (version.isEmpty()) {
-                // not loaded yet: the instance's own list of components says it
-                QFile pack(FS::PathCombine(minecraft->instanceRoot(), "mmc-pack.json"));
-                if (pack.open(QIODevice::ReadOnly)) {
-                    for (const auto& value : QJsonDocument::fromJson(pack.readAll()).object().value("components").toArray()) {
-                        const QJsonObject component = value.toObject();
-                        if (component.value("uid").toString() == "net.minecraft") {
-                            version = component.value("cachedVersion").toString(component.value("version").toString());
-                        }
-                    }
-                }
-            }
-        }
+        const QString version = VelloraLook::components(dynamic_cast<MinecraftInstance*>(instance)).value("net.minecraft");
         if (!VelloraGuest::demoWorks(version)) {
             VelloraGuest::noDemo(m_mainWindow, version);
             return false;
@@ -1591,6 +1575,8 @@ bool Application::launch(BaseInstance* instance,
                 return false;
             }
         }
+        // the player's look in the game: the Vellora Cosmetics mod and the skin, the cape and the accessories
+        VelloraLook::prepare(instance);
         auto& controller = extras.controller;
         controller.reset(new LaunchController());
         controller->setInstance(instance);

@@ -1,0 +1,7 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/vellora_mods">
+        <!-- built from cosmetics-mod/ by tools/build-cosmetics-mod.sh -->
+        <file>vellora-cosmetics-1.20.1.jar</file>
+    </qresource>
+</RCC>

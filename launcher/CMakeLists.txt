@@ -888,6 +888,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/VelloraSound.cpp
     ui/themes/VelloraGuest.h
     ui/themes/VelloraGuest.cpp
+    ui/themes/VelloraLook.h
+    ui/themes/VelloraLook.cpp
     ui/themes/VelloraSound.h
     ui/themes/SculkTheme.h
     ui/themes/ITheme.cpp
@@ -1358,6 +1360,7 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/lunar/lunar.qrc
     resources/sculk_light/sculk_light.qrc
     resources/sculk_theme/sculk_theme.qrc
+    resources/vellora_mods/vellora_mods.qrc
     resources/translations/translations.qrc
     resources/documents/documents.qrc
     resources/shaders/shaders.qrc

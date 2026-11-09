@@ -94,6 +94,12 @@ class VelloraCharacter : public QWidget {
                            const QString& pet, const QString& emote = QString(), const QString& effect = QString(), double time = 0,
                            const QString& hand = QString());
 
+    /// the look for the game (the Vellora Cosmetics mod): the accessories of the head, body and back slots as boxes on the parts
+    /// of the Minecraft player model (pets, things in the hand and effects stay in the launcher), the skin and the cape;
+    /// written into `dir` as look.json, skin.png and cape.png. Returns false when the files could not be written.
+    static bool exportLook(const QString& dir, const QImage& skin, bool slim, const QImage& cape, const QString& head, const QString& body,
+                           const QString& back);
+
    protected:
     void paintEvent(QPaintEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;

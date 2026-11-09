@@ -22,6 +22,7 @@
 #include <QtMath>
 #include <QPainter>
 #include <QRadialGradient>
+#include <QDir>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -781,6 +782,100 @@ QList<VelloraCharacter::Box3> VelloraCharacter::build(const Cosmetics::Item& ite
         }
     }
     return out;
+}
+
+bool VelloraCharacter::exportLook(const QString& dir, const QImage& skin, bool slim, const QImage& cape, const QString& head, const QString& body,
+                                  const QString& back)
+{
+    if (!QDir().mkpath(dir)) {
+        return false;
+    }
+    QFile::remove(QDir(dir).filePath("skin.png"));
+    QFile::remove(QDir(dir).filePath("cape.png"));
+    QJsonObject look;
+    look["version"] = 1;
+    if (!skin.isNull()) {
+        // a skin of the old 64x32 layout gets the 64x64 one the player model reads (the left arm and leg from the right ones)
+        QImage full = skin.convertToFormat(QImage::Format_ARGB32);
+        if (full.width() == 64 && full.height() == 32) {
+            QImage tall(64, 64, QImage::Format_ARGB32);
+            tall.fill(Qt::transparent);
+            QPainter painter(&tall);
+            painter.drawImage(0, 0, full);
+            painter.drawImage(QPoint(16, 48), full.copy(0, 16, 16, 16));
+            painter.drawImage(QPoint(32, 48), full.copy(40, 16, 16, 16));
+            painter.end();
+            full = tall;
+        }
+        if (!full.save(QDir(dir).filePath("skin.png"), "PNG")) {
+            return false;
+        }
+        look["skin"] = "skin.png";
+        look["slim"] = slim;
+    }
+    if (!cape.isNull()) {
+        if (!cape.save(QDir(dir).filePath("cape.png"), "PNG")) {
+            return false;
+        }
+        look["cape"] = "cape.png";
+    }
+
+    // the launcher's model: y up, the feet at 0, the face to +z; Minecraft's: y down from the neck, the face to -z, each box
+    // in the pixels of its part, from the part's pivot (the default pose of the player model)
+    static const char* const names[] = { "head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg" };
+    const float armY = slim ? 2.5f : 2.f;
+    const float pivots[6][3] = { { 0, 0, 0 }, { 0, 0, 0 }, { -5, armY, 0 }, { 5, armY, 0 }, { -1.9f, 12, 0 }, { 1.9f, 12, 0 } };
+    QJsonArray boxes[6];
+    const QPair<QString, QString> worn[] = { { Cosmetics::Head, head }, { Cosmetics::Body, body }, { Cosmetics::Back, back } };
+    for (const auto& [slot, id] : worn) {
+        const Cosmetics::Item* item = Cosmetics::find(id);
+        if (!item) {
+            continue;
+        }
+        for (const Box3& b : build(*item, slot)) {
+            int part;
+            switch (b.part) {
+                case HEAD:
+                    part = 0;
+                    break;
+                case BODY:
+                case RWING:
+                case LWING:
+                case CAPE:
+                    part = 1;  // wings and capes of the back hang on the body
+                    break;
+                case RARM:
+                    part = 2;
+                    break;
+                case LARM:
+                    part = 3;
+                    break;
+                case RLEG:
+                    part = 4;
+                    break;
+                case LLEG:
+                    part = 5;
+                    break;
+                default:
+                    continue;
+            }
+            const float* p = pivots[part];
+            boxes[part].append(QJsonArray{ b.x0 - p[0], 24 - b.y1 - p[1], -b.z1 - p[2], b.x1 - p[0], 24 - b.y0 - p[1], -b.z0 - p[2],
+                                           double(quint32(b.color)) });
+        }
+    }
+    QJsonObject parts;
+    for (int i = 0; i < 6; i++) {
+        if (!boxes[i].isEmpty()) {
+            parts[names[i]] = boxes[i];
+        }
+    }
+    look["parts"] = parts;
+    QFile file(QDir(dir).filePath("look.json"));
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        return false;
+    }
+    return file.write(QJsonDocument(look).toJson(QJsonDocument::Compact)) > 0;
 }
 
 void VelloraCharacter::drawItem(const Cosmetics::Item* item, const QString& slot, double time)

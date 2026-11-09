@@ -1387,7 +1387,7 @@ final class WardrobeScreen {
             public void onClick(View v) {
                 SkinCache.useGeneratedCape(activity, cape);
                 Sounds.play(Sounds.WEAR);
-                Toast.makeText(activity, "Плащ надет в Vellora: он виден в лобби и гардеробе. В самой игре Minecraft показывает только официальные плащи.",
+                Toast.makeText(activity, "Плащ надет: он виден в лобби, в гардеробе и в игре на Fabric и Quilt 1.20.1 (Vellora сама ставит свой мод) — на тебе.",
                                Toast.LENGTH_LONG).show();
                 activity.accountChanged();
             }

@@ -756,6 +756,94 @@ final class CharacterView extends View {
     }
 
     /**
+     * The look for the game (the Vellora Cosmetics mod; the PC launcher writes the same): the accessories of the head, body
+     * and back slots as boxes on the parts of the Minecraft player model (pets, things in the hand and effects stay in
+     * Vellora), the skin and the cape, written into `dir` as look.json, skin.png and cape.png. The launcher's model has y
+     * up, the feet at 0 and the face to +z; Minecraft's has y down from the neck and the face to -z, each box in the pixels
+     * of its part, from the part's pivot.
+     */
+    static void exportLook(Context context, java.io.File dir, Bitmap skin, boolean slim, Bitmap cape, String head, String body, String back)
+        throws java.io.IOException, org.json.JSONException {
+        if (!dir.isDirectory() && !dir.mkdirs()) {
+            throw new java.io.IOException("cannot make " + dir);
+        }
+        new java.io.File(dir, "skin.png").delete();
+        new java.io.File(dir, "cape.png").delete();
+        org.json.JSONObject look = new org.json.JSONObject();
+        look.put("version", 1);
+        if (skin != null) {
+            Bitmap full = skin;
+            if (skin.getWidth() == 64 && skin.getHeight() == 32) {
+                // the old 64x32 layout: the 64x64 one the player model reads, the left arm and leg from the right ones
+                full = Bitmap.createBitmap(64, 64, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(full);
+                canvas.drawBitmap(skin, 0, 0, null);
+                canvas.drawBitmap(Bitmap.createBitmap(skin, 0, 16, 16, 16), 16, 48, null);
+                canvas.drawBitmap(Bitmap.createBitmap(skin, 40, 16, 16, 16), 32, 48, null);
+            }
+            savePng(full, new java.io.File(dir, "skin.png"));
+            look.put("skin", "skin.png");
+            look.put("slim", slim);
+        }
+        if (cape != null) {
+            savePng(cape, new java.io.File(dir, "cape.png"));
+            look.put("cape", "cape.png");
+        }
+        String[] names = { "head", "body", "rightArm", "leftArm", "rightLeg", "leftLeg" };
+        float armY = slim ? 2.5f : 2f;
+        float[][] pivots = { { 0, 0, 0 }, { 0, 0, 0 }, { -5, armY, 0 }, { 5, armY, 0 }, { -1.9f, 12, 0 }, { 1.9f, 12, 0 } };
+        org.json.JSONArray[] boxes = new org.json.JSONArray[6];
+        for (int i = 0; i < 6; i++) {
+            boxes[i] = new org.json.JSONArray();
+        }
+        String[][] worn = { { Cosmetics.HEAD, head }, { Cosmetics.BODY, body }, { Cosmetics.BACK, back } };
+        for (String[] w : worn) {
+            Cosmetics.Item item = w[1] == null || w[1].isEmpty() ? null : Cosmetics.find(context, w[1]);
+            if (item == null) {
+                continue;
+            }
+            for (Box b : build(item, w[0])) {
+                int part;
+                switch (b.part) {
+                    case HEAD: part = 0; break;
+                    case BODY: case RWING: case LWING: case CAPE: part = 1; break;  // wings and capes of the back hang on the body
+                    case RARM: part = 2; break;
+                    case LARM: part = 3; break;
+                    case RLEG: part = 4; break;
+                    case LLEG: part = 5; break;
+                    default: continue;
+                }
+                float[] p = pivots[part];
+                org.json.JSONArray a = new org.json.JSONArray();
+                a.put(b.x0 - p[0]).put(24 - b.y1 - p[1]).put(-b.z1 - p[2]).put(b.x1 - p[0]).put(24 - b.y0 - p[1]).put(-b.z0 - p[2]).put(b.color & 0xFFFFFFFFL);
+                boxes[part].put(a);
+            }
+        }
+        org.json.JSONObject parts = new org.json.JSONObject();
+        for (int i = 0; i < 6; i++) {
+            if (boxes[i].length() > 0) {
+                parts.put(names[i], boxes[i]);
+            }
+        }
+        look.put("parts", parts);
+        java.io.FileOutputStream out = new java.io.FileOutputStream(new java.io.File(dir, "look.json"));
+        try {
+            out.write(look.toString().getBytes("UTF-8"));
+        } finally {
+            out.close();
+        }
+    }
+
+    private static void savePng(Bitmap bitmap, java.io.File file) throws java.io.IOException {
+        java.io.FileOutputStream out = new java.io.FileOutputStream(file);
+        try {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+        } finally {
+            out.close();
+        }
+    }
+
+    /**
      * Builds an item's 3D shape from its pixels (the front picture, and the back one where there is one). Each pixel
      * becomes a box, runs of the same colour are joined; where it goes depends on the slot: around the head (wide rows
      * all the way round, narrow ones like ears thin), as plates on the clothes, on the back (wings turn at the spine,

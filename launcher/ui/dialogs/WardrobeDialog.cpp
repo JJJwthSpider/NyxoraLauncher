@@ -539,8 +539,8 @@ QWidget* WardrobeDialog::generator(bool capes)
                 cape.save(QDir(APPLICATION->dataRoot()).filePath("vellora-cape.png"), "PNG");
                 QSettings(QDir(APPLICATION->dataRoot()).filePath("vellora-ui.ini"), QSettings::IniFormat).setValue("generatedCape", true);
                 VelloraSound::play("wear");
-                status->setText(tr("The cape is on in Vellora: you see it in the lobby and the wardrobe. In the game itself Minecraft shows "
-                                   "only official capes."));
+                status->setText(tr("The cape is on: in the lobby, in the wardrobe and in the game on Fabric and Quilt 1.20.1 (Vellora "
+                                   "puts its mod in), where you see it on yourself."));
             });
             actions->addWidget(wear);
             auto* save = new QPushButton(tr("Save PNG..."));

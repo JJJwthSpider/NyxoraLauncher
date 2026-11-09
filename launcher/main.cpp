@@ -72,6 +72,7 @@ int main(int argc, char* argv[])
             Q_INIT_RESOURCE(sculk_light);
             Q_INIT_RESOURCE(lunar);
             Q_INIT_RESOURCE(sculk_theme);
+            Q_INIT_RESOURCE(vellora_mods);
             Q_INIT_RESOURCE(translations);
 
             Q_INIT_RESOURCE(shaders);

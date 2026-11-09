@@ -540,6 +540,8 @@ public final class PojavEngine extends GameEngine {
         for (String fixed : ModFixes.fixMods(new File(gameDir, "mods"))) {
             log.log("Исправил для телефона: " + fixed);
         }
+        // the player's look in the game: the skin, the cape and the accessories from Vellora (Fabric and Quilt, 1.20.1)
+        GameLook.prepare(activity, inst, gameDir);
 
         // the loader
         String versionId = versionId(inst);

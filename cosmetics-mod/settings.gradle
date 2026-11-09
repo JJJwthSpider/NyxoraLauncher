@@ -1,0 +1,18 @@
+// Maven Central often answers "429 Too Many Requests" to build machines: it is read from Google's mirror of it
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        maven { url = 'https://maven-central.storage-download.googleapis.com/maven2/' }
+        gradlePluginPortal()
+    }
+}
+
+gradle.beforeProject { project ->
+    project.repositories.whenObjectAdded { repo ->
+        if (repo instanceof MavenArtifactRepository && repo.url.toString().startsWith('https://repo.maven.apache.org/maven2')) {
+            repo.url = 'https://maven-central.storage-download.googleapis.com/maven2/'
+        }
+    }
+}
+
+rootProject.name = 'vellora-cosmetics'

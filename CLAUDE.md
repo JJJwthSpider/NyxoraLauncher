@@ -17,5 +17,17 @@
   котором куплен Minecraft: Java Edition.
 - Гостю закрыт только ИИ (Аркан, ИИ-генераторы скинов и плащей): `VelloraGuest::aiAllowed`, `MainActivity.requireAi`.
 
+## Образ в игре (мод Vellora Cosmetics)
+
+В игре видны только скин, плащ и аксессуары слотов «голова», «тело», «спина» — не питомцы, не «в руке», не эффекты
+(правило владельца проекта). Это делает свой Fabric-мод `cosmetics-mod/` (Minecraft 1.20.1, Fabric и Quilt):
+лаунчер перед запуском кладёт его в `mods` и пишет `config/vellora-cosmetics/look.json` (кубики аксессуаров на частях
+модели игрока Minecraft), `skin.png`, `cape.png` — ПК: `VelloraLook::prepare` + `VelloraCharacter::exportLook`,
+телефон: `GameLook.prepare` + `CharacterView.exportLook` (выгрузки ПК и телефона должны совпадать). Из неподходящих
+сборок мод убирается. Пересборка мода: `tools/build-cosmetics-mod.sh` (jar кладётся в `launcher/resources/vellora_mods/`
+и `android/assets/`).
+
+## Где код гостя
+
 Где это в коде: ПК — `launcher/ui/themes/VelloraGuest.*`, `Application::launch`, `LaunchController`; телефон —
 `Account.guest`, `MainActivity.playInstallation`, `PojavEngine.prepare` (демо-аккаунт `Demo.<ник>`).
