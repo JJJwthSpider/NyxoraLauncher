@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
@@ -454,10 +455,31 @@ public final class PojavEngine extends GameEngine {
         return new File(Tools.DIR_GAME_HOME, "custom_instances/lullaby-" + inst.id);
     }
 
+    /**
+     * The guest's game: the official Minecraft demo (Mojang's free trial: a world for five game days, about 100 minutes,
+     * then a new one), which the engine starts for a Microsoft account without the game. The demo is plain Minecraft
+     * (the engine starts it only for plain versions): the version of the pack without its mods, in a folder of its own
+     * for each version. The full game and the mods come with the account that bought Minecraft.
+     */
+    static Installation demoOf(Installation pack) {
+        Installation demo = new Installation();
+        demo.id = UUID.nameUUIDFromBytes(("vellora-demo:" + pack.minecraftVersion).getBytes()).toString();
+        demo.name = "Демо Minecraft " + pack.minecraftVersion;
+        demo.minecraftVersion = pack.minecraftVersion;
+        demo.loader = "vanilla";
+        demo.fpsBoost = pack.fpsBoost;
+        return demo;
+    }
+
     /** everything before the engine takes over; returns a message for the user when the game cannot start yet */
-    private String prepare(final MainActivity activity, Installation inst, Account account, final Builder.Listener log, final Done done) throws Exception {
-        if (!account.ownsJava) {
+    private String prepare(final MainActivity activity, Installation pack, Account account, final Builder.Listener log, final Done done) throws Exception {
+        final boolean demo = account.guest;
+        final Installation inst = demo ? demoOf(pack) : pack;
+        if (!demo && !account.ownsJava) {
             return "На этом аккаунте Microsoft нет Minecraft: Java Edition, поэтому игра не запустится. Её можно купить на minecraft.net.";
+        }
+        if (demo) {
+            log.log("Гость: демо-версия Minecraft " + inst.minecraftVersion + " (без модов).");
         }
         // the Java this Minecraft version needs: downloaded once, then used for every installation of such versions
         int java = javaFor(inst.minecraftVersion);
@@ -472,7 +494,27 @@ public final class PojavEngine extends GameEngine {
             runtime = exactJava(java);
         }
 
-        // the account: a fresh Minecraft token from the Microsoft sign-in
+        MinecraftAccount mc = new MinecraftAccount();
+        if (demo) {
+            // the engine's demo account ("Demo." before the name): the game gets "--demo" and the demo has its own copy
+            // of Minecraft
+            mc.username = "Demo." + account.name;
+            mc.profileId = UUID.nameUUIDFromBytes(("OfflinePlayer:" + account.name).getBytes("UTF-8")).toString();
+            mc.accessToken = "0";
+            mc.isMicrosoft = false;
+            mc.msaRefreshToken = "0";
+            mc.xuid = "";
+        } else {
+            signIn(activity, account, log, mc);
+        }
+        mc.save();
+        PojavProfile.setCurrentProfile(activity, mc.username);
+        Tools.switchDemo(demo);  // the folders of Minecraft itself: the demo's or the full game's
+        return startGame(activity, inst, java, runtime, log, done);
+    }
+
+    /** the Microsoft account for the engine, with a fresh Minecraft token */
+    private static void signIn(MainActivity activity, Account account, Builder.Listener log, MinecraftAccount mc) throws Exception {
         if (account.minecraftTokenExpires - System.currentTimeMillis() < 30 * 60 * 1000L) {
             log.log("Обновляю вход в аккаунт...");
             try {
@@ -488,7 +530,6 @@ public final class PojavEngine extends GameEngine {
                 log.log("Вход не обновился (" + e.getMessage() + "), запускаю с сохранённым.");
             }
         }
-        MinecraftAccount mc = new MinecraftAccount();
         mc.username = account.name;
         mc.profileId = account.uuid;
         mc.accessToken = account.minecraftToken;
@@ -496,9 +537,11 @@ public final class PojavEngine extends GameEngine {
         mc.msaRefreshToken = account.refreshToken;
         mc.expiresAt = account.minecraftTokenExpires;
         mc.xuid = "";
-        mc.save();
-        PojavProfile.setCurrentProfile(activity, mc.username);
+    }
 
+    /** the files, the loader, the profile, then the engine downloads Minecraft and starts it */
+    private String startGame(final MainActivity activity, final Installation inst, int java, String runtime, final Builder.Listener log, final Done done)
+        throws Exception {
         // the files: mods, resource packs, shaders and the modpack's own files
         File gameDir = new File(Tools.DIR_GAME_HOME, "custom_instances/lullaby-" + inst.id);
         installFiles(activity, inst, gameDir, log);

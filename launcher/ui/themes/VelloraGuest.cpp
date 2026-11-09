@@ -91,8 +91,8 @@ bool askName(QWidget* parent)
     const QString current = name().isEmpty() ? randomName() : name();
     const QString typed = QInputDialog::getText(parent, QObject::tr("Guest"),
                                                 QObject::tr("The guest's nickname: 3 to 16 Latin letters, digits or _.\n"
-                                                            "A guest has instances, mods, the catalog and the wardrobe; the AI and the game "
-                                                            "itself come with a Microsoft account."),
+                                                            "A guest has instances, mods, the catalog, the wardrobe and the demo of the "
+                                                            "game; the AI and the full game come with a Microsoft account."),
                                                 QLineEdit::Normal, current, &ok)
                               .trimmed();
     if (!ok) {
@@ -124,5 +124,47 @@ bool requireAi(QWidget* parent)
         APPLICATION->ShowGlobalSettings(parent, "accounts");
     }
     return aiAllowed();
+}
+
+bool playsDemo()
+{
+    if (name().isEmpty()) {
+        return false;
+    }
+    auto* accounts = APPLICATION->accounts();
+    for (int i = 0; i < accounts->count(); i++) {
+        if (accounts->at(i)->ownsMinecraft()) {
+            return false;  // an account that bought the game is here: Prism's own way (the full game)
+        }
+    }
+    return true;
+}
+
+bool confirmDemo(QWidget* parent)
+{
+    if (settings().value("guestDemoExplained", false).toBool()) {
+        return true;
+    }
+    VelloraSound::play("open");
+    QMessageBox box(parent);
+    box.setWindowTitle(QObject::tr("A guest plays the demo"));
+    box.setText(QObject::tr("Without a Microsoft account there is the demo of Minecraft: Java Edition, the official free trial from Mojang: "
+                            "a world for 5 game days (about 100 minutes), then a new one can be started. You play with your nickname, %1.\n\n"
+                            "The full game comes after signing in with the Microsoft account that bought Minecraft.")
+                    .arg(name()));
+    auto* play = box.addButton(QObject::tr("Play the demo"), QMessageBox::AcceptRole);
+    auto* signIn = box.addButton(QObject::tr("Sign in with Microsoft"), QMessageBox::ActionRole);
+    box.addButton(QObject::tr("Cancel"), QMessageBox::RejectRole);
+    box.setDefaultButton(play);
+    box.exec();
+    if (box.clickedButton() == signIn) {
+        APPLICATION->ShowGlobalSettings(parent, "accounts");
+        return false;
+    }
+    if (box.clickedButton() != play) {
+        return false;
+    }
+    settings().setValue("guestDemoExplained", true);
+    return true;
 }
 }  // namespace VelloraGuest

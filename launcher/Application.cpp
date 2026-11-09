@@ -80,6 +80,7 @@
 #include "ui/pagedialog/PageDialog.h"
 
 #include "ui/themes/ThemeManager.h"
+#include "ui/themes/VelloraGuest.h"
 
 #include "ApplicationMessage.h"
 
@@ -1538,8 +1539,18 @@ bool Application::launch(BaseInstance* instance,
                          LaunchMode mode,
                          MinecraftTarget::Ptr targetToJoin,
                          MinecraftAccountPtr accountToUse,
-                         const QString& offlineName)
+                         const QString& givenOfflineName)
 {
+    QString offlineName = givenOfflineName;
+    if (mode == LaunchMode::Normal && !accountToUse && instance->canLaunch() && !m_updateRunning && VelloraGuest::playsDemo()) {
+        // a guest plays the official demo with the guest's nickname, as Prism does for a player without an account that
+        // owns the game, but at once (no "no accounts" and "play the demo?" questions); the full game wants the purchase
+        if (!VelloraGuest::confirmDemo(m_mainWindow)) {
+            return false;
+        }
+        mode = LaunchMode::Demo;
+        offlineName = VelloraGuest::name();
+    }
     if (m_updateRunning) {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
     } else if (instance->canLaunch()) {

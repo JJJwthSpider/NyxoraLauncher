@@ -18,7 +18,7 @@ import android.widget.Toast;
 /**
  * The door to the launcher: signing in with a Microsoft account (the player opens microsoft.com/link, in any browser, on
  * the phone or a computer, and types the code shown here), or "Войти как гость" with a nickname: a guest gets the menu
- * without the AI and without starting the game itself.
+ * without the AI and plays the official Minecraft demo; the full game is checked through the account that bought it.
  */
 final class LoginScreen {
     private final MainActivity activity;
@@ -114,7 +114,8 @@ final class LoginScreen {
         row.topMargin = dp(14);
         row.bottomMargin = dp(4);
         card.addView(buttons, row);
-        // like Millida's guest: a nickname and the menu at once; the AI and the game itself wait for the Microsoft sign-in
+        // like Millida's guest: a nickname and the menu at once, the demo of the game; the AI and the full game wait for the
+        // Microsoft sign-in
         Button guest = Ui.button(activity, "Войти как гость", false);
         guest.setTextSize(13);
         guest.setOnClickListener(new View.OnClickListener() {
@@ -125,7 +126,7 @@ final class LoginScreen {
         LinearLayout.LayoutParams guestParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         guestParams.topMargin = dp(6);
         card.addView(guest, guestParams);
-        TextView guestNote = Ui.label(activity, "Гостю доступны сборки, моды и гардероб. ИИ и запуск игры — после входа.", 11, Ui.HINT, false);
+        TextView guestNote = Ui.label(activity, "Гостю доступны сборки, моды, гардероб и демо-версия игры. ИИ и вся игра — после входа.", 11, Ui.HINT, false);
         guestNote.setGravity(Gravity.CENTER);
         card.addView(guestNote);
 

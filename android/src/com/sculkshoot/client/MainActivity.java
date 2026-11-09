@@ -271,14 +271,14 @@ public final class MainActivity extends Activity {
         show(login.view());
     }
 
-    /** "Войти как гость": a nickname, the menu, everything but the AI and the game itself */
+    /** "Войти как гость": a nickname, the menu and the demo of the game, everything but the AI and the full game */
     void signedInAsGuest(String name) {
         account = Account.guest(name);
         account.save(this);
         Account.clearPending(this);
         login = null;
         showHome();
-        Toast.makeText(this, "Привет, " + name + "! Ты гость: ИИ и запуск игры — после входа через Microsoft.", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Привет, " + name + "! Ты гость: можно играть в демо-версию. ИИ и вся игра — после входа через Microsoft.", Toast.LENGTH_LONG).show();
     }
 
     /** the AI (Arkan's chats and builds, the AI skin and cape generators) needs a Microsoft account */
@@ -375,9 +375,10 @@ public final class MainActivity extends Activity {
             nick.setSingleLine(true);
             new AlertDialog.Builder(this)
                 .setTitle("Гость: " + account.name)
-                .setMessage("Ты вошёл без аккаунта Microsoft. Можно собирать установки, ставить моды и наряжаться в гардеробе. "
-                            + "ИИ (Аркан, генераторы скинов и плащей) и запуск игры — после входа через Microsoft "
-                            + "с купленной Minecraft: Java Edition.\n\nНик гостя:")
+                .setMessage("Ты вошёл без аккаунта Microsoft. Можно собирать установки, ставить моды, наряжаться в гардеробе "
+                            + "и играть в демо-версию Minecraft (официальная пробная от Mojang, без модов). ИИ (Аркан, генераторы "
+                            + "скинов и плащей) и вся игра со сборками — после входа через Microsoft с купленной Minecraft: Java Edition."
+                            + "\n\nНик гостя:")
                 .setView(nick)
                 .setPositiveButton("Войти через Microsoft", new android.content.DialogInterface.OnClickListener() {
                     public void onClick(android.content.DialogInterface d, int w) {
@@ -1989,23 +1990,38 @@ public final class MainActivity extends Activity {
         });
     }
 
-    /** "Play" on the main screen or in the editor */
+    /**
+     * "Play" on the main screen or in the editor. A guest plays the official Minecraft demo (Mojang's free trial), as a
+     * Microsoft account without the game does: the full game is checked through the account that bought it. The first
+     * time a guest is told what that means.
+     */
     void playInstallation(final Installation inst) {
         if (account != null && account.guest) {
-            // the game checks the purchase through the Microsoft account: a guest builds, a signed-in player plays
-            Sounds.play(Sounds.OPEN);
-            new AlertDialog.Builder(this)
-                .setTitle("Играть — после входа")
-                .setMessage("Minecraft: Java Edition проверяет покупку через аккаунт Microsoft. Войди тем аккаунтом, на котором "
-                            + "куплена игра, — сборка «" + inst.name + "» и всё, что ты собрал, останется.")
-                .setPositiveButton("Войти через Microsoft", new android.content.DialogInterface.OnClickListener() {
-                    public void onClick(android.content.DialogInterface d, int w) {
-                        leaveGuest();
-                    }
-                })
-                .setNegativeButton("Позже", null)
-                .show();
-            return;
+            final android.content.SharedPreferences seen = getSharedPreferences("guest", MODE_PRIVATE);
+            if (!seen.getBoolean("demoExplained", false)) {
+                Sounds.play(Sounds.OPEN);
+                boolean here = GameEngine.get() != null;
+                new AlertDialog.Builder(this)
+                    .setTitle(here ? "Гость играет в демо" : "Как гостю поиграть")
+                    .setMessage(guestPlayText(inst))
+                    .setPositiveButton(here ? "Играть демо" : "Дальше", new android.content.DialogInterface.OnClickListener() {
+                        public void onClick(android.content.DialogInterface d, int w) {
+                            seen.edit().putBoolean("demoExplained", true).apply();
+                            playInstallation(inst);
+                        }
+                    })
+                    .setNeutralButton("Войти через Microsoft", new android.content.DialogInterface.OnClickListener() {
+                        public void onClick(android.content.DialogInterface d, int w) {
+                            leaveGuest();
+                        }
+                    })
+                    .setNegativeButton("Отмена", null)
+                    .show();
+                return;
+            }
+            if (GameEngine.get() != null) {
+                Toast.makeText(this, "Демо: Minecraft " + inst.minecraftVersion + " без модов", Toast.LENGTH_SHORT).show();
+            }
         }
         Sounds.play(Sounds.LAUNCH);
         if (GameEngine.get() != null) {
@@ -2029,6 +2045,18 @@ public final class MainActivity extends Activity {
     }
 
     /** the full build: Minecraft starts inside Lullaby on the built-in engine */
+    /** what a guest plays: the demo here, or the one PojavLauncher offers */
+    String guestPlayText(Installation inst) {
+        if (GameEngine.get() == null) {
+            return "Игру запускает PojavLauncher: он попросит войти своим аккаунтом Microsoft, а без покупки предложит "
+                + "демо-версию Minecraft.\n\nВся игра с модами — после входа аккаунтом, на котором куплен Minecraft: Java Edition.";
+        }
+        return "Без аккаунта Microsoft доступна демо-версия Minecraft: Java Edition — официальная бесплатная пробная версия "
+            + "от Mojang. Мир на 5 игровых дней (около 100 минут), потом можно начать новый.\n\n"
+            + "Демо идёт без модов: запустится Minecraft " + inst.minecraftVersion + " из сборки «" + inst.name + "», "
+            + "с твоим ником. Сборка с модами и вся игра — после входа аккаунтом, на котором куплен Minecraft.";
+    }
+
     private void playHere(final Installation inst) {
         final GameEngine engine = GameEngine.get();
         final HomeScreen.Progress progress = new HomeScreen.Progress(this, "Запускаю «" + inst.name + "»");

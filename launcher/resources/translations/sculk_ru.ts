@@ -1788,9 +1788,9 @@ Are you sure?</source>
     </message>
     <message>
         <source>The guest&apos;s nickname: 3 to 16 Latin letters, digits or _.
-A guest has instances, mods, the catalog and the wardrobe; the AI and the game itself come with a Microsoft account.</source>
+A guest has instances, mods, the catalog, the wardrobe and the demo of the game; the AI and the full game come with a Microsoft account.</source>
         <translation>Ник гостя: 3–16 латинских букв, цифр или _.
-Гостю доступны сборки, моды, каталог и гардероб; ИИ и запуск игры — с аккаунтом Microsoft.</translation>
+Гостю доступны сборки, моды, каталог, гардероб и демо-версия игры; ИИ и вся игра — с аккаунтом Microsoft.</translation>
     </message>
     <message>
         <source>A nickname is 3 to 16 Latin letters, digits or _.</source>
@@ -1811,6 +1811,26 @@ A guest has instances, mods, the catalog and the wardrobe; the AI and the game i
     <message>
         <source>Later</source>
         <translation>Позже</translation>
+    </message>
+    <message>
+        <source>A guest plays the demo</source>
+        <translation>Гость играет в демо</translation>
+    </message>
+    <message>
+        <source>Without a Microsoft account there is the demo of Minecraft: Java Edition, the official free trial from Mojang: a world for 5 game days (about 100 minutes), then a new one can be started. You play with your nickname, %1.
+
+The full game comes after signing in with the Microsoft account that bought Minecraft.</source>
+        <translation>Без аккаунта Microsoft доступна демо-версия Minecraft: Java Edition — официальная бесплатная пробная версия от Mojang: мир на 5 игровых дней (около 100 минут), потом можно начать новый. Играешь со своим ником, %1.
+
+Вся игра — после входа аккаунтом Microsoft, на котором куплен Minecraft.</translation>
+    </message>
+    <message>
+        <source>Play the demo</source>
+        <translation>Играть демо</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
     </message>
     <message>
         <source>worn</source>
@@ -3183,8 +3203,12 @@ Are you sure?</source>
         <translation>Гость</translation>
     </message>
     <message>
-        <source>A guest: instances, mods and the wardrobe; the AI and the game itself need a Microsoft account</source>
-        <translation>Гость: сборки, моды и гардероб; для ИИ и запуска игры нужен аккаунт Microsoft</translation>
+        <source>A guest: instances, mods, the wardrobe and the demo of the game; the AI and the full game need a Microsoft account</source>
+        <translation>Гость: сборки, моды, гардероб и демо-версия игры; для ИИ и всей игры нужен аккаунт Microsoft</translation>
+    </message>
+    <message>
+        <source>demo version</source>
+        <translation>демо-версия</translation>
     </message>
     <message>
         <source>Friends</source>

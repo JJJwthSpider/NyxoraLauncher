@@ -1503,7 +1503,8 @@ void MainWindow::showProfileMenu()
     const auto account = APPLICATION->accounts()->defaultAccount();
     QMenu menu(this);
     if (!account) {
-        // like Millida: a Microsoft account, or a guest with a nickname (no AI, and the game wants the Microsoft account)
+        // like Millida: a Microsoft account, or a guest with a nickname (no AI; the demo of the game, the full game wants
+        // the Microsoft account that bought it)
         menu.addAction(QIcon::fromTheme("accounts"), tr("Sign in with Microsoft..."), this,
                        [this] { APPLICATION->ShowGlobalSettings(this, "accounts"); });
         const QString guest = VelloraGuest::name();

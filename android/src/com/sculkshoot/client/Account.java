@@ -60,7 +60,7 @@ final class Account {
     String minecraftToken = "";
     long minecraftTokenExpires;
 
-    /** a guest: a nickname without a Microsoft account; the menu opens, but not the AI (Arkan) and not the game itself */
+    /** a guest: a nickname without a Microsoft account; the menu and the demo of the game, but not the AI and the full game */
     boolean guest;
 
     boolean signedIn() {

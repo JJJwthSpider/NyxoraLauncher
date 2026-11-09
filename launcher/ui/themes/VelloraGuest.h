@@ -22,8 +22,9 @@
 class QWidget;
 
 /// The guest of Vellora Client, like Millida's: a nickname without a Microsoft account. A guest uses the launcher
-/// (instances, mods, the catalog, the wardrobe), but not the AI (Arkan's agent, the AI skin and cape generators); the
-/// game itself checks the purchase through the Microsoft account, as Prism Launcher always did.
+/// (instances, mods, the catalog, the wardrobe), but not the AI (Arkan's agent, the AI skin and cape generators), and
+/// plays the official Minecraft demo (Mojang's free trial), as Prism Launcher does for a player without an account that
+/// owns the game; the full game is checked through the Microsoft account that bought it.
 namespace VelloraGuest {
 /// the AI works with a Microsoft account in the list
 bool aiAllowed();
@@ -40,4 +41,8 @@ QImage skin(bool* slim = nullptr);
 bool askName(QWidget* parent);
 /// for a guest: explains that the AI needs a Microsoft account and offers the sign-in; true when the AI may be used
 bool requireAi(QWidget* parent);
+/// a guest's "Play" is the demo: a guest with a nickname and no account in the list owns Minecraft
+bool playsDemo();
+/// the first time a guest plays: what the demo is and how to get the full game; true to start the demo
+bool confirmDemo(QWidget* parent);
 }  // namespace VelloraGuest

@@ -828,10 +828,13 @@ final class HomeScreen {
             total += i.playedMillis;
         }
         String played = Installation.playTime(total);
-        if (played.isEmpty()) {
+        Account account = activity.account();
+        // a guest plays the demo of the game: said small under "Играть"
+        String small = account != null && account.guest ? "демо-версия" : played.isEmpty() ? "" : "наиграно " + played;
+        if (small.isEmpty()) {
             play.setText("▶  Играть");
         } else {
-            android.text.SpannableString text = new android.text.SpannableString("▶  Играть\nнаиграно " + played);
+            android.text.SpannableString text = new android.text.SpannableString("▶  Играть\n" + small);
             int cut = text.toString().indexOf('\n');
             text.setSpan(new android.text.style.RelativeSizeSpan(0.42f), cut, text.length(), android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             text.setSpan(new android.text.style.ForegroundColorSpan(0xD0FFFFFF), cut, text.length(), android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -871,7 +874,7 @@ final class HomeScreen {
         }
         accountChip.setVisibility(View.VISIBLE);
         accountName.setText(account.ownsJava || account.guest ? account.name : "Без Java Edition");
-        accountSub.setText(account.guest ? "Гость" : account.ownsJava ? "Microsoft" : "нет игры");
+        accountSub.setText(account.guest ? "Гость · демо" : account.ownsJava ? "Microsoft" : "нет игры");
         if (SkinCache.skin(activity, account) == null) {
             Icons.loadHead(head, account.skinUrl, R.drawable.wizard);
         }

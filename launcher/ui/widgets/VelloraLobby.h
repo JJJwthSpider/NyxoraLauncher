@@ -85,6 +85,7 @@ class VelloraLobby : public QWidget {
     QLabel* m_change = nullptr;
     QLabel* m_playHours = nullptr;
     qint64 m_played = 0;
+    bool m_guest = false;  // a guest plays the demo: said under "Play"
     bool m_hasToday = false, m_running = false;
     void updatePlayButton();
     class VelloraHubTile* m_skinTile = nullptr;

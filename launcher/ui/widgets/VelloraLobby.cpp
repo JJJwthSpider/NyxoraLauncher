@@ -573,8 +573,11 @@ void VelloraLobby::setPlayer(const QString& name, const QByteArray& skinPng, con
     m_accountChip->setIcon(QIcon(QPixmap::fromImage(head.scaled(28, 28))));
     m_accountChip->setText(name.isEmpty() ? tr("Sign in") : guest ? name + "  ˅\n" + tr("Guest") : name + "  ˅");
     m_accountChip->setMinimumHeight(guest ? 56 : 44);  // two lines for a guest, like Millida's "Гость"
-    m_accountChip->setToolTip(guest ? tr("A guest: instances, mods and the wardrobe; the AI and the game itself need a Microsoft account")
+    m_accountChip->setToolTip(guest ? tr("A guest: instances, mods, the wardrobe and the demo of the game; the AI and the full game need a "
+                                         "Microsoft account")
                                     : QString());
+    m_guest = guest;
+    updatePlayButton();
 }
 
 void VelloraLobby::refreshCharacter()
@@ -627,7 +630,10 @@ void VelloraLobby::updatePlayButton()
     }
     // the hours played under "Play", like Millida's button: a reason to come back
     const qint64 hours = m_played / 3600, minutes = (m_played % 3600) / 60;
-    const QString played = m_played <= 0 ? QString() : hours > 0 ? tr("%1 h played").arg(hours) : tr("%1 min played").arg(std::max<qint64>(1, minutes));
+    QString played = m_played <= 0 ? QString() : hours > 0 ? tr("%1 h played").arg(hours) : tr("%1 min played").arg(std::max<qint64>(1, minutes));
+    if (m_guest) {
+        played = tr("demo version");  // a guest plays the official demo
+    }
     m_play->setText(tr("▶  Play"));
     m_playHours->setText(played);
     m_playHours->setVisible(!played.isEmpty());
