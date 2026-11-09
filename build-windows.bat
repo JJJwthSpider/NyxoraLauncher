@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-setlocal EnableExtensions EnableDelayedExpansion
+setlocal EnableExtensions
 title Сборка Vellora Client
 
 rem ======================================================================
@@ -44,7 +44,7 @@ echo.
 echo      Если нужно просто играть, собирать ничего не надо: распакуй
 echo      VelloraClient-Windows.zip и запусти vellora.exe - это готовый лаунчер.
 echo.
-echo      Сейчас файл запущен из папки: %SRC%
+echo      Сейчас файл запущен из папки: "%SRC%"
 goto :fail
 :have_sources
 
@@ -66,7 +66,27 @@ call :ensure "git --version" Git.Git
 call :ensure "cmake --version" Kitware.CMake
 call :ensure "ninja --version" Ninja-build.Ninja
 call :ensure "py -3 -c 0" Python.Python.3.12
-call :ensure "java -version" EclipseAdoptium.Temurin.17.JDK
+
+rem  Для сборки нужен JDK (компилятор javac), а не просто Java для игры: у игроков
+rem  Minecraft часто стоит только Java для запуска, и с ней сборка падает на CMake
+rem  ("Could NOT find Java (missing: Java_JAVAC_EXECUTABLE)").
+if defined JAVA_HOME set "JAVA_HOME=%JAVA_HOME:"=%"
+call :find_jdk
+if not defined JDK (
+    echo  Устанавливаю Java JDK 17 - она нужна для сборки ...
+    winget install --id EclipseAdoptium.Temurin.17.JDK -e --accept-package-agreements --accept-source-agreements --silent
+    call :find_jdk
+)
+if not defined JDK (
+    echo.
+    echo  [x] Не нашёл и не смог установить Java JDK. Установи JDK 17 вручную:
+    echo      https://adoptium.net  - потом запусти этот файл снова.
+    goto :fail
+)
+rem  CMake ищет Java через JAVA_HOME: пусть он указывает на найденный JDK, а если javac
+rem  есть только в PATH - не указывает никуда (иначе java и javac возьмутся из разных мест)
+if "%JDK%"=="PATH" set "JAVA_HOME="
+if not "%JDK%"=="PATH" set "JAVA_HOME=%JDK%"
 
 set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
 set "VSPATH="
@@ -139,18 +159,18 @@ rem ---------- 4. vcpkg - остальные библиотеки ----------
 echo.
 echo  [4/6] vcpkg ...
 if not exist "%WORK%\vcpkg\vcpkg.exe" (
-    if not exist "%WORK%\vcpkg\.git" git clone https://github.com/microsoft/vcpkg "%WORK%\vcpkg"
-    if errorlevel 1 goto :fail
+    rem  прошлое скачивание оборвалось: качаем заново
+    if exist "%WORK%\vcpkg" if not exist "%WORK%\vcpkg\bootstrap-vcpkg.bat" rmdir /s /q "%WORK%\vcpkg"
+    if not exist "%WORK%\vcpkg\.git" (
+        git clone https://github.com/microsoft/vcpkg "%WORK%\vcpkg"
+        if errorlevel 1 goto :fail
+    )
     call "%WORK%\vcpkg\bootstrap-vcpkg.bat" -disableMetrics
     if errorlevel 1 goto :fail
 ) else (
     echo  уже есть
 )
 set "VCPKG_ROOT=%WORK%\vcpkg"
-
-if not defined JAVA_HOME (
-    for /d %%j in ("%ProgramFiles%\Eclipse Adoptium\jdk-17*") do set "JAVA_HOME=%%j"
-)
 
 rem ---------- 5. сборка ----------
 echo.
@@ -195,6 +215,17 @@ if not errorlevel 1 exit /b 0
 echo  Устанавливаю %~2 ...
 winget install --id %~2 -e --accept-package-agreements --accept-source-agreements --silent
 set "INSTALLED=1"
+exit /b 0
+
+:find_jdk
+rem  JDK = папка JDK (с bin\javac.exe), или PATH, если javac есть в PATH, или пусто
+set "JDK="
+if defined JAVA_HOME if exist "%JAVA_HOME%\bin\javac.exe" set "JDK=%JAVA_HOME%"
+if defined JDK exit /b 0
+for /d %%j in ("%ProgramFiles%\Eclipse Adoptium\jdk-*" "%ProgramFiles%\Java\jdk*" "%ProgramFiles%\Microsoft\jdk-*" "%ProgramFiles%\Zulu\zulu*" "%ProgramFiles%\BellSoft\LibericaJDK*") do if exist "%%~j\bin\javac.exe" set "JDK=%%~j"
+if defined JDK exit /b 0
+where javac >nul 2>&1
+if not errorlevel 1 set "JDK=PATH"
 exit /b 0
 
 :fail
