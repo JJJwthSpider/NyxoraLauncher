@@ -1031,7 +1031,7 @@ QDialogButtonBox QPushButton {
 )QSS");
     // Windows gives menus, message boxes and lists fonts of their own: the pixel font of the theme there too
     // (a separate literal: MSVC limits one string literal to about 16 KB, and the one above is close)
-    qss += QStringLiteral("QMenu, QMessageBox, QMessageBox QLabel, QAbstractItemView, QToolTip { font-family: \"Tiny5\"; }\n");
+    qss += QStringLiteral("QMenu, QMessageBox, QMessageBox QLabel, QAbstractItemView, QToolTip { font-family: \"Tiny5\"; font-size: 12pt; }\n");
     if (m_variant == Variant::Lunar) {
         // crimson gradients over the burgundy night: selections, the main buttons and progress
         qss += QStringLiteral(R"QSS(
