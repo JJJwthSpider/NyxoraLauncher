@@ -82,8 +82,8 @@ def wings(id, ru, en, rarity, light, mid, dark, shape=None, tip=None, claw="#E8D
 # ---------------------------------------------------------------- head
 # the pieces with fine detail are drawn with shapes at three times the resolution (art/designs.py)
 item("crown", "head", "Корона", "Crown", "legendary", [designs.crown().layer(3, -4.4, "both")])
-item("horns", "head", "Рога демона", "Demon horns", "epic", [designs.horns("#3A1A20", "#C81F3A", "#1A0A0E").layer(1, -6.2, "both")])
-item("halo", "head", "Нимб", "Halo", "legendary", [designs.halo().layer(3, -5.6, "both", "bob")])
+item("horns", "head", "Рога демона", "Demon horns", "epic", [designs.horns("#3A1A20", "#C81F3A", "#1A0A0E").layer(1, -7.2, "both")])
+item("halo", "head", "Нимб", "Halo", "legendary", [designs.halo().layer(3, -4.6, "both", "bob")])
 item("wizard_hat", "head", "Шляпа мага", "Wizard hat", "epic", [designs.wizard_hat("#8E1428", "#5A0A18", BLACK).layer(1, -10.2, "both")])
 item("cat_ears", "head", "Кошачьи уши", "Cat ears", "rare", [designs.pointy_ears("#1A0A0E", "#E87A90", tall=5.2).layer(3, -5.2, "both")])
 item("bunny_ears", "head", "Заячьи уши", "Bunny ears", "rare",
@@ -414,7 +414,7 @@ item("golden_wreath", "head", "Золотой венок", "Golden wreath", "leg
 item("oni_mask", "head", "Маска они", "Oni mask", "legendary", [designs.oni_mask().layer(4, 0), designs.mask_horns().layer(2, -3.6, "both")])
 item("witch_hat", "head", "Шляпа ведьмы", "Witch hat", "epic", [designs.wizard_hat("#3A1A4A", "#22102E", "#5BB04E", stars=None).layer(1, -10.2, "both")])
 item("bone_horns", "head", "Костяные рога", "Bone horns", "epic",
-     [designs.horns("#E8DCC8", "#8A7A5A", "#9C8A6A", spread=4.2, back=0.4).layer(1, -6.2, "both")])
+     [designs.horns("#E8DCC8", "#8A7A5A", "#9C8A6A", spread=4.2, back=0.4).layer(1, -7.2, "both")])
 # body
 item("dragon_amulet", "body", "Амулет дракона", "Dragon amulet", "legendary", [designs.dragon_amulet().layer(4.5, 8)])
 item("crystal_necklace", "body", "Кристалл на цепочке", "Crystal pendant", "epic",

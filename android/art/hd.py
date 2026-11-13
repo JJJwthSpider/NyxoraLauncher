@@ -132,12 +132,16 @@ def ramp(color):
     tones = []
     for t in (-2, -1, 0, 1, 2):
         if t < 0:
+            # a shadow is the same paint with less light: darker, a little purer, leaning to blue-violet. It is worked
+            # out from the colour's purity against its own brightness (HSV): a pale colour (bone, cream, white) keeps a
+            # pale shadow, where the lightness scale (HLS) would turn it vivid orange. A pale colour leans less, too.
             k = -t
-            hh = hue_toward(h, 0.70, 0.07 * k)          # shadows lean to blue-violet
-            ss = min(1.0, s * (1 + 0.10 * k) + 0.03 * k)
-            ll = l * (1 - 0.19 * k * contrast)
-            if l < 0.12:
-                ll = max(0.02, l * (1 - 0.30 * k))
+            hv, sv, vv = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+            lean = 0.07 * k * (0.35 + 0.65 * min(1.0, sv / 0.4))
+            dark = max(0.03, vv * (1 - 0.30 * k)) if l < 0.12 else vv * (1 - 0.19 * k * contrast)
+            rr, gg, bb = colorsys.hsv_to_rgb(hue_toward(hv, 0.70, lean), min(1.0, sv * (1 + 0.10 * k) + 0.03 * k), max(0.0, dark))
+            tones.append((round(rr * 255), round(gg * 255), round(bb * 255), a))
+            continue
         elif t > 0:
             hh = hue_toward(h, 0.15, 0.06 * t)           # lights lean to warm yellow
             ss = s * (1 - 0.08 * t)

@@ -115,17 +115,16 @@ def wizard_hat(main, shade, band, buckle=GOLD, stars=GOLD_L):
     return s
 
 
-def halo(gold=GOLD, gold_dark=GOLD_D, glow=GOLD_L):
-    """a halo seen a little from above: a ring with a light inner rim and a darker underside"""
-    s = Sprite(10, 3.2)
-    s.ellipse(0, 0, 10, 3.2, gold_dark)
-    s.ellipse(0, 0, 10, 2.7, gold)
-    s.ellipse(0.9, 0.55, 9.1, 2.35, glow)
-    s.ellipse(1.5, 0.9, 8.5, 2.25, None)
+def halo(gold=GOLD, gold_dark=GOLD_D):
+    """a halo: a thin band that the renderers bend into a ring over the head (as they do with crowns), its underside
+    darker"""
+    s = Sprite(10, 1.2)
+    s.rect(0, 0, 10, 1.2, gold)
+    s.rect(0, 0.8, 10, 1.2, gold_dark)
     return s
 
 
-def ram_horns(color, ridge, tip=None):
+def ram_horns(color, ridge, tip=None, face_top=2.2):
     """ram horns: a thick ridged horn curling round beside each ear"""
     s = Sprite(16, 7.5)
     for side in (-1, 1):
@@ -144,6 +143,9 @@ def ram_horns(color, ridge, tip=None):
             s.line([outer[k], inner[k]], ridge, 1 / 3)
         if tip:
             s.poly(outer[13:] + inner[13:][::-1], tip)
+    # the horns curl beside the head, not over the face: what would lie on the face (x 4..12 of the figure, below
+    # the top of the head) is cut away
+    s.rect(4, face_top, 12, 7.5, None)
     return s
 
 
