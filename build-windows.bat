@@ -1,31 +1,31 @@
 @echo off
 chcp 65001 >nul
 setlocal EnableExtensions
-title Сборка Vellora Client
+title Сборка Nyxora Launcher
 
 rem ======================================================================
-rem  Vellora Client: сборка для Windows одним файлом.
+rem  Nyxora Launcher: сборка для Windows одним файлом.
 rem  Ставит недостающие программы (winget), скачивает Qt и библиотеки,
 rem  собирает лаунчер и кладёт ярлык на рабочий стол.
 rem ======================================================================
 
 set "SRC=%~dp0"
 if "%SRC:~-1%"=="\" set "SRC=%SRC:~0,-1%"
-set "WORK=C:\Vellora"
+set "WORK=C:\Nyxora"
 set "QT_VERSION=6.8.3"
 set "QTDIR=%WORK%\Qt\%QT_VERSION%\msvc2022_64"
-set "OUT=%WORK%\Vellora Client"
+set "OUT=%WORK%\Nyxora Launcher"
 set "LOG=%WORK%\build-log.txt"
 
 echo.
 echo  ================================================================
-echo    Vellora Client - сборка для Windows
+echo    Nyxora Launcher - сборка для Windows
 echo  ================================================================
 echo   Скрипт сам скачает всё нужное и соберёт лаунчер.
 echo   Нужно около 10 ГБ свободного места на диске C: и интернет.
 echo   Первый раз это займёт 30-90 минут, потом - несколько минут.
 echo   Готовый лаунчер появится в папке:  %OUT%
-echo   и ярлык "Vellora Client" на рабочем столе.
+echo   и ярлык "Nyxora Launcher" на рабочем столе.
 echo.
 pause
 
@@ -38,11 +38,11 @@ echo  [x] Рядом с build-windows.bat нет исходного кода - �
 echo      Скорее всего, этот файл запущен прямо из zip-архива.
 echo.
 echo      Что сделать:
-echo        1. Правой кнопкой по архиву VelloraClient-src.zip - «Извлечь все...» - «Извлечь».
+echo        1. Правой кнопкой по архиву NyxoraLauncher-src.zip - «Извлечь все...» - «Извлечь».
 echo        2. Открой распакованную папку и запусти build-windows.bat уже из неё.
 echo.
 echo      Если нужно просто играть, собирать ничего не надо: распакуй
-echo      VelloraClient-Windows.zip и запусти vellora.exe - это готовый лаунчер.
+echo      NyxoraLauncher-Windows.zip и запусти nyxora.exe - это готовый лаунчер.
 echo.
 echo      Сейчас файл запущен из папки: "%SRC%"
 goto :fail
@@ -197,12 +197,12 @@ if errorlevel 1 (
     powershell -NoProfile -Command "Get-Content -Tail 60 '%LOG%'"
     goto :fail
 )
-powershell -NoProfile -Command "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop')+'\Vellora Client.lnk'); $s.TargetPath='%OUT%\vellora.exe'; $s.WorkingDirectory='%OUT%'; $s.Save()"
+powershell -NoProfile -Command "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop')+'\Nyxora Launcher.lnk'); $s.TargetPath='%OUT%\nyxora.exe'; $s.WorkingDirectory='%OUT%'; $s.Save()"
 
 echo.
 echo  ================================================================
-echo   ГОТОВО. Лаунчер собран:  %OUT%\vellora.exe
-echo   На рабочем столе есть ярлык "Vellora Client".
+echo   ГОТОВО. Лаунчер собран:  %OUT%\nyxora.exe
+echo   На рабочем столе есть ярлык "Nyxora Launcher".
 echo  ================================================================
 explorer "%OUT%"
 pause

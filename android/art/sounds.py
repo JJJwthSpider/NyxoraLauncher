@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The sounds and the music of Vellora, made here (no samples from anyone): soft and round, like a music box in a
+"""The sounds and the music of Nyxora, made here (no samples from anyone): soft and round, like a music box in a
 quiet room. The same files for the phone (android/assets) and the desktop launcher (launcher/resources/sculk_theme).
 
 UI sounds (22050 Hz, mono): marimba "tok"s and small bells with a little room echo.

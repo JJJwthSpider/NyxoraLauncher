@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * The main screen, made like Millida Launcher in Vellora's colours: the lobby (picture tiles on the left, the player in
+ * The main screen, made like Millida Launcher in Nyxora's colours: the lobby (picture tiles on the left, the player in
  * the middle, Arkan the wizard on the right, "Сегодня играем" with a big Play button below) and the library (search,
  * "Мои сборки" and what to do with the selected one); the catalog opens from the tabs at the top.
  */
@@ -497,7 +497,7 @@ final class HomeScreen {
         LinearLayout texts = new LinearLayout(activity);
         texts.setOrientation(LinearLayout.VERTICAL);
         texts.setPadding(dp(12), dp(10), dp(96), 0);
-        texts.addView(tight(Ui.label(activity, "ИИ-МАГ × VELLORA", 9, Ui.HINT, true)));
+        texts.addView(tight(Ui.label(activity, "ИИ-МАГ × NYXORA", 9, Ui.HINT, true)));
         TextView headline = tight(Ui.label(activity, "СОБЕРИ СБОРКУ", 17, Ui.TEXT, true));
         headline.setPadding(0, dp(4), 0, 0);
         texts.addView(headline);
@@ -581,7 +581,7 @@ final class HomeScreen {
         texts.setOrientation(LinearLayout.VERTICAL);
         texts.setGravity(Gravity.CENTER_VERTICAL);
         texts.setPadding(dp(136), dp(8), dp(10), dp(8));
-        TextView tag = Ui.label(activity, "Vellora", 9, Ui.TEXT, true);
+        TextView tag = Ui.label(activity, "Nyxora", 9, Ui.TEXT, true);
         tag.setPadding(dp(5), dp(1), dp(5), dp(2));
         tag.setBackgroundColor(0xFFB3263A);
         texts.addView(tag, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));

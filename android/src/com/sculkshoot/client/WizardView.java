@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Arkan, Vellora's AI pack builder, as a 3D mob in the style of a Minecraft mod: the old hooded wizard made of boxes
+ * Arkan, Nyxora's AI pack builder, as a 3D mob in the style of a Minecraft mod: the old hooded wizard made of boxes
  * with a pixel texture (assets/arkan_model.json and arkan.png, made by art/arkan3d.py), drawn here with the same
  * software renderer as the player (CharacterView): a deep burgundy hood with a crimson rim stitched with gold and its
  * top falling back, the face lost in its shadow with only the red eyes glowing, a silver beard, a cloak with gold edges,
@@ -144,7 +144,7 @@ final class WizardView extends View {
             m.tex = new int[m.tw * m.th];
             texture.getPixels(m.tex, 0, m.tw, 0, 0, m.tw, m.th);
         } catch (Exception e) {
-            android.util.Log.w("Vellora", "Arkan's model did not load: " + e);
+            android.util.Log.w("Nyxora", "Arkan's model did not load: " + e);
             m.boxes.clear();  // no model: the view stays empty rather than crashing
         }
         model = m;

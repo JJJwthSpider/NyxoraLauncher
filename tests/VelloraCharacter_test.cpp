@@ -89,7 +89,7 @@ class VelloraCharacterTest : public QObject {
         QVERIFY2(phases.size() >= 3, "the edges fall only on the stretched dots: the frame is not in screen pixels");
     }
 
-    /// the look for the game (the Vellora Cosmetics mod): boxes on the parts of the Minecraft player model
+    /// the look for the game (the Nyxora Cosmetics mod): boxes on the parts of the Minecraft player model
     void exportLook()
     {
         QTemporaryDir dir;

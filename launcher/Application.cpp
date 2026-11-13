@@ -588,8 +588,13 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     {
         bool migrated = false;
 
-        // Lullaby Launcher was called SculkShoot Client before: bring its instances, accounts and chats along
+        // Nyxora Launcher was called Vellora Client before: bring its instances, accounts and chats along
         migrated = handleDataMigration(
+            dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../VelloraClient"), "Vellora Client",
+            "vellora.cfg");
+        // and SculkShoot Client before that
+        if (!migrated)
+            migrated = handleDataMigration(
             dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../SculkShootClient"),
             "SculkShoot Client", "sculkshoot.cfg");
         if (!migrated)
@@ -650,12 +655,13 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     // Initialize application settings
     {
         // Provide a fallback for migration from PolyMC
-        m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
+        // the settings of Vellora Client (vellora.cfg) are read when the portable folder is unpacked over the old one
+        m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "vellora.cfg", "polymc.cfg", "multimc.cfg" }, this));
 
         // Theming
         m_settings->registerSetting("IconTheme", QString());
         m_settings->registerSetting("ApplicationTheme", QString());
-        // Vellora: the "add a Microsoft account" page is shown once; after that the lobby's "Sign in" is enough
+        // Nyxora: the "add a Microsoft account" page is shown once; after that the lobby's "Sign in" is enough
         m_settings->registerSetting("VelloraLoginAsked", false);
         m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
@@ -1250,7 +1256,7 @@ bool Application::createSetupWizard()
             m_themeManager->applyCurrentlySelectedTheme();
         }
     }
-    // the launcher became Vellora Client: the burgundy red rain look (theme id "lunar") once for everyone
+    // the launcher became Nyxora Launcher: the burgundy red rain look (theme id "lunar") once for everyone
     if (!settings()->get("VelloraDesignApplied").toBool()) {
         settings()->set("VelloraDesignApplied", true);
         settings()->set("ApplicationTheme", QString("lunar"));
@@ -1267,7 +1273,7 @@ bool Application::createSetupWizard()
         if (!validIcons)
             settings()->set("IconTheme", QString("lunar"));
         if (!validWidgets) {
-            // the Vellora theme (id "lunar") is the default look of the launcher
+            // the Nyxora theme (id "lunar") is the default look of the launcher
             const QString style = QStringLiteral("lunar");
             settings()->set("ApplicationTheme", style);
         }
@@ -1575,7 +1581,7 @@ bool Application::launch(BaseInstance* instance,
                 return false;
             }
         }
-        // the player's look in the game: the Vellora Cosmetics mod and the skin, the cape and the accessories
+        // the player's look in the game: the Nyxora Cosmetics mod and the skin, the cape and the accessories
         VelloraLook::prepare(instance);
         auto& controller = extras.controller;
         controller.reset(new LaunchController());

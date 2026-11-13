@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds Vellora Client for Android (VelloraClient.apk) without Gradle or the Google SDK download:
+# Builds Nyxora Launcher for Android (NyxoraLauncher.apk) without Gradle or the Google SDK download:
 # only the Ubuntu/Debian packages aapt, android-sdk-platform-23, dalvik-exchange (dx), zipalign and apksigner.
 #   sudo apt install aapt android-sdk-platform-23 dalvik-exchange zipalign apksigner openjdk-17-jdk-headless
 # The app is signed with android/release.jks if it exists (KEYSTORE_PASS must hold its password),
@@ -32,6 +32,6 @@ else
     [ -f "$KEY" ] || keytool -genkeypair -keystore "$KEY" -storepass "$PASS" -keypass "$PASS" -alias sculkshoot \
         -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Lullaby Launcher" >/dev/null 2>&1
 fi
-apksigner sign --v4-signing-enabled false --ks "$KEY" --ks-pass "pass:$PASS" --out VelloraClient.apk "$OUT/apk/aligned.apk"
-apksigner verify VelloraClient.apk
-echo "Built $(pwd)/VelloraClient.apk ($(du -h VelloraClient.apk | cut -f1))"
+apksigner sign --v4-signing-enabled false --ks "$KEY" --ks-pass "pass:$PASS" --out NyxoraLauncher.apk "$OUT/apk/aligned.apk"
+apksigner verify NyxoraLauncher.apk
+echo "Built $(pwd)/NyxoraLauncher.apk ($(du -h NyxoraLauncher.apk | cut -f1))"

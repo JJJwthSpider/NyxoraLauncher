@@ -156,6 +156,8 @@ EMBLEMS = {
                                  s.ellipse(cx - 0.5, cy - 0.5, cx + 0.5, cy + 0.5, None)),
     "snow": lambda s, cx, cy, c: [s.line([(cx - math.cos(a) * 1.6, cy - math.sin(a) * 1.6), (cx + math.cos(a) * 1.6, cy + math.sin(a) * 1.6)], c, 0.34)
                                   for a in (math.pi / 2, math.pi / 6, -math.pi / 6)],
+    "n": lambda s, cx, cy, c: (s.rect(cx - 1.6, cy - 1.5, cx - 0.8, cy + 1.5, c), s.rect(cx + 0.8, cy - 1.5, cx + 1.6, cy + 1.5, c),
+                               s.poly([(cx - 1.6, cy - 1.5), (cx - 0.7, cy - 1.5), (cx + 1.6, cy + 1.5), (cx + 0.7, cy + 1.5)], c)),
     "v": lambda s, cx, cy, c: s.poly([(cx - 1.7, cy - 1.2), (cx - 0.8, cy - 1.2), (cx, cy + 0.4), (cx + 0.8, cy - 1.2), (cx + 1.7, cy - 1.2), (cx, cy + 1.6)], c),
     "diamond": lambda s, cx, cy, c: s.poly([(cx, cy - 1.5), (cx + 1.1, cy), (cx, cy + 1.5), (cx - 1.1, cy)], c),
 }

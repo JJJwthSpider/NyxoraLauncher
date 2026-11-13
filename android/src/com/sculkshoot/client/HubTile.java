@@ -12,7 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
- * A tile of the lobby, drawn the way Millida Launcher draws its tiles, in Vellora's burgundy: a dark outline with cut
+ * A tile of the lobby, drawn the way Millida Launcher draws its tiles, in Nyxora's burgundy: a dark outline with cut
  * corners, a plate in the colour of the section, hard rays behind the picture, the picture standing on the tile (it may
  * rise above the top edge), and the name on a dense band over the bottom. A "!" or a ribbon can call for attention.
  */

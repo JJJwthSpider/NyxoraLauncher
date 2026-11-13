@@ -37,7 +37,7 @@ class QPushButton;
 class QToolButton;
 class QVBoxLayout;
 
-/// The "Create" tab of Vellora Client, made like Millida Launcher's "Новая сборка": the name, the loader as tiles with
+/// The "Create" tab of Nyxora Launcher, made like Millida Launcher's "Новая сборка": the name, the loader as tiles with
 /// a sign (a loader that does not exist for the version says why), the Minecraft version as a grid with a search and a
 /// snapshots switch, "Build with AI" and "Create"; next to it the ready packs: ideas Arkan assembles and the most popular
 /// modpacks on Modrinth, installed with one click.

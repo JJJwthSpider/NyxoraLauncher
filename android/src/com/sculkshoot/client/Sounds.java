@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * The interface sounds, like Millida Launcher's: a blip when a tab changes ("nav"), a sweep when a screen opens or
- * closes, a tick, a sparkle when an item is put on, a chord on Play. The sounds are Vellora's own (art/sounds.py), short
+ * closes, a tick, a sparkle when an item is put on, a chord on Play. The sounds are Nyxora's own (art/sounds.py), short
  * and quiet; the 🔊 button in the lobby turns them off. The music ("Crimson Rain", a calm loop) plays in the menu and pauses
  * in the game and in the background; 🎵 turns it off.
  */

@@ -41,10 +41,10 @@ class SculkAmbience : public QObject {
     static bool enabled();
 
     /// draws the pulse of the veins (aligned with the texture through textureOffset) and the particles;
-    /// in the Vellora theme (id "lunar"): red rain with splashes and faint red flashes
+    /// in the Nyxora theme (id "lunar"): red rain with splashes and faint red flashes
     void paint(QPainter* painter, const QRect& rect, const QPoint& textureOffset, const QColor& glow, int pixelSize = 4);
 
-    /// the still part of the Vellora background: a dark burgundy night with a red glow from below
+    /// the still part of the Nyxora background: a dark burgundy night with a red glow from below
     static QPixmap moonScene(const QSize& size, qreal devicePixelRatio);
 
    private:

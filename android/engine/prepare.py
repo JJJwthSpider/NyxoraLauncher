@@ -100,20 +100,20 @@ for name in os.listdir(os.path.join(ANDROID, "assets")):
 
 # --- the manifest: Lullaby's menu, its file provider, the apps whose Java it can take ---------------------
 edit(os.path.join(MAIN, "AndroidManifest.xml"),
-     ('android:label="@string/app_name"\n        android:process=":launcher"', 'android:label="Vellora Client"\n        android:process=":launcher"'),
+     ('android:label="@string/app_name"\n        android:process=":launcher"', 'android:label="Nyxora Launcher"\n        android:process=":launcher"'),
      ('android:roundIcon="@mipmap/ic_launcher_round"', 'android:roundIcon="@mipmap/ic_launcher"'),
      ('''            android:name=".TestStorageActivity"
             android:exported="true"
             android:label="@string/app_short_name"''', '''            android:name=".TestStorageActivity"
             android:exported="true"
-            android:label="Vellora Client"'''),
+            android:label="Nyxora Launcher"'''),
      ('''        <activity
             android:name=".LauncherActivity"''', f'''        <activity
             android:name="{PACKAGE}.MainActivity"
             android:exported="false"
             android:theme="@style/SculkTheme"
             android:screenOrientation="sensorLandscape"
-            android:label="Vellora Client"
+            android:label="Nyxora Launcher"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" />
         <provider

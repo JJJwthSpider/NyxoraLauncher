@@ -1,7 +1,7 @@
 #!/bin/bash
-# Builds Vellora Client for Windows (64 bit) on Linux, without Windows: MinGW-w64 GCC (posix threads), Qt 6.4.2 for
+# Builds Nyxora Launcher for Windows (64 bit) on Linux, without Windows: MinGW-w64 GCC (posix threads), Qt 6.4.2 for
 # MinGW (aqtinstall), the libraries from MSYS2 (libarchive, qrencode, zlib, toml++ and the GCC runtime) and cmark built
-# here. The result is a portable folder and VelloraClient-Windows.zip: unpack it anywhere and start vellora.exe.
+# here. The result is a portable folder and NyxoraLauncher-Windows.zip: unpack it anywhere and start nyxora.exe.
 #
 # Needs: g++-mingw-w64-x86-64-posix, cmake, ninja, zstd, python3 (pip: aqtinstall), Java (for the jars), the Qt 6.4 tools
 # of the Linux build (moc, rcc, uic, lrelease) and extra-cmake-modules.
@@ -79,7 +79,7 @@ export PKG_CONFIG_SYSROOT_DIR="$W/sysroot"
 cmake -S "$SRC" -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE="$W/toolchain.cmake" -DCMAKE_BUILD_TYPE=Release \
       -DQT_HOST_PATH=/usr -DQT_HOST_PATH_CMAKE_DIR=/usr/lib/x86_64-linux-gnu/cmake \
       -DCMAKE_PREFIX_PATH="$W/qt/6.4.2/mingw_64;$W/prefix;$W/sysroot/mingw64" \
-      -DLauncher_APP_BINARY_NAME=vellora -DLauncher_USE_PCH=OFF -DCMAKE_INSTALL_PREFIX="$W/install" -DBUILD_TESTING=OFF
+      -DLauncher_APP_BINARY_NAME=nyxora -DLauncher_USE_PCH=OFF -DCMAKE_INSTALL_PREFIX="$W/install" -DBUILD_TESTING=OFF
 ninja -C build
 rm -rf install
 cmake --install build
@@ -123,6 +123,6 @@ while todo:
 print('bundled', len([d for d in done if os.path.exists(os.path.join(out, d))]), 'DLLs')
 EOF
 printf '[Paths]\nPlugins = .\n' > install/qt.conf
-rm -f VelloraClient-Windows.zip
-(cd install && zip -qr9 "$W/VelloraClient-Windows.zip" .)
-echo "Built $W/VelloraClient-Windows.zip ($(du -h "$W/VelloraClient-Windows.zip" | cut -f1))"
+rm -f NyxoraLauncher-Windows.zip
+(cd install && zip -qr9 "$W/NyxoraLauncher-Windows.zip" .)
+echo "Built $W/NyxoraLauncher-Windows.zip ($(du -h "$W/NyxoraLauncher-Windows.zip" | cut -f1))"

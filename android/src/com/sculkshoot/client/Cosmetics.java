@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The wardrobe of Vellora, like the cosmetics of Millida Launcher: head, body, back, pets, effects and emotes, every one
+ * The wardrobe of Nyxora, like the cosmetics of Millida Launcher: head, body, back, pets, effects and emotes, every one
  * open for free. The items are pixel art described once in assets/cosmetics.json (written by art/cosmetics.py; the
  * desktop launcher draws the same file) and drawn on the character in the launcher. In the game only the real Minecraft
  * capes of the account are seen.

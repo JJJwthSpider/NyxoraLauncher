@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Arkan, Vellora's AI wizard, as a 3D mob in the style of a Minecraft mod: a model of boxes and its texture.
+"""Arkan, Nyxora's AI wizard, as a 3D mob in the style of a Minecraft mod: a model of boxes and its texture.
 
 It is the old pixel-art Arkan made of boxes: a deep burgundy hood with its pointed top falling back to the left (a gold
 tip at the end) and a crimson rim stitched with gold around the opening, the face lost in the shadow of the hood with

@@ -13,7 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 
 /**
- * The background of Vellora Client: a dark burgundy night with red rain falling slantwise, small splashes on the
+ * The background of Nyxora Launcher: a dark burgundy night with red rain falling slantwise, small splashes on the
  * ground, a red glow from below and now and then a faint red flash. It animates by itself while it is on screen
  * (about 30 frames a second) and stops when its view is gone.
  */

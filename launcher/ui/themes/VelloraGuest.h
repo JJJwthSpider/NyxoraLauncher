@@ -21,7 +21,7 @@
 
 class QWidget;
 
-/// The guest of Vellora Client, like Millida's: a nickname without a Microsoft account. A guest uses the launcher
+/// The guest of Nyxora Launcher, like Millida's: a nickname without a Microsoft account. A guest uses the launcher
 /// (instances, mods, the catalog, the wardrobe), but not the AI (Arkan's agent, the AI skin and cape generators), and
 /// plays the official Minecraft demo (Mojang's free trial), as Prism Launcher does for a player without an account that
 /// owns the game; the full game is checked through the Microsoft account that bought it.

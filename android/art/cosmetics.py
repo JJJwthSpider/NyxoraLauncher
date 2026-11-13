@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The wardrobe of Vellora Client: every accessory as pixel art, written once and drawn by both apps.
+"""The wardrobe of Nyxora Launcher: every accessory as pixel art, written once and drawn by both apps.
 
 Writes android/assets/cosmetics.json (Android: Cosmetics.java) and launcher/resources/sculk_theme/cosmetics.json
 (desktop: VelloraCharacter.cpp). Coordinates are "skin pixels" of the 16x32 figure: the head is x 4..12, y 0..8, the
@@ -274,7 +274,8 @@ item("thick_chain", "body", "Толстая цепь", "Thick chain", "epic", [L
 item("cross_necklace", "body", "Крестик", "Cross", "rare", [L(5, 9, ["a....a", ".a..a.", "..ab..", ".bbbb.", "..bb..", "..bb.."], {"a": "#C9C2C8", "b": GOLD})])
 item("tesseract_amulet", "body", "Амулет тессеракта", "Tesseract amulet", "legendary",
      [L(5, 9, ["a....a", ".a..a.", "..aa..", ".bccb.", ".cddc.", ".bccb."], {"a": GOLD, "b": RUBY, "c": "#7A0F22", "d": "#FFC8CD"})])
-item("v_badge", "body", "Значок V", "V badge", "rare", [L(9, 10, ["a.a", "a.a", ".a."], {"a": RUBY})])
+# the badge and the cloak of the launcher carry its letter; their ids are from the time it was called Vellora
+item("v_badge", "body", "Значок N", "N badge", "rare", [L(8, 10, ["a..a", "aa.a", "a.aa", "a..a"], {"a": RUBY})])
 item("heart_badge", "body", "Значок-сердце", "Heart badge", "common", [L(9, 10, ["a.a", "aaa", ".a."], {"a": "#FF5A8A"})])
 item("star_badge", "body", "Значок-звезда", "Star badge", "common", [L(9, 10, [".a.", "aaa", "a.a"], {"a": "#FFD23C"})])
 item("suspenders", "body", "Подтяжки", "Suspenders", "common", [L(5, 8, ["a....a"] * 11, {"a": "#2C5BD6"}, "both")])
@@ -313,7 +314,7 @@ cape("royal_cape", "Королевская мантия", "Royal mantle", "legen
 cape("forest_cape", "Лесной плащ", "Forest cloak", "rare", "#2E6B32", "#5BB04E", "#1E4A22", "leaf", "#8A5A2E")
 cape("shadow_cape", "Плащ тени", "Shadow cloak", "epic", "#16101C", RUBY, "#0A060E", "eye", RUBY)
 cape("snow_cape", "Снежный плащ", "Snow cloak", "rare", WHITE, "#5CB6FF", "#BFE6FF", "snow", "#5CB6FF")
-cape("vellora_cape", "Плащ Vellora", "Vellora cloak", "legendary", "#5A0A18", RUBY, "#2A0A12", "v", RUBY)
+cape("vellora_cape", "Плащ Nyxora", "Nyxora cloak", "legendary", "#5A0A18", RUBY, "#2A0A12", "n", RUBY)
 item("quiver", "back", "Колчан со стрелами", "Quiver", "rare",
      [L(8, 5, ["a.a.", "bbbb", "cccc", "cddc", "cccc", "cddc", "cccc", "cccc", ".cc."], {"a": WHITE, "b": "#8A5A2E", "c": "#6E3A1E", "d": GOLD}, "back")])
 item("guitar_back", "back", "Гитара за спиной", "Guitar", "epic",
@@ -455,7 +456,7 @@ OUTFITS = [
     {"title": "Хэллоуин", "titleEn": "Halloween", "head": "pumpkin_head", "back": "bat_wings", "body": "bell_collar", "pet": "ghost_pet", "effect": "embers", "hand": "lantern"},
     {"title": "Праздник", "titleEn": "Party", "head": "party_hat", "back": "", "body": "flower_lei", "pet": "bunny_pet", "effect": "confetti", "hand": "heart_balloon"},
     {"title": "Шахтёр", "titleEn": "Miner", "head": "pilot_goggles", "back": "blue_backpack", "body": "tool_belt", "pet": "creeper_pet", "effect": "", "hand": "pickaxe"},
-    {"title": "Повелитель Vellora", "titleEn": "Vellora lord", "head": "devil_crown", "back": "vellora_cape", "body": "v_badge", "pet": "sculk_pet", "effect": "crimson_aura", "hand": "talisman"},
+    {"title": "Повелитель Nyxora", "titleEn": "Nyxora lord", "head": "devil_crown", "back": "vellora_cape", "body": "v_badge", "pet": "sculk_pet", "effect": "crimson_aura", "hand": "talisman"},
     {"title": "Морской волк", "titleEn": "Sea wolf", "head": "bandana_head", "back": "surfboard", "body": "bandolier", "pet": "turtle_pet", "effect": "bubbles", "hand": "trident"},
     {"title": "Единорог", "titleEn": "Unicorn", "head": "unicorn_horn", "back": "butterfly_wings", "body": "heart_badge", "pet": "jelly_pet", "effect": "sparkles", "hand": "lollipop"},
     {"title": "Архангел", "titleEn": "Archangel", "head": "halo", "back": "archangel_wings", "body": "crystal_necklace", "pet": "spirit_pet", "effect": "sparkles", "hand": "excalibur"},

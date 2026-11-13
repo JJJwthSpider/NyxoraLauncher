@@ -344,7 +344,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // The launch panel on the left: AI agent, ready packs, new instance
     {
-        // Vellora, like Millida Launcher: two pages, the lobby and the library (the launch panel and the instances)
+        // Nyxora, like Millida Launcher: two pages, the lobby and the library (the launch panel and the instances)
         m_pages = new QStackedWidget(ui->centralWidget);
         m_lobby = new VelloraLobby(m_pages);
         auto* libraryPage = new QWidget(m_pages);
@@ -744,7 +744,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     retranslateUi();
 
-    // Vellora opens on the lobby, like Millida Launcher
+    // Nyxora opens on the lobby, like Millida Launcher
     showLobbyPage(true);
     // like Millida: no status bar (the hours played are on the Play button), no tool bars; the shortcuts of their
     // actions still work from the window
@@ -921,7 +921,7 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
 void MainWindow::updateMainToolBar()
 {
     ui->menuBar->setVisible(APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
-    // Vellora, like Millida: no tool bar; its actions are in the lobby's chips, the headers and "⋯"
+    // Nyxora, like Millida: no tool bar; its actions are in the lobby's chips, the headers and "⋯"
     ui->mainToolBar->setVisible(false);
 }
 
@@ -1387,7 +1387,7 @@ void MainWindow::updateLaunchPanelProfile()
     m_launchPanel->setProfile(account->profileName(), account->getFace(32, 32));
     if (m_lobby) {
         const auto& profile = account->accountData()->minecraftProfile;
-        // a cape from the generator, chosen in the wardrobe, shows instead of the account's one (in Vellora only)
+        // a cape from the generator, chosen in the wardrobe, shows instead of the account's one (in Nyxora only)
         QByteArray capePng = profile.capes.value(profile.currentCape).data;
         const QImage generated = WardrobeDialog::generatedCape();
         if (!generated.isNull()) {

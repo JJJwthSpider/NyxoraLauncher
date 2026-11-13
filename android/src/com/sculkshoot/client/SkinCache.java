@@ -13,7 +13,7 @@ import java.io.FileOutputStream;
 /**
  * The player's skin and cape kept on the phone, so the lobby shows them at once, also without internet or when
  * Mojang's texture server is slow (before, every start fetched them again and the player stayed a shadow when that
- * failed). A cape made by the generator is kept here too; it shows in Vellora.
+ * failed). A cape made by the generator is kept here too; it shows in Nyxora.
  */
 final class SkinCache {
     private SkinCache() {}

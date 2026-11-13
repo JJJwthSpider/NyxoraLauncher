@@ -11,7 +11,7 @@ import java.net.URLEncoder;
 final class Http {
     private Http() {}
 
-    static final String USER_AGENT = "Vellora-Client-Android/1.0 (github.com/nvsdjonvljw/Script)";
+    static final String USER_AGENT = "Nyxora-Launcher-Android/1.0 (github.com/nvsdjonvljw/Script)";
 
     static final class Response {
         final int status;

@@ -634,7 +634,7 @@ final class WardrobeScreen {
                                                  "👑 Принцесса", "🚀 Космонавт", "😈 Демон", "🤖 Кибер неон", "🧟 Зомби", "💀 Скелет", "🧝 Эльф",
                                                  "🪓 Викинг", "🖤 Чёрное худи с черепом", "🍷 Бордовый костюм" };
     private static final String[] CAPE_IDEAS = { "🌌 Галактика со звёздами", "🔥 Огненный", "❄ Ледяной", "👑 Золотой с короной", "💗 Розовый с сердцем",
-                                                 "🌈 Радуга", "🍷 Бордовый Vellora", "🌲 Лесной", "⚡ Синий с молнией", "🖤 Чёрно-красные полосы" };
+                                                 "🌈 Радуга", "🍷 Бордовый Nyxora", "🌲 Лесной", "⚡ Синий с молнией", "🖤 Чёрно-красные полосы" };
 
     /** the colours of the buttons: clothes and capes, hair, eyes, skin */
     private static final int[] CLOTH_COLORS = { 0xFFC62828, 0xFF6E1423, 0xFFEF7C1E, 0xFFE0A526, 0xFFF2C230, 0xFF3E9B47, 0xFF8BD13B, 0xFF23B5B5,
@@ -1381,13 +1381,13 @@ final class WardrobeScreen {
     private void showCapeActions(LinearLayout actions, final Bitmap cape) {
         actions.removeAllViews();
         actions.setVisibility(View.VISIBLE);
-        Button wear = Ui.button(activity, "Носить в Vellora", true);
+        Button wear = Ui.button(activity, "Носить в Nyxora", true);
         wear.setTextSize(12);
         wear.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 SkinCache.useGeneratedCape(activity, cape);
                 Sounds.play(Sounds.WEAR);
-                Toast.makeText(activity, "Плащ надет: он виден в лобби, в гардеробе и в игре на Fabric и Quilt 1.20.1 (Vellora сама ставит свой мод) — на тебе.",
+                Toast.makeText(activity, "Плащ надет: он виден в лобби, в гардеробе и в игре на Fabric и Quilt 1.20.1 (Nyxora сама ставит свой мод) — на тебе.",
                                Toast.LENGTH_LONG).show();
                 activity.accountChanged();
             }

@@ -22,7 +22,7 @@
 class BaseInstance;
 class MinecraftInstance;
 
-/// The player's look in the game: the Vellora Cosmetics mod (cosmetics-mod/, Fabric) shows the skin, the cape and the
+/// The player's look in the game: the Nyxora Cosmetics mod (cosmetics-mod/, Fabric) shows the skin, the cape and the
 /// accessories of the head, body and back slots from the launcher on the player of the game. Before every start the
 /// launcher puts the mod into a Fabric or Quilt instance of Minecraft 1.20.1 and writes the look into
 /// config/vellora-cosmetics/; from any other instance the mod is taken out (Fabric would refuse to start with it).

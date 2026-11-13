@@ -26,7 +26,7 @@
 #include <QTimer>
 #include <QWidget>
 
-/// The wardrobe of Vellora, like the cosmetics of Millida Launcher: pixel-art items drawn in code on the player in the
+/// The wardrobe of Nyxora, like the cosmetics of Millida Launcher: pixel-art items drawn in code on the player in the
 /// launcher (the same items as the Android app, android/src/.../Cosmetics.java). Only the real Minecraft capes of the
 /// account are seen in the game; the rest is for the launcher.
 namespace Cosmetics {
@@ -98,7 +98,7 @@ class VelloraCharacter : public QWidget {
                            const QString& pet, const QString& emote = QString(), const QString& effect = QString(), double time = 0,
                            const QString& hand = QString());
 
-    /// the look for the game (the Vellora Cosmetics mod): the accessories of the head, body and back slots as boxes on the parts
+    /// the look for the game (the Nyxora Cosmetics mod): the accessories of the head, body and back slots as boxes on the parts
     /// of the Minecraft player model (pets, things in the hand and effects stay in the launcher), the skin and the cape;
     /// written into `dir` as look.json, skin.png and cape.png. Returns false when the files could not be written.
     static bool exportLook(const QString& dir, const QImage& skin, bool slim, const QImage& cape, const QString& head, const QString& body,

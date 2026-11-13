@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "vellora_cosmetics",
   "version": "${version}",
-  "name": "Vellora Cosmetics",
-  "description": "Your look from the Vellora Client launcher in the game: your skin, your cape and the accessories on your head, body and back. Only you see them.",
-  "authors": ["Vellora Client"],
+  "name": "Nyxora Cosmetics",
+  "description": "Your look from the Nyxora Launcher in the game: your skin, your cape and the accessories on your head, body and back. Only you see them.",
+  "authors": ["Nyxora Launcher"],
   "license": "GPL-3.0-only",
   "environment": "client",
   "entrypoints": {

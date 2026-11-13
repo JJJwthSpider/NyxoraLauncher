@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Vellora Client's desktop icon: the user's picture (android/art/vellora_icons_source.png, object 1: a dark cube with a
-crimson glow and an orbit with a star in a glowing rounded frame), the same as the Android app (android/art/vellora_art.py).
+"""Nyxora Launcher's desktop icon: the picture the user sent (android/art/nyxora_icon_user.png: a glass cube inside a
+hexagon with an orbit, blue and violet, in a glowing rounded frame), the same as the Android app (android/art/nyxora_art.py).
 Writes the icon used inside the launcher (org.prismlauncher.PrismLauncher.svg: the picture inside an SVG), the 256 px
-PNG, vellora.ico (Windows) and vellora.icns (macOS).
-Run from the program_info directory:  python3 vellora_icon.py
+PNG, nyxora.ico (Windows) and nyxora.icns (macOS). The sizes of 16 to 32 pixels show the cube close up, without the
+frame: its thin line would vanish there.
+Run from the program_info directory:  python3 nyxora_icon.py
 """
 import base64
 import io
@@ -12,16 +13,18 @@ import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "android" / "art"))
-import vellora_art  # noqa: E402
+import nyxora_art  # noqa: E402
 
 from PIL import Image  # noqa: E402
 
 
 def main():
-    big = vellora_art.framed(None, 512)  # the icon picture the user sent
+    big = nyxora_art.framed(None, 512)  # the icon picture the user sent
     big.resize((256, 256), Image.LANCZOS).save(HERE / "org.prismlauncher.PrismLauncher_256.png")
-    big.save(HERE / "vellora.ico", sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
-    big.save(HERE / "vellora.icns")
+    sizes = [16, 24, 32, 48, 64, 128, 256]
+    pictures = [nyxora_art.small(s) if s <= 32 else big.resize((s, s), Image.LANCZOS) for s in sizes]
+    pictures[-1].save(HERE / "nyxora.ico", sizes=[(s, s) for s in sizes], append_images=pictures[:-1])
+    big.save(HERE / "nyxora.icns")
     data = io.BytesIO()
     big.save(data, "PNG", optimize=True)
     encoded = base64.b64encode(data.getvalue()).decode("ascii")

@@ -111,7 +111,7 @@ final class SkinGenerator {
                                                 { "звёзд", "star" }, { "star", "star" }, { "череп", "skull" }, { "skull", "skull" }, { "крипер", "creeper" },
                                                 { "creeper", "creeper" }, { "молни", "bolt" }, { "lightning", "bolt" }, { "flash", "bolt" }, { "лун", "moon" },
                                                 { "moon", "moon" }, { "огон", "flame" }, { "огн", "flame" }, { "пламя", "flame" }, { "fire", "flame" }, { "алмаз", "diamond" },
-                                                { "diamond", "diamond" }, { "корон", "crown" }, { "crown", "crown" }, { "vellora", "v" }, { "веллора", "v" } };
+                                                { "diamond", "diamond" }, { "корон", "crown" }, { "crown", "crown" }, { "nyxora", "n" }, { "никсора", "n" }, { "vellora", "v" }, { "веллора", "v" } };
 
     /** the looks: the words that call them, the look id */
     private static final String[][] THEMES = { { "рыцар", "knight" }, { "knight", "knight" }, { "латы", "knight" }, { "доспех", "knight" }, { "броня", "knight" },
@@ -322,7 +322,7 @@ final class SkinGenerator {
         boolean beard, glowEyes, eyepatch, gloves, longSleeves = true, belt;
     }
 
-    private static final String[] EMBLEM_CHOICES = { "heart", "star", "bolt", "moon", "flame", "diamond", "v", "" };
+    private static final String[] EMBLEM_CHOICES = { "heart", "star", "bolt", "moon", "flame", "diamond", "n", "" };
     private static final String[] HAIR_STYLES = { "short", "spiky", "long", "short", "bun", "mohawk" };
 
     private static Look look(String prompt, Random rnd, int variant, Options o) {
@@ -699,7 +699,7 @@ final class SkinGenerator {
     /* ------------------------------------------------------------ emblems: 5x5 pictures for the chest and capes */
 
     /** the emblems a button can choose, and their 5x5 pictures (the buttons draw them) */
-    static final String[] EMBLEM_IDS = { "heart", "star", "bolt", "moon", "flame", "diamond", "crown", "skull", "creeper", "v" };
+    static final String[] EMBLEM_IDS = { "heart", "star", "bolt", "moon", "flame", "diamond", "crown", "skull", "creeper", "n" };
 
     static String[] emblemRows(String id) {
         switch (id) {
@@ -712,7 +712,8 @@ final class SkinGenerator {
         case "flame": return new String[] { "..#..", ".##..", ".###.", "#####", ".###." };
         case "diamond": return new String[] { ".###.", "#####", ".###.", "..#..", "....." };
         case "crown": return new String[] { "#.#.#", "#####", "#####", ".....", "....." };
-        case "v": return new String[] { "#...#", "#...#", ".#.#.", ".#.#.", "..#.." };
+        case "n": return new String[] { "#...#", "##..#", "#.#.#", "#..##", "#...#" };
+        case "v": return new String[] { "#...#", "#...#", ".#.#.", ".#.#.", "..#.." };  // the letter of the old name, in saved looks
         default: return null;
         }
     }

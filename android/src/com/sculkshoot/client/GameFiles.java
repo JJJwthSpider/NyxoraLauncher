@@ -33,7 +33,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * The game files of an installation, like Millida Launcher shows them: the screenshot gallery (open, share, delete) and
- * the worlds (size, last played, a backup into Downloads/Vellora, delete). Only in the full build, where the game runs
+ * the worlds (size, last played, a backup into Downloads/Nyxora, delete). Only in the full build, where the game runs
  * on the phone.
  */
 final class GameFiles {
@@ -229,7 +229,7 @@ final class GameFiles {
         dialog[0] = new AlertDialog.Builder(activity).setTitle("Миры — " + inst.name).setView(scroll).setNegativeButton("Закрыть", null).show();
     }
 
-    /** the world as a zip in Downloads/Vellora, in the background */
+    /** the world as a zip in Downloads/Nyxora, in the background */
     private void backup(final File world) {
         Toast.makeText(activity, "Делаю бэкап «" + world.getName() + "»...", Toast.LENGTH_SHORT).show();
         activity.background(new MainActivity.Job<String>() {

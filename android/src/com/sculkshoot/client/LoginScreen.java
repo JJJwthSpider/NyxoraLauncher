@@ -47,7 +47,7 @@ final class LoginScreen {
         logo = new ImageView(activity);
         logo.setImageResource(R.drawable.install_default);
         card.addView(logo, new LinearLayout.LayoutParams(dp(64), dp(64)));
-        TextView title = Ui.label(activity, "Vellora Client", 22, Ui.ACCENT, true);
+        TextView title = Ui.label(activity, "Nyxora Launcher", 22, Ui.ACCENT, true);
         title.setGravity(Gravity.CENTER);
         title.setPadding(0, dp(8), 0, dp(4));
         card.addView(title);

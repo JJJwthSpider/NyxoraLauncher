@@ -856,10 +856,10 @@ You may solve this issue by remounting /tmp as &apos;exec&apos; or setting the j
     <message>
         <source>Join me in Minecraft %1!
 Address: %2
-In Vellora Client: Lobby → Join a friend, paste the address. In Minecraft: Multiplayer → Direct Connection.</source>
+In Nyxora Launcher: Lobby → Join a friend, paste the address. In Minecraft: Multiplayer → Direct Connection.</source>
         <translation>Заходи ко мне в Minecraft %1!
 Адрес: %2
-В Vellora Client: Лобби → Присоединиться к другу, вставь адрес. В Minecraft: Сетевая игра → Прямое подключение.</translation>
+В Nyxora Launcher: Лобби → Присоединиться к другу, вставь адрес. В Minecraft: Сетевая игра → Прямое подключение.</translation>
     </message>
     <message>
         <source>Invite code like LL-8N4Q-2ZKD-1X, or an address like brave-creeper.e4mc.link</source>
@@ -1865,8 +1865,8 @@ The full game comes after signing in with the Microsoft account that bought Mine
         <translation>Современная тема в цветах скалка из Minecraft</translation>
     </message>
     <message>
-        <source>Vellora (Red rain)</source>
-        <translation>Vellora (Красный дождь)</translation>
+        <source>Nyxora (Red rain)</source>
+        <translation>Nyxora (Красный дождь)</translation>
     </message>
     <message>
         <source>Night black and moon white with stars and a see-through rainbow</source>
@@ -2348,12 +2348,12 @@ The author likely blocked third-party launchers.</source>
         <translation>Останавливаю сервер и сохраняю мир...</translation>
     </message>
     <message>
-        <source>[Vellora] Mods on the server: %1. Client-only, left out: %2.</source>
-        <translation>[Vellora] Моды на сервере: %1. Только для клиента, не перенесены: %2.</translation>
+        <source>[Nyxora] Mods on the server: %1. Client-only, left out: %2.</source>
+        <translation>[Nyxora] Моды на сервере: %1. Только для клиента, не перенесены: %2.</translation>
     </message>
     <message>
-        <source>Vellora server</source>
-        <translation>Сервер Vellora</translation>
+        <source>Nyxora server</source>
+        <translation>Сервер Nyxora</translation>
     </message>
 </context>
 <context>
@@ -2571,16 +2571,16 @@ The author likely blocked third-party launchers.</source>
         <translation>Через бесплатный туннель bore.pub: без проброса портов и без регистрации</translation>
     </message>
     <message>
-        <source>Vellora server</source>
-        <translation>Сервер Vellora</translation>
+        <source>Nyxora server</source>
+        <translation>Сервер Nyxora</translation>
     </message>
     <message>
         <source>Join my Minecraft server!
 Invite code: %1
-In Vellora Client: Lobby → Join a friend, enter the code. Or in Minecraft: Multiplayer → Direct Connection → %2</source>
+In Nyxora Launcher: Lobby → Join a friend, enter the code. Or in Minecraft: Multiplayer → Direct Connection → %2</source>
         <translation>Заходи на мой сервер Minecraft!
 Код приглашения: %1
-В Vellora Client: Лобби → Присоединиться к другу, введи код. Или в Minecraft: Сетевая игра → Прямое подключение → %2</translation>
+В Nyxora Launcher: Лобби → Присоединиться к другу, введи код. Или в Minecraft: Сетевая игра → Прямое подключение → %2</translation>
     </message>
 </context>
 <context>
@@ -3279,8 +3279,8 @@ Are you sure?</source>
         <translation>Играть с друзьями: лобби, сервер, код приглашения</translation>
     </message>
     <message>
-        <source>AI WIZARD × VELLORA</source>
-        <translation>ИИ-МАГ × VELLORA</translation>
+        <source>AI WIZARD × NYXORA</source>
+        <translation>ИИ-МАГ × NYXORA</translation>
     </message>
     <message>
         <source>BUILD</source>
@@ -3807,8 +3807,8 @@ variants</source>
         <translation>Радуга</translation>
     </message>
     <message>
-        <source>Burgundy Vellora</source>
-        <translation>Бордовый Vellora</translation>
+        <source>Burgundy Nyxora</source>
+        <translation>Бордовый Nyxora</translation>
     </message>
     <message>
         <source>Forest</source>
@@ -3823,12 +3823,12 @@ variants</source>
         <translation>Чёрно-красные полосы</translation>
     </message>
     <message>
-        <source>Wear in Vellora</source>
-        <translation>Носить в Vellora</translation>
+        <source>Wear in Nyxora</source>
+        <translation>Носить в Nyxora</translation>
     </message>
     <message>
-        <source>The cape is on: in the lobby, in the wardrobe and in the game on Fabric and Quilt 1.20.1 (Vellora puts its mod in), where you see it on yourself.</source>
-        <translation>Плащ надет: он виден в лобби, в гардеробе и в игре на Fabric и Quilt 1.20.1 (Vellora сама ставит свой мод) — на тебе.</translation>
+        <source>The cape is on: in the lobby, in the wardrobe and in the game on Fabric and Quilt 1.20.1 (Nyxora puts its mod in), where you see it on yourself.</source>
+        <translation>Плащ надет: он виден в лобби, в гардеробе и в игре на Fabric и Quilt 1.20.1 (Nyxora сама ставит свой мод) — на тебе.</translation>
     </message>
     <message>
         <source>Save PNG...</source>

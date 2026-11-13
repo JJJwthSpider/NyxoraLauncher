@@ -533,13 +533,13 @@ QWidget* WardrobeDialog::generator(bool capes)
             const QImage cape = st.capes.at(index);
             m_character->setCape(cape);
             m_character->setBack(true);
-            auto* wear = new QPushButton(tr("Wear in Vellora"));
+            auto* wear = new QPushButton(tr("Wear in Nyxora"));
             wear->setObjectName("accentButton");
             connect(wear, &QPushButton::clicked, this, [cape, status] {
                 cape.save(QDir(APPLICATION->dataRoot()).filePath("vellora-cape.png"), "PNG");
                 QSettings(QDir(APPLICATION->dataRoot()).filePath("vellora-ui.ini"), QSettings::IniFormat).setValue("generatedCape", true);
                 VelloraSound::play("wear");
-                status->setText(tr("The cape is on: in the lobby, in the wardrobe and in the game on Fabric and Quilt 1.20.1 (Vellora "
+                status->setText(tr("The cape is on: in the lobby, in the wardrobe and in the game on Fabric and Quilt 1.20.1 (Nyxora "
                                    "puts its mod in), where you see it on yourself."));
             });
             actions->addWidget(wear);
@@ -784,7 +784,7 @@ QWidget* WardrobeDialog::generator(bool capes)
                                     tr("Princess"),                tr("Astronaut"),                 tr("Demon"),                   tr("Cyber neon"),
                                     tr("Zombie"),                  tr("Skeleton"),                  tr("Elf"),                     tr("Viking") };
     const QStringList capeIdeas = { tr("Galaxy with stars"), tr("Fire"),       tr("Ice"),          tr("Gold with a crown"), tr("Pink with a heart"),
-                                    tr("Rainbow"),           tr("Burgundy Vellora"), tr("Forest"), tr("Blue with lightning"), tr("Black and red stripes") };
+                                    tr("Rainbow"),           tr("Burgundy Nyxora"), tr("Forest"), tr("Blue with lightning"), tr("Black and red stripes") };
     const QString key = capes ? "generatorRecentCapes" : "generatorRecentSkins";
     const QStringList recent = ui.value(key).toStringList();
     auto addIdea = [this, ideas, ideasHolder, prompt, draw](const QString& text, bool old) {

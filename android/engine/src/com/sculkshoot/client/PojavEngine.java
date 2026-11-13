@@ -92,7 +92,7 @@ public final class PojavEngine extends GameEngine {
     @Override
     List<String[]> graphicsChoices(Activity activity) {
         List<String[]> out = new ArrayList<String[]>();
-        out.add(new String[] { "auto", "Авто — Vellora выберет сам (рекомендуется)" });
+        out.add(new String[] { "auto", "Авто — Nyxora выберет сам (рекомендуется)" });
         for (String id : Tools.getCompatibleRenderers(activity).rendererIds) {
             if (LTW.equals(id)) {
                 out.add(new String[] { id, "LTW (OpenGL ES 3) — для 1.17 и новее, лучше всего на новых телефонах" });
@@ -540,7 +540,7 @@ public final class PojavEngine extends GameEngine {
         for (String fixed : ModFixes.fixMods(new File(gameDir, "mods"))) {
             log.log("Исправил для телефона: " + fixed);
         }
-        // the player's look in the game: the skin, the cape and the accessories from Vellora (Fabric and Quilt, 1.20.1)
+        // the player's look in the game: the skin, the cape and the accessories from Nyxora (Fabric and Quilt, 1.20.1)
         GameLook.prepare(activity, inst, gameDir);
 
         // the loader
@@ -652,7 +652,7 @@ public final class PojavEngine extends GameEngine {
 
             public void onDownloadFailed(Throwable error) {
                 finished[0] = true;
-                android.util.Log.e("Vellora", "Minecraft download failed", error);
+                android.util.Log.e("Nyxora", "Minecraft download failed", error);
                 final String why = describe(error);
                 activity.runOnUiThread(() -> done.finished(false, "Не удалось скачать Minecraft " + inst.minecraftVersion + ":\n" + why
                                                                        + "\n\nПроверь интернет и нажми «Играть» ещё раз — уже скачанное не скачивается заново."));
@@ -796,7 +796,7 @@ public final class PojavEngine extends GameEngine {
         final Intent intent = new Intent(activity, JavaGUILauncherActivity.class);
         intent.putExtra("javaArgs", "-jar " + installer.getAbsolutePath() + " --installClient " + Tools.DIR_GAME_NEW);
         activity.runOnUiThread(() -> activity.startActivity(intent));
-        return "Ставлю " + Plan.loaderName(inst.loader) + " " + inst.loaderVersion + ". Когда установка закончится, вернись в Vellora и нажми «Играть» ещё раз.";
+        return "Ставлю " + Plan.loaderName(inst.loader) + " " + inst.loaderVersion + ". Когда установка закончится, вернись в Nyxora и нажми «Играть» ещё раз.";
     }
 
     /* ------------------------------------------------------------ files of the installation */

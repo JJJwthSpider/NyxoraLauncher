@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// What Arkan, the pack builder of Vellora Client, understands in a request (launcher/modplatform/agent/ModpackPlan.cpp)
+// What Arkan, the pack builder of Nyxora Launcher, understands in a request (launcher/modplatform/agent/ModpackPlan.cpp)
 
 #include <QTest>
 

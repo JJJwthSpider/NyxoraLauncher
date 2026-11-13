@@ -139,7 +139,7 @@ QPixmap SculkTheme::starTexture(const QColor& background, int size)
     if (auto it = cache.constFind(key); it != cache.constEnd()) {
         return *it;
     }
-    // Vellora: the still red rain behind the panels: faint slanted streaks; the tile wraps around without seams
+    // Nyxora: the still red rain behind the panels: faint slanted streaks; the tile wraps around without seams
     QImage image(size, size, QImage::Format_RGB32);
     image.fill(background);
     QPainter p(&image);
@@ -167,7 +167,7 @@ QPixmap SculkTheme::starTexture(const QColor& background, int size)
 QPixmap SculkTheme::texture(const QColor& background, const QColor& glow, int pixelSize)
 {
     if (s_lunar) {
-        // the Vellora theme (id "lunar") has no sculk: everything lies on the burgundy night with red rain
+        // the Nyxora theme (id "lunar") has no sculk: everything lies on the burgundy night with red rain
         return starTexture(background, 64 * pixelSize);
     }
     static QHash<QString, QPixmap> cache;
@@ -247,7 +247,7 @@ const SculkTheme::Colors& SculkTheme::colors() const
         "#0c2a31", "#8eacb1", "#e9f6f7", "#9fd0d5", "#d8eef0", "#dbf0f2", "#c6e7ea", "#0aa5b0", "#0e8f99",
         "#ffffff", "#e0f2f4", "#a9c4c8", "#0b7680", "#ffffff", "#4f7379", "#d4eef1", "#10a6b1", "#0b7680",
     };
-    // Vellora Client (the old "lunar" id): burgundy night and crimson; the crimson gradients are added by the style sheet
+    // Nyxora Launcher (the old "lunar" id): burgundy night and crimson; the crimson gradients are added by the style sheet
     static const Colors s_lunar{
         "#fbeff1", "#8a5a62", "#0e0407", "#5a1e2a", "#2b0e15", "#140509", "#3d121c", "#ff4d5e", "#e8364f",
         "#ffffff", "#1c080d", "#7a4a52", "#c81f3a", "#090204", "#d1a3aa", "#2e0d14", "#ff5a6e", "#ffffff",
@@ -286,7 +286,7 @@ QString SculkTheme::name()
         case Variant::Light:
             return QObject::tr("Sculk (Light)");
         case Variant::Lunar:
-            return QObject::tr("Vellora (Red rain)");
+            return QObject::tr("Nyxora (Red rain)");
         default:
             return QObject::tr("Sculk");
     }
@@ -1067,7 +1067,7 @@ QTabBar::tab:selected {
 QSlider::sub-page:horizontal {
     background: @rainbowStrong@;
 }
-/* Vellora, made like Millida Launcher: buttons are raised blocks with a dark outline, a light top edge and a thick
+/* Nyxora, made like Millida Launcher: buttons are raised blocks with a dark outline, a light top edge and a thick
    dark bottom edge; pressed, the bottom edge goes away as if the block was pushed in */
 QPushButton, QToolBar QToolButton, QToolButton#quickChip {
     background-color: #2b0e15;
@@ -1148,7 +1148,7 @@ QProgressBar::chunk {
     const auto& c = colors();
     // the rainbow at different strengths: over dark backgrounds the soft one looks like light through glass
     auto rainbow = [](int alpha, bool pastel) {
-        // Vellora: crimson shades instead of the old rainbow
+        // Nyxora: crimson shades instead of the old rainbow
         const QColor bands[] = { QColor(255, 90, 110), QColor(232, 54, 79), QColor(200, 31, 58), QColor(168, 22, 46),
                                  QColor(200, 31, 58), QColor(232, 54, 79) };
         QStringList stops;

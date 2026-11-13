@@ -79,7 +79,7 @@ void LaunchController::executeTask()
 void LaunchController::decideAccount()
 {
     if (m_accountToUse || (m_wantedLaunchMode == LaunchMode::Demo && !m_offlineName.isEmpty())) {
-        return;  // Vellora: a guest's demo has its player already, no account is asked for
+        return;  // Nyxora: a guest's demo has its player already, no account is asked for
     }
 
     // Select the account to use. If the instance has a specific account set, that will be used. Otherwise, the default account will be used
@@ -290,7 +290,7 @@ void LaunchController::login()
 
     if (m_actualLaunchMode == LaunchMode::Demo) {
         if (m_wantedLaunchMode == LaunchMode::Demo || askPlayDemo()) {
-            // Vellora: a guest's demo is played with the guest's nickname, not asked again
+            // Nyxora: a guest's demo is played with the guest's nickname, not asked again
             bool ok = m_wantedLaunchMode == LaunchMode::Demo && !m_offlineName.isEmpty();
             auto name = ok ? m_offlineName : askOfflineName("Player", &ok);
             if (ok) {

@@ -8,7 +8,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
 /**
- * Buttons and panels made of blocks, like Millida Launcher's look in Vellora's colours: corners cut by one "pixel" step,
+ * Buttons and panels made of blocks, like Millida Launcher's look in Nyxora's colours: corners cut by one "pixel" step,
  * a dark outline, a light line along the top edge and a thick dark edge at the bottom, so a button looks like a raised
  * block. Pressed, the bottom edge disappears and the face moves down, as if the block was pushed in.
  */

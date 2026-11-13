@@ -351,7 +351,7 @@ public final class MainActivity extends Activity {
                     return;
                 }
                 if (error != null) {
-                    android.util.Log.w("Vellora", "the sign-in was not renewed now: " + error.getMessage());
+                    android.util.Log.w("Nyxora", "the sign-in was not renewed now: " + error.getMessage());
                     return;
                 }
                 if (fresh != null) {  // without internet the saved profile stays
@@ -809,7 +809,7 @@ public final class MainActivity extends Activity {
         title.setTextColor(ACCENT);
         titles.addView(title);
         TextView subtitle = new TextView(this);
-        subtitle.setText("Vellora Client · моды с Modrinth");
+        subtitle.setText("Nyxora Launcher · моды с Modrinth");
         subtitle.setTextSize(11);
         subtitle.setTextColor(HINT);
         titles.addView(subtitle);
@@ -1649,7 +1649,7 @@ public final class MainActivity extends Activity {
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(20), dp(8), dp(20), 0);
         TextView hint = new TextView(this);
-        hint.setText("Вставь код, который прислал друг из Vellora Client на компьютере («Мой сервер»). Я покажу адрес сервера.");
+        hint.setText("Вставь код, который прислал друг из Nyxora Launcher на компьютере («Мой сервер»). Я покажу адрес сервера.");
         box.addView(hint);
         final EditText code = new EditText(this);
         code.setHint("LL-XXXX-XXXX-...");
@@ -1678,7 +1678,7 @@ public final class MainActivity extends Activity {
     private void showAddress(String code) {
         InviteCode.Address address = InviteCode.decode(code);
         if (address == null) {
-            new AlertDialog.Builder(this).setMessage("Это не похоже на код приглашения Vellora. Проверь, что код скопирован целиком.")
+            new AlertDialog.Builder(this).setMessage("Это не похоже на код приглашения Nyxora. Проверь, что код скопирован целиком.")
                 .setPositiveButton("OK", null).show();
             return;
         }
@@ -1711,11 +1711,11 @@ public final class MainActivity extends Activity {
 
     private void showAbout() {
         new AlertDialog.Builder(this)
-            .setTitle("Vellora Client для Android")
+            .setTitle("Nyxora Launcher для Android")
             .setMessage("Аркан собирает сборки модов с Modrinth: понимает тему, названия модов, «убери» и «побольше», "
                         + "сам добавляет оптимизацию и все нужные библиотеки.\n\n"
                         + "Сама Minecraft: Java Edition на телефоне запускается в лаунчере для Android, который умеет ставить сборки "
-                        + "Modrinth (.mrpack). Кнопка «Играть» сохраняет сборку в «Загрузки/Vellora» и открывает такой лаунчер, «Файл» — отправляет .mrpack.\n\n"
+                        + "Modrinth (.mrpack). Кнопка «Играть» сохраняет сборку в «Загрузки/Nyxora» и открывает такой лаунчер, «Файл» — отправляет .mrpack.\n\n"
                         + "Шрифт Tiny5 — SIL Open Font License.")
             .setPositiveButton("OK", null)
             .show();
@@ -1792,7 +1792,7 @@ public final class MainActivity extends Activity {
     private File writePack() throws Exception {
         String safe = packPlan.name.replace('—', '-').replaceAll("[^\\p{L}\\p{N} ._-]", "").replaceAll("\\s+", " ").trim();
         if (safe.isEmpty()) {
-            safe = "Vellora pack";
+            safe = "Nyxora pack";
         }
         File file = new File(PackProvider.exportDir(this), safe + ".mrpack");
         ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(file));
@@ -1869,23 +1869,23 @@ public final class MainActivity extends Activity {
                 android.content.ContentValues values = new android.content.ContentValues();
                 values.put("_display_name", pack.getName());
                 values.put("mime_type", "application/octet-stream");  // keeps the .mrpack extension
-                values.put("relative_path", "Download/Vellora");
+                values.put("relative_path", "Download/Nyxora");
                 Uri target = getContentResolver().insert(Uri.parse("content://media/external/downloads"), values);
                 if (target == null) {
                     return null;
                 }
                 copy(pack, getContentResolver().openOutputStream(target));
-                return "Загрузки/Vellora/" + pack.getName();
+                return "Загрузки/Nyxora/" + pack.getName();
             }
             if (!hasStoragePermission()) {
                 requestPermissions(new String[] { android.Manifest.permission.WRITE_EXTERNAL_STORAGE }, REQUEST_STORAGE);
                 return null;
             }
-            File dir = new File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "Vellora");
+            File dir = new File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "Nyxora");
             dir.mkdirs();
             File target = new File(dir, pack.getName());
             copy(pack, new FileOutputStream(target));
-            return "Загрузки/Vellora/" + pack.getName();
+            return "Загрузки/Nyxora/" + pack.getName();
         } catch (Exception e) {
             return null;
         }
@@ -1965,7 +1965,7 @@ public final class MainActivity extends Activity {
 
     private File exportFile(Installation inst) throws Exception {
         String safe = inst.name.replace('—', '-').replaceAll("[^\\p{L}\\p{N} ._-]", "").replaceAll("\\s+", " ").trim();
-        File file = new File(PackProvider.exportDir(this), (safe.isEmpty() ? "Vellora pack" : safe) + ".mrpack");
+        File file = new File(PackProvider.exportDir(this), (safe.isEmpty() ? "Nyxora pack" : safe) + ".mrpack");
         Installer.writeMrpack(inst, installations, file);
         return file;
     }
@@ -2049,8 +2049,8 @@ public final class MainActivity extends Activity {
     String guestPlayText(Installation inst) {
         if (GameEngine.get() == null) {
             return "Игру запускает PojavLauncher: он попросит войти своим аккаунтом Microsoft, а без покупки предложит "
-                + "демо-версию Minecraft — но только без модов. Демо со сборкой с модами есть в полной версии Vellora "
-                + "(VelloraClient-full), где игра запускается прямо в приложении.\n\n"
+                + "демо-версию Minecraft — но только без модов. Демо со сборкой с модами есть в полной версии Nyxora "
+                + "(NyxoraLauncher-full), где игра запускается прямо в приложении.\n\n"
                 + "Вся игра — после входа аккаунтом, на котором куплен Minecraft: Java Edition.";
         }
         return "Без аккаунта Microsoft доступна демо-версия Minecraft: Java Edition — официальная бесплатная пробная версия "
@@ -2336,7 +2336,7 @@ public final class MainActivity extends Activity {
         text.append(major > 0 ? "Для Minecraft " + (inst != null ? inst.minecraftVersion : "") + " нужна Java " + major + " для Android. "
                               : "Java для Android, на которой работает игра. ");
         text.append(installed.isEmpty() ? "Сейчас Java не установлена." : "Сейчас есть: " + installed + ".");
-        text.append(major > 0 ? "\n\nОбычно Vellora скачивает Java сам при «Играть», но сейчас не получилось (нет интернета?). "
+        text.append(major > 0 ? "\n\nОбычно Nyxora скачивает Java сам при «Играть», но сейчас не получилось (нет интернета?). "
                               : "\n\nVellora сам скачивает нужную Java при «Играть» (8, 17, 21 или 25 — по версии Minecraft). ");
         text.append("Её можно также взять из PojavLauncher (или Amethyst), если он стоит на телефоне, или выбрать файл: "
                     + "APK PojavLauncher или архив Java (.tar.xz).");
@@ -2485,7 +2485,7 @@ public final class MainActivity extends Activity {
                      + " и все моды.");
         steps.append("<br><br>3. Войди аккаунтом Microsoft, на котором куплена Minecraft: Java Edition, и нажми <b>Играть</b>.");
         steps.append("<br><br>4. Удобные кнопки для игры (джойстик, ЛКМ, ПКМ, прыжок, инвентарь, камера, клавиатура): "
-                     + "<b>Управление → Отправить в лаунчер</b> на главном экране Vellora.");
+                     + "<b>Управление → Отправить в лаунчер</b> на главном экране Nyxora.");
         if (launchers.isEmpty()) {
             steps.append("<br><br>На телефоне пока нет лаунчера Java Edition. Установи, например, PojavLauncher, Amethyst, "
                          + "Fold Craft Launcher или Zalith Launcher и нажми «Играть» ещё раз.");

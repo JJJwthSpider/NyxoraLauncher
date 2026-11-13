@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Vellora Client's pictures. The app icon is the user's picture (art/vellora_icons_source.png, object 1: a dark cube
-with a crimson glow and an orbit with a star in a glowing frame); its second object is the tile "Готовые сборки".
+"""Nyxora Launcher's pictures. The app icon is the picture the user sent (art/nyxora_icon_user.png: a glass cube inside a
+hexagon with an orbit, blue and violet, in a glowing rounded frame). The tile "Готовые сборки" is object 2 of the earlier
+picture (art/vellora_icons_source.png).
 Writes the adaptive icon layers and the legacy icon, the logo used inside the app (res/drawable-nodpi/install_default.png),
 the tiles "Новая установка" (tile_new.png, drawn here) and "Готовые сборки" (tile_packs.png), and a preview
-art/vellora_preview.png. (sky() and crystal_v() are the earlier drawn "V" icon, kept for reference.)
-Run:  python3 art/vellora_art.py   (from android/)
+art/nyxora_preview.png. (sky() and crystal_v() are the earlier drawn "V" icon, kept for reference.)
+Run:  python3 art/nyxora_art.py   (from android/)
 """
 import math
 import pathlib
@@ -102,39 +103,64 @@ def tile(symbol):
 
 
 SOURCE = HERE / "vellora_icons_source.png"
-ICON = HERE / "vellora_icon_user.jpg"   # the icon exactly as the user sent it (object 1, close up)
-ICON_BOX = (205, 150, 790, 735)    # object 1 with its frame, in the source picture
-INNER_BOX = (232, 177, 763, 708)   # object 1 inside the frame line
-PACKS_BOX = (977, 150, 1564, 737)  # object 2 with its frame
+ICON = HERE / "nyxora_icon_user.png"   # the icon exactly as the user sent it
+FRAME = (134, 130, 1110, 1081)     # the glowing frame line in the icon picture
+GLOW = 12                          # how much of the glow outside the line stays in the icon
+CORNER = 232                       # the radius of the frame's corners
+OBJECT = (232, 208, 1028, 1004)    # the cube with its orbit, without the frame: for the smallest sizes
+PACKS_BOX = (977, 150, 1564, 737)  # the tile "Готовые сборки": object 2 with its frame, in SOURCE
 
 
-def icon_square():
-    """the user's icon picture, cut to a square around the cube"""
-    img = Image.open(ICON).convert("RGBA")
-    side = min(img.size)
-    left = (img.size[0] - side) // 2
-    return img.crop((left, 0, left + side, side))
+def icon_picture():
+    return Image.open(ICON).convert("RGBA")
 
 
 def framed(box, size):
-    """an object of the source with its frame (box None: the user's icon picture), the outside of the rounded square
-    see-through"""
-    img = (icon_square() if box is None else Image.open(SOURCE).convert("RGBA").crop(box)).resize((size, size), Image.LANCZOS)
+    """the icon with its glowing frame, the outside of the rounded square see-through (box None), or an object of
+    SOURCE with its frame (the tile "Готовые сборки")"""
+    if box is not None:
+        img = Image.open(SOURCE).convert("RGBA").crop(box).resize((size, size), Image.LANCZOS)
+        radius, inset = 0.205, 6
+    else:
+        # the frame is a little wider than it is tall: it is fitted to a square (the cube changes by 2.5%, unseen)
+        x0, y0, x1, y1 = FRAME
+        img = icon_picture().crop((x0 - GLOW, y0 - GLOW, x1 + GLOW, y1 + GLOW)).resize((size, size), Image.LANCZOS)
+        radius, inset = (CORNER + GLOW) / (x1 - x0 + 2 * GLOW), 0
     mask = Image.new("L", (size * 4, size * 4), 0)
-    ImageDraw.Draw(mask).rounded_rectangle((6, 6, size * 4 - 7, size * 4 - 7), radius=int(size * 4 * 0.205), fill=255)
+    ImageDraw.Draw(mask).rounded_rectangle((inset, inset, size * 4 - 1 - inset, size * 4 - 1 - inset), radius=int(size * 4 * radius), fill=255)
     img.putalpha(mask.resize((size, size), Image.LANCZOS))
     return img
 
 
+def small(size):
+    """the icon for 16 to 32 pixels: the cube with its orbit close up on the dark background, without the frame (its
+    thin line would vanish), the corners rounded"""
+    img = icon_picture().crop(OBJECT).resize((size * 4, size * 4), Image.LANCZOS)
+    mask = Image.new("L", img.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, img.size[0] - 1, img.size[1] - 1), radius=int(img.size[0] * 0.22), fill=255)
+    img.putalpha(mask)
+    return img.resize((size, size), Image.LANCZOS)
+
+
 def adaptive_layers(size):
-    """the user's picture exactly as it is: the foreground is the whole picture, sharp, over the visible part of the
-    adaptive icon (72 of 108dp, a little more so no dark seam shows), the background is the picture's dark edge colour"""
-    inner = icon_square().convert("RGB")
-    edge = inner.resize((16, 16), Image.BOX).getpixel((0, 15))
+    """the adaptive icon: the launcher of the phone cuts its own shape out of the middle 72 of 108dp, so the frame is
+    left out; the foreground is the inside of the frame, the cube and its orbit within the visible part, and the
+    background is the picture's dark colour"""
+    picture = icon_picture()
+    x0, y0, x1, y1 = FRAME
+    line = 26  # the frame line with its inner glow, left out
+    inner = picture.crop((x0 + line, y0 + line, x1 - line, y1 - line)).convert("RGB")
+    edge = picture.convert("RGB").resize((16, 16), Image.BOX).getpixel((0, 0))
     bg = Image.new("RGB", (size, size), edge)
-    part = int(size * 76 / 108)
+    part = int(size * 78 / 108)  # the orbit stays inside the round mask (66dp) of the phone's launcher
+    scaled = inner.resize((part, part), Image.LANCZOS).convert("RGBA")
+    # the edge of the picture fades into the background: no seam when the launcher moves the layers apart
+    fade = Image.new("L", (part, part), 0)
+    soft = max(2, part // 24)
+    ImageDraw.Draw(fade).rectangle((soft, soft, part - 1 - soft, part - 1 - soft), fill=255)
+    scaled.putalpha(fade.filter(ImageFilter.GaussianBlur(soft / 2)))
     fg = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    fg.alpha_composite(inner.resize((part, part), Image.LANCZOS).convert("RGBA"), ((size - part) // 2, (size - part) // 2))
+    fg.alpha_composite(scaled, ((size - part) // 2, (size - part) // 2))
     return bg, fg
 
 
@@ -162,7 +188,7 @@ def main():
     for i, name in enumerate(("install_default.png", "tile_new.png", "tile_packs.png")):
         im = Image.open(nodpi / name).convert("RGBA").resize((260, 260), Image.LANCZOS)
         prev.alpha_composite(im, (300 * (i + 1) + 20, 20))
-    prev.save(HERE / "vellora_preview.png")
+    prev.save(HERE / "nyxora_preview.png")
 
 
 if __name__ == "__main__":

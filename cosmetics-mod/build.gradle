@@ -1,4 +1,4 @@
-// Vellora Cosmetics: the player's own look from the Vellora Client launcher in the game (Fabric and Quilt).
+// Nyxora Cosmetics: the player's own look from the Nyxora Launcher in the game (Fabric and Quilt).
 // Build: gradle build  ->  build/libs/vellora-cosmetics-<minecraft>-<version>.jar
 plugins {
     id 'fabric-loom' version '1.10.5'

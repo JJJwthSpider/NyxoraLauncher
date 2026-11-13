@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Makes VelloraClient-src.zip: the sources at HEAD together with the git submodules.
+"""Makes NyxoraLauncher-src.zip: the sources at HEAD together with the git submodules.
 
 `git archive` (and GitHub's "Download ZIP") leaves the submodules out: libraries/libnbtplusplus comes out empty and
 cmake stops with "does not contain a CMakeLists.txt file". This puts each submodule's own `git archive` under its
 path in the same zip.
 
-    python3 tools/make-src-zip.py [VelloraClient-src.zip]
+    python3 tools/make-src-zip.py [NyxoraLauncher-src.zip]
 """
 import io
 import subprocess
@@ -14,7 +14,7 @@ import zipfile
 from pathlib import Path
 
 root = Path(__file__).resolve().parent.parent
-out = Path(sys.argv[1]) if len(sys.argv) > 1 else root / "VelloraClient-src.zip"
+out = Path(sys.argv[1]) if len(sys.argv) > 1 else root / "NyxoraLauncher-src.zip"
 
 
 def archive(cwd, prefix=""):

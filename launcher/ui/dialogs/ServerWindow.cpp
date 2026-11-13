@@ -146,7 +146,7 @@ QWidget* ServerWindow::buildSettings()
     form->addRow(tr("Server memory:"), m_memory);
 
     m_motd = new QLineEdit(m_settingsBox);
-    m_motd->setPlaceholderText(tr("Vellora server"));
+    m_motd->setPlaceholderText(tr("Nyxora server"));
     form->addRow(tr("Description:"), m_motd);
     m_seed = new QLineEdit(m_settingsBox);
     m_seed->setPlaceholderText(tr("random"));
@@ -393,7 +393,7 @@ void ServerWindow::updateAddresses()
 QString ServerWindow::invitation() const
 {
     const QString address = m_manager->publicAddress().isEmpty() ? m_manager->lanAddress() : m_manager->publicAddress();
-    return tr("Join my Minecraft server!\nInvite code: %1\nIn Vellora Client: Lobby → Join a friend, enter the code. "
+    return tr("Join my Minecraft server!\nInvite code: %1\nIn Nyxora Launcher: Lobby → Join a friend, enter the code. "
               "Or in Minecraft: Multiplayer → Direct Connection → %2")
         .arg(m_manager->inviteCode(), address);
 }

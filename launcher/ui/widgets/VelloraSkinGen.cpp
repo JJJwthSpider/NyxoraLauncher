@@ -106,6 +106,8 @@ const std::pair<const char*, const char*> EMBLEMS[] = {
     { "diamond", "diamond" },
     { "корон", "crown" },
     { "crown", "crown" },
+    { "nyxora", "n" },
+    { "никсора", "n" },
     { "vellora", "v" },
     { "веллора", "v" } };
 const std::pair<const char*, const char*> THEMES[] = {
@@ -333,7 +335,7 @@ QRgb contrast(QRgb top, QRgb accent)
 const QRgb SKIN_TONES[] = { 0xFFF2C7A5, 0xFFE8B48C, 0xFFD39A6A, 0xFFB57A4A, 0xFF8D5524, 0xFFFFDBB8 };
 const QRgb HAIR_COLORS[] = { 0xFF2B1B12, 0xFF4A2C1A, 0xFF6B4423, 0xFFB5834A, 0xFFE3C16F, 0xFF1E1E24, 0xFFA33A1E };
 const QRgb HUE[] = { 0xFFC62828, 0xFF2C5BD6, 0xFF3E9B47, 0xFF7B3FC4, 0xFFEF7C1E, 0xFF23B5B5, 0xFF6E1423, 0xFF1E1E24, 0xFFEC6FA8, 0xFFE0A526 };
-const char* const EMBLEM_CHOICES[] = { "heart", "star", "bolt", "moon", "flame", "diamond", "v", "" };
+const char* const EMBLEM_CHOICES[] = { "heart", "star", "bolt", "moon", "flame", "diamond", "n", "" };
 const char* const HAIR_STYLES[] = { "short", "spiky", "long", "short", "bun", "mohawk" };
 
 enum Face { TOP = 0, BOTTOM, RIGHT, FRONT, LEFT, BACK };
@@ -767,7 +769,7 @@ void applyOptions(Look& l, const Options& o, int variant)
 
 QStringList emblemIds()
 {
-    return { "heart", "star", "bolt", "moon", "flame", "diamond", "crown", "skull", "creeper", "v" };
+    return { "heart", "star", "bolt", "moon", "flame", "diamond", "crown", "skull", "creeper", "n" };
 }
 
 QStringList emblemRows(const QString& id)
@@ -781,7 +783,8 @@ QStringList emblemRows(const QString& id)
     if (id == "flame") return { "..#..", ".##..", ".###.", "#####", ".###." };
     if (id == "diamond") return { ".###.", "#####", ".###.", "..#..", "....." };
     if (id == "crown") return { "#.#.#", "#####", "#####", ".....", "....." };
-    if (id == "v") return { "#...#", "#...#", ".#.#.", ".#.#.", "..#.." };
+    if (id == "n") return { "#...#", "##..#", "#.#.#", "#..##", "#...#" };
+    if (id == "v") return { "#...#", "#...#", ".#.#.", ".#.#.", "..#.." };  // the letter of the old name, in saved looks
     return {};
 }
 

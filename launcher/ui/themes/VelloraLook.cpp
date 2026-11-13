@@ -108,7 +108,7 @@ void prepare(BaseInstance* base)
     // the mod of this launcher, written again when it differs (a newer launcher brings a newer mod)
     QFile bundled(":/vellora_mods/" + ModFile);
     if (!bundled.open(QIODevice::ReadOnly)) {
-        qWarning() << "Vellora Cosmetics is not bundled with this launcher";
+        qWarning() << "Nyxora Cosmetics is not bundled with this launcher";
         return;
     }
     const QByteArray mod = bundled.readAll();
@@ -118,7 +118,7 @@ void prepare(BaseInstance* base)
         QDir().mkpath(instance->modsRoot());
         QFile out(jar);
         if (!out.open(QIODevice::WriteOnly | QIODevice::Truncate) || out.write(mod) != mod.size()) {
-            qWarning() << "Vellora Cosmetics could not be put into" << instance->modsRoot();
+            qWarning() << "Nyxora Cosmetics could not be put into" << instance->modsRoot();
             return;
         }
     }
@@ -127,7 +127,7 @@ void prepare(BaseInstance* base)
     currentLook(skin, slim, cape);
     if (!VelloraCharacter::exportLook(FS::PathCombine(instance->gameRoot(), "config", "vellora-cosmetics"), skin, slim, cape,
                                       Cosmetics::worn(Cosmetics::Head), Cosmetics::worn(Cosmetics::Body), Cosmetics::worn(Cosmetics::Back))) {
-        qWarning() << "The look for Vellora Cosmetics could not be written";
+        qWarning() << "The look for Nyxora Cosmetics could not be written";
     }
 }
 }  // namespace VelloraLook

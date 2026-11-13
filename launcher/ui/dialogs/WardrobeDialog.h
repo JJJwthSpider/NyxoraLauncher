@@ -27,7 +27,7 @@ class QLabel;
 class QPushButton;
 class VelloraCharacter;
 
-/// The wardrobe of Vellora, like Millida Launcher's: the player on the left (a click turns it around), the tabs on the
+/// The wardrobe of Nyxora, like Millida Launcher's: the player on the left (a click turns it around), the tabs on the
 /// right (outfits, head, body, back, pets, emotes) and the items as tiles; the capes and skins open the account's skin
 /// manager, where the real Minecraft capes are put on.
 class WardrobeDialog : public QDialog {
@@ -41,7 +41,7 @@ class WardrobeDialog : public QDialog {
                    bool slim = false,
                    QWidget* parent = nullptr);
 
-    /// the cape made by the generator and chosen to wear in Vellora (a null image: none)
+    /// the cape made by the generator and chosen to wear in Nyxora (a null image: none)
     static QImage generatedCape();
 
    private:

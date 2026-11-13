@@ -756,9 +756,9 @@ final class CharacterView extends View {
     }
 
     /**
-     * The look for the game (the Vellora Cosmetics mod; the PC launcher writes the same): the accessories of the head, body
+     * The look for the game (the Nyxora Cosmetics mod; the PC launcher writes the same): the accessories of the head, body
      * and back slots as boxes on the parts of the Minecraft player model (pets, things in the hand and effects stay in
-     * Vellora), the skin and the cape, written into `dir` as look.json, skin.png and cape.png. The launcher's model has y
+     * Nyxora), the skin and the cape, written into `dir` as look.json, skin.png and cape.png. The launcher's model has y
      * up, the feet at 0 and the face to +z; Minecraft's has y down from the neck and the face to -z, each box in the pixels
      * of its part, from the part's pivot.
      */

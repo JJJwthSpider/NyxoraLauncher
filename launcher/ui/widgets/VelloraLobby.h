@@ -27,7 +27,7 @@ class LaunchTile;
 class MoonyWidget;
 class SculkAmbience;
 
-/// The lobby of Vellora Client, made like Millida Launcher's: picture tiles on the left, the player drawn full-length
+/// The lobby of Nyxora Launcher, made like Millida Launcher's: picture tiles on the left, the player drawn full-length
 /// from the skin in the middle, Arkan the wizard on the right and "Сегодня играем" with a big Play button at the bottom,
 /// all over the red rain.
 class VelloraLobby : public QWidget {

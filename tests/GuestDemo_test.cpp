@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// A guest of Vellora plays the official Minecraft demo. The demo came in Minecraft 1.3.1: older versions ignore "--demo"
+// A guest of Nyxora plays the official Minecraft demo. The demo came in Minecraft 1.3.1: older versions ignore "--demo"
 // and would run the full game, so they must get no demo (ui/themes/VelloraGuest).
 
 #include <QTest>

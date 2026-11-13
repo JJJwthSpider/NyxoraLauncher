@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Vellora Cosmetics: the player's look from the Vellora Client launcher in the game. The launcher writes it into
+ * Nyxora Cosmetics: the player's look from the Nyxora Launcher in the game. The launcher writes it into
  * config/vellora-cosmetics/ before every start: look.json (the accessories on the head, body and back as coloured
  * boxes on the parts of the player model, whether the skin is slim) with skin.png and cape.png. The mod shows them on
  * the player of this game only (the launcher has no server to share them): in third person, in the inventory, in mirrors
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class VelloraCosmetics implements ClientModInitializer {
     public static final String MOD_ID = "vellora_cosmetics";
-    static final Logger LOG = LoggerFactory.getLogger("Vellora Cosmetics");
+    static final Logger LOG = LoggerFactory.getLogger("Nyxora Cosmetics");
     private static Look look = Look.NONE;
 
     @Override

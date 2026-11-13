@@ -124,7 +124,7 @@ bool atLeast(const QList<int>& v, int minor, int patch)
 QNetworkRequest request(const QUrl& url)
 {
     QNetworkRequest r(url);
-    r.setHeader(QNetworkRequest::UserAgentHeader, "Vellora-Client (github.com/nvsdjonvljw/Script)");
+    r.setHeader(QNetworkRequest::UserAgentHeader, "Nyxora-Launcher (github.com/nvsdjonvljw/Script)");
     return r;
 }
 }  // namespace

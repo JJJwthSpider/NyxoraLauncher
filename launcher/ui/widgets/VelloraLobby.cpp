@@ -196,7 +196,7 @@ QImage VelloraLobby::renderBody(const QImage& source)
     return out;
 }
 
-/// A tile of the lobby, drawn the way Millida Launcher draws its tiles, in Vellora's burgundy: a dark outline with cut
+/// A tile of the lobby, drawn the way Millida Launcher draws its tiles, in Nyxora's burgundy: a dark outline with cut
 /// corners, a plate in the colour of the section, hard rays behind the picture, the picture standing on the tile (its top
 /// rises over the edge) and the name on a dense band over the bottom; a "!" or a ribbon calls for attention.
 class VelloraHubTile : public QAbstractButton {
@@ -453,7 +453,7 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     bannerLayout->setContentsMargins(16, 12, 6, 30);
     auto* bannerTexts = new QVBoxLayout;
     bannerTexts->setSpacing(0);
-    bannerTexts->addWidget(caption(tr("AI WIZARD × VELLORA"), 8, "#d1a3aa", banner));
+    bannerTexts->addWidget(caption(tr("AI WIZARD × NYXORA"), 8, "#d1a3aa", banner));
     bannerTexts->addSpacing(4);
     bannerTexts->addWidget(caption(tr("BUILD"), 16, "#fbeff1", banner));
     bannerTexts->addWidget(caption(tr("A PACK"), 16, "#fbeff1", banner));

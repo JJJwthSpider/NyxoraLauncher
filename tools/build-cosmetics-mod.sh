@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds the Vellora Cosmetics mod (cosmetics-mod/, Fabric, Minecraft 1.20.1) and puts the jar where the launchers take
+# Builds the Nyxora Cosmetics mod (cosmetics-mod/, Fabric, Minecraft 1.20.1) and puts the jar where the launchers take
 # it from: launcher/resources/vellora_mods/ (PC) and android/assets/ (phone).
 # Needs: JDK 17 or newer, Gradle 8.13 (or the GRADLE variable), the internet (maven.fabricmc.net, Mojang's servers,
 # Maven Central or its Google mirror).

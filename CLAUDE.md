@@ -1,4 +1,9 @@
-# Vellora Client: правила проекта
+# Nyxora Launcher: правила проекта
+
+Лаунчер называется **Nyxora Launcher** (раньше — Vellora Client). Внутренние имена остались от старого названия и
+не переименовываются: классы `Vellora…`, идентификатор мода `vellora_cosmetics`, файлы `vellora-cosmetics-*.jar`,
+папка `config/vellora-cosmetics`, идентификаторы вещей гардероба (`vellora_cape`, `v_badge`), пакет Android
+`com.sculkshoot.client`. Данные Vellora Client на ПК переносятся при первом запуске (`Application::handleDataMigration`).
 
 ## Гость (бесплатная версия)
 
@@ -17,7 +22,7 @@
   котором куплен Minecraft: Java Edition.
 - Гостю закрыт только ИИ (Аркан, ИИ-генераторы скинов и плащей): `VelloraGuest::aiAllowed`, `MainActivity.requireAi`.
 
-## Образ в игре (мод Vellora Cosmetics)
+## Образ в игре (мод Nyxora Cosmetics)
 
 В игре видны только скин, плащ и аксессуары слотов «голова», «тело», «спина» — не питомцы, не «в руке», не эффекты
 (правило владельца проекта). Это делает свой Fabric-мод `cosmetics-mod/` (Minecraft 1.20.1, Fabric и Quilt):

@@ -11,9 +11,9 @@ import java.io.InputStream;
 import java.util.Arrays;
 
 /**
- * The player's look in the game: the Vellora Cosmetics mod (cosmetics-mod/ in the repository, Fabric) shows the skin, the
- * cape and the accessories of the head, body and back slots from Vellora on the player of the game; pets, things in the
- * hand and effects stay in Vellora. Before every start the mod is put into a Fabric or Quilt pack of Minecraft 1.20.1 and
+ * The player's look in the game: the Nyxora Cosmetics mod (cosmetics-mod/ in the repository, Fabric) shows the skin, the
+ * cape and the accessories of the head, body and back slots from Nyxora on the player of the game; pets, things in the
+ * hand and effects stay in Nyxora. Before every start the mod is put into a Fabric or Quilt pack of Minecraft 1.20.1 and
  * the look is written into its config/vellora-cosmetics/; from any other pack the mod is taken out (Fabric would refuse
  * to start with it). The same as the PC launcher does (VelloraLook).
  */
@@ -67,7 +67,7 @@ final class GameLook {
                                      Cosmetics.worn(activity, Cosmetics.HEAD), Cosmetics.worn(activity, Cosmetics.BODY),
                                      Cosmetics.worn(activity, Cosmetics.BACK));
         } catch (Exception e) {
-            Log.w("Vellora", "The look for the game was not written: " + e);
+            Log.w("Nyxora", "The look for the game was not written: " + e);
         }
     }
 

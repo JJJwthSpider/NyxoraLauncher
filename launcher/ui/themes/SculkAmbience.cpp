@@ -184,7 +184,7 @@ void SculkAmbience::paint(QPainter* painter, const QRect& rect, const QPoint& te
     painter->restore();
 }
 
-/* ---------------------------------------------------------------- Vellora: the red rain (the old "lunar" theme id) */
+/* ---------------------------------------------------------------- Nyxora: the red rain (the old "lunar" theme id) */
 
 namespace {
 quint32 sceneHash(int a, int b, int salt)
@@ -197,13 +197,13 @@ quint32 sceneHash(int a, int b, int salt)
 
 void SculkAmbience::tickLunar([[maybe_unused]] double t)
 {
-    // Vellora: the red rain moves everywhere at once, so the whole picture is repainted every frame
+    // Nyxora: the red rain moves everywhere at once, so the whole picture is repainted every frame
     m_target->update();
 }
 
 void SculkAmbience::paintLunar(QPainter* painter, double t)
 {
-    // Vellora Client: red rain falling slantwise, small splashes on the ground and now and then a faint red flash,
+    // Nyxora Launcher: red rain falling slantwise, small splashes on the ground and now and then a faint red flash,
     // the same as the Android app (android/src/.../RainDrawable.java)
     const QRectF area(m_lastRect);
     const double w = area.width(), h = area.height();
@@ -244,7 +244,7 @@ void SculkAmbience::paintLunar(QPainter* painter, double t)
 
 QPixmap SculkAmbience::moonScene(const QSize& size, qreal dpr)
 {
-    // Vellora Client: a dark burgundy night with a red glow from below; the rain is drawn on top by the ambience
+    // Nyxora Launcher: a dark burgundy night with a red glow from below; the rain is drawn on top by the ambience
     QPixmap pixmap(size * dpr);
     pixmap.setDevicePixelRatio(dpr);
     QPainter p(&pixmap);
