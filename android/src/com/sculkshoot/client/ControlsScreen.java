@@ -59,7 +59,7 @@ final class ControlsScreen {
         LinearLayout bar = new LinearLayout(activity);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(8), dp(6), dp(8), dp(6));
-        bar.setBackgroundColor(0xCC140509);
+        bar.setBackgroundColor(0xCC060514);
         Button back = Ui.button(activity, "← Назад", false);
         back.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -80,7 +80,7 @@ final class ControlsScreen {
         body.addView(preview, pp);
 
         ScrollView sideScroll = new ScrollView(activity);
-        sideScroll.setBackgroundColor(0x99140509);
+        sideScroll.setBackgroundColor(0x99060514);
         LinearLayout side = new LinearLayout(activity);
         side.setOrientation(LinearLayout.VERTICAL);
         side.setPadding(dp(12), dp(10), dp(12), dp(10));

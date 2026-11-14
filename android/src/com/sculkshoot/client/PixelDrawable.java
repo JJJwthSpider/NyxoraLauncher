@@ -28,14 +28,14 @@ final class PixelDrawable extends Drawable {
         this.raised = raised;
     }
 
-    /** the crimson main button */
+    /** the violet main button */
     static PixelDrawable accent(float density) {
-        return new PixelDrawable(0xFFE8364F, 0xFFFF7586, 0xFF8E1428, 0xFF1E0408, 2 * density, true);
+        return new PixelDrawable(0xFF8154F0, 0xFFAE8AFF, 0xFF502CB0, 0xFF09041E, 2 * density, true);
     }
 
     /** an ordinary dark button */
     static PixelDrawable plain(float density) {
-        return new PixelDrawable(0xFF2B0E15, 0xFF4A1A26, 0xFF12040A, 0xFF060103, 2 * density, true);
+        return new PixelDrawable(0xFF110E2B, 0xFF211A4A, 0xFF040512, 0xFF010106, 2 * density, true);
     }
 
     /** a panel or a card: no bottom edge, the outline in the given colour */

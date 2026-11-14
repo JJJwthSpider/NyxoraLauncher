@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Arkan, Nyxora's AI wizard, as a 3D mob in the style of a Minecraft mod: a model of boxes and its texture.
 
-It is the old pixel-art Arkan made of boxes: a deep burgundy hood with its pointed top falling back to the left (a gold
-tip at the end) and a crimson rim stitched with gold around the opening, the face lost in the shadow of the hood with
-only the red eyes glowing in it, a silver beard falling to a point, a cloak with gold edges, gold runes and a ruby
+It is the old pixel-art Arkan made of boxes: a deep indigo hood with its pointed top falling back to the left (a gold
+tip at the end) and a violet rim stitched with gold around the opening, the face lost in the shadow of the hood with
+only the violet eyes glowing in it, a silver beard falling to a point, a cloak with gold edges, gold runes and a ruby
 brooch, a black belt with a gold buckle, a gold hem, and the right hand of the picture raised, the palm up, under the
 red tesseract.
 
@@ -15,7 +15,7 @@ them at full brightness; the glowing pixels of the head are the eyes, they close
 hand under the tesseract, "glows" are the soft lights the views draw over the model (the ruby).
 
 WizardView.java (phone) and MoonyWidget.cpp (PC) draw it in 3D: he floats over a magic circle, turns a little, looks
-around, holds the red tesseract over his raised hand, and the tesseract lights the cloth near it red. The small
+around, holds the violet tesseract over his raised hand, and the tesseract lights the cloth near it violet. The small
 pictures of him (res/drawable-nodpi/wizard.png and launcher/resources/sculk_theme/wizard.png: chat avatars, list icons)
 are stills of that render, a close-up of his head and shoulders.
 
@@ -33,16 +33,16 @@ DESKTOP = HERE.parent.parent / "launcher" / "resources" / "sculk_theme"
 TW = 128
 
 # the palette of the old Arkan, a little lighter: the 3D views shade the faces and the cloth must not turn black
-HOOD = [(30, 5, 11), (46, 8, 17), (60, 10, 22), (76, 13, 28), (94, 16, 33)]
-ROBE = [(22, 3, 8), (36, 6, 13), (50, 8, 18), (66, 11, 24), (82, 14, 29)]
-RIM_D, RIM, RIM_L = (116, 22, 40), (150, 30, 50), (176, 40, 62)
+HOOD = [(7, 5, 30), (12, 8, 46), (17, 10, 60), (24, 13, 76), (40, 21, 107)]
+ROBE = [(4, 3, 22), (9, 6, 36), (13, 8, 50), (19, 11, 66), (30, 16, 86)]
+RIM_D, RIM, RIM_L = (61, 36, 141), (92, 58, 185), (106, 70, 204)
 GOLD_D, GOLD, GOLD_L = (120, 82, 30), (192, 142, 56), (240, 202, 112)
 BEARD_S, BEARD_D, BEARD, BEARD_L = (96, 90, 102), (146, 140, 150), (200, 196, 200), (238, 234, 232)
-SKIN_D, SKIN, SKIN_L = (104, 52, 48), (150, 82, 70), (196, 112, 98)
-SHADOW, SHADOW_2 = (7, 1, 4), (18, 4, 9)
-LEATHER, LEATHER_L = (14, 6, 8), (30, 14, 14)
-EYE, EYE_CORE = (255, 54, 70, 254), (255, 214, 218, 254)
-GEM_D, GEM, GEM_L = (150, 10, 30, 254), (220, 28, 48, 254), (255, 150, 160, 254)
+SKIN_D, SKIN, SKIN_L = (92, 60, 123), (150, 101, 185), (178, 125, 217)
+SHADOW, SHADOW_2 = (1, 2, 7), (4, 4, 18)
+LEATHER, LEATHER_L = (7, 6, 14), (19, 14, 30)
+EYE, EYE_CORE = (145, 84, 255, 254), (232, 220, 255, 254)
+GEM_D, GEM, GEM_L = (80, 37, 185, 254), (117, 60, 232, 254), (196, 166, 255, 254)
 CLEAR = (0, 0, 0, 0)
 
 rnd = random.Random(7)
@@ -98,11 +98,11 @@ def paint_all(b, painter, skip=()):
 
 
 def stud(k):
-    """the gold stitches on the crimson rim, every other pixel"""
+    """the gold stitches on the violet rim, every other pixel"""
     return (GOLD if k % 4 == 0 else GOLD_D) if k % 2 == 0 else None
 
 
-# ---------------------------------------------------------------- the head: no face, only the shadow and the red eyes
+# ---------------------------------------------------------------- the head: no face, only the shadow and the violet eyes
 head = box("head", [-4, 24, -4], [8, 8, 8])
 paint_all(head, lambda n, i, j, w, h: SHADOW)
 
@@ -111,7 +111,7 @@ def face_paint(i, j, w, h):
     if 2 <= j <= 4 and 1 <= i <= 6:
         return SHADOW_2  # the eyes catch a little light
     if j == 5 and i in (3, 4):
-        return (44, 16, 18)  # a hint of the nose
+        return (24, 16, 44)  # a hint of the nose
     return SHADOW
 
 
@@ -140,7 +140,7 @@ def hood_paint(n, i, j, w, h):
 
 
 paint_all(hood, hood_paint)
-# the brim: the crimson rim stitched with gold stands out around the opening, so the shadow inside is deep
+# the brim: the violet rim stitched with gold stands out around the opening, so the shadow inside is deep
 brim_top = box("head", [-4.5, 30.6, 4], [9, 2, 2])
 paint_all(brim_top, lambda n, i, j, w, h: (stud(i) or RIM) if n == "front" and j == 1 else
           (RIM_L if j == 0 else RIM) if n == "front" else SHADOW_2 if n == "bottom" else shade(HOOD, 3) if n == "top" else RIM_D)

@@ -53,12 +53,12 @@ final class WardrobeScreen {
         float density = activity.getResources().getDisplayMetrics().density;
         root = new LinearLayout(activity);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(0xFF0B0305);
+        root.setBackgroundColor(0xFF04030B);
 
         LinearLayout bar = new LinearLayout(activity);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(10), dp(6), dp(10), dp(6));
-        bar.setBackgroundColor(0xF0080204);
+        bar.setBackgroundColor(0xF0020208);
         Button back = Ui.button(activity, "‹ Лобби", true);
         back.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -102,7 +102,7 @@ final class WardrobeScreen {
         stage.setBackground(new StageDrawable(density));
         character = new CharacterView(activity);
         stage.addView(character, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        TextView hint = Ui.label(activity, "Крути пальцем · нажми — анимация", 10, 0xB3FFD6DC, false);
+        TextView hint = Ui.label(activity, "Крути пальцем · нажми — анимация", 10, 0xB3E6DCFF, false);
         hint.setGravity(Gravity.CENTER);
         stage.addView(hint, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
         body.addView(stage, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 4));
@@ -431,7 +431,7 @@ final class WardrobeScreen {
         card.setOrientation(LinearLayout.VERTICAL);
         card.setGravity(Gravity.CENTER_HORIZONTAL);
         card.setPadding(dp(6), dp(6), dp(6), dp(8));
-        card.setBackground(PixelDrawable.panel(all ? 0xFF4A1420 : 0xFF1C080D, all ? 0xFFFF5A6E : 0xFF3A121B, density));
+        card.setBackground(PixelDrawable.panel(all ? 0xFF1E144A : 0xFF0A081C, all ? 0xFF9F73FF : 0xFF18123A, density));
         LinearLayout rows = new LinearLayout(activity);
         rows.setOrientation(LinearLayout.VERTICAL);
         for (int row = 0; row < 2; row++) {
@@ -439,7 +439,7 @@ final class WardrobeScreen {
             for (int col = 0; col < 2; col++) {
                 int i = row * 2 + col;
                 View cell = i < items.size() ? new ItemIcon(activity, items.get(i)) : new View(activity);
-                cell.setBackground(PixelDrawable.panel(i < items.size() ? cellColor(items.get(i).rarity) : 0xFF14060A, 0xFF0B0305, density));
+                cell.setBackground(PixelDrawable.panel(i < items.size() ? cellColor(items.get(i).rarity) : 0xFF070614, 0xFF04030B, density));
                 cell.setPadding(dp(4), dp(4), dp(4), dp(4));
                 LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(dp(56), dp(50));
                 p.setMargins(dp(2), dp(2), dp(2), dp(2));
@@ -453,7 +453,7 @@ final class WardrobeScreen {
         name.setMaxWidth(dp(120));
         name.setPadding(0, dp(4), 0, 0);
         card.addView(name);
-        TextView count = Ui.label(activity, (all ? "Весь " : "") + worn + "/" + items.size(), 10, all ? 0xFFFF8090 : Ui.HINT, false);
+        TextView count = Ui.label(activity, (all ? "Весь " : "") + worn + "/" + items.size(), 10, all ? 0xFFB493FF : Ui.HINT, false);
         count.setGravity(Gravity.CENTER);
         card.addView(count);
         card.setClickable(true);
@@ -475,9 +475,9 @@ final class WardrobeScreen {
         tile.setOrientation(LinearLayout.VERTICAL);
         tile.setGravity(Gravity.CENTER_HORIZONTAL);
         tile.setPadding(dp(4), dp(4), dp(4), dp(7));
-        // the frame shows the rarity, like Millida's; a worn item glows crimson
-        tile.setBackground(PixelDrawable.panel(on ? 0xFF4A1420 : 0xFF1C080D, on ? 0xFFFF5A6E : Cosmetics.rarityColor(rarity), density));
-        picture.setBackground(PixelDrawable.panel(cellColor(rarity), 0xFF0B0305, density));
+        // the frame shows the rarity, like Millida's; a worn item glows violet
+        tile.setBackground(PixelDrawable.panel(on ? 0xFF1E144A : 0xFF0A081C, on ? 0xFF9F73FF : Cosmetics.rarityColor(rarity), density));
+        picture.setBackground(PixelDrawable.panel(cellColor(rarity), 0xFF04030B, density));
         picture.setPadding(dp(6), dp(6), dp(6), dp(6));
         tile.addView(picture, new LinearLayout.LayoutParams(dp(92), dp(74)));
         TextView label = Ui.label(activity, name, 11, Ui.TEXT, true);
@@ -485,7 +485,7 @@ final class WardrobeScreen {
         label.setMaxWidth(dp(96));
         label.setPadding(0, dp(3), 0, 0);
         tile.addView(label);
-        tile.addView(Ui.label(activity, on ? "надето" : Cosmetics.rarityName(rarity), 9, on ? 0xFFFF8090 : Cosmetics.rarityColor(rarity), false));
+        tile.addView(Ui.label(activity, on ? "надето" : Cosmetics.rarityName(rarity), 9, on ? 0xFFB493FF : Cosmetics.rarityColor(rarity), false));
         tile.setClickable(true);
         tile.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -512,7 +512,7 @@ final class WardrobeScreen {
         LinearLayout panel = new LinearLayout(activity);
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setPadding(dp(12), dp(10), dp(12), dp(12));
-        panel.setBackground(PixelDrawable.panel(0xFF1C080D, 0xFF5A1E2A, density));
+        panel.setBackground(PixelDrawable.panel(0xFF0A081C, 0xFF322364, density));
         panel.addView(Ui.label(activity, "Свой скин", 15, Ui.TEXT, true));
         TextView text = Ui.label(activity, "PNG 64×64 из файла: его сразу видно в лобби, а в игре — всем игрокам. Выбери, какие руки у скина.", 12, Ui.HINT,
                                  false);
@@ -634,7 +634,7 @@ final class WardrobeScreen {
                                                  "👑 Принцесса", "🚀 Космонавт", "😈 Демон", "🤖 Кибер неон", "🧟 Зомби", "💀 Скелет", "🧝 Эльф",
                                                  "🪓 Викинг", "🖤 Чёрное худи с черепом", "🍷 Бордовый костюм" };
     private static final String[] CAPE_IDEAS = { "🌌 Галактика со звёздами", "🔥 Огненный", "❄ Ледяной", "👑 Золотой с короной", "💗 Розовый с сердцем",
-                                                 "🌈 Радуга", "🍷 Бордовый Nyxora", "🌲 Лесной", "⚡ Синий с молнией", "🖤 Чёрно-красные полосы" };
+                                                 "🌈 Радуга", "🔮 Фиолетовый Nyxora", "🌲 Лесной", "⚡ Синий с молнией", "🖤 Чёрно-красные полосы" };
 
     /** the colours of the buttons: clothes and capes, hair, eyes, skin */
     private static final int[] CLOTH_COLORS = { 0xFFC62828, 0xFF6E1423, 0xFFEF7C1E, 0xFFE0A526, 0xFFF2C230, 0xFF3E9B47, 0xFF8BD13B, 0xFF23B5B5,
@@ -708,7 +708,7 @@ final class WardrobeScreen {
         final LinearLayout panel = new LinearLayout(activity);
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setPadding(dp(12), dp(10), dp(12), dp(12));
-        panel.setBackground(PixelDrawable.panel(0xFF241018, 0xFFB3263A, density));
+        panel.setBackground(PixelDrawable.panel(0xFF101124, 0xFF6C44CE, density));
         LinearLayout titleRow = new LinearLayout(activity);
         titleRow.setGravity(Gravity.CENTER_VERTICAL);
         WizardView wizard = new WizardView(activity);
@@ -732,7 +732,7 @@ final class WardrobeScreen {
         prompt.setTextSize(13);
         prompt.setSingleLine(true);
         prompt.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_GO);
-        prompt.setBackground(Ui.rounded(activity, 0xFF0E0407, 0, 0xFF5A1E2A));
+        prompt.setBackground(Ui.rounded(activity, 0xFF04040E, 0, 0xFF322364));
         prompt.setPadding(dp(10), dp(7), dp(10), dp(7));
         prompt.setText(st.prompt);
         inputRow.addView(prompt, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
@@ -941,7 +941,7 @@ final class WardrobeScreen {
         LinearLayout panel = new LinearLayout(activity);
         panel.setGravity(Gravity.CENTER_VERTICAL);
         panel.setPadding(dp(12), dp(10), dp(12), dp(12));
-        panel.setBackground(PixelDrawable.panel(0xFF1C080D, 0xFF5A1E2A, density));
+        panel.setBackground(PixelDrawable.panel(0xFF0A081C, 0xFF322364, density));
         WizardView wizard = new WizardView(activity);
         panel.addView(wizard, new LinearLayout.LayoutParams(dp(56), dp(56)));
         LinearLayout texts = new LinearLayout(activity);
@@ -1038,7 +1038,7 @@ final class WardrobeScreen {
         LinearLayout more = new LinearLayout(activity);
         more.setOrientation(LinearLayout.VERTICAL);
         more.setGravity(Gravity.CENTER);
-        more.setBackground(PixelDrawable.panel(0xFF1C080D, 0xFF5A1E2A, density));
+        more.setBackground(PixelDrawable.panel(0xFF0A081C, 0xFF322364, density));
         TextView arrow = Ui.label(activity, "↻", 26, Ui.TEXT, false);
         arrow.setGravity(Gravity.CENTER);
         more.addView(arrow);
@@ -1063,7 +1063,7 @@ final class WardrobeScreen {
         st.selected = index;
         float density = activity.getResources().getDisplayMetrics().density;
         for (int i = 0; i < st.results.size() && i < variants.getChildCount(); i++) {
-            variants.getChildAt(i).setBackground(PixelDrawable.panel(i == index ? 0xFF3A1019 : 0xFF1C080D, i == index ? 0xFFFF5A6E : 0xFF8A3442, density));
+            variants.getChildAt(i).setBackground(PixelDrawable.panel(i == index ? 0xFF17103A : 0xFF0A081C, i == index ? 0xFF9F73FF : 0xFF674DAB, density));
         }
         Object r = st.results.get(index);
         if (capes) {
@@ -1280,10 +1280,10 @@ final class WardrobeScreen {
         protected void onDraw(Canvas canvas) {
             float w = getWidth(), h = getHeight(), d = getResources().getDisplayMetrics().density;
             paint.setStyle(Paint.Style.FILL);
-            paint.setColor(selected ? 0xFFFF5A6E : 0xFF5A1E2A);
+            paint.setColor(selected ? 0xFF9F73FF : 0xFF322364);
             canvas.drawRect(0, 0, w, h, paint);
             float in = selected ? 3 * d : 1.5f * d;
-            paint.setColor(0xFF120508);
+            paint.setColor(0xFF060512);
             canvas.drawRect(in, in, w - in, h - in, paint);
             float pad = in + 2 * d;
             if (color != 0) {
@@ -1303,7 +1303,7 @@ final class WardrobeScreen {
                     }
                 }
             } else if (none) {
-                paint.setColor(0xFF8A3442);
+                paint.setColor(0xFF674DAB);
                 paint.setStrokeWidth(2 * d);
                 canvas.drawLine(pad, h - pad, w - pad, pad, paint);
             } else if (auto) {
@@ -1503,14 +1503,14 @@ final class WardrobeScreen {
 
     /* ------------------------------------------------------------ pictures */
 
-    /** the stage behind the player: a crimson light in the middle and hard rays, like the stage of Millida's wardrobe */
+    /** the stage behind the player: a violet light in the middle and hard rays, like the stage of Millida's wardrobe */
     static final class StageDrawable extends android.graphics.drawable.Drawable {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final PixelDrawable frame;
         private final float inset;
 
         StageDrawable(float density) {
-            frame = PixelDrawable.panel(0xFF2A0A12, 0xFF060103, density);
+            frame = PixelDrawable.panel(0xFF0D0A2A, 0xFF010106, density);
             inset = 2 * Math.max(1, Math.round(2 * density));
         }
 
@@ -1522,11 +1522,11 @@ final class WardrobeScreen {
             canvas.save();
             canvas.clipRect(b.left + inset, b.top + inset, b.right - inset, b.bottom - inset);
             float cx = b.exactCenterX(), cy = b.top + b.height() * 0.45f, r = Math.max(b.width(), b.height());
-            paint.setShader(new RadialGradient(cx, cy, r * 0.6f, new int[] { 0xFF8A2036, 0xFF4A1020, 0xFF1C060B }, new float[] { 0f, 0.45f, 1f },
+            paint.setShader(new RadialGradient(cx, cy, r * 0.6f, new int[] { 0xFF5237AB, 0xFF17104A, 0xFF08061C }, new float[] { 0f, 0.45f, 1f },
                                                Shader.TileMode.CLAMP));
             canvas.drawRect(b, paint);
             paint.setShader(null);
-            paint.setColor(0x22FFB0BC);
+            paint.setColor(0x22CFBCFF);
             Path path = new Path();
             for (int i = 0; i < 18; i++) {
                 double a0 = Math.toRadians(i * 20), a1 = Math.toRadians(i * 20 + 8);
@@ -1574,8 +1574,8 @@ final class WardrobeScreen {
                 float u = Math.min(w / 28f, h / 44f);
                 float ox = getPaddingLeft() + (w - 28 * u) / 2 + 6 * u, oy = getPaddingTop() + (h - 44 * u) / 2 + 8 * u;
                 Cosmetics.Pen pen = new Cosmetics.Pen(canvas, ox, oy, u);
-                pen.rect(4, 0, 8, 8, 0x332B0E15);
-                pen.rect(4, 8, 8, 24, 0x332B0E15);
+                pen.rect(4, 0, 8, 8, 0x33110E2B);
+                pen.rect(4, 8, 8, 24, 0x33110E2B);
                 Cosmetics.drawParticles(pen, item, time);
                 postInvalidateDelayed(60);
                 return;
@@ -1660,11 +1660,11 @@ final class WardrobeScreen {
             float[][] parts = { { 4, 0, 8, 8 }, { 4, 8, 8, 12 }, { 0, emote.equals("cheer") ? -4 : 8, 4, 12 }, { 12, waving ? -4 : 8, 4, 12 },
                                 { 4, 20, 4, 12 }, { 8, 20, 4, 12 } };
             for (float[] r : parts) {
-                pen.rect(r[0], r[1] + lift, r[2], r[3], 0xFF5A1E2A);
-                pen.rect(r[0] + 0.6f, r[1] + 0.6f + lift, r[2] - 1.2f, r[3] - 1.2f, 0xFF2B0E15);
+                pen.rect(r[0], r[1] + lift, r[2], r[3], 0xFF322364);
+                pen.rect(r[0] + 0.6f, r[1] + 0.6f + lift, r[2] - 1.2f, r[3] - 1.2f, 0xFF110E2B);
             }
-            pen.rect(6, 4 + lift, 1, 1, 0xFFFF4654);
-            pen.rect(9, 4 + lift, 1, 1, 0xFFFF4654);
+            pen.rect(6, 4 + lift, 1, 1, 0xFF9A62FF);
+            pen.rect(9, 4 + lift, 1, 1, 0xFF9A62FF);
             Cosmetics.draw(pen, Cosmetics.find(context, body), false, time);
             Cosmetics.draw(pen, Cosmetics.find(context, head), false, time);
             Cosmetics.draw(pen, Cosmetics.find(context, pet), false, time);
@@ -1696,9 +1696,9 @@ final class WardrobeScreen {
             float ox = (getWidth() - 10 * u) / 2, oy = (getHeight() - 16 * u) / 2;
             if (cape == null) {
                 Cosmetics.Pen pen = new Cosmetics.Pen(canvas, ox, oy, u);
-                pen.rect(0, 0, 10, 16, 0xFF5A1E2A);
-                pen.rect(0.5f, 0.5f, 9, 15, 0xFF1C080D);
-                pen.rect(2, 7.5f, 6, 1, 0xFF8A3442);
+                pen.rect(0, 0, 10, 16, 0xFF322364);
+                pen.rect(0.5f, 0.5f, 9, 15, 0xFF0A081C);
+                pen.rect(2, 7.5f, 6, 1, 0xFF674DAB);
                 return;
             }
             float s = cape.getWidth() / 64f;

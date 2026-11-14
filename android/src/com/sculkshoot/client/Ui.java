@@ -9,15 +9,15 @@ import android.view.Gravity;
 import android.widget.Button;
 import android.widget.TextView;
 
-/** The look of the app in one place: burgundy and crimson, buttons and panels made of blocks like Millida Launcher. */
+/** The look of the app in one place: dark navy and violet, buttons and panels made of blocks like Millida Launcher. */
 final class Ui {
     private Ui() {}
 
-    static final int BG = 0xFF0E0407, PANEL = 0xFF1C080D, PANEL_LIGHT = 0xFF2B0E15, ACCENT = 0xFFFFFFFF, ACCENT_DARK = 0xFF8A3442,
-                     TEXT = 0xFFFBEFF1, HINT = 0xFFD1A3AA, USER_BUBBLE = 0xFF4A1420, LINE = 0xFF5A1E2A, GLASS = 0xE61C080D,
+    static final int BG = 0xFF04040E, PANEL = 0xFF0A081C, PANEL_LIGHT = 0xFF110E2B, ACCENT = 0xFFFFFFFF, ACCENT_DARK = 0xFF674DAB,
+                     TEXT = 0xFFFBEFF1, HINT = 0xFFC3B7E1, USER_BUBBLE = 0xFF1E144A, LINE = 0xFF322364, GLASS = 0xE60A081C,
                      DANGER = 0xFFE5534B;
-    static final int[] RAINBOW_PASTEL = { 0xFFFF5A6E, 0xFFE8364F, 0xFFC81F3A, 0xFFA8162E, 0xFFC81F3A, 0xFFFF8090 };
-    static final int[] RAINBOW = { 0xFFFF3B4F, 0xFFE8364F, 0xFFFF6B7D, 0xFFC0213A, 0xFFA3182F, 0xFF7A1426 };
+    static final int[] RAINBOW_PASTEL = { 0xFF9F73FF, 0xFF8154F0, 0xFF693EDB, 0xFF5B34C6, 0xFF693EDB, 0xFFB493FF };
+    static final int[] RAINBOW = { 0xFF9058FF, 0xFF8154F0, 0xFFA881FF, 0xFF693FD6, 0xFF5C36C3, 0xFF412496 };
 
     static Typeface pixel;
 
@@ -39,17 +39,17 @@ final class Ui {
     /** a panel or card made of blocks (Millida-like), outlined in `stroke` (0: a dark outline) */
     static android.graphics.drawable.Drawable rounded(Context context, int color, float radius, int stroke) {
         float density = context.getResources().getDisplayMetrics().density;
-        return PixelDrawable.panel(color, stroke != 0 ? stroke : 0xFF060103, density);
+        return PixelDrawable.panel(color, stroke != 0 ? stroke : 0xFF010106, density);
     }
 
-    /** the crimson main button, a raised block */
+    /** the violet main button, a raised block */
     static android.graphics.drawable.Drawable rainbow(Context context, float radius) {
         return PixelDrawable.accent(context.getResources().getDisplayMetrics().density);
     }
 
-    /** the selected card: a crimson glow inside a bright crimson outline */
+    /** the selected card: a violet glow inside a bright violet outline */
     static android.graphics.drawable.Drawable rainbowFrame(Context context, float radius) {
-        return PixelDrawable.panel(0xCC4A1420, 0xFFFF5A6E, context.getResources().getDisplayMetrics().density);
+        return PixelDrawable.panel(0xCC1E144A, 0xFF9F73FF, context.getResources().getDisplayMetrics().density);
     }
 
     static Button button(Context context, String text, boolean accent) {

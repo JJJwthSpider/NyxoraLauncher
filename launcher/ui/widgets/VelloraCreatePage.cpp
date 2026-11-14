@@ -77,7 +77,7 @@ const PopularMod POPULAR_MODS[] = {
 QLabel* caption(const QString& text, QWidget* parent)
 {
     auto* label = new QLabel(text, parent);
-    label->setStyleSheet("color: #ff8090; font-weight: bold; background: transparent;");
+    label->setStyleSheet("color: #b493ff; font-weight: bold; background: transparent;");
     return label;
 }
 
@@ -93,7 +93,7 @@ QFrame* panel(QWidget* parent)
     auto* frame = new QFrame(parent);
     frame->setObjectName("createPanel");
     frame->setStyleSheet(
-        "QFrame#createPanel { background-color: rgba(20, 5, 9, 235); border: 2px solid #3a121b; border-bottom: 5px solid #0b0305; "
+        "QFrame#createPanel { background-color: rgba(6, 5, 20, 235); border: 2px solid #18123a; border-bottom: 5px solid #04030b; "
         "border-radius: 2px; }");
     return frame;
 }
@@ -139,7 +139,7 @@ QIcon VelloraCreatePage::loaderSign(const QString& key)
         colors = { { 'w', QColor(0xdb, 0xd0, 0xb4) }, { 'b', QColor(0x8f, 0x84, 0x66) } };
     } else if (key == "quilt") {
         rows = { "ppp.bbb", "ppp.bbb", "ppp.bbb", ".......", "ooo.mmm", "ooo.mmm", "ooo.mmm" };
-        colors = { { 'p', QColor(0xb0, 0x7c, 0xe8) }, { 'b', QColor(0x4f, 0xa3, 0xe0) }, { 'o', QColor(0xf0, 0xa0, 0x40) }, { 'm', QColor(0xe8, 0x60, 0x8c) } };
+        colors = { { 'p', QColor(0xb0, 0x7c, 0xe8) }, { 'b', QColor(0x4f, 0xa3, 0xe0) }, { 'o', QColor(0xf0, 0xa0, 0x40) }, { 'm', QColor(0x86, 0x78, 0xf0) } };
     } else if (key == "vanilla") {
         rows = { "gggggggg", "gGgggGgg", "dgdddgdd", "dddddddd", "ddDddddd", "dddddDdd", "dDdddddd" };
         colors = { { 'g', QColor(0x6d, 0xbe, 0x45) }, { 'G', QColor(0x8f, 0xd4, 0x60) }, { 'd', QColor(0x8b, 0x5a, 0x2b) }, { 'D', QColor(0x6b, 0x43, 0x20) } };
@@ -245,9 +245,9 @@ VelloraCreatePage::VelloraCreatePage(QWidget* parent) : QWidget(parent)
     m_versions->setSpacing(2);
     m_versions->setStyleSheet(
         "QListWidget#versionGrid { background: transparent; border: none; }"
-        "QListWidget#versionGrid::item { background-color: #2b0e15; border: 2px solid #060103; border-bottom: 4px solid #12040a; "
+        "QListWidget#versionGrid::item { background-color: #110e2b; border: 2px solid #010106; border-bottom: 4px solid #040512; "
         "color: #fbeff1; min-width: 70px; min-height: 22px; }"
-        "QListWidget#versionGrid::item:selected { background-color: #e8364f; color: white; border-bottom-color: #8e1428; }");
+        "QListWidget#versionGrid::item:selected { background-color: #8154f0; color: white; border-bottom-color: #502cb0; }");
     form->addWidget(m_versions, 1);
     connect(m_versionSearch, &QLineEdit::textChanged, this, [this] { fillVersions(); });
     connect(m_snapshots, &QCheckBox::toggled, this, [this] {
@@ -280,9 +280,9 @@ VelloraCreatePage::VelloraCreatePage(QWidget* parent) : QWidget(parent)
     m_modList->setMaximumHeight(116);
     m_modList->setStyleSheet(
         "QListWidget#modGrid { background: transparent; border: none; }"
-        "QListWidget#modGrid::item { background-color: #2b0e15; border: 2px solid #060103; border-bottom: 4px solid #12040a; "
+        "QListWidget#modGrid::item { background-color: #110e2b; border: 2px solid #010106; border-bottom: 4px solid #040512; "
         "color: #fbeff1; padding: 3px 8px; }"
-        "QListWidget#modGrid::item:selected { background-color: #e8364f; color: white; border-bottom-color: #8e1428; }");
+        "QListWidget#modGrid::item:selected { background-color: #8154f0; color: white; border-bottom-color: #502cb0; }");
     modLayout->addWidget(m_modList);
     connect(m_modList, &QListWidget::itemSelectionChanged, this, [this] {
         if (m_fillingMods) {
@@ -332,7 +332,7 @@ VelloraCreatePage::VelloraCreatePage(QWidget* parent) : QWidget(parent)
     form->addWidget(m_openMods);
     m_status = new QLabel(left);
     m_status->setWordWrap(true);
-    m_status->setStyleSheet("color: #d1a3aa; background: transparent;");
+    m_status->setStyleSheet("color: #c3b7e1; background: transparent;");
     form->addWidget(m_status);
 
     auto* foot = new QHBoxLayout;
@@ -399,7 +399,7 @@ VelloraCreatePage::VelloraCreatePage(QWidget* parent) : QWidget(parent)
     m_packs->setContentsMargins(0, 0, 4, 0);
     m_packs->setSpacing(6);
     m_packsStatus = new QLabel(tr("Loading the most popular packs from Modrinth..."), packsBox);
-    m_packsStatus->setStyleSheet("color: #d1a3aa; background: transparent;");
+    m_packsStatus->setStyleSheet("color: #c3b7e1; background: transparent;");
     m_packsStatus->setWordWrap(true);
     m_packs->addWidget(m_packsStatus);
     m_packs->addStretch(1);
@@ -408,10 +408,10 @@ VelloraCreatePage::VelloraCreatePage(QWidget* parent) : QWidget(parent)
     outer->addWidget(right, 2);
 
     setStyleSheet(
-        "QToolButton#loaderTile { background-color: #2b0e15; color: #fbeff1; border: 2px solid #060103; border-bottom: 5px solid #12040a; "
+        "QToolButton#loaderTile { background-color: #110e2b; color: #fbeff1; border: 2px solid #010106; border-bottom: 5px solid #040512; "
         "padding: 4px; }"
-        "QToolButton#loaderTile:checked { background-color: #e8364f; color: white; border-bottom-color: #8e1428; }"
-        "QToolButton#loaderTile:disabled { color: #6a4a50; background-color: #1a070b; }");
+        "QToolButton#loaderTile:checked { background-color: #8154f0; color: white; border-bottom-color: #502cb0; }"
+        "QToolButton#loaderTile:disabled { color: #635a7e; background-color: #09071a; }");
 }
 
 void VelloraCreatePage::showEvent(QShowEvent* event)
@@ -473,7 +473,7 @@ void VelloraCreatePage::fillVersions()
         item->setTextAlignment(Qt::AlignCenter);
         item->setSizeHint(QSize(78, 30));
         if (!release) {
-            item->setForeground(QColor(0xd1, 0xa3, 0xaa));
+            item->setForeground(QColor(0xc3, 0xb7, 0xe1));
         }
         if (version->version() == previous || (!select && previous.isEmpty() && version->version() == "1.21.1")) {
             select = item;
@@ -839,7 +839,7 @@ QWidget* VelloraCreatePage::packRow(const QJsonObject& hit)
     auto* row = new QFrame;
     row->setObjectName("packRow");
     row->setStyleSheet(
-        "QFrame#packRow { background-color: #2b0e15; border: 2px solid #060103; border-bottom: 4px solid #12040a; }"
+        "QFrame#packRow { background-color: #110e2b; border: 2px solid #010106; border-bottom: 4px solid #040512; }"
         "QLabel { background: transparent; }");
     auto* layout = new QHBoxLayout(row);
     layout->setContentsMargins(8, 6, 8, 6);
@@ -868,7 +868,7 @@ QWidget* VelloraCreatePage::packRow(const QJsonObject& hit)
     const auto count = downloads >= 1e6 ? tr("%1M").arg(downloads / 1e6, 0, 'f', 1) : downloads >= 1e3 ? tr("%1K").arg(int(downloads / 1e3))
                                                                                                          : QString::number(int(downloads));
     auto* sub = new QLabel(QString("⬇ %1 · %2").arg(count, hit.value("description").toString()), row);
-    sub->setStyleSheet("color: #d1a3aa;");
+    sub->setStyleSheet("color: #c3b7e1;");
     sub->setMaximumWidth(360);
     sub->setText(sub->fontMetrics().elidedText(sub->text(), Qt::ElideRight, 340));
     texts->addWidget(sub);

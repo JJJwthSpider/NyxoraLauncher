@@ -89,7 +89,7 @@ final class GameFiles {
             ImageView image = new ImageView(activity);
             image.setScaleType(ImageView.ScaleType.CENTER_CROP);
             image.setImageBitmap(thumbnail(shot, 320));
-            image.setBackground(Ui.rounded(activity, Ui.PANEL, 0, 0xFF5A1E2A));
+            image.setBackground(Ui.rounded(activity, Ui.PANEL, 0, 0xFF322364));
             image.setPadding(dp(3), dp(3), dp(3), dp(3));
             GridLayout.LayoutParams p = new GridLayout.LayoutParams();
             p.width = dp(150);
@@ -176,7 +176,7 @@ final class GameFiles {
             LinearLayout row = new LinearLayout(activity);
             row.setGravity(Gravity.CENTER_VERTICAL);
             row.setPadding(dp(10), dp(8), dp(8), dp(10));
-            row.setBackground(Ui.rounded(activity, Ui.PANEL, 0, 0xFF5A1E2A));
+            row.setBackground(Ui.rounded(activity, Ui.PANEL, 0, 0xFF322364));
             ImageView icon = new ImageView(activity);
             File iconFile = new File(world, "icon.png");
             if (iconFile.isFile()) {

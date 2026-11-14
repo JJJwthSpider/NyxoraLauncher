@@ -78,9 +78,9 @@ public final class MainActivity extends Activity {
 
     // sculk colors of the desktop theme
     // night black and moon white; main buttons wear a see-through rainbow
-    private static final int BG = 0xFF0E0407, PANEL = 0xFF1C080D, PANEL_LIGHT = 0xFF2B0E15, ACCENT = 0xFFFFFFFF, ACCENT_DARK = 0xFF8A3442,
-                             TEXT = 0xFFFBEFF1, HINT = 0xFFD1A3AA, USER_BUBBLE = 0xFF4A1420, LINE = 0xFF5A1E2A;
-    private static final int[] RAINBOW_PASTEL = { 0xFFFF5A6E, 0xFFE8364F, 0xFFC81F3A, 0xFFA8162E, 0xFFC81F3A, 0xFFFF8090 };
+    private static final int BG = 0xFF04040E, PANEL = 0xFF0A081C, PANEL_LIGHT = 0xFF110E2B, ACCENT = 0xFFFFFFFF, ACCENT_DARK = 0xFF674DAB,
+                             TEXT = 0xFFFBEFF1, HINT = 0xFFC3B7E1, USER_BUBBLE = 0xFF1E144A, LINE = 0xFF322364;
+    private static final int[] RAINBOW_PASTEL = { 0xFF9F73FF, 0xFF8154F0, 0xFF693EDB, 0xFF5B34C6, 0xFF693EDB, 0xFFB493FF };
 
     private static final String[] TOPIC_REPLIES = { "Зомби-апокалипсис: города, зомби и оружие", "Магия и приключения с подземельями",
                                                     "Технологии и космос", "Только оптимизация для слабого ПК" };
@@ -796,7 +796,7 @@ public final class MainActivity extends Activity {
         LinearLayout bar = new LinearLayout(this);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(12), dp(8), dp(8), dp(8));
-        bar.setBackgroundColor(0xCC140509);
+        bar.setBackgroundColor(0xCC060514);
         wizard = new WizardView(this);
         bar.addView(wizard, new LinearLayout.LayoutParams(dp(48), dp(48)));
         LinearLayout titles = new LinearLayout(this);
@@ -858,7 +858,7 @@ public final class MainActivity extends Activity {
         packBar = new LinearLayout(this);
         packBar.setOrientation(LinearLayout.VERTICAL);
         packBar.setPadding(dp(12), dp(8), dp(12), dp(8));
-        packBar.setBackground(rounded(0xE61C080D, 12, LINE));
+        packBar.setBackground(rounded(0xE60A081C, 12, LINE));
         packTitle = new TextView(this);
         packTitle.setTextColor(TEXT);
         packTitle.setTextSize(13);
@@ -921,7 +921,7 @@ public final class MainActivity extends Activity {
         input.setHintTextColor(HINT);
         input.setTextColor(TEXT);
         input.setTextSize(15);
-        input.setBackground(rounded(0xE61C080D, 20, LINE));
+        input.setBackground(rounded(0xE60A081C, 20, LINE));
         input.setPadding(dp(14), dp(10), dp(14), dp(10));
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         input.setImeOptions(EditorInfo.IME_ACTION_SEND);
@@ -993,7 +993,7 @@ public final class MainActivity extends Activity {
         bubble.setLineSpacing(0, 1.1f);
         bubble.setTextIsSelectable(true);
         bubble.setMovementMethod(LinkMovementMethod.getInstance());
-        bubble.setBackground(rounded(0xF02B0E15, 14, LINE));
+        bubble.setBackground(rounded(0xF0110E2B, 14, LINE));
         bubble.setPadding(dp(12), dp(9), dp(12), dp(9));
         addRow(bubble, true);
     }
@@ -1056,7 +1056,7 @@ public final class MainActivity extends Activity {
         hideTyping();
         LinearLayout bubble = new LinearLayout(this);
         bubble.setOrientation(LinearLayout.VERTICAL);
-        bubble.setBackground(rounded(0xF02B0E15, 14, LINE));
+        bubble.setBackground(rounded(0xF0110E2B, 14, LINE));
         bubble.setPadding(dp(12), dp(9), dp(12), dp(9));
         TextView head = new TextView(this);
         head.setText("Аркан работает...");
@@ -2314,7 +2314,7 @@ public final class MainActivity extends Activity {
         if (fixes.isEmpty()) {
             return;
         }
-        TextView title = Ui.label(this, "Как починить", 14, 0xFFFF8090, true);
+        TextView title = Ui.label(this, "Как починить", 14, 0xFFB493FF, true);
         title.setPadding(Ui.dp(this, 14), Ui.dp(this, 10), Ui.dp(this, 14), Ui.dp(this, 4));
         column.addView(title);
         for (View fix : fixes) {

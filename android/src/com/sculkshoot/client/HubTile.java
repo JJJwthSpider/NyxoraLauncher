@@ -12,7 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
- * A tile of the lobby, drawn the way Millida Launcher draws its tiles, in Nyxora's burgundy: a dark outline with cut
+ * A tile of the lobby, drawn the way Millida Launcher draws its tiles, in Nyxora's violet: a dark outline with cut
  * corners, a plate in the colour of the section, hard rays behind the picture, the picture standing on the tile (it may
  * rise above the top edge), and the name on a dense band over the bottom. A "!" or a ribbon can call for attention.
  */
@@ -53,7 +53,7 @@ final class HubTile extends FrameLayout {
         title.setSingleLine(true);
         title.setEllipsize(android.text.TextUtils.TruncateAt.END);
         strip.addView(title);
-        subtitle = Ui.label(context, sub == null ? "" : sub, 10, 0xFFFFC2CA, false);
+        subtitle = Ui.label(context, sub == null ? "" : sub, 10, 0xFFDBCBFF, false);
         subtitle.setSingleLine(true);
         subtitle.setVisibility(sub == null || sub.isEmpty() ? GONE : VISIBLE);
         strip.addView(subtitle);
@@ -70,7 +70,7 @@ final class HubTile extends FrameLayout {
         if (ribbon == null) {
             ribbon = Ui.label(getContext(), "", 9, 0xFFFFFFFF, true);
             ribbon.setPadding(Ui.dp(getContext(), 6), Ui.dp(getContext(), 1), Ui.dp(getContext(), 6), Ui.dp(getContext(), 2));
-            ribbon.setBackgroundColor(0xFFE8364F);
+            ribbon.setBackgroundColor(0xFF8154F0);
             LayoutParams p = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP | Gravity.END);
             p.setMargins(0, Ui.dp(getContext(), 6), Ui.dp(getContext(), 6), 0);
             addView(ribbon, p);

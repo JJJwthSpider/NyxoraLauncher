@@ -79,7 +79,7 @@ final class BrowserScreen {
         LinearLayout bar = new LinearLayout(activity);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(10), dp(6), dp(10), dp(6));
-        bar.setBackgroundColor(0xF0080204);
+        bar.setBackgroundColor(0xF0020208);
         Button back = Ui.button(activity, inst == null ? "‹ Лобби" : "‹ Назад", true);
         back.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -145,7 +145,7 @@ final class BrowserScreen {
         query.setTextSize(14);
         query.setSingleLine(true);
         query.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
-        query.setBackground(Ui.rounded(activity, 0xE6140509, 0, 0xFF5A1E2A));
+        query.setBackground(Ui.rounded(activity, 0xE6060514, 0, 0xFF322364));
         query.setPadding(dp(12), dp(8), dp(12), dp(8));
         query.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -183,7 +183,7 @@ final class BrowserScreen {
         LinearLayout filters = new LinearLayout(activity);
         filters.setOrientation(LinearLayout.VERTICAL);
         filters.setPadding(dp(10), dp(8), dp(10), dp(10));
-        filters.setBackground(Ui.rounded(activity, 0xD9100406, 0, 0xFF2B0E15));
+        filters.setBackground(Ui.rounded(activity, 0xD9060410, 0, 0xFF110E2B));
         filters.addView(filterTitle("Сортировка"));
         sort = new Spinner(activity);
         String[] names = new String[SORTS.length];
@@ -191,7 +191,7 @@ final class BrowserScreen {
             names[i] = SORTS[i][1];
         }
         sort.setAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, names));
-        sort.setBackground(Ui.rounded(activity, 0xFF2B0E15, 0, 0xFF5A1E2A));
+        sort.setBackground(Ui.rounded(activity, 0xFF110E2B, 0, 0xFF322364));
         sort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             boolean first = true;
 
@@ -304,7 +304,7 @@ final class BrowserScreen {
     }
 
     private TextView filterTitle(String text) {
-        TextView t = Ui.label(activity, text, 12, 0xFFFF8090, true);
+        TextView t = Ui.label(activity, text, 12, 0xFFB493FF, true);
         t.setPadding(dp(2), dp(10), 0, dp(4));
         return t;
     }
@@ -486,7 +486,7 @@ final class BrowserScreen {
             card.setPadding(dp(6), dp(6), dp(6), dp(9));
             card.setBackground(PixelDrawable.plain(activity.getResources().getDisplayMetrics().density));
             android.widget.FrameLayout banner = new android.widget.FrameLayout(activity);
-            banner.setBackgroundColor(0xFF2B0E15);
+            banner.setBackgroundColor(0xFF110E2B);
             ImageView icon = new ImageView(activity);
             Icons.load(icon, hit.isNull("icon_url") ? "" : hit.optString("icon_url"));
             banner.addView(icon, new android.widget.FrameLayout.LayoutParams(dp(64), dp(64), Gravity.CENTER));
@@ -501,7 +501,7 @@ final class BrowserScreen {
             meta.setSingleLine(true);
             meta.setPadding(dp(2), 0, dp(2), 0);
             card.addView(meta);
-            TextView desc = Ui.label(activity, hit.optString("description"), 12, 0xFFCFB4B9, false);
+            TextView desc = Ui.label(activity, hit.optString("description"), 12, 0xFFCDC7E0, false);
             desc.setMaxLines(2);
             desc.setMinLines(2);
             desc.setEllipsize(android.text.TextUtils.TruncateAt.END);

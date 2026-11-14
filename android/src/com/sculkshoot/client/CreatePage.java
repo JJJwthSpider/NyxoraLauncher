@@ -84,7 +84,7 @@ final class CreatePage {
         // the form scrolls, "Создать" stays at the bottom of the panel
         LinearLayout leftPanel = new LinearLayout(activity);
         leftPanel.setOrientation(LinearLayout.VERTICAL);
-        leftPanel.setBackground(PixelDrawable.panel(0xF0140509, 0xFF3A121B, density));
+        leftPanel.setBackground(PixelDrawable.panel(0xF0060514, 0xFF18123A, density));
         ScrollView leftScroll = new ScrollView(activity);
         LinearLayout left = new LinearLayout(activity);
         left.setOrientation(LinearLayout.VERTICAL);
@@ -101,7 +101,7 @@ final class CreatePage {
         head.setPadding(0, 0, 0, dp(2));
         ImageView icon = new ImageView(activity);
         icon.setImageResource(R.drawable.install_default);
-        icon.setBackground(PixelDrawable.panel(0xFF3A0D16, 0xFF7A1F2E, density));
+        icon.setBackground(PixelDrawable.panel(0xFF150D3A, 0xFF4B3096, density));
         icon.setPadding(dp(4), dp(4), dp(4), dp(4));
         head.addView(icon, new LinearLayout.LayoutParams(dp(48), dp(48)));
         LinearLayout nameColumn = new LinearLayout(activity);
@@ -113,7 +113,7 @@ final class CreatePage {
         name.setHintTextColor(Ui.HINT);
         name.setTextSize(15);
         name.setSingleLine(true);
-        name.setBackground(Ui.rounded(activity, 0xFF0E0407, 0, 0xFF5A1E2A));
+        name.setBackground(Ui.rounded(activity, 0xFF04040E, 0, 0xFF322364));
         name.setPadding(dp(10), dp(7), dp(10), dp(7));
         name.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -180,7 +180,7 @@ final class CreatePage {
         versionSearch.setTextColor(Ui.TEXT);
         versionSearch.setTextSize(12);
         versionSearch.setSingleLine(true);
-        versionSearch.setBackground(Ui.rounded(activity, 0xFF0E0407, 0, 0xFF5A1E2A));
+        versionSearch.setBackground(Ui.rounded(activity, 0xFF04040E, 0, 0xFF322364));
         versionSearch.setPadding(dp(8), dp(4), dp(8), dp(4));
         versionSearch.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -253,7 +253,7 @@ final class CreatePage {
         modSearch.setTextSize(12);
         modSearch.setSingleLine(true);
         modSearch.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
-        modSearch.setBackground(Ui.rounded(activity, 0xFF0E0407, 0, 0xFF5A1E2A));
+        modSearch.setBackground(Ui.rounded(activity, 0xFF04040E, 0, 0xFF322364));
         modSearch.setPadding(dp(10), dp(6), dp(10), dp(6));
         searchRow.addView(modSearch, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         Button find = Ui.button(activity, "Найти", false);
@@ -281,7 +281,7 @@ final class CreatePage {
         // the foot: "Собрать с ИИ" and "Создать"
         LinearLayout foot = new LinearLayout(activity);
         foot.setPadding(dp(12), dp(6), dp(12), dp(10));
-        foot.setBackgroundColor(0xF0100406);
+        foot.setBackgroundColor(0xF0060410);
         Button ai = Ui.button(activity, "🔮 Собрать с ИИ", false);
         ai.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -314,7 +314,7 @@ final class CreatePage {
         LinearLayout right = new LinearLayout(activity);
         right.setOrientation(LinearLayout.VERTICAL);
         right.setPadding(dp(12), dp(10), dp(12), dp(12));
-        right.setBackground(PixelDrawable.panel(0xF0140509, 0xFF3A121B, density));
+        right.setBackground(PixelDrawable.panel(0xF0060514, 0xFF18123A, density));
         rightScroll.addView(right);
         LinearLayout.LayoutParams rightParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 10);
         rightParams.setMargins(dp(5), dp(8), dp(10), dp(8));
@@ -500,7 +500,7 @@ final class CreatePage {
     }
 
     private TextView caption(String text) {
-        TextView t = Ui.label(activity, text, 12, 0xFFFF8090, true);
+        TextView t = Ui.label(activity, text, 12, 0xFFB493FF, true);
         t.setPadding(0, dp(4), 0, dp(4));
         return t;
     }
@@ -738,7 +738,7 @@ final class CreatePage {
                 colors['p'] = 0xFFB07CE8;
                 colors['b'] = 0xFF4FA3E0;
                 colors['o'] = 0xFFF0A040;
-                colors['m'] = 0xFFE8608C;
+                colors['m'] = 0xFF8678F0;
             } else if ("vanilla".equals(loader)) {
                 rows = new String[] { "gggggggg", "gGgggGgg", "dgdddgdd", "dddddddd", "ddDddddd", "dddddDdd", "dDdddddd" };
                 colors['g'] = 0xFF6DBE45;

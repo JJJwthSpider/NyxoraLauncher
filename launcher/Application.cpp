@@ -1256,7 +1256,7 @@ bool Application::createSetupWizard()
             m_themeManager->applyCurrentlySelectedTheme();
         }
     }
-    // the launcher became Nyxora Launcher: the burgundy red rain look (theme id "lunar") once for everyone
+    // the launcher became Nyxora Launcher: the navy neon rain look (theme id "lunar") once for everyone
     if (!settings()->get("VelloraDesignApplied").toBool()) {
         settings()->set("VelloraDesignApplied", true);
         settings()->set("ApplicationTheme", QString("lunar"));

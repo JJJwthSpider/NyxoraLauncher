@@ -28,7 +28,7 @@ class QPainter;
 /// The face of the mod pack agent: Arkan, the old hooded wizard, as a 3D mob in the style of a Minecraft mod, a model
 /// of boxes with a pixel texture (resources/sculk_theme/arkan_model.json and arkan.png, made by android/art/arkan3d.py)
 /// drawn by a small software renderer, the same as the phone's WizardView: the face lost in the shadow of the hood with
-/// only the red eyes glowing, the crimson rim stitched with gold, the silver beard, the ruby brooch; he floats over a
+/// only the violet eyes glowing, the violet rim stitched with gold, the silver beard, the ruby brooch; he floats over a
 /// turning magic circle, looks around and blinks, and the red tesseract turns in four dimensions over his raised palm
 /// and lights the cloth near it. His eyes glow brighter when the mouse comes near; while the agent works the tesseract
 /// spins faster and the sparks fly. In a small place only his head and shoulders are shown, looking at you. (The class

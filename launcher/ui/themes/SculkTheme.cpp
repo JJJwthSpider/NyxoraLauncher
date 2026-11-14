@@ -139,7 +139,7 @@ QPixmap SculkTheme::starTexture(const QColor& background, int size)
     if (auto it = cache.constFind(key); it != cache.constEnd()) {
         return *it;
     }
-    // Nyxora: the still red rain behind the panels: faint slanted streaks; the tile wraps around without seams
+    // Nyxora: the still neon rain behind the panels: faint slanted streaks; the tile wraps around without seams
     QImage image(size, size, QImage::Format_RGB32);
     image.fill(background);
     QPainter p(&image);
@@ -167,7 +167,7 @@ QPixmap SculkTheme::starTexture(const QColor& background, int size)
 QPixmap SculkTheme::texture(const QColor& background, const QColor& glow, int pixelSize)
 {
     if (s_lunar) {
-        // the Nyxora theme (id "lunar") has no sculk: everything lies on the burgundy night with red rain
+        // the Nyxora theme (id "lunar") has no sculk: everything lies on the navy night with neon rain
         return starTexture(background, 64 * pixelSize);
     }
     static QHash<QString, QPixmap> cache;
@@ -247,10 +247,10 @@ const SculkTheme::Colors& SculkTheme::colors() const
         "#0c2a31", "#8eacb1", "#e9f6f7", "#9fd0d5", "#d8eef0", "#dbf0f2", "#c6e7ea", "#0aa5b0", "#0e8f99",
         "#ffffff", "#e0f2f4", "#a9c4c8", "#0b7680", "#ffffff", "#4f7379", "#d4eef1", "#10a6b1", "#0b7680",
     };
-    // Nyxora Launcher (the old "lunar" id): burgundy night and crimson; the crimson gradients are added by the style sheet
+    // Nyxora Launcher (the old "lunar" id): navy night and violet; the violet gradients are added by the style sheet
     static const Colors s_lunar{
-        "#fbeff1", "#8a5a62", "#0e0407", "#5a1e2a", "#2b0e15", "#140509", "#3d121c", "#ff4d5e", "#e8364f",
-        "#ffffff", "#1c080d", "#7a4a52", "#c81f3a", "#090204", "#d1a3aa", "#2e0d14", "#ff5a6e", "#ffffff",
+        "#fbeff1", "#8577ab", "#04040e", "#322364", "#110e2b", "#060514", "#18123d", "#9b68ff", "#8154f0",
+        "#ffffff", "#0a081c", "#6e6096", "#693edb", "#020209", "#c3b7e1", "#120d2e", "#9f73ff", "#ffffff",
     };
     switch (m_variant) {
         case Variant::Dark:
@@ -286,7 +286,7 @@ QString SculkTheme::name()
         case Variant::Light:
             return QObject::tr("Sculk (Light)");
         case Variant::Lunar:
-            return QObject::tr("Nyxora (Red rain)");
+            return QObject::tr("Nyxora (Neon rain)");
         default:
             return QObject::tr("Sculk");
     }
@@ -295,7 +295,7 @@ QString SculkTheme::name()
 QString SculkTheme::tooltip()
 {
     if (m_variant == Variant::Lunar) {
-        return QObject::tr("Burgundy and crimson with red rain falling in the background");
+        return QObject::tr("Dark navy with violet and blue, neon rain falling in the background");
     }
     return QObject::tr("Modern theme in the colors of Minecraft sculk");
 }
@@ -1033,7 +1033,7 @@ QDialogButtonBox QPushButton {
     // (a separate literal: MSVC limits one string literal to about 16 KB, and the one above is close)
     qss += QStringLiteral("QMenu, QMessageBox, QMessageBox QLabel, QAbstractItemView, QToolTip { font-family: \"Tiny5\"; font-size: 12pt; }\n");
     if (m_variant == Variant::Lunar) {
-        // crimson gradients over the burgundy night: selections, the main buttons and progress
+        // violet gradients over the navy night: selections, the main buttons and progress
         qss += QStringLiteral(R"QSS(
 QAbstractItemView::item:selected, QMenu::item:selected, QMenuBar::item:selected {
     background-color: @rainbowSoft@;
@@ -1045,18 +1045,18 @@ QAbstractItemView::item:selected:!active {
 QToolBar#instanceToolBar QToolButton#primaryAction, QPushButton#primaryAction, QPushButton#accentButton, QPushButton:default {
     background-color: @rainbowLight@;
     color: #ffffff;
-    border: 1px solid #ff8a98;
+    border: 1px solid #bb9cff;
 }
 QToolBar#instanceToolBar QToolButton#primaryAction:hover, QPushButton#primaryAction:hover, QPushButton#accentButton:hover,
 QPushButton:default:hover {
-    background-color: #ff5a6e;
+    background-color: #9f73ff;
     color: #ffffff;
 }
 QPushButton:pressed, QPushButton:checked, QToolButton:pressed, QToolButton:checked, QPushButton#quickChip:pressed,
 QToolBar QToolButton:pressed, QToolBar QToolButton:checked, QPushButton#loaderCard:checked {
     background-color: @rainbowSoft@;
     color: #ffffff;
-    border-color: #ff8a98;
+    border-color: #bb9cff;
 }
 QProgressBar::chunk {
     background-color: @rainbowStrong@;
@@ -1070,75 +1070,75 @@ QSlider::sub-page:horizontal {
 /* Nyxora, made like Millida Launcher: buttons are raised blocks with a dark outline, a light top edge and a thick
    dark bottom edge; pressed, the bottom edge goes away as if the block was pushed in */
 QPushButton, QToolBar QToolButton, QToolButton#quickChip {
-    background-color: #2b0e15;
+    background-color: #110e2b;
     color: #fbeff1;
     border-radius: 2px;
-    border: 2px solid #060103;
-    border-top: 2px solid #4a1a26;
-    border-bottom: 5px solid #12040a;
+    border: 2px solid #010106;
+    border-top: 2px solid #211a4a;
+    border-bottom: 5px solid #040512;
     padding: 4px 12px 3px 12px;
     font-weight: bold;
 }
 QPushButton:hover, QToolBar QToolButton:hover {
-    background-color: #3d121c;
-    border-top-color: #6a2232;
+    background-color: #18123d;
+    border-top-color: #3e2d7e;
 }
 QPushButton:pressed, QToolBar QToolButton:pressed {
-    border-bottom: 2px solid #12040a;
+    border-bottom: 2px solid #040512;
     padding: 7px 12px 3px 12px;
 }
 QPushButton:disabled, QToolBar QToolButton:disabled {
-    background-color: #1c080d;
-    color: #8a5a62;
-    border-bottom-color: #0b0205;
+    background-color: #0a081c;
+    color: #8577ab;
+    border-bottom-color: #02020b;
 }
 QToolBar#instanceToolBar QToolButton#primaryAction, QPushButton#primaryAction, QPushButton#accentButton, QPushButton:default {
-    background-color: #e8364f;
+    background-color: #8154f0;
     color: #ffffff;
-    border: 2px solid #1e0408;
-    border-top: 2px solid #ff7586;
-    border-bottom: 5px solid #8e1428;
+    border: 2px solid #09041e;
+    border-top: 2px solid #ae8aff;
+    border-bottom: 5px solid #502cb0;
 }
 QToolBar#instanceToolBar QToolButton#primaryAction:hover, QPushButton#primaryAction:hover, QPushButton#accentButton:hover,
 QPushButton:default:hover {
-    background-color: #ff4a62;
+    background-color: #9365ff;
     color: #ffffff;
 }
 QPushButton:checked, QToolBar QToolButton:checked {
-    background-color: #e8364f;
+    background-color: #8154f0;
     color: #ffffff;
-    border-top-color: #ff7586;
-    border-bottom: 5px solid #8e1428;
+    border-top-color: #ae8aff;
+    border-bottom: 5px solid #502cb0;
 }
 QLineEdit, QComboBox, QSpinBox, QPlainTextEdit, QTextEdit {
     border-radius: 2px;
-    border: 2px solid #5a1e2a;
-    background-color: #140509;
+    border: 2px solid #322364;
+    background-color: #060514;
 }
 QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QPlainTextEdit:focus, QTextEdit:focus {
-    border-color: #e8364f;
+    border-color: #8154f0;
 }
 QTabBar::tab {
     border-radius: 2px;
-    border: 2px solid #060103;
-    border-bottom: 4px solid #12040a;
-    background-color: #2b0e15;
+    border: 2px solid #010106;
+    border-bottom: 4px solid #040512;
+    background-color: #110e2b;
     padding: 5px 14px;
     margin-right: 4px;
     font-weight: bold;
 }
 QTabBar::tab:selected {
-    background-color: #e8364f;
+    background-color: #8154f0;
     color: #ffffff;
-    border-bottom: 4px solid #8e1428;
+    border-bottom: 4px solid #502cb0;
 }
 QMenu, QToolTip {
     border-radius: 2px;
-    border: 2px solid #5a1e2a;
+    border: 2px solid #322364;
 }
 QProgressBar {
     border-radius: 2px;
-    border: 2px solid #060103;
+    border: 2px solid #010106;
 }
 QProgressBar::chunk {
     border-radius: 0px;
@@ -1148,9 +1148,9 @@ QProgressBar::chunk {
     const auto& c = colors();
     // the rainbow at different strengths: over dark backgrounds the soft one looks like light through glass
     auto rainbow = [](int alpha, bool pastel) {
-        // Nyxora: crimson shades instead of the old rainbow
-        const QColor bands[] = { QColor(255, 90, 110), QColor(232, 54, 79), QColor(200, 31, 58), QColor(168, 22, 46),
-                                 QColor(200, 31, 58), QColor(232, 54, 79) };
+        // Nyxora: violet shades instead of the old rainbow
+        const QColor bands[] = { QColor(159, 115, 255), QColor(129, 84, 240), QColor(105, 62, 219), QColor(91, 52, 198),
+                                 QColor(105, 62, 219), QColor(129, 84, 240) };
         QStringList stops;
         for (int i = 0; i < 6; i++) {
             QColor b = pastel ? QColor((bands[i].red() + 255 * 2) / 3, (bands[i].green() + 255 * 2) / 3, (bands[i].blue() + 255 * 2) / 3)

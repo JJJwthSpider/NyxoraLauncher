@@ -323,7 +323,7 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
         const float turn = phase * 0.4f;
         for (int i = 0; i < 40; i++) {
             const float a = turn + i * s_pi * 2 / 40;
-            runeDot(ground, std::cos(a) * 11, 0, std::sin(a) * 11, i % 5 == 0 ? 0xFFFF6B7A : 0xFFE8364F);
+            runeDot(ground, std::cos(a) * 11, 0, std::sin(a) * 11, i % 5 == 0 ? 0xFFAB81FF : 0xFF8154F0);
         }
         for (int i = 0; i < 12; i++) {
             const float a = -turn * 1.5f + i * s_pi * 2 / 12;
@@ -347,7 +347,7 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
         p.save();
         p.translate(foot);
         p.scale(1, 0.3);
-        glowAt(p, QPointF(0, 0), 15 * unit, QColor(0xE8, 0x36, 0x4F), 0.5);
+        glowAt(p, QPointF(0, 0), 15 * unit, QColor(0x81, 0x54, 0xf0), 0.5);
         p.restore();
     }
     p.setRenderHint(QPainter::SmoothPixmapTransform, false);
@@ -358,19 +358,19 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
     if (!m_blink) {
         const double shine = 0.7 + 0.3 * std::sin(time * (2.2 + 3.8 * busy));
         for (const auto& e : m.eyes) {
-            glowAt(p, at(project(mats[Head], e[0], e[1], e[2])), unit * 2.2, QColor(255, 40, 64), (0.4 + 0.25 * m_wake) * shine);
+            glowAt(p, at(project(mats[Head], e[0], e[1], e[2])), unit * 2.2, QColor(131, 72, 255), (0.4 + 0.25 * m_wake) * shine);
         }
     }
     // the ruby glows
     for (const auto& g : m.glows) {
         glowAt(p, at(project(mats[static_cast<int>(g[0])], g[1], g[2], g[3])), unit * g[4] * (1.0 + 0.4 * busy) * (0.85 + 0.15 * std::sin(time * 3.0)),
-               QColor(255, 40, 64), 0.44);
+               QColor(131, 72, 255), 0.44);
     }
 
     // the tesseract over the raised hand, turning in four dimensions
     const QPointF c = at(QPointF(m_centerX + m_tesseract[0] * m_scale, m_centerY - m_tesseract[1] * m_scale)) +
                       QPointF(0, std::sin(time * 2.0) * unit * 0.4);
-    glowAt(p, c, unit * 7 * (1.0 + 0.3 * std::max<double>(busy, m_wake)), QColor(255, 40, 60), (0.3 + 0.15 * m_wake) * pulse);
+    glowAt(p, c, unit * 7 * (1.0 + 0.3 * std::max<double>(busy, m_wake)), QColor(134, 72, 255), (0.3 + 0.15 * m_wake) * pulse);
     QPointF corners[16];
     const double size = unit * 15, turn = phase * 0.7;
     for (int i = 0; i < 16; i++) {
@@ -383,7 +383,7 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
         const double k3 = 1.0 / (4.0 - z2 * k4);
         corners[i] = c + QPointF(x2 * k4 * k3 * size, y1 * k4 * k3 * size);
     }
-    p.setPen(QPen(withAlpha(QColor(255, 70, 84), (200 + 55 * pulse) / 255.0), std::max(1.0, unit * 0.45), Qt::SolidLine, Qt::RoundCap));
+    p.setPen(QPen(withAlpha(QColor(154, 98, 255), (200 + 55 * pulse) / 255.0), std::max(1.0, unit * 0.45), Qt::SolidLine, Qt::RoundCap));
     for (int i = 0; i < 16; i++) {
         for (int bit = 0; bit < 4; bit++) {
             const int j = i ^ (1 << bit);
@@ -393,12 +393,12 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
         }
     }
     p.setPen(Qt::NoPen);
-    p.setBrush(QColor(255, 200, 205));
+    p.setBrush(QColor(224, 208, 255));
     const double dot = std::max(1.0, unit * 0.5);
     for (const auto& corner : corners) {
         p.drawEllipse(corner, dot, dot);
     }
-    // sparks rise from the tesseract and fade: crimson and gold
+    // sparks rise from the tesseract and fade: violet and gold
     const bool working = busy > 0.5f;
     const int count = working ? 12 : 7;
     const double period = working ? 1.4 : 2.4;
@@ -407,7 +407,7 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
         const double sx = c.x() + std::sin(i * 12.9 + t * 3) * unit * 4;
         const double sy = c.y() - unit * 2 - t * unit * 11;
         const double s = unit * (t < 0.5 ? 0.8 : 0.55);
-        p.fillRect(QRectF(sx, sy, s, s), withAlpha(i % 3 == 0 ? QColor(244, 204, 116) : QColor(255, 70, 84), 1.0 - t));
+        p.fillRect(QRectF(sx, sy, s, s), withAlpha(i % 3 == 0 ? QColor(244, 204, 116) : QColor(154, 98, 255), 1.0 - t));
     }
     p.restore();
 }
@@ -523,7 +523,7 @@ void MoonyWidget::face(const Matrix& m, const float* a, const float* b, const fl
             }
             if (alpha == 254) {
                 // a glowing pixel: the eyes (closed while he blinks), the ruby
-                row[px] = m_blink && head ? 0xFF12040A : (0xFF000000 | (texel & 0xFFFFFF));
+                row[px] = m_blink && head ? 0xFF040512 : (0xFF000000 | (texel & 0xFFFFFF));
             } else {
                 row[px] = qRgb(std::min(255, ((qRed(texel) * r256) >> 8) + redAdd), std::min(255, ((qGreen(texel) * b256) >> 8) + redAdd / 8),
                                std::min(255, ((qBlue(texel) * b256) >> 8) + redAdd / 4));
@@ -544,12 +544,12 @@ void MoonyWidget::paintBubble(QPainter& painter, const QRectF& box)
          << QPointF(box.left() + w * 0.38, box.bottom() - 1);
     path.addPolygon(tail);
     path = path.simplified();
-    painter.setPen(QPen(QColor(255, 90, 110, 230), std::max(1.5, w * 0.045)));
-    painter.setBrush(QColor(0x1c, 0x08, 0x0d));
+    painter.setPen(QPen(QColor(159, 115, 255, 230), std::max(1.5, w * 0.045)));
+    painter.setBrush(QColor(0x0a, 0x08, 0x1c));
     painter.drawPath(path);
 
-    // three dots in crimson shades
-    const QColor dots[] = { QColor(255, 90, 110), QColor(232, 54, 79), QColor(255, 140, 152) };
+    // three dots in violet shades
+    const QColor dots[] = { QColor(159, 115, 255), QColor(129, 84, 240), QColor(189, 157, 255) };
     const double r = h * 0.12;
     for (int i = 0; i < 3; i++) {
         double lift = 0;

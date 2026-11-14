@@ -50,7 +50,7 @@
 #include "ui/widgets/VelloraSkinGen.h"
 
 namespace {
-/// a wardrobe tile: the item on a dark figure and its name; a crimson frame when it is worn
+/// a wardrobe tile: the item on a dark figure and its name; a violet frame when it is worn
 class ItemTile : public QAbstractButton {
    public:
     QString head, body, back, pet, emote, effect, hand;
@@ -67,10 +67,10 @@ class ItemTile : public QAbstractButton {
     {
         QPainter p(this);
         const QRectF r = rect().adjusted(2, 2, -2, -2);
-        p.fillRect(r, worn ? QColor(0x4A, 0x14, 0x20) : QColor(0x2B, 0x0E, 0x15));
-        p.setPen(QPen(worn ? QColor(0xFF, 0x5A, 0x6E) : (underMouse() ? frame.lighter(130) : frame), 2));
+        p.fillRect(r, worn ? QColor(0x1e, 0x14, 0x4a) : QColor(0x11, 0x0e, 0x2b));
+        p.setPen(QPen(worn ? QColor(0x9f, 0x73, 0xff) : (underMouse() ? frame.lighter(130) : frame), 2));
         p.drawRect(r);
-        p.fillRect(QRectF(r.left(), r.bottom() - 4, r.width(), 4), worn ? QColor(0x8E, 0x14, 0x28) : QColor(0x12, 0x04, 0x0A));
+        p.fillRect(QRectF(r.left(), r.bottom() - 4, r.width(), 4), worn ? QColor(0x50, 0x2c, 0xb0) : QColor(0x04, 0x05, 0x12));
         const QRectF picture(r.left() + 6, r.top() + 6, r.width() - 12, r.height() - 58);
         if (!hand.isEmpty() && head.isEmpty() && body.isEmpty() && back.isEmpty() && pet.isEmpty() && emote.isEmpty() && effect.isEmpty()) {
             VelloraCharacter::paintIcon(p, picture.adjusted(14, 4, -14, -4), hand, 1.3);  // a thing in the hand, large
@@ -84,7 +84,7 @@ class ItemTile : public QAbstractButton {
         p.setFont(f);
         p.drawText(QRectF(r.left() + 4, r.bottom() - 50, r.width() - 8, 30), Qt::AlignCenter | Qt::TextWordWrap, text());
         if (worn) {
-            p.setPen(QColor(0xFF, 0x80, 0x90));
+            p.setPen(QColor(0xb4, 0x93, 0xff));
             p.drawText(QRectF(r.left(), r.bottom() - 19, r.width(), 14), Qt::AlignCenter, QObject::tr("worn"));
         }
     }
@@ -107,9 +107,9 @@ class ChipButton : public QAbstractButton {
     {
         QPainter p(this);
         const int w = width(), h = height();
-        p.fillRect(rect(), isChecked() ? QColor(0xFF, 0x5A, 0x6E) : underMouse() ? QColor(0x8A, 0x34, 0x42) : QColor(0x5A, 0x1E, 0x2A));
+        p.fillRect(rect(), isChecked() ? QColor(0x9f, 0x73, 0xff) : underMouse() ? QColor(0x67, 0x4d, 0xab) : QColor(0x32, 0x23, 0x64));
         const int in = isChecked() ? 3 : 1;
-        p.fillRect(QRect(in, in, w - 2 * in, h - 2 * in), QColor(0x12, 0x05, 0x08));
+        p.fillRect(QRect(in, in, w - 2 * in, h - 2 * in), QColor(0x06, 0x05, 0x12));
         const int pad = in + 2;
         if (color) {
             p.fillRect(QRect(pad, pad, w - 2 * pad, h - 2 * pad), QColor::fromRgba(color));
@@ -125,7 +125,7 @@ class ChipButton : public QAbstractButton {
                 }
             }
         } else if (none) {
-            p.setPen(QPen(QColor(0x8A, 0x34, 0x42), 2));
+            p.setPen(QPen(QColor(0x67, 0x4d, 0xab), 2));
             p.drawLine(pad, h - pad, w - pad, pad);
         } else if (autoChip) {
             p.setPen(QColor(0xFB, 0xEF, 0xF1));
@@ -152,7 +152,7 @@ QIcon diceIcon()
     return QIcon(pm);
 }
 
-/// a variant of the generator: the picture, the name, a crimson frame when it is the one tried on
+/// a variant of the generator: the picture, the name, a violet frame when it is the one tried on
 class VariantTile : public QAbstractButton {
    public:
     explicit VariantTile(QWidget* parent) : QAbstractButton(parent)
@@ -166,8 +166,8 @@ class VariantTile : public QAbstractButton {
     {
         QPainter p(this);
         const QRectF r = rect().adjusted(1, 1, -1, -1);
-        p.fillRect(r, isChecked() ? QColor(0x3A, 0x10, 0x19) : QColor(0x1C, 0x08, 0x0D));
-        p.setPen(QPen(isChecked() ? QColor(0xFF, 0x5A, 0x6E) : underMouse() ? QColor(0xB3, 0x26, 0x3A) : QColor(0x8A, 0x34, 0x42), isChecked() ? 3 : 2));
+        p.fillRect(r, isChecked() ? QColor(0x17, 0x10, 0x3a) : QColor(0x0a, 0x08, 0x1c));
+        p.setPen(QPen(isChecked() ? QColor(0x9f, 0x73, 0xff) : underMouse() ? QColor(0x6c, 0x44, 0xce) : QColor(0x67, 0x4d, 0xab), isChecked() ? 3 : 2));
         p.drawRect(r);
         if (!text().isEmpty()) {
             p.setPen(QColor(0xFB, 0xEF, 0xF1));
@@ -213,7 +213,7 @@ WardrobeDialog::WardrobeDialog(const QImage& skin,
     // the header: "‹ Лобби" on the left, "Снять всё" and "Загрузить скин" on the right
     auto* header = new QFrame(this);
     header->setObjectName("wardrobeHeader");
-    header->setStyleSheet("QFrame#wardrobeHeader { background-color: rgba(8, 2, 4, 235); border-bottom: 2px solid #3a0d16; }");
+    header->setStyleSheet("QFrame#wardrobeHeader { background-color: rgba(2, 2, 8, 235); border-bottom: 2px solid #150d3a; }");
     auto* headerLayout = new QHBoxLayout(header);
     headerLayout->setContentsMargins(12, 8, 12, 8);
     auto* back = new QPushButton(tr("‹ Lobby"), header);
@@ -410,7 +410,7 @@ QWidget* WardrobeDialog::generator(bool capes)
         // a guest: the generator is AI, it opens with a Microsoft account
         auto* locked = new QFrame(this);
         locked->setObjectName("generatorPanel");
-        locked->setStyleSheet("QFrame#generatorPanel { background-color: #1c080d; border: 2px solid #5a1e2a; border-bottom: 5px solid #3a0d16; }");
+        locked->setStyleSheet("QFrame#generatorPanel { background-color: #0a081c; border: 2px solid #322364; border-bottom: 5px solid #150d3a; }");
         auto* row = new QHBoxLayout(locked);
         auto* wizard = new MoonyWidget(locked);
         wizard->setFixedSize(84, 84);
@@ -421,7 +421,7 @@ QWidget* WardrobeDialog::generator(bool capes)
         texts->addWidget(title);
         auto* note = new QLabel(tr("Arkan draws for a Microsoft account. A guest has the ready-made things of the wardrobe."), locked);
         note->setWordWrap(true);
-        note->setStyleSheet("color: #d1a3aa;");
+        note->setStyleSheet("color: #c3b7e1;");
         texts->addWidget(note);
         row->addLayout(texts, 1);
         auto* signIn = new QPushButton(tr("Sign in with Microsoft"), locked);
@@ -434,13 +434,13 @@ QWidget* WardrobeDialog::generator(bool capes)
     QSettings ui(QDir(APPLICATION->dataRoot()).filePath("vellora-ui.ini"), QSettings::IniFormat);
     auto* panel = new QFrame(this);
     panel->setObjectName("generatorPanel");
-    panel->setStyleSheet("QFrame#generatorPanel { background-color: #241018; border: 2px solid #b3263a; border-bottom: 5px solid #3a0d16; }");
+    panel->setStyleSheet("QFrame#generatorPanel { background-color: #101124; border: 2px solid #6c44ce; border-bottom: 5px solid #150d3a; }");
     panel->setMinimumWidth(560);
     auto* layout = new QVBoxLayout(panel);
     auto* subtitle = new QLabel(capes ? tr("Describe a cape or build it with the buttons: Arkan draws at once")
                                       : tr("Describe a character or build it with the buttons: Arkan draws at once"),
                                 panel);
-    subtitle->setStyleSheet("color: #d1a3aa;");
+    subtitle->setStyleSheet("color: #c3b7e1;");
     layout->addWidget(subtitle);
 
     auto* inputRow = new QHBoxLayout;
@@ -479,7 +479,7 @@ QWidget* WardrobeDialog::generator(bool capes)
     layout->addLayout(actions);
     auto* status = new QLabel(panel);
     status->setWordWrap(true);
-    status->setStyleSheet("color: #d1a3aa;");
+    status->setStyleSheet("color: #c3b7e1;");
     layout->addWidget(status);
 
     // colours and details, which fold away
@@ -663,7 +663,7 @@ QWidget* WardrobeDialog::generator(bool capes)
     auto addRow = [this, rows, custom](const QString& title) {
         const int row = rows->rowCount();
         auto* label = new QLabel(title, custom);
-        label->setStyleSheet("color: #d1a3aa;");
+        label->setStyleSheet("color: #c3b7e1;");
         rows->addWidget(label, row, 0);
         auto* line = new QHBoxLayout;
         line->setSpacing(4);
@@ -697,7 +697,7 @@ QWidget* WardrobeDialog::generator(bool capes)
         // the words do not shrink: six in a line, the rest on the next one (the patterns of a cape are eleven)
         const int row = rows->rowCount();
         auto* label = new QLabel(title, custom);
-        label->setStyleSheet("color: #d1a3aa;");
+        label->setStyleSheet("color: #c3b7e1;");
         rows->addWidget(label, row, 0, Qt::AlignTop);
         auto* grid = new QGridLayout;
         grid->setSpacing(4);
@@ -784,7 +784,7 @@ QWidget* WardrobeDialog::generator(bool capes)
                                     tr("Princess"),                tr("Astronaut"),                 tr("Demon"),                   tr("Cyber neon"),
                                     tr("Zombie"),                  tr("Skeleton"),                  tr("Elf"),                     tr("Viking") };
     const QStringList capeIdeas = { tr("Galaxy with stars"), tr("Fire"),       tr("Ice"),          tr("Gold with a crown"), tr("Pink with a heart"),
-                                    tr("Rainbow"),           tr("Burgundy Nyxora"), tr("Forest"), tr("Blue with lightning"), tr("Black and red stripes") };
+                                    tr("Rainbow"),           tr("Violet Nyxora"), tr("Forest"), tr("Blue with lightning"), tr("Black and red stripes") };
     const QString key = capes ? "generatorRecentCapes" : "generatorRecentSkins";
     const QStringList recent = ui.value(key).toStringList();
     auto addIdea = [this, ideas, ideasHolder, prompt, draw](const QString& text, bool old) {
@@ -802,13 +802,13 @@ QWidget* WardrobeDialog::generator(bool capes)
     };
     if (!recent.isEmpty()) {
         auto* label = new QLabel(tr("Recent:"), ideasHolder);
-        label->setStyleSheet("color: #d1a3aa;");
+        label->setStyleSheet("color: #c3b7e1;");
         ideas->addWidget(label);
         for (const QString& r : recent) {
             addIdea(r, true);
         }
         auto* label2 = new QLabel(tr("Ideas:"), ideasHolder);
-        label2->setStyleSheet("color: #d1a3aa;");
+        label2->setStyleSheet("color: #c3b7e1;");
         ideas->addWidget(label2);
     }
     for (const QString& idea : capes ? capeIdeas : skinIdeas) {
@@ -852,7 +852,7 @@ QWidget* WardrobeDialog::generator(bool capes)
         (*draw)(false);  // back on the tab: what was made is still there
     } else {
         auto* hint = new QLabel(tr("Write who to draw, click an idea or the die: the variants appear here"), variantsHolder);
-        hint->setStyleSheet("color: #d1a3aa;");
+        hint->setStyleSheet("color: #c3b7e1;");
         variants->addWidget(hint);
     }
     return panel;

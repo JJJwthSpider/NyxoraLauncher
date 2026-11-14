@@ -39,7 +39,7 @@ final class CharacterView extends View {
     private int[] cape;
     private int capeW, capeH;
     private boolean slim;
-    private static int[] shadowSkin;  // when there is no skin yet: a dark figure with a crimson rim and red eyes
+    private static int[] shadowSkin;  // when there is no skin yet: a dark figure with a violet rim and violet eyes
 
     // what is shown
     private boolean turnable = true;
@@ -535,12 +535,12 @@ final class CharacterView extends View {
             drawParticles(Cosmetics.find(context, worn(Cosmetics.EFFECT)), time);
         }
 
-        // the crimson light on the floor, then the frame, sharp
+        // the violet light on the floor, then the frame, sharp
         float[] foot = project(mats[WORLD], 0, 0, 0);
         float k2 = (float) w / bufW;
         float fx = foot[0] * k2, fy = foot[1] * k2 + (lift > 0 ? lift * scale * k2 : 0);
         float radius = 16 * scale * k2;
-        glow.setShader(new RadialGradient(fx, fy, radius, new int[] { 0x70E8364F, 0x00E8364F }, null, Shader.TileMode.CLAMP));
+        glow.setShader(new RadialGradient(fx, fy, radius, new int[] { 0x708154F0, 0x008154F0 }, null, Shader.TileMode.CLAMP));
         canvas.save();
         canvas.scale(1, 0.25f, fx, fy);
         canvas.drawCircle(fx, fy, radius, glow);
@@ -581,7 +581,7 @@ final class CharacterView extends View {
         return out;
     }
 
-    /** a dark figure for when there is no skin: crimson rim, red eyes */
+    /** a dark figure for when there is no skin: violet rim, violet eyes */
     private static int[] shadow() {
         if (shadowSkin != null) {
             return shadowSkin;
@@ -596,11 +596,11 @@ final class CharacterView extends View {
                         continue;
                     }
                     boolean edge = y == v || y == v + d + h - 1 || x == u || x == u + 2 * (d + w) - 1 || x == u + d || x == u + d + w - 1;
-                    t[y * 64 + x] = edge ? 0xFF8A3442 : 0xFF2B0E15;
+                    t[y * 64 + x] = edge ? 0xFF674DAB : 0xFF110E2B;
                 }
             }
         }
-        t[12 * 64 + 10] = t[12 * 64 + 13] = 0xFFFF4654;  // the eyes
+        t[12 * 64 + 10] = t[12 * 64 + 13] = 0xFF9A62FF;  // the eyes
         shadowSkin = t;
         return t;
     }

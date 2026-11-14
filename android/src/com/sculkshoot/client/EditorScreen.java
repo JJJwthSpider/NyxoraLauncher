@@ -49,7 +49,7 @@ final class EditorScreen {
         LinearLayout bar = new LinearLayout(activity);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(8), dp(6), dp(8), dp(6));
-        bar.setBackgroundColor(0xCC140509);
+        bar.setBackgroundColor(0xCC060514);
         Button back = Ui.button(activity, "← Назад", false);
         back.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -80,7 +80,7 @@ final class EditorScreen {
         LinearLayout side = new LinearLayout(activity);
         side.setOrientation(LinearLayout.VERTICAL);
         side.setPadding(dp(10), dp(10), dp(10), dp(10));
-        side.setBackgroundColor(0x99140509);
+        side.setBackgroundColor(0x99060514);
         summary = Ui.label(activity, "", 12, Ui.HINT, false);
         side.addView(summary);
         add = Ui.button(activity, "Добавить моды", true);

@@ -1865,8 +1865,12 @@ The full game comes after signing in with the Microsoft account that bought Mine
         <translation>Современная тема в цветах скалка из Minecraft</translation>
     </message>
     <message>
-        <source>Nyxora (Red rain)</source>
-        <translation>Nyxora (Красный дождь)</translation>
+        <source>Nyxora (Neon rain)</source>
+        <translation>Nyxora (Неоновый дождь)</translation>
+    </message>
+    <message>
+        <source>Dark navy with violet and blue, neon rain falling in the background</source>
+        <translation>Тёмно-синий с фиолетовым и голубым, на фоне идёт неоновый дождь</translation>
     </message>
     <message>
         <source>Night black and moon white with stars and a see-through rainbow</source>
@@ -3807,8 +3811,8 @@ variants</source>
         <translation>Радуга</translation>
     </message>
     <message>
-        <source>Burgundy Nyxora</source>
-        <translation>Бордовый Nyxora</translation>
+        <source>Violet Nyxora</source>
+        <translation>Фиолетовый Nyxora</translation>
     </message>
     <message>
         <source>Forest</source>

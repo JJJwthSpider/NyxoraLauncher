@@ -91,7 +91,7 @@ final class HomeScreen {
         libraryBar = new LinearLayout(activity);
         libraryBar.setGravity(Gravity.CENTER_VERTICAL);
         libraryBar.setPadding(dp(10), dp(6), dp(10), dp(6));
-        libraryBar.setBackgroundColor(0xF0080204);
+        libraryBar.setBackgroundColor(0xF0020208);
         Button back = Ui.button(activity, "‹ Лобби", true);
         back.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -154,7 +154,7 @@ final class HomeScreen {
         tiles.setOrientation(LinearLayout.VERTICAL);
         tiles.setClipChildren(false);
         WardrobeScreen.ItemPicture outfit = new WardrobeScreen.ItemPicture(activity, "crown", "chain", "demon_wings", "cube_pet");
-        wardrobeTile = new HubTile(activity, 0xFFB3263A, outfit, "Гардероб", things(Cosmetics.items(activity).size()) + " — всё открыто");
+        wardrobeTile = new HubTile(activity, 0xFF6C44CE, outfit, "Гардероб", things(Cosmetics.items(activity).size()) + " — всё открыто");
         wardrobeTile.setAlert(!activity.getSharedPreferences("lobby", android.content.Context.MODE_PRIVATE).getBoolean("wardrobeSeen", false));
         wardrobeTile.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -167,7 +167,7 @@ final class HomeScreen {
         skinTile = new CharacterView(activity);
         skinTile.setTurnable(false);
         skinTile.setCloseUp(true);
-        HubTile skin = new HubTile(activity, 0xFF7A1E4E, skinTile, "Мой скин", "Загрузи свой");
+        HubTile skin = new HubTile(activity, 0xFF2F3896, skinTile, "Мой скин", "Загрузи свой");
         skin.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 HomeScreen.this.activity.openWardrobe(WardrobeScreen.SKINS);
@@ -180,7 +180,7 @@ final class HomeScreen {
         friendB.emote = "wave";
         duo.addView(friendA, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
         duo.addView(friendB, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
-        HubTile friends = new HubTile(activity, 0xFF5A1A1A, duo, "Играть с друзьями", "Сервер друга по коду");
+        HubTile friends = new HubTile(activity, 0xFF3D1F64, duo, "Играть с друзьями", "Сервер друга по коду");
         friends.setRibbon("Бесплатно");
         friends.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -320,22 +320,22 @@ final class HomeScreen {
         LinearLayout today = new LinearLayout(activity);
         today.setGravity(Gravity.CENTER_VERTICAL);
         today.setPadding(dp(8), dp(6), dp(12), dp(8));
-        today.setBackground(PixelDrawable.panel(0xF02A0A12, 0xFF8A3442, density));
+        today.setBackground(PixelDrawable.panel(0xF00D0A2A, 0xFF674DAB, density));
         android.widget.FrameLayout cover = new android.widget.FrameLayout(activity);
-        cover.setBackground(PixelDrawable.panel(0xFF3A0D16, 0xFF0B0305, density));
+        cover.setBackground(PixelDrawable.panel(0xFF150D3A, 0xFF04030B, density));
         playIcon = new ImageView(activity);
         playIcon.setPadding(dp(6), dp(6), dp(6), dp(6));
         cover.addView(playIcon);
         TextView coverTag = Ui.label(activity, "Сборка", 8, Ui.TEXT, true);
         coverTag.setPadding(dp(3), 0, dp(3), dp(1));
-        coverTag.setBackgroundColor(0xCC0B0305);
+        coverTag.setBackgroundColor(0xCC04030B);
         cover.addView(coverTag, new android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
                                                                             Gravity.TOP | Gravity.START));
         today.addView(cover, new LinearLayout.LayoutParams(dp(58), dp(58)));
         LinearLayout texts = new LinearLayout(activity);
         texts.setOrientation(LinearLayout.VERTICAL);
         texts.setPadding(dp(12), 0, dp(4), 0);
-        texts.addView(Ui.label(activity, "СЕГОДНЯ ИГРАЕМ", 10, 0xFFFF8090, true));
+        texts.addView(Ui.label(activity, "СЕГОДНЯ ИГРАЕМ", 10, 0xFFB493FF, true));
         playName = Ui.label(activity, "", 18, Ui.TEXT, true);
         playName.setSingleLine(true);
         playName.setEllipsize(android.text.TextUtils.TruncateAt.END);
@@ -346,7 +346,7 @@ final class HomeScreen {
 
         today.addView(texts, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         // like Millida's card: it says it opens the packs
-        playChange = Ui.label(activity, "Сменить\nсборку ›", 10, 0xFFFF8090, true);
+        playChange = Ui.label(activity, "Сменить\nсборку ›", 10, 0xFFB493FF, true);
         playChange.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
         today.addView(playChange);
         today.setClickable(true);
@@ -394,7 +394,7 @@ final class HomeScreen {
         search.setTextColor(Ui.TEXT);
         search.setTextSize(14);
         search.setSingleLine(true);
-        search.setBackground(Ui.rounded(activity, 0xE6140509, 0, 0xFF5A1E2A));
+        search.setBackground(Ui.rounded(activity, 0xE6060514, 0, 0xFF322364));
         search.setPadding(dp(12), dp(9), dp(12), dp(9));
         search.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -448,12 +448,12 @@ final class HomeScreen {
         // the page of the chosen installation: slides in from the right, like Millida's build page
         LinearLayout panel = new LinearLayout(activity);
         panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setBackground(PixelDrawable.panel(0xF70E0407, 0xFF8A3442, density));
+        panel.setBackground(PixelDrawable.panel(0xF704040E, 0xFF674DAB, density));
         panel.setClickable(true);
         LinearLayout panelHead = new LinearLayout(activity);
         panelHead.setGravity(Gravity.CENTER_VERTICAL);
         panelHead.setPadding(dp(10), dp(6), dp(6), 0);
-        panelHead.addView(Ui.label(activity, "Сборка", 11, 0xFFFF8090, true), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        panelHead.addView(Ui.label(activity, "Сборка", 11, 0xFFB493FF, true), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         Button close = Ui.button(activity, "✕", false);
         close.setTextSize(13);
         close.setMinHeight(dp(34));
@@ -485,7 +485,7 @@ final class HomeScreen {
         showPage(LOBBY);
     }
 
-    /** the banner on the right of the lobby: Arkan, "Собери сборку словами" and a button, over a crimson pixel edge */
+    /** the banner on the right of the lobby: Arkan, "Собери сборку словами" and a button, over a violet pixel edge */
     private View banner() {
         float density = activity.getResources().getDisplayMetrics().density;
         android.widget.FrameLayout card = new android.widget.FrameLayout(activity);
@@ -501,7 +501,7 @@ final class HomeScreen {
         TextView headline = tight(Ui.label(activity, "СОБЕРИ СБОРКУ", 17, Ui.TEXT, true));
         headline.setPadding(0, dp(4), 0, 0);
         texts.addView(headline);
-        texts.addView(tight(Ui.label(activity, "СЛОВАМИ", 17, 0xFFFF4654, true)));
+        texts.addView(tight(Ui.label(activity, "СЛОВАМИ", 17, 0xFF9A62FF, true)));
         Button go = Ui.button(activity, "▶ СОБРАТЬ", true);
         go.setTextSize(12);
         go.setMinHeight(dp(32));
@@ -525,14 +525,14 @@ final class HomeScreen {
         return card;
     }
 
-    /** the dark banner with a crimson pixel edge at the bottom, like the lava edge of Millida's promo card */
+    /** the dark banner with a violet pixel edge at the bottom, like the lava edge of Millida's promo card */
     static final class BannerDrawable extends android.graphics.drawable.Drawable {
         private final android.graphics.Paint paint = new android.graphics.Paint();
         private final PixelDrawable frame;
         private final float step;
 
         BannerDrawable(float density) {
-            frame = PixelDrawable.panel(0xFF14060A, 0xFF060103, density);
+            frame = PixelDrawable.panel(0xFF070614, 0xFF010106, density);
             step = Math.max(2, Math.round(4 * density));
         }
 
@@ -541,7 +541,7 @@ final class HomeScreen {
             android.graphics.Rect b = getBounds();
             frame.setBounds(b);
             frame.draw(canvas);
-            int[] reds = { 0xFFE8364F, 0xFFB3263A, 0xFFFF6B7D, 0xFF8E1428, 0xFFC81F3A };
+            int[] reds = { 0xFF8154F0, 0xFF6C44CE, 0xFFA881FF, 0xFF502CB0, 0xFF693EDB };
             float bottom = b.bottom - step / 2;
             int columns = (int) (b.width() / step);
             for (int i = 0; i < columns; i++) {
@@ -575,7 +575,7 @@ final class HomeScreen {
         duo.addView(a, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
         duo.addView(b, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
         android.widget.FrameLayout card = new android.widget.FrameLayout(activity);
-        card.setBackground(PixelDrawable.panel(0xFF3A0D16, 0xFF0B0305, activity.getResources().getDisplayMetrics().density));
+        card.setBackground(PixelDrawable.panel(0xFF150D3A, 0xFF04030B, activity.getResources().getDisplayMetrics().density));
         card.addView(duo, new android.widget.FrameLayout.LayoutParams(dp(130), ViewGroup.LayoutParams.MATCH_PARENT, Gravity.START));
         LinearLayout texts = new LinearLayout(activity);
         texts.setOrientation(LinearLayout.VERTICAL);
@@ -583,7 +583,7 @@ final class HomeScreen {
         texts.setPadding(dp(136), dp(8), dp(10), dp(8));
         TextView tag = Ui.label(activity, "Nyxora", 9, Ui.TEXT, true);
         tag.setPadding(dp(5), dp(1), dp(5), dp(2));
-        tag.setBackgroundColor(0xFFB3263A);
+        tag.setBackgroundColor(0xFF6C44CE);
         texts.addView(tag, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         texts.addView(Ui.label(activity, "Играть по сети с другом", 15, Ui.TEXT, true));
         Button code = Ui.button(activity, "Код приглашения", true);
@@ -625,14 +625,14 @@ final class HomeScreen {
                     card.setPadding(dp(5), dp(5), dp(5), dp(7));
                     card.setBackground(PixelDrawable.plain(density));
                     android.widget.FrameLayout picture = new android.widget.FrameLayout(activity);
-                    int color = hit.optInt("color", 0x3A0D16);
-                    picture.setBackground(PixelDrawable.panel(0xFF000000 | ((color >> 1) & 0x7F7F7F), 0xFF0B0305, density));
+                    int color = hit.optInt("color", 0x150D3A);
+                    picture.setBackground(PixelDrawable.panel(0xFF000000 | ((color >> 1) & 0x7F7F7F), 0xFF04030B, density));
                     ImageView icon = new ImageView(activity);
                     Icons.load(icon, hit.isNull("icon_url") ? "" : hit.optString("icon_url"));
                     picture.addView(icon, new android.widget.FrameLayout.LayoutParams(dp(60), dp(60), Gravity.CENTER));
                     TextView tag = Ui.label(activity, "▶ Сборка", 9, Ui.TEXT, true);
                     tag.setPadding(dp(5), dp(1), dp(5), dp(2));
-                    tag.setBackgroundColor(0xFFB3263A);
+                    tag.setBackgroundColor(0xFF6C44CE);
                     android.widget.FrameLayout.LayoutParams tagParams = new android.widget.FrameLayout.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP | Gravity.START);
                     tagParams.setMargins(dp(5), dp(5), 0, 0);
@@ -941,7 +941,7 @@ final class HomeScreen {
             card.setPadding(dp(5), dp(5), dp(5), dp(8));
             card.setBackground(chosen ? Ui.rainbowFrame(activity, 0) : PixelDrawable.plain(density));
             android.widget.FrameLayout picture = new android.widget.FrameLayout(activity);
-            picture.setBackground(PixelDrawable.panel(chosen ? 0xFF4A1420 : 0xFF2A0A12, 0xFF0B0305, density));
+            picture.setBackground(PixelDrawable.panel(chosen ? 0xFF1E144A : 0xFF0D0A2A, 0xFF04030B, density));
             ImageView icon = new ImageView(activity);
             Icons.load(icon, inst.iconUrl, inst.chatId.isEmpty() ? R.drawable.install_default : R.drawable.wizard);
             picture.addView(icon, new android.widget.FrameLayout.LayoutParams(dp(58), dp(58), Gravity.CENTER));
@@ -969,9 +969,9 @@ final class HomeScreen {
         add.setOrientation(LinearLayout.VERTICAL);
         add.setPadding(dp(5), dp(5), dp(5), dp(8));
         add.setBackground(PixelDrawable.plain(density));
-        TextView plus = Ui.label(activity, "+", 34, 0xFFFF4654, true);
+        TextView plus = Ui.label(activity, "+", 34, 0xFF9A62FF, true);
         plus.setGravity(Gravity.CENTER);
-        plus.setBackground(PixelDrawable.panel(0xFF1C080D, 0xFF0B0305, density));
+        plus.setBackground(PixelDrawable.panel(0xFF0A081C, 0xFF04030B, density));
         add.addView(plus, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(82)));
         TextView addName = Ui.label(activity, "Все версии", 13, Ui.TEXT, true);
         addName.setPadding(dp(2), dp(5), 0, 0);

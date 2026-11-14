@@ -29,7 +29,7 @@ class SculkAmbience;
 
 /// The lobby of Nyxora Launcher, made like Millida Launcher's: picture tiles on the left, the player drawn full-length
 /// from the skin in the middle, Arkan the wizard on the right and "Сегодня играем" with a big Play button at the bottom,
-/// all over the red rain.
+/// all over the neon rain.
 class VelloraLobby : public QWidget {
     Q_OBJECT
    public:

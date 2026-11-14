@@ -312,12 +312,12 @@ void drawSilhouette(const Pen& p, bool leftUp, bool rightUp, double lift, bool b
     const QRectF parts[] = { { 4, 0, 8, 8 },   { 4, 8, 8, 12 }, { 0, rightUp ? -4.0 : 8.0, 4, 12 }, { 12, leftUp ? -4.0 : 8.0, 4, 12 },
                              { 4, 20, 4, 12 }, { 8, 20, 4, 12 } };
     for (const auto& r : parts) {
-        p.rect(r.x(), r.y() + lift, r.width(), r.height(), QColor(0x8A, 0x34, 0x42));
-        p.rect(r.x() + 0.5, r.y() + 0.5 + lift, r.width() - 1, r.height() - 1, QColor(0x2B, 0x0E, 0x15));
+        p.rect(r.x(), r.y() + lift, r.width(), r.height(), QColor(0x67, 0x4d, 0xab));
+        p.rect(r.x() + 0.5, r.y() + 0.5 + lift, r.width() - 1, r.height() - 1, QColor(0x11, 0x0e, 0x2b));
     }
     if (!back) {
-        p.rect(6, 4 + lift, 1, 1, QColor(0xFF, 0x46, 0x54));
-        p.rect(9, 4 + lift, 1, 1, QColor(0xFF, 0x46, 0x54));
+        p.rect(6, 4 + lift, 1, 1, QColor(0x9a, 0x62, 0xff));
+        p.rect(9, 4 + lift, 1, 1, QColor(0x9a, 0x62, 0xff));
     }
 }
 }  // namespace
@@ -369,7 +369,7 @@ float mixf(float a, float b, float t)
     return a + (b - a) * t;
 }
 
-/// a dark figure for when there is no skin: crimson rim, red eyes
+/// a dark figure for when there is no skin: violet rim, violet eyes
 const QImage& shadowSkin()
 {
     static QImage t = [] {
@@ -384,12 +384,12 @@ const QImage& shadowSkin()
                         continue;
                     }
                     const bool edge = y == v || y == v + d + h - 1 || x == u || x == u + 2 * (d + w) - 1 || x == u + d || x == u + d + w - 1;
-                    img.setPixel(x, y, edge ? 0xFF8A3442 : 0xFF2B0E15);
+                    img.setPixel(x, y, edge ? 0xFF674DAB : 0xFF110E2B);
                 }
             }
         }
-        img.setPixel(10, 12, 0xFFFF4654);
-        img.setPixel(13, 12, 0xFFFF4654);
+        img.setPixel(10, 12, 0xFF9A62FF);
+        img.setPixel(13, 12, 0xFF9A62FF);
         return img;
     }();
     return t;
@@ -1289,12 +1289,12 @@ void VelloraCharacter::paintEvent(QPaintEvent*)
     }
 
     QPainter painter(this);
-    // the crimson light on the floor, then the frame, sharp
+    // the violet light on the floor, then the frame, sharp
     const QPointF foot = project(m_mats[WORLD], 0, 0, 0) * k + QPointF(0, lift * m_scale * k);
     const double radius = 16 * m_scale * k;
     QRadialGradient glow(foot, radius);
-    glow.setColorAt(0, QColor(232, 54, 79, 112));
-    glow.setColorAt(1, QColor(232, 54, 79, 0));
+    glow.setColorAt(0, QColor(129, 84, 240, 112));
+    glow.setColorAt(1, QColor(129, 84, 240, 0));
     painter.save();
     painter.translate(foot);
     painter.scale(1, 0.25);

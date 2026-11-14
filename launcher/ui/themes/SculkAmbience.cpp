@@ -184,7 +184,7 @@ void SculkAmbience::paint(QPainter* painter, const QRect& rect, const QPoint& te
     painter->restore();
 }
 
-/* ---------------------------------------------------------------- Nyxora: the red rain (the old "lunar" theme id) */
+/* ---------------------------------------------------------------- Nyxora: the neon rain (the old "lunar" theme id) */
 
 namespace {
 quint32 sceneHash(int a, int b, int salt)
@@ -197,13 +197,13 @@ quint32 sceneHash(int a, int b, int salt)
 
 void SculkAmbience::tickLunar([[maybe_unused]] double t)
 {
-    // Nyxora: the red rain moves everywhere at once, so the whole picture is repainted every frame
+    // Nyxora: the neon rain moves everywhere at once, so the whole picture is repainted every frame
     m_target->update();
 }
 
 void SculkAmbience::paintLunar(QPainter* painter, double t)
 {
-    // Nyxora Launcher: red rain falling slantwise, small splashes on the ground and now and then a faint red flash,
+    // Nyxora Launcher: neon rain falling slantwise, small splashes on the ground and now and then a faint violet flash,
     // the same as the Android app (android/src/.../RainDrawable.java)
     const QRectF area(m_lastRect);
     const double w = area.width(), h = area.height();
@@ -215,7 +215,7 @@ void SculkAmbience::paintLunar(QPainter* painter, double t)
     const double cycle = std::fmod(t, 9.5);
     if (cycle < 0.35) {
         const double flash = (1 - cycle / 0.35) * (cycle < 0.08 ? cycle / 0.08 : 1.0);
-        painter->fillRect(area, QColor(255, 40, 60, int(40 * flash)));
+        painter->fillRect(area, QColor(134, 72, 255, int(40 * flash)));
     }
     constexpr double wind = 0.16;
     const int drops = int(std::min(420.0, w * h / 900.0));
@@ -227,13 +227,16 @@ void SculkAmbience::paintLunar(QPainter* painter, double t)
         const double y = std::fmod(t * speed + (sceneHash(i, 4, 51) % 1000) / 1000.0 * span, span) - length;
         const double x = (sceneHash(i, 5, 51) % 10000) / 10000.0 * (w + h * wind) - h * wind + y * wind;
         const int alpha = near ? 150 + int(sceneHash(i, 6, 51) % 90) : 60 + int(sceneHash(i, 6, 51) % 70);
-        painter->setPen(QPen(QColor(255, near ? 52 : 70, near ? 70 : 88, alpha), near ? 1.8 : 1.0, Qt::SolidLine, Qt::RoundCap));
+        // the colours of the icon: two drops in three violet, one blue
+        const bool blue = sceneHash(i, 7, 51) % 3 == 0;
+        const QColor drop = blue ? QColor(86, near ? 190 : 170, 255, alpha) : QColor(near ? 150 : 130, near ? 100 : 90, 255, alpha);
+        painter->setPen(QPen(drop, near ? 1.8 : 1.0, Qt::SolidLine, Qt::RoundCap));
         const QPointF top(area.left() + x, area.top() + y);
         painter->drawLine(top, top + QPointF(length * wind, length));
         const double hit = (y + length) - h;
         if (near && hit > 0 && hit < speed * 0.25) {
             const double k = hit / (speed * 0.25);
-            painter->setPen(QPen(QColor(255, 90, 105, int(170 * (1 - k))), 1.2));
+            painter->setPen(QPen(QColor(163, 115, 255, int(170 * (1 - k))), 1.2));
             painter->setBrush(Qt::NoBrush);
             const double r = 3 + 9 * k;
             painter->drawEllipse(QPointF(area.left() + x + length * wind, area.bottom() - 4), r, r * 0.3);
@@ -244,7 +247,7 @@ void SculkAmbience::paintLunar(QPainter* painter, double t)
 
 QPixmap SculkAmbience::moonScene(const QSize& size, qreal dpr)
 {
-    // Nyxora Launcher: a dark burgundy night with a red glow from below; the rain is drawn on top by the ambience
+    // Nyxora Launcher: a dark navy night with a violet glow from below; the rain is drawn on top by the ambience
     QPixmap pixmap(size * dpr);
     pixmap.setDevicePixelRatio(dpr);
     QPainter p(&pixmap);
@@ -252,13 +255,13 @@ QPixmap SculkAmbience::moonScene(const QSize& size, qreal dpr)
     const double w = size.width();
     const double h = size.height();
     QLinearGradient sky(0, 0, 0, h);
-    sky.setColorAt(0, QColor(0x07, 0x02, 0x04));
-    sky.setColorAt(0.55, QColor(0x16, 0x05, 0x0a));
-    sky.setColorAt(1, QColor(0x2a, 0x09, 0x12));
+    sky.setColorAt(0, QColor(0x02, 0x02, 0x07));
+    sky.setColorAt(0.55, QColor(0x06, 0x05, 0x16));
+    sky.setColorAt(1, QColor(0x0b, 0x09, 0x2a));
     p.fillRect(QRectF(0, 0, w, h), sky);
     QRadialGradient glow(QPointF(w * 0.5, h * 1.15), std::max(w, h) * 0.75);
-    glow.setColorAt(0, QColor(0xc8, 0x10, 0x2e, 0x66));
-    glow.setColorAt(0.5, QColor(0x80, 0x0a, 0x1e, 0x22));
+    glow.setColorAt(0, QColor(0x5e, 0x30, 0xdb, 0x66));
+    glow.setColorAt(0.5, QColor(0x3e, 0x1b, 0x9e, 0x22));
     glow.setColorAt(1, Qt::transparent);
     p.fillRect(QRectF(0, 0, w, h), glow);
     p.end();

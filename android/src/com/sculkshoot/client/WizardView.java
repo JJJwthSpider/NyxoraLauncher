@@ -22,8 +22,8 @@ import java.util.List;
 /**
  * Arkan, Nyxora's AI pack builder, as a 3D mob in the style of a Minecraft mod: the old hooded wizard made of boxes
  * with a pixel texture (assets/arkan_model.json and arkan.png, made by art/arkan3d.py), drawn here with the same
- * software renderer as the player (CharacterView): a deep burgundy hood with a crimson rim stitched with gold and its
- * top falling back, the face lost in its shadow with only the red eyes glowing, a silver beard, a cloak with gold edges,
+ * software renderer as the player (CharacterView): a deep indigo hood with a violet rim stitched with gold and its
+ * top falling back, the face lost in its shadow with only the violet eyes glowing, a silver beard, a cloak with gold edges,
  * runes and a ruby brooch, a black belt with a gold buckle, one hand raised with the red tesseract turning in four
  * dimensions over it. The tesseract lights the cloth near it red. He floats over a turning magic circle, turns a
  * little, looks around and blinks; while he works the tesseract spins faster and the sparks fly. In a small place (a
@@ -69,9 +69,9 @@ final class WizardView extends View {
         super(context);
         load(context);
         pixels.setFilterBitmap(false);  // sharp pixels, like Minecraft
-        line.setColor(0xFFFF4654);
+        line.setColor(0xFF9A62FF);
         line.setStrokeCap(Paint.Cap.ROUND);
-        dot.setColor(0xFFFFC8CD);
+        dot.setColor(0xFFE0D0FF);
     }
 
     private Boolean closeUpForced;
@@ -279,7 +279,7 @@ final class WizardView extends View {
             float turn = time * 0.4f * speed;
             for (int i = 0; i < 40; i++) {
                 double a = turn + i * Math.PI * 2 / 40;
-                runeDot(ground, (float) Math.cos(a) * 11, 0, (float) Math.sin(a) * 11, i % 5 == 0 ? 0xFFFF6B7A : 0xFFE8364F);
+                runeDot(ground, (float) Math.cos(a) * 11, 0, (float) Math.sin(a) * 11, i % 5 == 0 ? 0xFFAB81FF : 0xFF8154F0);
             }
             for (int i = 0; i < 12; i++) {
                 double a = -turn * 1.5 + i * Math.PI * 2 / 12;
@@ -297,7 +297,7 @@ final class WizardView extends View {
         if (!closeUp) {
             float[] foot = project(ground, new float[] { 0, 0, 0 });
             float fx = foot[0] * k2, fy = foot[1] * k2, radius = 15 * scale * k2;
-            glow.setShader(new RadialGradient(fx, fy, radius, new int[] { 0x80E8364F, 0x00E8364F }, null, Shader.TileMode.CLAMP));
+            glow.setShader(new RadialGradient(fx, fy, radius, new int[] { 0x808154F0, 0x008154F0 }, null, Shader.TileMode.CLAMP));
             canvas.save();
             canvas.scale(1, 0.3f, fx, fy);
             canvas.drawCircle(fx, fy, radius, glow);
@@ -312,7 +312,7 @@ final class WizardView extends View {
             for (float[] e : m.eyes) {
                 float[] p = project(mats[HEAD], e);
                 float r = scale * k2 * 2.2f;
-                glow.setShader(new RadialGradient(p[0] * k2, p[1] * k2, r, new int[] { ((int) (140 * shine) << 24) | 0xFF2840, 0x00FF2840 }, null,
+                glow.setShader(new RadialGradient(p[0] * k2, p[1] * k2, r, new int[] { ((int) (140 * shine) << 24) | 0x8348FF, 0x008348FF }, null,
                                                   Shader.TileMode.CLAMP));
                 canvas.drawCircle(p[0] * k2, p[1] * k2, r, glow);
             }
@@ -321,7 +321,7 @@ final class WizardView extends View {
         for (float[] g : m.glows) {
             float[] at = project(mats[(int) g[0]], new float[] { g[1], g[2], g[3] });
             float gr = scale * k2 * g[4] * (busy ? 1.4f : 1f) * (0.85f + 0.15f * (float) Math.sin(time * 3));
-            glow.setShader(new RadialGradient(at[0] * k2, at[1] * k2, gr, new int[] { 0x70FF2840, 0x00FF2840 }, null, Shader.TileMode.CLAMP));
+            glow.setShader(new RadialGradient(at[0] * k2, at[1] * k2, gr, new int[] { 0x708348FF, 0x008348FF }, null, Shader.TileMode.CLAMP));
             canvas.drawCircle(at[0] * k2, at[1] * k2, gr, glow);
         }
 
@@ -329,7 +329,7 @@ final class WizardView extends View {
         float cx = (centerX + tesseract[0] * scale) * k2;
         float cy = (centerY - tesseract[1] * scale) * k2 + (float) Math.sin(time * 2) * scale * k2 * 0.4f;
         float glowRadius = scale * k2 * 7 * (busy ? 1.3f : 1f);
-        glow.setShader(new RadialGradient(cx, cy, glowRadius, new int[] { ((int) (110 * pulse) << 24) | 0xFF283C, 0x00FF283C }, null,
+        glow.setShader(new RadialGradient(cx, cy, glowRadius, new int[] { ((int) (110 * pulse) << 24) | 0x8648FF, 0x008648FF }, null,
                                           Shader.TileMode.CLAMP));
         canvas.drawCircle(cx, cy, glowRadius, glow);
         float size = scale * k2 * 15;
@@ -359,14 +359,14 @@ final class WizardView extends View {
         for (int i = 0; i < 16; i++) {
             canvas.drawCircle(tx[i], ty[i], r, dot);
         }
-        // sparks rise from the tesseract and fade: crimson and gold
+        // sparks rise from the tesseract and fade: violet and gold
         int count = busy ? 12 : 7;
         float period = busy ? 1.4f : 2.4f;
         for (int i = 0; i < count; i++) {
             float t = ((time + i * period / count) % period) / period;
             float sx = cx + (float) Math.sin(i * 12.9 + t * 3) * scale * k2 * 4;
             float sy = cy - scale * k2 * 2 - t * scale * k2 * 11;
-            spark.setColor(i % 3 == 0 ? 0xFFF4CC74 : 0xFFFF4654);
+            spark.setColor(i % 3 == 0 ? 0xFFF4CC74 : 0xFF9A62FF);
             spark.setAlpha((int) (255 * (1 - t)));
             float s = scale * k2 * (t < 0.5f ? 0.8f : 0.55f);
             canvas.drawRect(sx, sy, sx + s, sy + s, spark);
@@ -474,7 +474,7 @@ final class WizardView extends View {
                 }
                 if (alpha == 254) {
                     // a glowing pixel: the eyes (closed while he blinks), the ruby
-                    color[i] = blink && head ? 0xFF12040A : 0xFF000000 | (c & 0xFFFFFF);
+                    color[i] = blink && head ? 0xFF040512 : 0xFF000000 | (c & 0xFFFFFF);
                 } else {
                     int r = Math.min(255, ((((c >> 16) & 0xFF) * r256) >> 8) + redAdd);
                     int g = Math.min(255, ((((c >> 8) & 0xFF) * b256) >> 8) + redAdd / 8);

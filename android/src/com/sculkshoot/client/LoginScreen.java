@@ -42,7 +42,7 @@ final class LoginScreen {
         card.setOrientation(LinearLayout.VERTICAL);
         card.setGravity(Gravity.CENTER_HORIZONTAL);
         card.setPadding(dp(28), dp(20), dp(28), dp(20));
-        card.setBackground(Ui.rounded(activity, 0xE0140509, 18, Ui.LINE));
+        card.setBackground(Ui.rounded(activity, 0xE0060514, 18, Ui.LINE));
 
         logo = new ImageView(activity);
         logo.setImageResource(R.drawable.install_default);
