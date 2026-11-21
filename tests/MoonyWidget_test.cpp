@@ -13,8 +13,8 @@
 namespace {
 struct Counts {
     int opaque = 0;    // the model's pixels
-    int glowing = 0;   // bright red: the eyes, the rubies, the tesseract, the magic circle
-    int beard = 0;     // light grey
+    int glowing = 0;   // bright violet: the antenna light, the cube, the hover ring
+    int suit = 0;      // near white: the spacesuit and the helmet
     int lowestRow = 0; // the lowest row with a model pixel
 };
 
@@ -28,11 +28,11 @@ Counts look(const QImage& image)
                 c.opaque++;
                 c.lowestRow = y;
                 const int r = qRed(p), g = qGreen(p), b = qBlue(p);
-                if (b > 200 && g < 150 && r > 110) {  // the bright violet of the eyes, the gems and the magic circle
+                if (b > 200 && g < 150 && r > 110) {  // the bright violet of the antenna light, the cube and the ring
                     c.glowing++;
                 }
                 if (r > 150 && std::abs(r - g) < 14 && std::abs(g - b) < 14) {
-                    c.beard++;
+                    c.suit++;
                 }
             }
         }
@@ -67,9 +67,9 @@ class MoonyWidgetTest : public QObject {
         widget.resize(116, 136);  // the lobby banner
         const Counts c = look(shot(widget, "arkan_banner.png"));
         QVERIFY2(c.opaque > 116 * 136 / 8, "the model is drawn");
-        QVERIFY2(c.glowing > 20, "the eyes, the gems and the magic circle glow");
-        QVERIFY2(c.beard > 20, "the silver beard is there");
-        QVERIFY2(c.lowestRow > 136 * 3 / 4, "the whole figure, down to the magic circle");
+        QVERIFY2(c.glowing > 20, "the antenna light, the cube and the ring glow");
+        QVERIFY2(c.suit > 20, "the white spacesuit is there");
+        QVERIFY2(c.lowestRow > 136 * 3 / 4, "the whole figure, down to the ring");
     }
 
     void closeUp()
@@ -78,7 +78,7 @@ class MoonyWidgetTest : public QObject {
         widget.resize(64, 64);  // a small place: only the head and shoulders
         const Counts c = look(shot(widget, "arkan_small.png"));
         QVERIFY2(c.opaque > 64 * 64 / 3, "the head fills the small place");
-        QVERIFY2(c.beard > 40, "the beard is big in the close-up");
+        QVERIFY2(c.suit > 40, "the helmet is big in the close-up");
     }
 
     void withBubble()

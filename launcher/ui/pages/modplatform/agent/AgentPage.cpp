@@ -453,7 +453,7 @@ AgentPage::~AgentPage() = default;
 
 void AgentPage::retranslate()
 {
-    m_title->setText(tr("Arkan the wizard, the pack builder"));
+    m_title->setText(tr("Arkan the astronaut, the pack builder"));
     m_subtitle->setText(
         tr("Tell me what the pack should be about, and the loader and version. "
            "I will find the mods, add optimization and everything they need."));

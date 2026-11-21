@@ -260,8 +260,8 @@
         <translation>Аркан работает</translation>
     </message>
     <message>
-        <source>Arkan the wizard, the pack builder</source>
-        <translation>Маг Аркан, сборщик</translation>
+        <source>Arkan the astronaut, the pack builder</source>
+        <translation>Космонавт Аркан, сборщик</translation>
     </message>
     <message>
         <source>Write to Arkan, e.g.: a zombie apocalypse pack with cities, zombies and weapons</source>
@@ -273,7 +273,7 @@
     </message>
     <message>
         <source>Hi! I&apos;m Arkan and I build mod packs. &lt;b&gt;What should your pack be about?&lt;/b&gt; Tell me the theme and what must be in it, for example: &lt;i&gt;a zombie apocalypse with cities, zombies and weapons&lt;/i&gt;.</source>
-        <translation>Привет! Я Аркан, маг-сборщик, собираю сборки модов. &lt;b&gt;Про что будет твоя сборка?&lt;/b&gt; Расскажи тему и что в ней должно быть, например: &lt;i&gt;зомби-апокалипсис, должны быть города, зомби и оружие&lt;/i&gt;.</translation>
+        <translation>Привет! Я Аркан, космонавт-сборщик, собираю сборки модов. &lt;b&gt;Про что будет твоя сборка?&lt;/b&gt; Расскажи тему и что в ней должно быть, например: &lt;i&gt;зомби-апокалипсис, должны быть города, зомби и оружие&lt;/i&gt;.</translation>
     </message>
 </context>
 <context>
@@ -3283,8 +3283,8 @@ Are you sure?</source>
         <translation>Играть с друзьями: лобби, сервер, код приглашения</translation>
     </message>
     <message>
-        <source>AI WIZARD × NYXORA</source>
-        <translation>ИИ-МАГ × NYXORA</translation>
+        <source>AI ASTRONAUT × NYXORA</source>
+        <translation>ИИ-КОСМОНАВТ × NYXORA</translation>
     </message>
     <message>
         <source>BUILD</source>
@@ -3347,8 +3347,8 @@ Are you sure?</source>
         <translation>Мой скин</translation>
     </message>
     <message>
-        <source>AI WIZARD</source>
-        <translation>ИИ-МАГ</translation>
+        <source>AI ASTRONAUT</source>
+        <translation>ИИ-КОСМОНАВТ</translation>
     </message>
     <message>
         <source>Arkan</source>

@@ -454,7 +454,7 @@ VelloraLobby::VelloraLobby(QWidget* parent) : QWidget(parent)
     bannerLayout->setContentsMargins(16, 12, 6, 30);
     auto* bannerTexts = new QVBoxLayout;
     bannerTexts->setSpacing(0);
-    bannerTexts->addWidget(caption(tr("AI WIZARD × NYXORA"), 8, "#c3b7e1", banner));
+    bannerTexts->addWidget(caption(tr("AI ASTRONAUT × NYXORA"), 8, "#c3b7e1", banner));
     bannerTexts->addSpacing(4);
     bannerTexts->addWidget(caption(tr("BUILD"), 16, "#fbeff1", banner));
     bannerTexts->addWidget(caption(tr("A PACK"), 16, "#fbeff1", banner));

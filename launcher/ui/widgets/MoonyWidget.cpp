@@ -100,7 +100,7 @@ const ArkanModel& arkan()
             readPoint(b.value("from"), from);
             readPoint(b.value("size"), size);
             if (part == Body && from[1] < 1) {
-                part = Skirt;  // the robe below the belt sways on its own
+                part = Skirt;  // the legs sway a little on their own, as he floats
             }
             const QJsonArray uv = b.value("uv").toArray();
             m.boxes.push_back({ float(part), from[0], from[1], from[2], size[0], size[1], size[2], float(uv.at(0).toDouble()),
@@ -299,7 +299,7 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
     mats[magic] = mul(camera, magicArm);
     mats[other] = mul(camera, rot(m.pivots[other][0], m.pivots[other][1], m.pivots[other][2], oPitch, 0, oRoll));
     mats[Skirt] = mul(camera, rot(0, 12, 0, skirtSway, 0, 0));
-    // the tesseract over the raised palm; its red light falls on the cloth near it
+    // the cube over the raised palm; its violet light falls on the suit near it
     const double pulse = 0.75 + 0.25 * std::sin(time * (3.0 + 4.0 * busy));
     auto palm = transformPoint(magicArm, m.hands[magic]);
     palm[1] += 6.5f;
@@ -318,7 +318,7 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
     m_frame.fill(Qt::transparent);
     std::fill(m_depth.begin(), m_depth.end(), -1e9f);
 
-    // the magic circle on the ground: a ring of runes turning under him
+    // the hover ring under him: dots of light turning, violet outside, blue inside
     if (!closeUp) {
         const float turn = phase * 0.4f;
         for (int i = 0; i < 40; i++) {
@@ -327,7 +327,7 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
         }
         for (int i = 0; i < 12; i++) {
             const float a = -turn * 1.5f + i * s_pi * 2 / 12;
-            runeDot(ground, std::cos(a) * 7, 0, std::sin(a) * 7, 0xFFF4CC74);
+            runeDot(ground, std::cos(a) * 7, 0, std::sin(a) * 7, 0xFF7CD0FF);
         }
     }
     // the model
@@ -354,14 +354,14 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
     m_frame.setDevicePixelRatio(density);  // one frame pixel = one screen pixel
     p.drawImage(QPointF(area.topLeft()), m_frame);
 
-    // the glow of the eyes: brighter when he is awake or working
+    // the glow of the antenna light: brighter when he is awake or working
     if (!m_blink) {
         const double shine = 0.7 + 0.3 * std::sin(time * (2.2 + 3.8 * busy));
         for (const auto& e : m.eyes) {
             glowAt(p, at(project(mats[Head], e[0], e[1], e[2])), unit * 2.2, QColor(131, 72, 255), (0.4 + 0.25 * m_wake) * shine);
         }
     }
-    // the ruby glows
+    // the screen on his chest glows
     for (const auto& g : m.glows) {
         glowAt(p, at(project(mats[static_cast<int>(g[0])], g[1], g[2], g[3])), unit * g[4] * (1.0 + 0.4 * busy) * (0.85 + 0.15 * std::sin(time * 3.0)),
                QColor(131, 72, 255), 0.44);
@@ -398,7 +398,7 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
     for (const auto& corner : corners) {
         p.drawEllipse(corner, dot, dot);
     }
-    // sparks rise from the tesseract and fade: violet and gold
+    // sparks rise from the cube and fade: violet and blue
     const bool working = busy > 0.5f;
     const int count = working ? 12 : 7;
     const double period = working ? 1.4 : 2.4;
@@ -407,12 +407,12 @@ void MoonyWidget::paintArkan(QPainter& p, const QRect& area)
         const double sx = c.x() + std::sin(i * 12.9 + t * 3) * unit * 4;
         const double sy = c.y() - unit * 2 - t * unit * 11;
         const double s = unit * (t < 0.5 ? 0.8 : 0.55);
-        p.fillRect(QRectF(sx, sy, s, s), withAlpha(i % 3 == 0 ? QColor(244, 204, 116) : QColor(154, 98, 255), 1.0 - t));
+        p.fillRect(QRectF(sx, sy, s, s), withAlpha(i % 3 == 0 ? QColor(124, 208, 255) : QColor(154, 98, 255), 1.0 - t));
     }
     p.restore();
 }
 
-/// one dot of the magic circle, with the depth test (his robe hides the back of the ring)
+/// one dot of the hover ring, with the depth test (his legs hide the back of the ring)
 void MoonyWidget::runeDot(const Matrix& m, float x, float y, float z, QRgb color)
 {
     float depth = 0;
@@ -460,8 +460,8 @@ void MoonyWidget::drawBox(const Matrix& m, const float* b, bool head)
     f(x0, y0, z1, x1, y0, z1, x0, y0, z0, u + id + iw, v, iw, id);
 }
 
-/// one face, a textured parallelogram, shaded like Minecraft and lit red by the tesseract when it is near and turned to
-/// it; the pixels with alpha 254 glow (not shaded), those of the head are the eyes and close when he blinks
+/// one face, a textured parallelogram, shaded like Minecraft and lit violet by the cube when it is near and turned to
+/// it; the pixels with alpha 254 glow (not shaded), those of the head (the antenna light) go dark when he "blinks"
 void MoonyWidget::face(const Matrix& m, const float* a, const float* b, const float* c, int su, int sv, int sw, int sh, bool head)
 {
     const auto A = transformPoint(m, a), B = transformPoint(m, b), C = transformPoint(m, c);
@@ -476,14 +476,15 @@ void MoonyWidget::face(const Matrix& m, const float* a, const float* b, const fl
     if (ny / len < -0.5f) {
         bright *= 0.85f;
     }
-    // the red light of the tesseract
+    // the violet light of the cube: more blue than red
     const float dx = m_tesseract[0] - (A[0] + (ex + fx) / 2), dy = m_tesseract[1] - (A[1] + (ey + fy) / 2),
                 dz = m_tesseract[2] - (A[2] + (ez + fz) / 2);
     const float dist = std::sqrt(dx * dx + dy * dy + dz * dz) + 1e-3f;
-    const float red = std::max(0.0f, (nx * dx + ny * dy + nz * dz) / (len * dist)) * std::clamp(1.1f - dist / 13, 0.0f, 1.0f) * m_tesseractLight;
+    const float lit = std::max(0.0f, (nx * dx + ny * dy + nz * dz) / (len * dist)) * std::clamp(1.1f - dist / 13, 0.0f, 1.0f) * m_tesseractLight;
     const int b256 = static_cast<int>(std::lround(std::min(1.08f, bright) * 256));
-    const int r256 = static_cast<int>(std::lround(std::min(1.4f, bright + 0.7f * red) * 256));
-    const int redAdd = static_cast<int>(std::lround(red * 22));
+    const int r256 = static_cast<int>(std::lround(std::min(1.3f, bright + 0.35f * lit) * 256));
+    const int v256 = static_cast<int>(std::lround(std::min(1.4f, bright + 0.7f * lit) * 256));
+    const int add = static_cast<int>(std::lround(lit * 22));
     const float sAx = m_centerX + A[0] * m_scale, sAy = m_centerY - A[1] * m_scale;
     const float e1x = ex * m_scale, e1y = -ey * m_scale, e2x = fx * m_scale, e2y = -fy * m_scale;
     const float det = e1x * e2y - e1y * e2x;
@@ -522,11 +523,11 @@ void MoonyWidget::face(const Matrix& m, const float* a, const float* b, const fl
                 continue;
             }
             if (alpha == 254) {
-                // a glowing pixel: the eyes (closed while he blinks), the ruby
+                // a glowing pixel: the antenna light (dark for a moment now and then), the screen
                 row[px] = m_blink && head ? 0xFF040512 : (0xFF000000 | (texel & 0xFFFFFF));
             } else {
-                row[px] = qRgb(std::min(255, ((qRed(texel) * r256) >> 8) + redAdd), std::min(255, ((qGreen(texel) * b256) >> 8) + redAdd / 8),
-                               std::min(255, ((qBlue(texel) * b256) >> 8) + redAdd / 4));
+                row[px] = qRgb(std::min(255, ((qRed(texel) * r256) >> 8) + add / 2), std::min(255, ((qGreen(texel) * b256) >> 8) + add / 8),
+                               std::min(255, ((qBlue(texel) * v256) >> 8) + add));
             }
             depthRow[px] = z;
         }

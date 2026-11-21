@@ -25,12 +25,12 @@
 
 class QPainter;
 
-/// The face of the mod pack agent: Arkan, the old hooded wizard, as a 3D mob in the style of a Minecraft mod, a model
+/// The face of the mod pack agent: Arkan, a person in a spacesuit, as a 3D mob in the style of a Minecraft mod, a model
 /// of boxes with a pixel texture (resources/sculk_theme/arkan_model.json and arkan.png, made by android/art/arkan3d.py)
-/// drawn by a small software renderer, the same as the phone's WizardView: the face lost in the shadow of the hood with
-/// only the violet eyes glowing, the violet rim stitched with gold, the silver beard, the ruby brooch; he floats over a
-/// turning magic circle, looks around and blinks, and the red tesseract turns in four dimensions over his raised palm
-/// and lights the cloth near it. His eyes glow brighter when the mouse comes near; while the agent works the tesseract
+/// drawn by a small software renderer, the same as the phone's WizardView: a white helmet with a wide glass in the icon's
+/// blue and violet, an antenna whose light blinks, a white suit with a lit screen on the chest and a life-support pack;
+/// he floats over a turning ring of light, looks around, and Nyxora's cube (a tesseract) turns in four dimensions over
+/// his raised palm. The antenna light glows brighter when the mouse comes near; while the agent works the cube
 /// spins faster and the sparks fly. In a small place only his head and shoulders are shown, looking at you. (The class
 /// keeps its old name, Moony, so nothing else has to change.)
 class MoonyWidget : public QWidget {
@@ -38,7 +38,7 @@ class MoonyWidget : public QWidget {
    public:
     explicit MoonyWidget(QWidget* parent = nullptr);
 
-    /// the mouse is over the tile: Arkan wakes up and his eyes glow brighter
+    /// the mouse is over the tile: Arkan wakes up and his antenna light glows brighter
     void setExcited(bool excited);
     /// a speech bubble next to him: the agent is a chat
     void setBubbleVisible(bool visible);

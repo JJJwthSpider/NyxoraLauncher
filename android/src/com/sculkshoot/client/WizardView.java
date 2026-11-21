@@ -20,14 +20,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Arkan, Nyxora's AI pack builder, as a 3D mob in the style of a Minecraft mod: the old hooded wizard made of boxes
+ * Arkan, Nyxora's AI pack builder, as a 3D mob in the style of a Minecraft mod: a person in a spacesuit made of boxes
  * with a pixel texture (assets/arkan_model.json and arkan.png, made by art/arkan3d.py), drawn here with the same
- * software renderer as the player (CharacterView): a deep indigo hood with a violet rim stitched with gold and its
- * top falling back, the face lost in its shadow with only the violet eyes glowing, a silver beard, a cloak with gold edges,
- * runes and a ruby brooch, a black belt with a gold buckle, one hand raised with the red tesseract turning in four
- * dimensions over it. The tesseract lights the cloth near it red. He floats over a turning magic circle, turns a
- * little, looks around and blinks; while he works the tesseract spins faster and the sparks fly. In a small place (a
- * chat avatar) only his head and shoulders are shown.
+ * software renderer as the player (CharacterView): a white helmet with a wide glass in the icon's blue and violet, an
+ * antenna whose light blinks, a white suit with a lit screen on the chest, a life-support pack, one hand raised with
+ * Nyxora's cube (a tesseract) turning in four dimensions over it. He floats over a turning ring of light, turns a
+ * little and looks around; while he works the cube spins faster and the sparks fly. In a small place (a chat avatar)
+ * only his head and shoulders are shown.
  */
 final class WizardView extends View {
     private static final int HEAD = 0, BODY = 1, RARM = 2, LARM = 3, SKIRT = 4;
@@ -82,7 +81,7 @@ final class WizardView extends View {
         invalidate();
     }
 
-    /** Arkan is building: the tesseract turns faster, the staff glows, the sparks fly */
+    /** Arkan is building: the cube turns faster, the sparks fly */
     void setBusy(boolean busy) {
         this.busy = busy;
         invalidate();
@@ -129,7 +128,7 @@ final class WizardView extends View {
                 }
                 float[] from = floats(b.getJSONArray("from")), size = floats(b.getJSONArray("size")), uv = floats(b.getJSONArray("uv"));
                 if (part == BODY && from[1] < 1) {
-                    part = SKIRT;  // the robe below the belt sways on its own
+                    part = SKIRT;  // the legs sway a little on their own, as he floats
                 }
                 m.boxes.add(new float[] { part, from[0], from[1], from[2], size[0], size[1], size[2], uv[0], uv[1], (float) b.optDouble("inflate", 0) });
             }
@@ -255,7 +254,7 @@ final class WizardView extends View {
         mul(camera, magicArm, mats[magic]);
         mul(camera, rot(m.pivots[other][0], m.pivots[other][1], m.pivots[other][2], oPitch, 0, oRoll), mats[other]);
         mul(camera, rot(0, 12, 0, skirtSway, 0, 0), mats[SKIRT]);
-        // the tesseract over the raised palm; its red light falls on the cloth near it
+        // the cube over the raised palm; its violet light falls on the suit near it
         float pulse = 0.75f + 0.25f * (float) Math.sin(time * (busy ? 7 : 3));
         float[] palm = apply(magicArm, m.hands[magic]);
         palm[1] += 6.5f;
@@ -274,7 +273,7 @@ final class WizardView extends View {
         Arrays.fill(color, 0);
         Arrays.fill(depth, -1e9f);
 
-        // the magic circle on the ground: a ring of runes turning under him
+        // the hover ring under him: dots of light turning, violet outside, blue inside
         if (!closeUp) {
             float turn = time * 0.4f * speed;
             for (int i = 0; i < 40; i++) {
@@ -283,7 +282,7 @@ final class WizardView extends View {
             }
             for (int i = 0; i < 12; i++) {
                 double a = -turn * 1.5 + i * Math.PI * 2 / 12;
-                runeDot(ground, (float) Math.cos(a) * 7, 0, (float) Math.sin(a) * 7, 0xFFF4CC74);
+                runeDot(ground, (float) Math.cos(a) * 7, 0, (float) Math.sin(a) * 7, 0xFF7CD0FF);
             }
         }
 
@@ -306,7 +305,7 @@ final class WizardView extends View {
         frame.setPixels(color, 0, bufW, 0, 0, bufW, bufH);
         canvas.drawBitmap(frame, new Rect(0, 0, bufW, bufH), new Rect(0, 0, bufW * k, bufH * k), pixels);
 
-        // the glow of the eyes
+        // the glow of the antenna light
         if (!blink) {
             float shine = 0.7f + 0.3f * (float) Math.sin(time * (busy ? 6 : 2.2));
             for (float[] e : m.eyes) {
@@ -317,7 +316,7 @@ final class WizardView extends View {
                 canvas.drawCircle(p[0] * k2, p[1] * k2, r, glow);
             }
         }
-        // the rubies glow
+        // the screen on his chest glows
         for (float[] g : m.glows) {
             float[] at = project(mats[(int) g[0]], new float[] { g[1], g[2], g[3] });
             float gr = scale * k2 * g[4] * (busy ? 1.4f : 1f) * (0.85f + 0.15f * (float) Math.sin(time * 3));
@@ -359,14 +358,14 @@ final class WizardView extends View {
         for (int i = 0; i < 16; i++) {
             canvas.drawCircle(tx[i], ty[i], r, dot);
         }
-        // sparks rise from the tesseract and fade: violet and gold
+        // sparks rise from the cube and fade: violet and blue
         int count = busy ? 12 : 7;
         float period = busy ? 1.4f : 2.4f;
         for (int i = 0; i < count; i++) {
             float t = ((time + i * period / count) % period) / period;
             float sx = cx + (float) Math.sin(i * 12.9 + t * 3) * scale * k2 * 4;
             float sy = cy - scale * k2 * 2 - t * scale * k2 * 11;
-            spark.setColor(i % 3 == 0 ? 0xFFF4CC74 : 0xFF9A62FF);
+            spark.setColor(i % 3 == 0 ? 0xFF7CD0FF : 0xFF9A62FF);
             spark.setAlpha((int) (255 * (1 - t)));
             float s = scale * k2 * (t < 0.5f ? 0.8f : 0.55f);
             canvas.drawRect(sx, sy, sx + s, sy + s, spark);
@@ -374,7 +373,7 @@ final class WizardView extends View {
         postInvalidateDelayed(33);
     }
 
-    /** one dot of the magic circle, with the depth test (his robe hides the back of the ring) */
+    /** one dot of the hover ring, with the depth test (his legs hide the back of the ring) */
     private void runeDot(float[] m, float x, float y, float z, int c) {
         float[] p = project(m, new float[] { x, y, z });
         int size = Math.max(1, Math.round(scale * 0.7f));
@@ -407,8 +406,8 @@ final class WizardView extends View {
     }
 
     /**
-     * one face, a textured parallelogram, shaded like Minecraft and lit red by the tesseract when it is near and turned to
-     * it; the pixels with alpha 254 glow (not shaded), those of the head are the eyes and close when he blinks
+     * one face, a textured parallelogram, shaded like Minecraft and lit violet by the cube when it is near and turned to
+     * it; the pixels with alpha 254 glow (not shaded), those of the head (the antenna light) go dark when he "blinks"
      */
     private void face(float[] m, float ax, float ay, float az, float bx, float by, float bz, float cx, float cy, float cz, int su, int sv, int sw, int sh,
                       boolean head) {
@@ -426,13 +425,14 @@ final class WizardView extends View {
         if (ny / len < -0.5f) {
             bright *= 0.85f;
         }
-        // the red light of the tesseract
+        // the violet light of the cube: more blue than red
         float dx = tesseract[0] - (AX + (ex + fx) / 2), dy = tesseract[1] - (AY + (ey + fy) / 2), dz = tesseract[2] - (AZ + (ez + fz) / 2);
         float dist = (float) Math.sqrt(dx * dx + dy * dy + dz * dz) + 1e-3f;
-        float red = Math.max(0, (nx * dx + ny * dy + nz * dz) / (len * dist)) * Math.max(0, Math.min(1, 1.1f - dist / 13)) * tesseractLight;
+        float lit = Math.max(0, (nx * dx + ny * dy + nz * dz) / (len * dist)) * Math.max(0, Math.min(1, 1.1f - dist / 13)) * tesseractLight;
         int b256 = Math.round(Math.min(1.08f, bright) * 256);
-        int r256 = Math.round(Math.min(1.4f, bright + 0.7f * red) * 256);
-        int redAdd = Math.round(red * 22);
+        int r256 = Math.round(Math.min(1.3f, bright + 0.35f * lit) * 256);
+        int v256 = Math.round(Math.min(1.4f, bright + 0.7f * lit) * 256);
+        int add = Math.round(lit * 22);
         float sAx = centerX + AX * scale, sAy = centerY - AY * scale;
         float e1x = ex * scale, e1y = -ey * scale, e2x = fx * scale, e2y = -fy * scale;
         float det = e1x * e2y - e1y * e2x;
@@ -473,12 +473,12 @@ final class WizardView extends View {
                     continue;
                 }
                 if (alpha == 254) {
-                    // a glowing pixel: the eyes (closed while he blinks), the ruby
+                    // a glowing pixel: the antenna light (dark for a moment now and then), the screen
                     color[i] = blink && head ? 0xFF040512 : 0xFF000000 | (c & 0xFFFFFF);
                 } else {
-                    int r = Math.min(255, ((((c >> 16) & 0xFF) * r256) >> 8) + redAdd);
-                    int g = Math.min(255, ((((c >> 8) & 0xFF) * b256) >> 8) + redAdd / 8);
-                    int bl = Math.min(255, (((c & 0xFF) * b256) >> 8) + redAdd / 4);
+                    int r = Math.min(255, ((((c >> 16) & 0xFF) * r256) >> 8) + add / 2);
+                    int g = Math.min(255, ((((c >> 8) & 0xFF) * b256) >> 8) + add / 8);
+                    int bl = Math.min(255, (((c & 0xFF) * v256) >> 8) + add);
                     color[i] = 0xFF000000 | (r << 16) | (g << 8) | bl;
                 }
                 depth[i] = z;

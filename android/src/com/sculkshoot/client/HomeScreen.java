@@ -497,7 +497,7 @@ final class HomeScreen {
         LinearLayout texts = new LinearLayout(activity);
         texts.setOrientation(LinearLayout.VERTICAL);
         texts.setPadding(dp(12), dp(10), dp(96), 0);
-        texts.addView(tight(Ui.label(activity, "ИИ-МАГ × NYXORA", 9, Ui.HINT, true)));
+        texts.addView(tight(Ui.label(activity, "ИИ-КОСМОНАВТ × NYXORA", 9, Ui.HINT, true)));
         TextView headline = tight(Ui.label(activity, "СОБЕРИ СБОРКУ", 17, Ui.TEXT, true));
         headline.setPadding(0, dp(4), 0, 0);
         texts.addView(headline);

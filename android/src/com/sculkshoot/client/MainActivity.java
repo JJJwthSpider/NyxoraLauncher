@@ -803,7 +803,7 @@ public final class MainActivity extends Activity {
         titles.setOrientation(LinearLayout.VERTICAL);
         titles.setPadding(dp(10), 0, 0, 0);
         TextView title = new TextView(this);
-        title.setText("Маг Аркан");
+        title.setText("Космонавт Аркан");
         title.setTypeface(pixel);
         title.setTextSize(18);
         title.setTextColor(ACCENT);
@@ -1383,7 +1383,7 @@ public final class MainActivity extends Activity {
         packLoaderVersion = "";
         workLog.setLength(0);
         updatePackBar();
-        say("Привет! Я Аркан, маг-сборщик, собираю сборки модов. <b>Про что будет твоя сборка?</b> Расскажи тему и что в ней должно быть, например: "
+        say("Привет! Я Аркан, космонавт-сборщик, собираю сборки модов. <b>Про что будет твоя сборка?</b> Расскажи тему и что в ней должно быть, например: "
                 + "<i>зомби-апокалипсис, должны быть города, зомби и оружие</i>.",
             TOPIC_REPLIES);
     }
