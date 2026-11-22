@@ -59,6 +59,13 @@ jobs:
           distribution: zulu
           java-version: "8"
 
+      - name: Newest Xcode (Amethyst uses the iOS 26 SDK)
+        run: |
+          ls -d /Applications/Xcode*.app
+          x="$(ls -d /Applications/Xcode_*.app | grep -v -i beta | sort -V | tail -1)"
+          sudo xcode-select -s "$x/Contents/Developer"
+          xcodebuild -version
+
       - name: Tools
         run: |
           brew install ldid make
