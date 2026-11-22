@@ -24,15 +24,29 @@ Quilt 1.20.1 видны твой скин, плащ и вещи головы, т
 
 
 ШАГ 1. ФАЙЛ ПРИЛОЖЕНИЯ
-Нужен файл .ipa. Есть два способа:
+Нужен файл .ipa. Варианты:
 - Готовый Amethyst (это нынешний PojavLauncher для iOS). Скачай на iPhone:
   https://nightly.link/AngelAuraMC/Amethyst-iOS/workflows/development/main/org.angelauramc.amethyst-ios.ipa.zip
   В «Файлах» нажми на скачанный zip — рядом появится файл .ipa. Это свежая сборка, в ней бывают ошибки.
 - Nyxora (NyxoraLauncher-iPhone.ipa): Amethyst с меню, гардеробом и образом Nyxora. Его собирает на Mac-серверах
   GitHub сборка «iPhone» (вкладка Actions репозитория → последний запуск «iPhone» → Artifacts →
-  NyxoraLauncher-iPhone; скачанный zip открой в «Файлах»). Есть свой Mac — можно собрать на нём: ios/prepare.py.
+  NyxoraLauncher-iPhone; скачанный zip открой в «Файлах»). Есть свой Mac — можно собрать на нём, см. ниже.
 - NyxoraLauncher-iPhone-quick (там же): готовый Amethyst только с названием и иконкой Nyxora, без меню.
 Играть можно с любым из них, движок одинаковый.
+
+Как собрать NyxoraLauncher-iPhone.ipa на своём Mac:
+1. Поставь Xcode из App Store и открой его один раз (он попросит принять лицензию и докачать компоненты).
+2. Поставь Homebrew: открой https://brew.sh, скопируй команду оттуда в Терминал, нажми Enter, введи пароль от Mac.
+   В конце Homebrew покажет пару команд в разделе «Next steps» — выполни и их.
+3. Распакуй NyxoraLauncher-src.zip (двойной щелчок) — появится папка NyxoraLauncher-src.
+4. Открой Терминал и выполни (путь — туда, куда распаковалась папка, обычно «Загрузки»):
+     cd ~/Downloads/NyxoraLauncher-src
+     bash ios/build-on-mac.sh
+   Скрипт сам поставит cmake, ldid, GNU make и Java 8 (может спросить пароль от Mac), скачает Amethyst, встроит в
+   него Nyxora и соберёт приложение. Это долго: 15–40 минут, нужно 10–15 ГБ свободного места и интернет.
+5. Готовый файл появится на Рабочем столе: NyxoraLauncher-iPhone.ipa. Перекинь его на iPhone (AirDrop, «Файлы»)
+   и ставь через SideStore (шаг 3). Если сборка сломалась — на Рабочем столе будет nyxora-iphone-build.log,
+   пришли его, разберёмся.
 
 
 ШАГ 2. SIDESTORE (ОДИН РАЗ, С КОМПЬЮТЕРОМ)

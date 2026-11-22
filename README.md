@@ -185,6 +185,8 @@ Amethyst на коммите из `ios/amethyst.commit` и встраивает 
 
 Приложение для iOS собирается только в Xcode, поэтому `.github/workflows/ios.yml` собирает его на Mac-серверах GitHub
 (при изменениях в `ios/` и по кнопке Run workflow); результат — `NyxoraLauncher-iPhone.ipa` в артефактах запуска.
+На своём Mac то же делает одна команда `bash ios/build-on-mac.sh` (ставит инструменты через Homebrew, собирает и
+кладёт `.ipa` на Рабочий стол).
 Быстрая сборка без компиляции (`ios/brand_ipa.py`: готовый IPA Amethyst с названием, иконкой и текстами Nyxora, без
 меню) — артефакт `NyxoraLauncher-iPhone-quick`. Вход, как и везде, только аккаунтом Microsoft; без купленной игры —
 официальная демо-версия. Аркана и генератора скинов на iPhone пока нет. Как поставить приложение (SideStore,
