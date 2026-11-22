@@ -1,0 +1,87 @@
+КАК ИГРАТЬ В MINECRAFT НА IPHONE (Nyxora Launcher)
+
+На iPhone Nyxora работает на движке Amethyst — это открытый лаунчер Minecraft: Java Edition для iOS
+(тот же, что PojavLauncher в полной версии для Android). В App Store таких приложений нет, поэтому
+приложение ставится напрямую, через SideStore, а для быстрой игры нужен JIT (включается приложением
+StikDebug). Компьютер нужен только для первой настройки.
+
+Сейчас в версии для iPhone свои только название и иконка Nyxora. Аркана, гардероба и образа в игре
+(мода Nyxora Cosmetics) на iPhone пока нет.
+
+
+ЧТО НУЖНО
+- iPhone XS или новее (кроме XR и SE 2-го поколения). На более старых тоже запускается, но медленно.
+  Ниже всё описано для iOS 17.4 и новее.
+- Apple ID (подходит обычный бесплатный). Один раз войди с ним на сайт https://developer.apple.com/account
+  и прими условия — так он становится аккаунтом разработчика (бесплатно).
+- Mac (подойдёт и ПК с Windows) и кабель для iPhone — только для первой настройки.
+- Аккаунт Microsoft, на котором куплена Minecraft: Java Edition. Без покупки запускается только
+  официальная демо-версия Minecraft.
+- Wi-Fi.
+
+
+ШАГ 1. ФАЙЛ ПРИЛОЖЕНИЯ
+Файл NyxoraLauncher-iPhone.ipa (его собирают Mac-серверы GitHub). Сохрани его на iPhone в «Файлы».
+Пока его нет, можно поставить сам Amethyst — движок тот же, отличаются только название и иконка:
+https://nightly.link/AngelAuraMC/Amethyst-iOS/workflows/development/main/org.angelauramc.amethyst-ios.ipa.zip
+(это свежая сборка, в ней бывают ошибки). Распакуй zip, внутри файл .ipa.
+
+
+ШАГ 2. SIDESTORE (ОДИН РАЗ, С КОМПЬЮТЕРОМ)
+SideStore — приложение, через которое ставятся программы не из App Store.
+1. На Mac скачай и установи iloader:
+   https://github.com/nab138/iloader/releases/latest/download/iloader-darwin-universal.dmg
+   (для Windows: сначала iTunes, потом iloader с https://github.com/nab138/iloader/releases/latest)
+2. Подключи iPhone кабелем, разблокируй его и нажми «Доверять этому компьютеру».
+3. В iloader войди со своим Apple ID и установи SideStore (следуй подсказкам iloader).
+4. На iPhone: Настройки → Основные → VPN и управление устройством → нажми на свой Apple ID → «Доверять».
+5. На iPhone: Настройки → Конфиденциальность и безопасность → Режим разработчика → включить.
+   iPhone перезагрузится; после этого подтверди включение.
+6. Если SideStore попросит VPN-приложение (LocalDevVPN, бесплатное в App Store), установи его.
+   Его надо включать, когда SideStore ставит или продлевает приложения.
+
+
+ШАГ 3. УСТАНОВКА NYXORA
+В SideStore: «Мои приложения» → «+» → выбери файл .ipa из шага 1.
+
+
+ШАГ 4. БОЛЬШЕ ПАМЯТИ (GETMORERAM) — ОБЯЗАТЕЛЬНО
+iOS даёт приложениям не из App Store мало памяти, Minecraft без этого шага не запустится.
+1. Скачай на iPhone Entitlement.ipa:
+   https://github.com/hugeBlack/GetMoreRam/releases/download/nightly/Entitlement.ipa
+   и установи его через SideStore («+»). Появится приложение GetMoreRam.
+2. Открой GetMoreRam → Settings → Sign In → войди со своим Apple ID (если вылетит — попробуй ещё раз).
+3. App IDs → Refresh → выбери строку, где есть «amethyst» (у Nyxora тот же идентификатор, что у Amethyst)
+   → «Add Increased Memory Limit». Если ниже появился текст без слова error — всё получилось.
+4. Удали GetMoreRam.
+5. Снова установи файл .ipa из шага 1 через SideStore «+», как обновление (старое не удаляй),
+   чтобы новая память заработала.
+
+
+ШАГ 5. JIT (НАСТРОЙКА ОДИН РАЗ)
+1. В SideStore: «Источники» → «+» → добавь https://stikdebug.xyz/index.json и установи StikDebug.
+2. На Mac в iloader (iPhone на кабеле): «Manage Pairing File» → напротив StikDebug нажми «Place».
+   Должно появиться зелёное «Pairing file placed successfully!».
+3. В StikDebug → Settings: если внизу написано «TXM» (а не «Non-TXM»), включи «Picture in Picture»
+   и «Always Run Scripts».
+
+
+КАК ЗАПУСКАТЬ ИГРУ (КАЖДЫЙ РАЗ)
+1. Подключись к Wi-Fi (или включи авиарежим).
+2. Включи LocalDevVPN.
+3. Открой StikDebug → «Connect by App» → выбери Nyxora. Если появится маленькое окно
+   «картинка в картинке», не закрывай его, пока не попросят.
+4. Nyxora откроется с JIT. В первый раз войди аккаунтом Microsoft. После этого можно снова включить
+   мобильный интернет.
+
+
+ВАЖНО
+- С бесплатным Apple ID приложения работают 7 дней. До истечения открой SideStore и нажми «Обновить»
+  (с включённым LocalDevVPN). Если срок всё же истёк, повтори шаг 4.
+- С бесплатным Apple ID одновременно можно держать 3 приложения из SideStore (сам SideStore тоже
+  считается). Поэтому GetMoreRam удаляется сразу после шага 4.
+- Если сменишь код-пароль iPhone, повтори шаг 5.2 (файл сопряжения перестанет работать).
+- Моды, Fabric, Forge и Quilt ставятся прямо в приложении.
+
+Источники: вики Amethyst (github.com/AngelAuraMC/angelauramc.github.io), руководство StikDebug
+(github.com/StephenDev0/StikDebug-Guide).

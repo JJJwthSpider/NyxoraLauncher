@@ -165,6 +165,17 @@ Vellora Client, до этого — Lullaby Launcher и SculkShoot Client). Ид
 который собирает сборку с Modrinth по тем же правилам, сохраняет чаты и отдаёт сборку `.mrpack` лаунчеру
 Minecraft на телефоне; там же расшифровка кодов приглашения. Подробности — в `android/README.md`.
 
+### iPhone
+
+На iPhone Nyxora играет в Minecraft: Java Edition на движке **Amethyst** (github.com/AngelAuraMC/Amethyst-iOS,
+GPL-3.0) — это iOS-версия того же лаунчера, что PojavLauncher в полной сборке для Android. `ios/prepare.py` берёт
+Amethyst на коммите из `ios/amethyst.commit` и ставит название и иконку Nyxora (`ios/art/`, их делает
+`ios/make_icons.py` из иконки пользователя); идентификатор приложения остаётся как у Amethyst, чтобы JIT-помощники
+и GetMoreRam узнавали его. Приложение для iOS собирается только в Xcode, поэтому `.github/workflows/ios.yml`
+собирает его на Mac-серверах GitHub: результат — `NyxoraLauncher-iPhone.ipa` в артефактах запуска. Вход, как и
+везде, только аккаунтом Microsoft; без купленной игры — официальная демо-версия. Аркана, гардероба и мода с образом
+на iPhone пока нет. Как поставить приложение (SideStore, GetMoreRam, JIT через StikDebug) — `HOW-TO-IPHONE-RU.txt`.
+
 ### Игра с друзьями
 
 **Лобби** (кнопка «Лобби» сверху или «Играть с друзьями» у установки):

@@ -36,3 +36,10 @@
 
 Где это в коде: ПК — `launcher/ui/themes/VelloraGuest.*`, `Application::launch`, `LaunchController`; телефон —
 `Account.guest`, `MainActivity.playInstallation`, `PojavEngine.prepare` (демо-аккаунт `Demo.<ник>`).
+
+## iPhone
+
+Версия для iPhone — это Amethyst (Minecraft: Java Edition для iOS, GPL-3.0) с названием и иконкой Nyxora:
+`ios/prepare.py` (коммит Amethyst в `ios/amethyst.commit`), сборка на Mac-серверах GitHub — `.github/workflows/ios.yml`,
+установка — `HOW-TO-IPHONE-RU.txt`. Правило про полную игру действует и здесь: в iOS-версию не добавлять локальные
+или офлайн-аккаунты, вход только Microsoft, без покупки — демо (`Demo.<ник>`, как в самом Amethyst).
