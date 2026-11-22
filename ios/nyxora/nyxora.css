@@ -1,0 +1,102 @@
+/* Nyxora for the iPhone: the icon's dark navy, violet and blue; blocks like Millida's with a pixel font */
+@font-face { font-family: Tiny5; src: url("Tiny5-Regular.ttf"); }
+
+:root {
+  --bg: #04040e;
+  --panel: #0a081c;
+  --panel-light: #110e2b;
+  --line: #322364;
+  --accent: #8154f0;
+  --accent-light: #a178ff;
+  --accent-dark: #3d1e96;
+  --blue: #5cc8ff;
+  --text: #fbefff;
+  --hint: #c3b7e1;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); overflow: hidden; }
+body { font: 15px/1.3 -apple-system, "SF Pro Text", system-ui, sans-serif; -webkit-user-select: none; user-select: none; }
+b, button, .title, .tabs, .play { font-family: Tiny5, -apple-system, system-ui, sans-serif; letter-spacing: 0.02em; }
+button { color: inherit; font-size: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+
+#rain { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+
+.screen {
+  position: relative; z-index: 1; height: 100%;
+  display: flex; flex-direction: column;
+  padding: calc(10px + var(--safe-top)) 14px calc(10px + var(--safe-bottom));
+  gap: 10px;
+  animation: appear 0.25s ease-out;
+}
+.screen[hidden] { display: none; }
+@keyframes appear { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* blocks: a dark outline, a light top edge and a thick dark bottom edge */
+.chip, .tile, .play, .tab, .item {
+  background: var(--panel);
+  border: 2px solid #01010a;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.08), inset 0 -4px 0 rgba(0, 0, 0, 0.45), 0 0 0 1px var(--line);
+}
+.chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 4px 12px 6px; }
+.chip:active, .tile:active, .item:active, .play:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1px var(--line); }
+.chip.icon { width: 44px; justify-content: center; padding: 0; font-size: 18px; }
+.chip.icon.off { opacity: 0.45; }
+
+.bar { display: flex; align-items: center; gap: 8px; }
+.grow { flex: 1; }
+.title { font-size: 17px; margin-left: 6px; }
+
+.account #head { width: 28px; height: 28px; image-rendering: pixelated; background: var(--panel-light); }
+.who { display: flex; flex-direction: column; align-items: flex-start; }
+.who b { font-size: 14px; }
+.who small { color: var(--hint); font-size: 11px; }
+
+.stage { position: relative; flex: 1; min-height: 0; }
+.stage.small { flex: 0 0 34%; }
+.stage canvas { width: 100%; height: 100%; display: block; }
+.stage::before {
+  content: ""; position: absolute; inset: 6% 8% 0;
+  background: radial-gradient(ellipse at 50% 70%, rgba(129, 84, 240, 0.22), transparent 65%);
+  pointer-events: none;
+}
+.hint { position: absolute; left: 0; right: 0; bottom: 2px; margin: 0; text-align: center; color: var(--hint); font-size: 12px; opacity: 0.8; }
+
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile { display: flex; align-items: center; gap: 10px; padding: 10px 12px 12px; text-align: left; min-height: 86px; }
+.tile b { display: block; font-size: 16px; }
+.tile small { color: var(--hint); font-size: 12px; }
+.tile.wardrobe { background: linear-gradient(160deg, #3d1e96, #110e2b 70%); }
+.tile.wardrobe canvas { width: 56px; height: 56px; image-rendering: pixelated; flex: none; }
+.tile.look { flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; }
+
+.play {
+  min-height: 62px; font-size: 26px; color: #fff;
+  background: linear-gradient(180deg, var(--accent-light), var(--accent) 55%, var(--accent-dark));
+  border-color: #12062e;
+}
+.profile { margin: -4px 0 0; text-align: center; color: var(--hint); font-size: 12px; min-height: 15px; }
+
+.tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: none; padding-bottom: 4px; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: none; padding: 7px 12px 9px; font-size: 13px; color: var(--hint); }
+.tab.on { background: linear-gradient(180deg, var(--accent-light), var(--accent)); color: #fff; }
+
+.grid {
+  flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; align-content: start;
+  padding-bottom: 8px;
+}
+.item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px 10px; text-align: center; }
+.item canvas { width: 64px; height: 64px; image-rendering: pixelated; }
+.item b { font-size: 11px; line-height: 1.2; }
+.item small { font-size: 10px; }
+.item.on { background: linear-gradient(180deg, #2a1870, var(--panel)); box-shadow: inset 0 0 0 2px var(--accent-light), 0 0 12px rgba(129, 84, 240, 0.55); }
+.item.on small { color: var(--accent-light) !important; }
+.item.outfit canvas { width: 100%; height: auto; aspect-ratio: 1; }
+.item.outfit .pics { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; width: 100%; }
+.item.outfit .pics canvas { width: 100%; height: auto; aspect-ratio: 1; background: rgba(255, 255, 255, 0.04); }
+.item.emote { font-size: 13px; justify-content: center; min-height: 64px; }
+.empty { grid-column: 1 / -1; color: var(--hint); text-align: center; padding: 24px; }

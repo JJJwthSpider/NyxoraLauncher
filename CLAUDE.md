@@ -39,7 +39,9 @@
 
 ## iPhone
 
-Версия для iPhone — это Amethyst (Minecraft: Java Edition для iOS, GPL-3.0) с названием и иконкой Nyxora:
-`ios/prepare.py` (коммит Amethyst в `ios/amethyst.commit`), сборка на Mac-серверах GitHub — `.github/workflows/ios.yml`,
-установка — `HOW-TO-IPHONE-RU.txt`. Правило про полную игру действует и здесь: в iOS-версию не добавлять локальные
+Версия для iPhone — это Amethyst (Minecraft: Java Edition для iOS, GPL-3.0) с Nyxora внутри: `ios/prepare.py` (коммит
+Amethyst в `ios/amethyst.commit`) ставит название и иконку, меню Nyxora первой страницей (веб-страница `ios/nyxora/`,
+сборка — `ios/build_web.py`; мост — `ios/native/NyxoraHomeViewController.m`) и образ в игре (`ios/native/NyxoraLook.m`,
+те же файлы мода, что на ПК и телефоне; `NyxLook.export` в `character.js` должен совпадать с `VelloraCharacter::exportLook`).
+Сборка на Mac-серверах GitHub — `.github/workflows/ios.yml`, установка — `HOW-TO-IPHONE-RU.txt`. Правило про полную игру действует и здесь: в iOS-версию не добавлять локальные
 или офлайн-аккаунты, вход только Microsoft, без покупки — демо (`Demo.<ник>`, как в самом Amethyst).

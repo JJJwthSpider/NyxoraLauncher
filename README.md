@@ -169,15 +169,26 @@ Minecraft на телефоне; там же расшифровка кодов �
 
 На iPhone Nyxora играет в Minecraft: Java Edition на движке **Amethyst** (github.com/AngelAuraMC/Amethyst-iOS,
 GPL-3.0) — это iOS-версия того же лаунчера, что PojavLauncher в полной сборке для Android. `ios/prepare.py` берёт
-Amethyst на коммите из `ios/amethyst.commit` и ставит название и иконку Nyxora (`ios/art/`, их делает
-`ios/make_icons.py` из иконки пользователя); идентификатор приложения остаётся как у Amethyst, чтобы JIT-помощники
-и GetMoreRam узнавали его. Приложение для iOS собирается только в Xcode, поэтому `.github/workflows/ios.yml`
-собирает его на Mac-серверах GitHub (по кнопке Run workflow). Быстрее без компиляции: `ios/brand_ipa.py` берёт
-готовый IPA Amethyst (или PojavLauncher для iOS) и меняет в нём название, иконку и тексты на Nyxora — это обычные
-файлы внутри zip, а подпись SideStore всё равно делает заново при установке; тот же workflow сам скачивает свежую
-сборку Amethyst и так её переделывает. Результат — `NyxoraLauncher-iPhone.ipa` в артефактах запуска. Вход, как и
-везде, только аккаунтом Microsoft; без купленной игры — официальная демо-версия. Аркана, гардероба и мода с образом
-на iPhone пока нет. Как поставить приложение (SideStore, GetMoreRam, JIT через StikDebug) — `HOW-TO-IPHONE-RU.txt`.
+Amethyst на коммите из `ios/amethyst.commit` и встраивает в него Nyxora:
+
+- название и иконку (`ios/art/`, их делает `ios/make_icons.py` из иконки пользователя); идентификатор приложения
+  остаётся как у Amethyst, чтобы JIT-помощники и GetMoreRam узнавали его;
+- меню Nyxora первой страницей приложения (пункт «Nyxora» над новостями и профилями Amethyst): лобби с 3D-персонажем
+  в твоём скине и плаще, гардероб со всеми вещами и образами (примерка в 3D, эмоции), неоновый дождь, звуки и музыка.
+  Само меню — веб-страница `ios/nyxora/` (рендер персонажа `character.js` — построчный перенос `CharacterView`),
+  её собирает `ios/build_web.py` вместе с вещами гардероба (`android/assets/cosmetics.json`), шрифтом, звуками и
+  модом; показывает и отвечает на её запросы `ios/native/NyxoraHomeViewController.m` (аккаунт, скин и плащ с серверов
+  Mojang, выбранный профиль, «Играть» — та же кнопка, что у Amethyst);
+- образ в игре: перед каждым запуском профиля Fabric или Quilt 1.20.1 `ios/native/NyxoraLook.m` кладёт мод
+  Nyxora Cosmetics и `config/vellora-cosmetics/look.json`, `skin.png`, `cape.png` в папку игры (те же файлы, что на ПК
+  и Android; выгрузка `NyxLook.export` совпадает с ПК кубик в кубик), из других профилей мод убирается.
+
+Приложение для iOS собирается только в Xcode, поэтому `.github/workflows/ios.yml` собирает его на Mac-серверах GitHub
+(при изменениях в `ios/` и по кнопке Run workflow); результат — `NyxoraLauncher-iPhone.ipa` в артефактах запуска.
+Быстрая сборка без компиляции (`ios/brand_ipa.py`: готовый IPA Amethyst с названием, иконкой и текстами Nyxora, без
+меню) — артефакт `NyxoraLauncher-iPhone-quick`. Вход, как и везде, только аккаунтом Microsoft; без купленной игры —
+официальная демо-версия. Аркана и генератора скинов на iPhone пока нет. Как поставить приложение (SideStore,
+GetMoreRam, JIT через StikDebug) — `HOW-TO-IPHONE-RU.txt`.
 
 ### Игра с друзьями
 

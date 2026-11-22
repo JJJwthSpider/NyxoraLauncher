@@ -9,7 +9,8 @@ What changes in Payload/<App>.app:
   catalog, Assets.car, can only be rebuilt with Xcode, so the app is told to use the files instead);
 - the plain icon files (AppIcon*.png): Nyxora's icon (ios/art/icon.png, made by ios/make_icons.py);
 - the texts of every language (*.lproj/*.strings): "Nyxora" for the app's name.
-The program itself (the executable, its entitlements) is not touched. The old signature no longer matches the
+The program itself (the executable, its entitlements) is not touched, so Nyxora's menu and the look in the game, which
+are compiled into the app, are not there: those come with the build from source (ios/prepare.py, on GitHub's Macs). The old signature no longer matches the
 changed files, which is how it should be: SideStore or AltStore sign the app again with the person's Apple ID when
 they install it (HOW-TO-IPHONE-RU.txt). The bundle id stays, so StikDebug and GetMoreRam treat it as Amethyst.
 

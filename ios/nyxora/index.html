@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Nyxora</title>
+<link rel="stylesheet" href="nyxora.css">
+</head>
+<body>
+<canvas id="rain" aria-hidden="true"></canvas>
+
+<main id="lobby" class="screen">
+  <header class="bar">
+    <button id="account" class="chip account" type="button">
+      <canvas id="head" width="32" height="32" aria-hidden="true"></canvas>
+      <span class="who"><b id="accountName">Войти</b><small id="accountKind">аккаунт Microsoft</small></span>
+    </button>
+    <span class="grow"></span>
+    <button id="sound" class="chip icon" type="button" aria-label="Звуки">🔊</button>
+    <button id="music" class="chip icon" type="button" aria-label="Музыка">🎵</button>
+  </header>
+
+  <section class="stage">
+    <canvas id="player" aria-label="Твой персонаж: крути пальцем, нажми — анимация"></canvas>
+    <p class="hint">Крути пальцем · нажми — анимация</p>
+  </section>
+
+  <section class="tiles">
+    <button id="openWardrobe" class="tile wardrobe" type="button">
+      <canvas id="wardrobeIcon" width="96" height="96" aria-hidden="true"></canvas>
+      <span><b>Гардероб</b><small id="wardrobeCount">все вещи открыты</small></span>
+    </button>
+    <div class="tile look">
+      <b>Образ в игре</b>
+      <small id="lookStatus">Скин, плащ и вещи головы, тела и спины видны в игре на Fabric и Quilt 1.20.1.</small>
+    </div>
+  </section>
+
+  <button id="play" class="play" type="button">▶ Играть</button>
+  <p id="profileLine" class="profile"></p>
+</main>
+
+<main id="wardrobe" class="screen" hidden>
+  <header class="bar">
+    <button id="back" class="chip" type="button">‹ Лобби</button>
+    <b class="title">Гардероб</b>
+    <span class="grow"></span>
+    <button id="takeOff" class="chip" type="button">Снять всё</button>
+  </header>
+  <section class="stage small">
+    <canvas id="dresser" aria-label="Персонаж в гардеробе"></canvas>
+  </section>
+  <nav id="tabs" class="tabs"></nav>
+  <section id="grid" class="grid"></section>
+</main>
+
+<script src="data.js"></script>
+<script src="character.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

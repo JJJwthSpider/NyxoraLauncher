@@ -5,8 +5,11 @@
 приложение ставится напрямую, через SideStore, а для быстрой игры нужен JIT (включается приложением
 StikDebug). Компьютер нужен только для первой настройки.
 
-Сейчас в версии для iPhone свои только название и иконка Nyxora. Аркана, гардероба и образа в игре
-(мода Nyxora Cosmetics) на iPhone пока нет.
+Что есть от Nyxora на iPhone: первая страница приложения — меню Nyxora (лобби с твоим персонажем в 3D,
+гардероб со всеми вещами и образами, неоновый дождь, звуки и музыка) и образ в игре: в профилях Fabric и
+Quilt 1.20.1 видны твой скин, плащ и вещи головы, тела и спины (мод Nyxora Cosmetics ставится сам).
+Остальное — профили, моды, настройки — это экраны Amethyst (кнопка ☰ слева сверху). Аркана и генератора
+скинов на iPhone пока нет.
 
 
 ЧТО НУЖНО
@@ -25,8 +28,10 @@ StikDebug). Компьютер нужен только для первой на�
 - Готовый Amethyst (это нынешний PojavLauncher для iOS). Скачай на iPhone:
   https://nightly.link/AngelAuraMC/Amethyst-iOS/workflows/development/main/org.angelauramc.amethyst-ios.ipa.zip
   В «Файлах» нажми на скачанный zip — рядом появится файл .ipa. Это свежая сборка, в ней бывают ошибки.
-- Nyxora: тот же Amethyst, но с названием и иконкой Nyxora (NyxoraLauncher-iPhone.ipa). Его делает скрипт
-  ios/brand_ipa.py из файла Amethyst; на GitHub это делает сборка «iPhone» сама.
+- Nyxora (NyxoraLauncher-iPhone.ipa): Amethyst с меню, гардеробом и образом Nyxora. Его собирает на Mac-серверах
+  GitHub сборка «iPhone» (вкладка Actions репозитория → последний запуск «iPhone» → Artifacts →
+  NyxoraLauncher-iPhone; скачанный zip открой в «Файлах»). Есть свой Mac — можно собрать на нём: ios/prepare.py.
+- NyxoraLauncher-iPhone-quick (там же): готовый Amethyst только с названием и иконкой Nyxora, без меню.
 Играть можно с любым из них, движок одинаковый.
 
 
