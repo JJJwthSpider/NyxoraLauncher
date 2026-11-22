@@ -165,7 +165,8 @@ def nyxora(natives):
 
     # the look for the game: after the game folder is known, before the game starts
     launcher = natives / "JavaLauncher.m"
-    patch(launcher, '#import "JavaLauncher.h"\n', '#import "JavaLauncher.h"\n#import "NyxoraLook.h"\n')
+    # task_set_exception_ports and mach_task_self: newer Xcode no longer brings <mach/mach.h> in by itself
+    patch(launcher, '#import "JavaLauncher.h"\n', '#import "JavaLauncher.h"\n#import "NyxoraLook.h"\n#include <mach/mach.h>\n')
     patch(launcher, "    [MinecraftOptionUtils setupOptionsAtGameDir:gameDir];\n",
           "    [MinecraftOptionUtils setupOptionsAtGameDir:gameDir];\n"
           "    if (!launchJar) {\n"
