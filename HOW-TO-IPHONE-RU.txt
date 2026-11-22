@@ -21,10 +21,13 @@ StikDebug). Компьютер нужен только для первой на�
 
 
 ШАГ 1. ФАЙЛ ПРИЛОЖЕНИЯ
-Файл NyxoraLauncher-iPhone.ipa (его собирают Mac-серверы GitHub). Сохрани его на iPhone в «Файлы».
-Пока его нет, можно поставить сам Amethyst — движок тот же, отличаются только название и иконка:
-https://nightly.link/AngelAuraMC/Amethyst-iOS/workflows/development/main/org.angelauramc.amethyst-ios.ipa.zip
-(это свежая сборка, в ней бывают ошибки). Распакуй zip, внутри файл .ipa.
+Нужен файл .ipa. Есть два способа:
+- Готовый Amethyst (это нынешний PojavLauncher для iOS). Скачай на iPhone:
+  https://nightly.link/AngelAuraMC/Amethyst-iOS/workflows/development/main/org.angelauramc.amethyst-ios.ipa.zip
+  В «Файлах» нажми на скачанный zip — рядом появится файл .ipa. Это свежая сборка, в ней бывают ошибки.
+- Nyxora: тот же Amethyst, но с названием и иконкой Nyxora (NyxoraLauncher-iPhone.ipa). Его делает скрипт
+  ios/brand_ipa.py из файла Amethyst; на GitHub это делает сборка «iPhone» сама.
+Играть можно с любым из них, движок одинаковый.
 
 
 ШАГ 2. SIDESTORE (ОДИН РАЗ, С КОМПЬЮТЕРОМ)

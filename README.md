@@ -172,7 +172,10 @@ GPL-3.0) — это iOS-версия того же лаунчера, что Poja
 Amethyst на коммите из `ios/amethyst.commit` и ставит название и иконку Nyxora (`ios/art/`, их делает
 `ios/make_icons.py` из иконки пользователя); идентификатор приложения остаётся как у Amethyst, чтобы JIT-помощники
 и GetMoreRam узнавали его. Приложение для iOS собирается только в Xcode, поэтому `.github/workflows/ios.yml`
-собирает его на Mac-серверах GitHub: результат — `NyxoraLauncher-iPhone.ipa` в артефактах запуска. Вход, как и
+собирает его на Mac-серверах GitHub (по кнопке Run workflow). Быстрее без компиляции: `ios/brand_ipa.py` берёт
+готовый IPA Amethyst (или PojavLauncher для iOS) и меняет в нём название, иконку и тексты на Nyxora — это обычные
+файлы внутри zip, а подпись SideStore всё равно делает заново при установке; тот же workflow сам скачивает свежую
+сборку Amethyst и так её переделывает. Результат — `NyxoraLauncher-iPhone.ipa` в артефактах запуска. Вход, как и
 везде, только аккаунтом Microsoft; без купленной игры — официальная демо-версия. Аркана, гардероба и мода с образом
 на iPhone пока нет. Как поставить приложение (SideStore, GetMoreRam, JIT через StikDebug) — `HOW-TO-IPHONE-RU.txt`.
 
